@@ -1,0 +1,1325 @@
+﻿
+<script src="~/jslib/Health/Health.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="HealthController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Issue To</label>
+                            <select class="form-control form-control-sm" ng-model="HealthRpt.ReportFor" ng-change="HealthRptFor()">
+                                <option ng-value="it.id" ng-repeat="it in IssueToList" ng-selected="it.id==HealthRpt.ReportFor">{{it.text}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-6 col-md-6" ng-show="HealthRpt.ReportFor==2" id="selectEmp">
+                        <label class="" for="inlineFormInputGroup">Select Employee</label>
+
+                        <div class="input-group-prepend">
+                            <select class="input-group-text dropdown-toggle p-0"
+                                    style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="HealthRpt.SelectEmployee">
+                                <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==HealthRpt.SelectEmployee">
+                                    {{ss.text}}
+                                </option>
+                            </select>
+                            <select class="form-control select2 form-control-sm" all-employee ng-model="HealthRpt.EmployeeId" employee-detail="HealthRpt.EmployeeDetails" side-bar-data="HealthRpt.EmpSideBarData" search-by="HealthRpt.SelectEmployee" style="width: 100%;" confirm-action="HealthRptFor()">
+                            </select>
+                             
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-6 col-md-6 " ng-show="HealthRpt.ReportFor==1" id="selectStu">
+
+                        <label class=""
+                               for="inlineFormInputGroup">Select Students</label>
+                        <div class="input-group-prepend">
+                            <select class="input-group-text dropdown-toggle p-0"
+                                    style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="HealthRpt.SelectStudent">
+
+                                <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==HealthRpt.SelectStudent">
+                                    {{ss.text}}
+                                </option>
+
+                            </select>
+                            <select class="form-control select2 form-control-sm" all-student ng-model="HealthRpt.StudentId" student-detail="HealthRpt.StudentDetails" side-bar-data="HealthRpt.SideBarData" search-by="HealthRpt.SelectStudent" confirm-action="HealthRptFor()">
+                                </select>
+                             
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="card card-success card-tabs">
+            <div class="card-header p-0 pt-1">
+                <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Monthly Test</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Health Growth</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-messages-tab" data-toggle="pill" href="#custom-tabs-one-messages" role="tab" aria-controls="custom-tabs-one-messages" aria-selected="false">Stool Test</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-settings-tab" data-toggle="pill" href="#custom-tabs-one-settings" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false">Urine Test</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-general-tab" data-toggle="pill" href="#custom-tabs-one-general" role="tab" aria-controls="custom-tabs-one-general" aria-selected="false">General Health</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body px-1" style="border: 1px solid #ccc;border-top: none;">
+                <div class="tab-content" id="custom-tabs-one-tabContent">
+                    <div class="tab-pane fade show active" id="custom-tabs-one-home" role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                        <div id="monthtable">
+                            <header class="row mb-1">
+                                <div class="col-md-7">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.MonthlyTest">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.MonthlyTest">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search" placeholder="Search"
+                                                       aria-label="Search" ng-model="searchData.MonthlyTest">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0"
+                                                            type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <!-- end col-md-8 -->
+                                <div class="col-md-5 text-right">
+                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                         data-placement="top" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                    </div>
+                                    <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-success btn-sm" id="add-month">
+                                        <i class="fas fa-plus w-t"></i> Add Monthly Test
+                                    </a>
+                                </div>
+                            </header>
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">S.No.</th>
+                                            <th style="width: 130px;">Month</th>
+                                            <th style="width: 130px;">Teeth</th>
+                                            <th style="width: 130px;">Nail</th>
+                                            <th style="width: 150px;">Cleanliness</th>
+                                            <th style="width: 80px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="Bo in MonthlyColl|orderBy:sortKey:reverse|filter:searchData.MonthlyTest|itemsPerPage:perPage.MonthlyTest" current-page="currentPages.MonthlyTest" pagination-id="MonthlyTestPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{Bo.MonthName}}</td>
+                                            <td>{{Bo.Teeth}}</td>
+                                            <td>{{Bo.Nail}}</td>
+                                            <td>{{Bo.Cleanliness}}</td>
+                                            <td>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-edit text-info" ng-click="getMonthlyTestById(Bo)"></i>
+                                                </a>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-trash-alt text-danger" ng-click="deleteMonthlyTest(Bo,$index)"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="MonthlyTestPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                        <div id="monthform" class="p-4">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Month</label>
+                                        <select class="form-control form-control-sm select2" ng-model="MonthlyTest.Month">
+                                            <option ng-repeat="M in MonthList" ng-value="M.id" ng-selected="M.id==MonthlyTest.Month">{{M.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Teeth</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="MonthlyTest.Teeth" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Nail</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="MonthlyTest.Nail" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Cleanliness</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="MonthlyTest.Cleanliness" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- File Upload Starts -->
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <span><b>Attach Document(s)</b></span>
+                                    <div class="timeline-item">
+                                        <div class="pb-3 add-more-than-one-form-block">
+                                            <form>
+                                                <article>
+                                                    <div class="row">
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <label>Type Of Document</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="docType">                                                                    
+                                                                    <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>                                                                  
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-10">
+                                                            <div class="row">
+                                                                <div class="col-sm-4">
+                                                                    <div class="form-group">
+                                                                        <label>Attach Document</label>
+                                                                        <div class="form-group">
+                                                                            <input type="file" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label>Description</label>
+                                                                        <input type="text" class="form-control form-control-sm"
+                                                                               ng-model="docDescription"
+                                                                               placeholder="">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-2">
+                                                                    <div class="d-flex">
+                                                                        <div>
+                                                                            <label class="invisible d-block">for height</label>
+                                                                            <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddFilesMonthlyTest(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            </form>
+                                        </div>
+                                        <div class="pb-3">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover border bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col" style="width: 20px">SN.</th>
+                                                            <th scope="col" style="width: 40%">Document Type</th>
+                                                            <th scope="col">File Name</th>
+                                                            <th scope="col">Description</th>
+                                                            <th scope="col" style="width: 130px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="ac in MonthlyTest.AttachMonTesColl">
+                                                            <th scope="row">{{$index+1}}</th>
+                                                            <td>{{ac.DocumentTypeName}}</td>
+                                                            @*<td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>*@
+                                                            <td>{{ac.Name}}</td>
+                                                            <td>{{ac.Description}}</td>
+                                                            <td>
+                                                                <div>
+                                                                    <a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                        <i class="fas fa-download text-secondary"></i>
+                                                                    </a>
+                                                                    <a class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." ng-click="ShowPersonalImg(ac)">
+                                                                        <i class="fas fa-eye text-info"></i>
+                                                                    </a>
+
+                                                                    @*<a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="ShowPersonalImg(dcc)"><i class="fas fa-eye text-info"></i></a>*@
+                                                                    <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachMonthlyTest($index)">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- File Upload Ends -->
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button" class="btn btn-sm btn-info" id="backmonth" ng-click="ClearMonthlyTest()" style="min-width: 90px;">
+                                        Back to
+                                        List
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearMonthlyTest()">Reset</button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="AddMonthlyTest()">{{MonthlyTest.Mode}}</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+                        <div id="growthtable">
+                            <header class="row mb-1">
+                                <div class="col-md-7">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.HealthGrowth">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.HealthGrowth">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search" placeholder="Search"
+                                                       aria-label="Search" ng-model="searchData.HealthGrowth">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0"
+                                                            type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <!-- end col-md-8 -->
+                                <div class="col-md-5 text-right">
+                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                         data-placement="top" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                    </div>
+                                    <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-success btn-sm" id="add-growth">
+                                        <i class="fas fa-plus w-t"></i> Add Health Growth
+                                    </a>
+                                </div>
+                            </header>
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">S.No.</th>
+                                            <th style="width: 130px;">Height</th>
+                                            <th style="width: 130px;">Weight</th>
+                                            <th style="width: 130px;">Test Date</th>
+                                            <th style="width: 150px;">Test By</th>
+                                            <th style="width: 250px;">Remarks</th>
+                                            <th style="width: 80px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="Hg in HealthGrowthColl|orderBy:sortKey:reverse|filter:searchData.HealthGrowth|itemsPerPage:perPage.HealthGrowth" current-page="currentPages.HealthGrowth" pagination-id="HealthGrowthPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{Hg.Height}}</td>
+                                            <td>{{Hg.Weight}}</td>
+                                            <td>{{Hg.TestMiti}}</td>
+                                            <td>{{Hg.TestBy}}</td>
+                                            <td>{{Hg.Remarks}}</td>
+                                            <td>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-edit text-info" ng-click="getHealthGrowthById(Hg)"></i>
+                                                </a>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-trash-alt text-danger" ng-click="deleteHealthGrowth(Hg,$index)"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="HealthGrowthPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                        <div id="growthform" class="p-4">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Height</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="HealthGrowth.Height" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Weight</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="HealthGrowth.Weight" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Test Date</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="HealthGrowth.TestDate_TMP" date-picker date-detail="HealthGrowth.TestDateDet" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Test By</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="HealthGrowth.TestBy" />
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label>Remarks</label>
+                                        <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="HealthGrowth.Remarks"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- File Upload Starts -->
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <span><b>Attach Document(s)</b></span>
+                                    <div class="timeline-item">
+                                        <div class="pb-3 add-more-than-one-form-block">
+                                            <form>
+                                                <article>
+                                                    <div class="row">
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <label>Type Of Document</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="docType">
+                                                                    <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-10">
+                                                            <div class="row">
+                                                                <div class="col-sm-4">
+                                                                    <div class="form-group">
+                                                                        <label>Attach Document</label>
+                                                                        <div class="form-group">
+                                                                            <input type="file" class="form-control-file border p-0 bg-white" file-model ng-model="attachDoc">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label>Description</label>
+                                                                        <input type="text" class="form-control form-control-sm"
+                                                                               ng-model="docDescription"
+                                                                               placeholder="">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-2">
+                                                                    <div class="d-flex">
+                                                                        <div>
+                                                                            <label class="invisible d-block">for height</label>
+                                                                            <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddFilesHealthGrowth(attachDoc,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            </form>
+                                        </div>
+                                        <div class="pb-3">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover border bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col" style="width: 20px">SN.</th>
+                                                            <th scope="col" style="width: 40%">Document Type</th>
+                                                            <th scope="col">File Name</th>
+                                                            <th scope="col">Description</th>
+                                                            <th scope="col" style="width: 130px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="HG in HealthGrowth.AttachHelGroColl">
+                                                            <th scope="row">{{$index+1}}</th>
+                                                            <td>{{HG.DocumentTypeName}}</td>
+                                                            <td>{{HG.Name}}</td>
+                                                            <td>{{HG.Description}}</td>
+                                                            <td>
+                                                                <div>
+                                                                    <a ng-hide="HG.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                        <i class="fas fa-download text-secondary"></i>
+                                                                    </a>
+                                                                    <a class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." ng-click="ShowPersonalImg(HG)">
+                                                                        <i class="fas fa-eye text-info"></i>
+                                                                    </a>
+
+                                                                    @*<a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="ShowPersonalImg(dcc)"><i class="fas fa-eye text-info"></i></a>*@
+                                                                    <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachHealthGrowth($index)">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- File Upload Ends -->
+
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button" class="btn btn-sm btn-info" id="backgrowth" style="min-width: 90px;" ng-click="ClearHealthGrowth()">
+                                        Back to
+                                        List
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearHealthGrowth()">Reset</button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="AddHealthGrowth()">{{HealthGrowth.Mode}}</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="custom-tabs-one-messages" role="tabpanel" aria-labelledby="custom-tabs-one-messages-tab">
+                        <div id="stooltable">
+                            <header class="row mb-1">
+                                <div class="col-md-7">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.stoolTest">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.stoolTest">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search" placeholder="Search"
+                                                       aria-label="Search" ng-model="searchData.stoolTest">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0"
+                                                            type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <!-- end col-md-8 -->
+                                <div class="col-md-5 text-right">
+                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                         data-placement="top" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                        </div>
+                                    </div>
+                                    <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-success btn-sm" id="add-stool">
+                                        <i class="fas fa-plus w-t"></i> Add Stool Test
+                                    </a>
+                                </div>
+                            </header>
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">S.No.</th>
+                                            <th style="width: 130px;">Test Date</th>
+                                            <th style="width: 130px;">Color</th>
+                                            <th style="width: 130px;">Mucus</th>
+                                            <th style="width: 130px;">Puscell</th>
+                                            <th style="width: 130px;">RBC</th>
+                                            <th style="width: 130px;">Cyst</th>
+                                            <th style="width: 130px;">Ova</th>
+                                            <th style="width: 130px;">Others</th>
+                                            <th style="width: 80px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="St in stoolTestColl|orderBy:sortKey:reverse|filter:searchData.stoolTest|itemsPerPage:perPage.stoolTest" current-page="currentPages.stoolTest" pagination-id="stoolTestPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{St.TestMiti}}</td>
+                                            <td>{{St.Color}}</td>
+                                            <td>{{St.Mucus}}</td>
+                                            <td>{{St.Puscell}}</td>
+                                            <td>{{St.RBC}}</td>
+                                            <td>{{St.Cyst}}</td>
+                                            <td>{{St.Ova}}</td>
+                                            <td>{{St.Others}}</td>
+                                            <td>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-edit text-info" ng-click="getStoolTestById(St)"></i>
+                                                </a>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-trash-alt text-danger" ng-click="deleteStoolTest(St,$index)"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="stoolTestPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                        <div id="stoolform" class="p-4">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Test Date</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="stoolTest.TestDate_TMP" date-picker date-detail="stoolTest.TestDateDet" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Color</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="stoolTest.Color" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Mucus</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="stoolTest.Mucus" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Puscell</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="stoolTest.Puscell" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>RBC</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="stoolTest.RBC" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Cyst</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="stoolTest.Cyst" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Ova</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="stoolTest.Ova" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Others</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="stoolTest.Others" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- File Upload Starts -->
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <span><b>Attach Document(s)</b></span>
+                                    <div class="timeline-item">
+                                        <div class="pb-3 add-more-than-one-form-block">
+                                            <form>
+                                                <article>
+                                                    <div class="row">
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <label>Type Of Document</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="docType">
+                                                                    <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-10">
+                                                            <div class="row">
+                                                                <div class="col-sm-4">
+                                                                    <div class="form-group">
+                                                                        <label>Attach Document</label>
+                                                                        <div class="form-group">
+                                                                            <input type="file" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label>Description</label>
+                                                                        <input type="text" class="form-control form-control-sm"
+                                                                               ng-model="docDescription"
+                                                                               placeholder="">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-2">
+                                                                    <div class="d-flex">
+                                                                        <div>
+                                                                            <label class="invisible d-block">for height</label>
+                                                                            <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddFilesStoolTest(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            </form>
+                                        </div>
+                                        <div class="pb-3">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover border bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col" style="width: 20px">SN.</th>
+                                                            <th scope="col" style="width: 40%">Document Type</th>
+                                                            <th scope="col">File Name</th>
+                                                            <th scope="col">Description</th>
+                                                            <th scope="col" style="width: 130px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="ac in stoolTest.AttachStTeColl">
+                                                            <th scope="row">{{$index+1}}</th>
+                                                            <td>{{ac.DocumentTypeName}}</td>
+                                                            @*<td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>*@
+                                                            <td>{{ac.Name}}</td>
+                                                            <td>{{ac.Description}}</td>
+                                                            <td>
+                                                                <div>
+                                                                    <a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                        <i class="fas fa-download text-secondary"></i>
+                                                                    </a>
+                                                                    <a class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." ng-click="ShowPersonalImg(ac)">
+                                                                        <i class="fas fa-eye text-info"></i>
+                                                                    </a>
+
+                                                                    @*<a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="ShowPersonalImg(dcc)"><i class="fas fa-eye text-info"></i></a>*@
+                                                                    <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachStoolTest($index)">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- File Upload Ends -->
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button" class="btn btn-sm btn-info" id="backstool" style="min-width: 90px;" ng-click="ClearStoolTest()">
+                                        Back to
+                                        List
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearStoolTest()">Reset</button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="AddStoolTest()">{{stoolTest.Mode}}</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="custom-tabs-one-settings" role="tabpanel" aria-labelledby="custom-tabs-one-settings-tab">
+                        <div id="urinetable">
+                            <header class="row mb-1">
+                                <div class="col-md-7">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.urineTest">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.urineTest">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search" placeholder="Search"
+                                                       aria-label="Search" ng-model="searchData.urineTest">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0"
+                                                            type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <!-- end col-md-8 -->
+                                <div class="col-md-5 text-right">
+                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                         data-placement="top" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                        </div>
+                                    </div>
+                                    <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-success btn-sm" id="add-urine">
+                                        <i class="fas fa-plus w-t"></i> Add Urine Test
+                                    </a>
+                                </div>
+                            </header>
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">S.No.</th>
+                                            <th style="width: 130px;">Test Date</th>
+                                            <th style="width: 130px;">Color</th>
+                                            <th style="width: 130px;">Protein</th>
+                                            <th style="width: 130px;">Sugar</th>
+                                            <th style="width: 130px;">Transparency</th>
+                                            <th style="width: 130px;">WBC</th>
+                                            <th style="width: 130px;">RBC</th>
+                                            <th style="width: 130px;">Others</th>
+                                            <th style="width: 80px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="Ut in UrineTestColl|orderBy:sortKey:reverse|filter:searchData.urineTest|itemsPerPage:perPage.urineTest" current-page="currentPages.urineTest" pagination-id="urineTestPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{Ut.TestMiti}}</td>
+                                            <td>{{Ut.Color}}</td>
+                                            <td>{{Ut.Protein}}</td>
+                                            <td>{{Ut.Sugar}}</td>
+                                            <td>{{Ut.Transparency}}</td>
+                                            <td>{{Ut.WBC}}</td>
+                                            <td>{{Ut.RBC}}</td>
+                                            <td>{{Ut.Others}}</td>
+
+                                            <td>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-edit text-info" ng-click="getUrineTestById(Ut)"></i>
+                                                </a>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-trash-alt text-danger" ng-click="deleteUrineTest(Ut,$index)"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="urineTestPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                        <div id="urineform" class="p-4">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Test Date</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="urineTest.TestDate_TMP" date-picker date-detail="urineTest.TestDateDet" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Color</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="urineTest.Color" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Protein</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="urineTest.Protein" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Sugar</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="urineTest.Sugar" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Transparency</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="urineTest.Transparency" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>WBC</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="urineTest.WBC" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>RBC</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="urineTest.RBC" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Others</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="urineTest.Others" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- File Upload Starts -->
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <span><b>Attach Document(s)</b></span>
+                                    <div class="timeline-item">
+                                        <div class="pb-3 add-more-than-one-form-block">
+                                            <form>
+                                                <article>
+                                                    <div class="row">
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <label>Type Of Document</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="docType">
+                                                                    <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-10">
+                                                            <div class="row">
+                                                                <div class="col-sm-4">
+                                                                    <div class="form-group">
+                                                                        <label>Attach Document</label>
+                                                                        <div class="form-group">
+                                                                            <input type="file" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label>Description</label>
+                                                                        <input type="text" class="form-control form-control-sm"
+                                                                               ng-model="docDescription"
+                                                                               placeholder="">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-2">
+                                                                    <div class="d-flex">
+                                                                        <div>
+                                                                            <label class="invisible d-block">for height</label>
+                                                                            <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddFilesUrineTest(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            </form>
+                                        </div>
+                                        <div class="pb-3">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover border bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col" style="width: 20px">SN.</th>
+                                                            <th scope="col" style="width: 40%">Document Type</th>
+                                                            <th scope="col">File Name</th>
+                                                            <th scope="col">Description</th>
+                                                            <th scope="col" style="width: 130px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="UR in urineTest.AttachUrTeColl">
+                                                            <th scope="row">{{$index+1}}</th>
+                                                            <td>{{UR.DocumentTypeName}}</td>
+                                                            @*<td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>*@
+                                                            <td>{{UR.Name}}</td>
+                                                            <td>{{UR.Description}}</td>
+                                                            <td>
+                                                                <div>
+                                                                    <a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                        <i class="fas fa-download text-secondary"></i>
+                                                                    </a>
+                                                                    <a class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." ng-click="ShowPersonalImg(ac)">
+                                                                        <i class="fas fa-eye text-info"></i>
+                                                                    </a>
+
+                                                                    @*<a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="ShowPersonalImg(dcc)"><i class="fas fa-eye text-info"></i></a>*@
+                                                                    <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachUrineTest($index)">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- File Upload Ends -->
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button" class="btn btn-sm btn-info" id="backurine" style="min-width: 90px;" ng-click="ClearUrineTest()">
+                                        Back to
+                                        List
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearUrineTest()">Reset</button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="AddUrineTest()">{{urineTest.Mode}}</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="custom-tabs-one-general" role="tabpanel" aria-labelledby="custom-tabs-one-general-tab">
+                        <div id="generaltable">
+                            <header class="row mb-1">
+                                <div class="col-md-7">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.genHealth">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.genHealth">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search" placeholder="Search"
+                                                       aria-label="Search" ng-model="searchData.genHealth">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0"
+                                                            type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <!-- end col-md-8 -->
+                                <div class="col-md-5 text-right">
+                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                         data-placement="top" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                        </div>
+                                    </div>
+                                    <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-success btn-sm" id="add-general">
+                                        <i class="fas fa-plus w-t"></i> Add General Test
+                                    </a>
+                                </div>
+                            </header>
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">S.No.</th>
+                                            <th style="width: 130px;">Date</th>
+                                            <th style="width: 230px;">Campaign Program</th>
+                                            <th style="width: 300px;">Remarks</th>
+                                            <th style="width: 80px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="Gh in GeneralHealthColl|orderBy:sortKey:reverse|filter:searchData.genHealth|itemsPerPage:perPage.genHealth" current-page="currentPages.genHealth" pagination-id="genHealthPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{Gh.ForMiti}}</td>
+                                            <td>{{Gh.CampaignName}}</td>
+                                            <td>{{Gh.Remarks}}</td>
+                                            <td>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-edit text-info" ng-click="getGeneralHealthById(Gh)"></i>
+                                                </a>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-trash-alt text-danger" ng-click="deleteGeneralHealth(Gh,$index)"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="genHealthPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                        <div id="generalform" class="p-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Date</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="genHealth.ForDate_TMP" date-picker date-detail="genHealth.ForDateDet" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Campaign Program</label>
+                                        <select class="form-control form-control-sm select2" ng-model="genHealth.CampaignProgram">
+                                            <option ng-repeat="C in CampaignColl" ng-value="C.TranId" ng-selected="C.TranId==genHealth.CampaignProgram">{{C.CampaignName}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Remarks</label>
+                                        <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="genHealth.Remarks"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- File Upload Starts -->
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <span><b>Attach Document(s)</b></span>
+                                    <div class="timeline-item">
+                                        <div class="pb-3 add-more-than-one-form-block">
+                                            <form>
+                                                <article>
+                                                    <div class="row">
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <label>Type Of Document</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="docType">
+                                                                    <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-10">
+                                                            <div class="row">
+                                                                <div class="col-sm-4">
+                                                                    <div class="form-group">
+                                                                        <label>Attach Document</label>
+                                                                        <div class="form-group">
+                                                                            <input type="file" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label>Description</label>
+                                                                        <input type="text" class="form-control form-control-sm"
+                                                                               ng-model="docDescription"
+                                                                               placeholder="">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-2">
+                                                                    <div class="d-flex">
+                                                                        <div>
+                                                                            <label class="invisible d-block">for height</label>
+                                                                            <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddFilesGeneralHealth(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            </form>
+                                        </div>
+                                        <div class="pb-3">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover border bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col" style="width: 20px">SN.</th>
+                                                            <th scope="col" style="width: 40%">Document Type</th>
+                                                            <th scope="col">File Name</th>
+                                                            <th scope="col">Description</th>
+                                                            <th scope="col" style="width: 130px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="UR in genHealth.AttachGenHeColl">
+                                                            <th scope="row">{{$index+1}}</th>
+                                                            <td>{{UR.DocumentTypeName}}</td>
+                                                            @*<td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>*@
+                                                            <td>{{UR.Name}}</td>
+                                                            <td>{{UR.Description}}</td>
+                                                            <td>
+                                                                <div>
+                                                                    <a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                        <i class="fas fa-download text-secondary"></i>
+                                                                    </a>
+                                                                    <a class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." ng-click="ShowPersonalImg(ac)">
+                                                                        <i class="fas fa-eye text-info"></i>
+                                                                    </a>
+
+                                                                    @*<a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="ShowPersonalImg(dcc)"><i class="fas fa-eye text-info"></i></a>*@
+                                                                    <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachGeneralHealth($index)">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- File Upload Ends -->
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button" class="btn btn-sm btn-info" id="backgeneral" style="min-width: 90px;" ng-click="ClearGeneralHealth()">
+                                        Back to
+                                        List
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearGeneralHealth()">Reset</button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="AddGeneralHealth()">{{genHealth.Mode}}</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </section>
+    <!-- /.row -->
+
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" @*tabindex="-1"*@>
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img ng-src="{{viewImg.FileData || viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.FileData || viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

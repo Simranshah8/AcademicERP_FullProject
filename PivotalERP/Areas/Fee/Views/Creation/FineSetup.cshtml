@@ -1,0 +1,269 @@
+﻿
+<script src="~/jslib/Fee/FineSetup.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="FineSetupController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:50px!important">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="custom-control custom-checkbox">
+                            <input class="custom-control-input" type="checkbox" ng-model="beData.IsActiveWise"
+                                   id="customCheckbox1" value="option1">
+                            <label for="customCheckbox1"
+                                   class="custom-control-label" style="font-size: 15px; font-weight:500">
+                                Active Range wise fine Setup
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <button type="button" class="btn btn-sm btn-success float-right mb-2" style="min-width: 90px;" ng-click="SaveUpdateFineSetup()">Save</button>
+                    </div>
+                </div>
+                <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:400px;">
+                    <table id="main-table"
+                           class="main-table table table-sm table-bordered bg-white">
+                        <thead class="text-center text-nowrap">
+                            <tr>
+                                <th class="text-center align-middle" rowspan="2" style="width:60px;">S.No.</th>
+                                <th class="align-middle" rowspan="2" style="width:180px">Classwise</th>
+                                <th style="width:180px">Condition As Per</th>
+                                <th style="width:250px">Fine On the Basis of</th>
+                                <th style="width:250px">Rebate On the Basis of</th>
+                            </tr>
+                            <tr>
+                                <th style="top:33px" class="py-0">
+                                    <select class="form-control form-control-sm form-select" ng-model="beData.SelectConditionAsPer">
+                                        <option ng-repeat="S in SelectConditionList" ng-value="S.id" ng-selected="S.id==beData.SelectConditionAsPer">{{S.text}}</option>
+                                    </select>
+                                </th>
+                                <th style="top:33px" class="py-0">
+                                    <div class="d-flex">
+                                        <select name="class-group" class="form-control form-control-sm" style="width:100%;" ng-model="beData.FineOnBasisOfAmnt" ng-change="Changetext()">
+                                            <option ng-repeat="F in FineOnBasisoFAmountList" ng-value="F.id" ng-selected="F.id==beData.FineOnBasisOfAmnt">{{F.text}}</option>
+                                        </select>
+                                        <select name="class-group" class="form-control form-control-sm" style="width:100%;" ng-model="beData.FineOnBasisOfMonth" ng-hide="beData.SelectConditionAsPer==3">
+                                            <option ng-repeat="FM in FineOnBasisoFMonthList" ng-value="FM.id" ng-selected="FM.id==beData.FineOnBasisOfMonth">{{FM.text}}</option>
+                                        </select>
+                                    </div>
+                                </th>
+                                <th style="top:33px" class="py-0">
+                                    <div class="d-flex">
+                                        <select name="class-group" class="form-control form-control-sm" style="width:100%;" ng-model="beData.DebateOnBasisOfAmnt" ng-disabled="beData.SelectConditionAsPer==1">
+                                            <option ng-repeat="DA in FineOnBasisoFAmountList" ng-value="DA.id" ng-selected="DA.id==beData.DebateOnBasisOfAmnt">{{DA.text}}</option>
+                                        </select>
+                                        <select name="class-group" class="form-control form-control-sm" style="width:100%;" ng-model="beData.DebateOnBasisOfMonth" ng-disabled="beData.SelectConditionAsPer==1" ng-hide="beData.SelectConditionAsPer==3">
+                                            <option ng-repeat="DM in FineOnBasisoFMonthList" ng-value="DM.id" ng-selected="DM.id==beData.DebateOnBasisOfMonth">{{DM.text}}</option>
+                                        </select>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="cl in Fine.FineSetupDetColl">
+                                <td class="text-center">{{$index+1}}</td>
+                                <td>
+                                    {{cl.ClassName}}
+                                </td>
+                                <td>
+                                    <input type="text" number-input class="form-control form-control-sm" style="text-align:right;" onfocus="this.select()" ng-model="cl.ConditionAmount">
+                                </td>
+                                <td>
+                                    <div class="d-flex">
+                                        <input type="text" number-input class="form-control form-control-sm" style="text-align:right;" onfocus="this.select()" ng-model="cl.FineAmount">
+                                        <button class="btn-success btn-sm btn ml-2" ng-click="ShowRange(cl)" ng-hide="beData.IsActiveWise==false || beData.SelectConditionAsPer==1 || beData.SelectConditionAsPer==3">Range</button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" number-input class="form-control form-control-sm" style="text-align:right;" onfocus="this.select()" ng-model="cl.ReBateAmount" ng-disabled="beData.SelectConditionAsPer==1">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h6>Followup Due Days: Fine Setup</h6>
+                    </div>
+                </div>
+                <div class="table-scroll-x-y sales-main-table table-scroll mb-4" style="max-height:400px;">
+                    <table id="main-table"
+                           class="main-table table table-sm table-bordered bg-white">
+                        <thead class="text-center text-nowrap">
+                            <tr>
+                                <th class="text-center align-middle" rowspan="2" style="width:60px;">S.No.</th>
+                                <th class="align-middle" rowspan="2" style="width:180px">Classwise</th>
+                                <th style="width:250px">Fine On the Basis of</th>
+                                <th style="width:250px">Rebate On the Basis of</th>
+                            </tr>
+                            <tr>
+                                <th class="py-0" style="top:33px">
+                                    <div class="d-flex">
+                                        <select name="class-group" class="form-control form-control-sm" style="width:100%;" ng-model="newDet.FineOnBasisOfAmount" ng-change="ChangeLabel()">
+                                            <option ng-repeat="FA in FineOnBasisoFAmountList" ng-value="FA.id" ng-selected="FA.id==newDet.FineOnBasisOfAmount">{{FA.text}}</option>
+                                        </select>
+                                    </div>
+                                </th>
+                                <th class="py-0" style="top:33px">
+                                    <div class="d-flex">
+                                        <select name="class-group" class="form-control form-control-sm" style="width:100%;" ng-model="newDet.DebateOnBasisOfAmount">
+                                            <option ng-repeat="DA in FineOnBasisoFAmountList" ng-value="DA.id" ng-selected="DA.id==newDet.DebateOnBasisOfAmount">{{DA.text}}</option>
+                                        </select>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="cl in Fine.DueDataDetColl">
+                                <td class="text-center">{{$index+1}}</td>
+                                <td>
+                                    {{cl.ClassName}}
+                                </td>
+                                <td>
+                                    <div class="d-flex">
+                                        <input type="text" number-input class="form-control form-control-sm" style="text-align:right;" onfocus="this.select()" ng-model="cl.FineAmount">
+                                        <button class="btn-success btn-sm btn ml-2" ng-click="ShowRange2(cl)">Range</button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" number-input class="form-control form-control-sm" style="text-align:right;" onfocus="this.select()" ng-model="cl.ReBateAmount">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+
+            <!--The modal opens on clicking view icon starts-->
+            <div class="modal fade" id="modal-xl">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header py-2">
+                            <h6 class="modal-title mb-0">{{CurFineSetup.ClassName}}</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="">
+                                <div class="table-scroll-x-y" style="max-height:370px;">
+                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr class="text-center text-nowrap">
+                                                <th style="width: 15px">S.No.</th>
+                                                <th style="width: 40px">Day's From</th>
+                                                <th style="width: 40px">Day's To</th>
+                                                <th style="width: 40px">
+                                                    <label style="font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;">{{ResponseMsg}}</label>
+                                                </th>
+                                                <th style="width: 20px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-nowrap text-center">
+                                            <tr ng-repeat="fs in CurFineSetup.FineSetupColl">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    <input type="number" class="form-control form-control-sm" style="text-align:right;" onfocus="this.select();" ng-model="fs.DaysFrom">
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="form-control form-control-sm" style="text-align:right;" onfocus="this.select();" ng-model="fs.DaysTo">
+                                                </td>
+                                                <td>
+                                                    <input type="text" number-input class="form-control form-control-sm" style="text-align:right;" onfocus="this.select();" ng-model="fs.Amount">
+                                                </td>
+                                                <td>
+                                                    <a class="p-1" ng-click="AddFineSetupMod($index)">
+                                                        <i class="fas fa-plus text-secondary"></i>
+                                                    </a>
+                                                    <a class="p-1" ng-click="delFineSetupMod($index)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" style="min-width: 90px">
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--The modal opens on clicking view icon starts-->
+            <!--The modal opens on clicking view icon starts-->
+            <div class="modal fade" id="modal-two" style="margin-top:30px;">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h6 class="modal-title mb-0">{{CurDueFollow.ClassName}}</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-2">
+                            <div class="">
+                                <div class="table-scroll-x-y" style="max-height:calc(100vh - 11rem);">
+                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr class="text-center text-nowrap">
+                                                <th style="width: 15px">S.No.</th>
+                                                <th style="width: 40px">Day's From</th>
+                                                <th style="width: 40px">Day's To</th>
+                                                <th style="width: 40px">
+                                                    <label style="font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;">{{RspMessage}}</label>
+                                                </th>
+                                                <th style="width: 20px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-nowrap text-center">
+                                            <tr ng-repeat="cf in CurDueFollow.CurFineSetupColl">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    <input type="number" class="form-control form-control-sm" style="text-align:right;" onfocus="this.select();" ng-model="cf.DaysFrom">
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="form-control form-control-sm" style="text-align:right;" onfocus="this.select();" ng-model="cf.DaysTo">
+                                                </td>
+                                                <td>
+                                                    <input type="text" number-input class="form-control form-control-sm" style="text-align:right;" onfocus="this.select();" ng-model="cf.Amount">
+                                                </td>
+                                                <td>
+                                                    <a class="p-1" ng-click="AddCurFineSetup($index)">
+                                                        <i class="fas fa-plus text-secondary"></i>
+                                                    </a>
+                                                    <a class="p-1" ng-click="delCurFineSetup($index)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" style="min-width: 90px">
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--The modal opens on clicking view icon starts-->
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+
+
+

@@ -1,0 +1,644 @@
+﻿app.controller('BookLostController', function ($scope, $http, $timeout, $filter, $rootScope, GlobalServices, $translate, uiGridConstants) {
+    $scope.Title = 'Book Lost';
+    OnClickDefault();
+
+    $scope.IssueToList = [{ id: 1, text: 'Student' }, { id: 2, text: 'Teacher' }];
+    $scope.LostDamageList = [{ id: 1, text: 'Lost' }, { id: 2, text: 'Damage' }];
+
+
+    $scope.getterAndSetter = function () {
+
+        $scope.gridOptions = [];
+    }
+
+    $scope.gridOptions = {
+        enableHorizontalScrollbar: 1,
+        enableVerticalScrollbar: 1,
+        enableFiltering: true,
+        enableSorting: true,
+        enableGridMenu: true,
+        showGridFooter: true,
+        showColumnFooter: false,
+        exporterCsvFilename: 'LostBookReport.csv',
+        exporterPdfOrientation: 'landscape',
+        exporterPdfPageSize: 'A3',
+        exporterPdfMaxGridWidth: 2500,
+        exporterPdfDefaultStyle: { fontSize: 8 },
+        exporterPdfTableHeaderStyle: { fontSize: 9, bold: true },
+        exporterPdfHeader: { text: "Lost Book Report\nInstitution Name", style: 'headerStyle' },
+        exporterPdfFooter: function (currentPage, pageCount) {
+            return { text: currentPage.toString() + ' of ' + pageCount.toString(), style: 'footerStyle' };
+        },
+        exporterPdfCustomFormatter: function (docDef) {
+            docDef.styles.headerStyle = { fontSize: 14, bold: true };
+            docDef.styles.footerStyle = { fontSize: 8 };
+            return docDef;
+        },
+
+        columnDefs: [
+            { name: 'S.N', field: 'SN', width: 60 },
+            {
+                name: 'LostDamage',
+                field: 'LostDamage',
+                displayName: 'Lost/Damage',
+                width: 120,
+                filter: {
+                    type: uiGridConstants.filter.SELECT,
+                    selectOptions: [
+                        { value: 'Lost', label: 'Lost' },
+                        { value: 'Damage', label: 'Damage' }
+                    ]
+                }
+            },
+            { name: 'Lost Damage Date', field: 'LostDate', displayName: 'Lost/Damage Date', width: 150 },
+            { name: 'Lost Damage By', field: 'LostBy', displayName: 'Lost/Damage By', width: 150 },
+            { name: 'Name', field: 'Name', width: 150 },
+            { name: 'Regd. No.', field: 'RegdNo', width: 120 },
+            { name: 'Class', field: 'Class', width: 100 },
+            { name: 'Section', field: 'Section', width: 100 },
+            { name: 'Accession No', field: 'AccessionNo', width: 130 },
+            { name: 'Book Title', field: 'BookTitle', width: 200 },
+            { name: 'Subject', field: 'Subject', width: 150 },
+            { name: 'Publication', field: 'Publication', width: 150 },
+            { name: 'Issued Date', field: 'IssuedDate', width: 120 },
+            { name: 'Credit Days', field: 'CreditDays', width: 100 },
+            { name: 'Total Days', field: 'TotalDays', width: 100 },
+            { name: 'Outstanding Days', field: 'OutstandingDays', width: 130 },
+            { name: 'Remarks', field: 'Remarks', width: 150 },
+            { name: 'Book No', field: 'BookNo', width: 100 },
+            { name: 'Call No', field: 'CallNo', width: 100 },
+            { name: 'Bar Code', field: 'BarCode', width: 120 },
+            { name: 'Batch', field: 'Batch', width: 100 },
+            { name: 'Faculty', field: 'Faculty', width: 120 },
+            { name: 'Level', field: 'Level', width: 100 },
+            { name: 'Semester', field: 'Semester', width: 100 },
+            { name: 'Class Year', field: 'ClassYear', width: 120 },
+            { name: 'Price', field: 'Price', width: 100 },
+            { name: 'Vendor', field: 'Vendor', width: 150 },
+            { name: 'Purchase Date', field: 'PurchaseDate', width: 130 },
+            { name: 'Bill No', field: 'BillNo', width: 100 },
+            { name: 'B_Faculty', field: 'B_Faculty', width: 120 },
+            { name: 'B_Level', field: 'B_Level', width: 100 },
+            { name: 'B_Semester', field: 'B_Semester', width: 100 },
+            { name: 'B_ClassYear', field: 'B_ClassYear', width: 120 },
+            { name: 'Book Category', field: 'BookCategory', width: 150 }
+        ],
+        data: [] // start empty
+    };
+
+    $scope.LoadData = function () {
+        $('.select2').select2();
+        $scope.confirmMSG = GlobalServices.getConfirmMSG();
+        $scope.perPageColl = GlobalServices.getPerPageList();
+        $scope.StudentSearchOptions = GlobalServices.getStudentSearchOptions();
+        $scope.EmployeeSearchOptions = GlobalServices.getEmployeeSearchOptions();
+        $scope.BookSearchOptions = [{ text: 'AccessionNo', value: 'BD.AccessionNo' }, { text: 'Book Title', value: 'BD.BookTitle' }, { text: 'Subject', value: 'BD.Subject' }, { text: 'BookNo', value: 'BD.BookNo' }, { text: 'CallNo', value: 'BD.CallNo' }];
+
+
+        //$scope.GetAllBookLostList();
+
+        
+        $scope.PreviousBookDetails = [];
+        $scope.newFilter = {
+            DateFrom_TMP: new Date(),
+            DateTo_TMP: new Date()
+        }
+
+        $scope.newLostDamage = {
+            SelectBook: $scope.BookSearchOptions[0].value,
+            IssueTo: 1,
+            IssueDate_TMP: null,
+            IssueDateDet: null,
+            SelectStudent: $scope.StudentSearchOptions[0].value,
+            SelectEmployee: $scope.EmployeeSearchOptions[0].value,
+            BookEntryId: null,
+            LostDamage: 1,
+            LostDamageDate_TMP: null,
+            DateFrom_TMP: new Date(),
+            Remarks: '',
+            StudentId: null,
+            EmployeeId: null,
+            StudentDetails: [],
+            EmployeeDetails: [],
+            FineAmount: 0,
+            SideBarData: [],
+            PreviousBookDetails: [],
+            PreviousBookDetailsColl: [],
+
+        };
+
+       
+    };
+
+    // Clear form details
+    $scope.ClearDetails = function () {
+        $scope.newLostDamage = {
+            SelectBook: $scope.BookSearchOptions[0].value,
+            IssueTo: 1,
+            IssueDate_TMP: null,
+            IssueDateDet: null,
+            SelectStudent: $scope.StudentSearchOptions[0].value,
+            SelectEmployee: $scope.EmployeeSearchOptions[0].value,
+            BookEntryId: null,
+            LostDamage: 1,
+            LostDamageDate_TMP: null,
+            DateFrom_TMP: new Date(),
+            Remarks: '',
+            StudentId: null,
+            EmployeeId: null,
+            StudentDetails: [],
+            EmployeeDetails: [],
+            FineAmount: 0,
+            SideBarData: [],
+            PreviousBookDetails: [],
+            PreviousBookDetailsColl: [],
+
+        };
+    };
+
+
+    $scope.GetBookDetails = function(BookDetails) {
+        $scope.newLostDamage.BookDetails = BookDetails;
+        if (BookDetails.IssueDate_AD) {
+            $scope.newLostDamage.IssueDate_TMP = new Date(BookDetails.IssueDate_AD);
+        } else {
+            $scope.newLostDamage.IssueDate_TMP = null;
+        }
+    };
+
+    $scope.CurDues = null;
+    $scope.DefaultPhoto = '/wwwroot/dynamic/images/avatar-img.jpg';
+    $scope.getStudentDetails = function () {
+        $scope.CurDues = null;
+        $scope.CurCreditRule = null;
+        $scope.PreviousBookDetailsColl = [];
+        if ($scope.newLostDamage.StudentId && $scope.newLostDamage.StudentId > 0) {
+            var para = {
+                StudentId: $scope.newLostDamage.StudentId,
+                PaidUpToMonth: 0,
+                PaidUpMonthColl: '',
+                SemesterId: ($scope.newLostDamage.StudentDetails ? $scope.newLostDamage.StudentDetails.SemesterId : null),
+                ClassYearId: ($scope.newLostDamage.StudentDetails ? $scope.newLostDamage.StudentDetails.ClassYearId : null)
+            };
+            $http({
+                method: 'POST',
+                url: base_url + "Fee/Transaction/GetDuesForReceipt",
+                dataType: "json",
+                data: JSON.stringify(para)
+            }).then(function (res) {
+                if (res.data.IsSuccess && res.data.Data) {
+                    $scope.CurDues = res.data.Data;
+
+                    if (!$scope.CurDues.PhotoPath || $scope.CurDues.PhotoPath.length == 0)
+                        $scope.CurDues.PhotoPath = $scope.DefaultPhoto;
+
+                    $timeout(function () {
+                        $scope.getPreviousBookList();
+                    });
+                }
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+
+            var para1 = {
+                StudentId: $scope.newLostDamage.StudentId,
+                EmployeeId: null,
+            };
+            $http({
+                method: 'POST',
+                url: base_url + "Library/Master/GetCreditRules",
+                dataType: "json",
+                data: JSON.stringify(para1)
+            }).then(function (res) {
+                if (res.data.IsSuccess && res.data.Data) {
+                    $scope.CurCreditRule = res.data.Data;
+                }
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+
+
+        }
+
+    }
+
+    $scope.getTeachCreditRule = function () {
+        $timeout(function () {
+            $scope.getPreviousBookList();
+        });
+
+        $timeout(function () {
+            var para1 = {
+                StudentId: null,
+                EmployeeId: $scope.newBookIssue.EmployeeId,
+            };
+            $http({
+                method: 'POST',
+                url: base_url + "Library/Master/GetCreditRules",
+                dataType: "json",
+                data: JSON.stringify(para1)
+            }).then(function (res) {
+                if (res.data.IsSuccess && res.data.Data) {
+                    $scope.CurCreditRule = res.data.Data;
+                }
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+        });
+    };
+
+    function OnClickDefault() {
+        $scope.search = {
+            StudentId: null,
+            EmployeeId: null
+        };
+        document.getElementById('add-function-form').style.display = "none";
+
+        document.getElementById('add-function-btn').onclick = function () {
+            document.getElementById('book-lost-section').style.display = 'none';
+            document.getElementById('add-function-form').style.display = 'block';
+            $scope.ClearDetails();
+        };
+
+        document.getElementById('detailsback-btn').onclick = function () {
+            document.getElementById('add-function-form').style.display = 'none';
+            document.getElementById('book-lost-section').style.display = 'block';
+            $scope.ClearDetails();
+        };
+    };
+
+    $scope.getTeachCreditRule = function () {
+        $timeout(function () {
+            $scope.getPreviousBookList();
+        });
+
+        $timeout(function () {
+            var para1 = {
+                StudentId: null,
+                EmployeeId: $scope.newLostDamage.EmployeeId,
+            };
+            $http({
+                method: 'POST',
+                url: base_url + "Library/Master/GetCreditRules",
+                dataType: "json",
+                data: JSON.stringify(para1)
+            }).then(function (res) {
+                if (res.data.IsSuccess && res.data.Data) {
+                    $scope.CurCreditRule = res.data.Data;
+                }
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+        });
+    };
+
+    $scope.CurDues = null;
+    $scope.DefaultPhoto = '/wwwroot/dynamic/images/avatar-img.jpg';
+    $scope.getDuesDetails = function () {
+        $scope.CurDues = null;
+        $scope.CurCreditRule = null;
+        $scope.PreviousBookDetailsColl = [];
+
+
+        //added by aayush 7/15/2025
+        $scope.$watch('StudentRegister.StudentDetails', function (newVal) {
+            if (newVal && newVal.StudentId) {
+                $scope.newLostDamage.StudentId = newVal.StudentId;
+            }
+        });
+
+        if ($scope.newLostDamage.StudentId && $scope.newLostDamage.StudentId > 0) {
+            var para = {
+                StudentId: $scope.newLostDamage.StudentId,
+                PaidUpToMonth: 0,
+                PaidUpMonthColl: '',
+                SemesterId: ($scope.newLostDamage.StudentDetails ? $scope.newLostDamage.StudentDetails.SemesterId : null),
+                ClassYearId: ($scope.newLostDamage.StudentDetails ? $scope.newLostDamage.StudentDetails.ClassYearId : null)
+            };
+            //$http({
+            //    method: 'POST',
+            //    url: base_url + "Fee/Transaction/GetDuesForReceipt",
+            //    dataType: "json",
+            //    data: JSON.stringify(para)
+            //}).then(function (res) {
+            //    if (res.data.IsSuccess && res.data.Data) {
+            //        $scope.CurDues = res.data.Data;
+
+            //        if (!$scope.CurDues.PhotoPath || $scope.CurDues.PhotoPath.length == 0)
+            //            $scope.CurDues.PhotoPath = $scope.DefaultPhoto;
+
+            //        $timeout(function () {
+            //            $scope.getPreviousBookList();
+            //        });
+            //    }
+            //}, function (reason) {
+            //    Swal.fire('Failed' + reason);
+            //});
+
+            var para1 = {
+                StudentId: $scope.newBookIssue.StudentId,
+                EmployeeId: null,
+            };
+            $http({
+                method: 'POST',
+                url: base_url + "Library/Master/GetCreditRules",
+                dataType: "json",
+                data: JSON.stringify(para1)
+            }).then(function (res) {
+                if (res.data.IsSuccess && res.data.Data) {
+                    $scope.CurCreditRule = res.data.Data;
+                }
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+
+
+        }
+
+    }
+
+    $scope.ShowBookDetails = function () {
+
+        $timeout(function () {
+            $scope.newLostDamage.BookDetails = $scope.newLostDamage.BookDetails;
+        });
+    };
+    $scope.AddBookForIssue = function () {
+
+        if ($scope.newLostDamage.Barcode && $scope.newLostDamage.Barcode.length > 0) {
+            $scope.getBookDetailsByBarcode();
+            return;
+        }
+
+        $timeout(function () {
+            if ($scope.CurCreditRule && $scope.newLostDamage.BookDetails) {
+                var totalIssue = $scope.PreviousBookDetailsColl.length + $scope.newLostDamage.DetailsColl.length;
+
+                if ($scope.CurCreditRule.BookLimit < totalIssue) {
+                    Swal.fire('Book Issues Limit exceed (' + $scope.CurCreditRule.BookLimit + ')');
+                } else {
+                    $timeout(function () {
+                        $scope.newLostDamage.DetailsColl.push({
+                            BookDet: $scope.newLostDamage.BookDetails,
+                            BookEntryId: $scope.newLostDamage.BookDetails.TranId,
+                            CreditDays: $scope.CurCreditRule.CreditDays,
+                            IssueRemarks: ''
+                        });
+                        $scope.newLostDamage.BookEntryId = null;
+                    });
+                }
+
+            } else {
+                Swal.fire('Please ! 1st setup credit rules.')
+            }
+        });
+
+    };
+
+    $scope.GetAllBookLostList = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+
+        $http({
+            method: 'POST',
+            url: base_url + "Library/Master/GetAllBookLost",
+            dataType: "json",
+            data: {}
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+
+            if (res.data.IsSuccess && res.data.Data) {
+                let processedData = res.data.Data.map(function (item, index) {
+                    return {
+                        SN: index + 1,
+                        LostDamage: item.LostDamage || 'N/A',
+                        LostDate: item.LostDamageDate || 'N/A',
+                        LostBy: item.LostDamageBy || 'N/A',
+                        Name: item.StudentName || item.EmployeeName || 'N/A',
+                        RegdNo: item.RegdNo || 'N/A',
+                        Class: item.Class || 'N/A',
+                        Section: item.Section || 'N/A',
+                        AccessionNo: item.AccessionNo || 'N/A',
+                        BookTitle: item.BookTitle || 'N/A',
+                        Subject: item.Subject || item.BookTitle || 'N/A',
+                        Publication: item.Publication || 'N/A',
+                        IssuedDate: item.IssueDate || 'N/A',
+                        CreditDays: item.CreditDays || 'N/A',
+                        TotalDays: item.TotalDays || 'N/A',
+                        OutstandingDays: item.OutstandingDays || 'N/A',
+                        Remarks: item.Remarks || 'N/A',
+                        BookNo: item.BookNo || 'N/A',
+                        CallNo: item.CallNo || 'N/A',
+                        BarCode: item.BarCode || 'N/A',
+                        Batch: item.Batch || 'N/A',
+                        Faculty: item.Faculty || 'N/A',
+                        Level: item.Level || 'N/A',
+                        Semester: item.Semester || 'N/A',
+                        ClassYear: item.ClassYear || 'N/A',
+                        Price: item.Price || 'N/A',
+                        Vendor: item.Vendor || 'N/A',
+                        PurchaseDate: item.PurchaseDate || 'N/A',
+                        BillNo: item.BillNo || 'N/A',
+                        B_Faculty: item.Bfaculty || 'N/A',
+                        B_Level: item.BLevel || 'N/A',
+                        B_Semester: item.BSemester || 'N/A',
+                        B_ClassYear: item.BClassYear || 'N/A',
+                        BookCategory: item.BookCategory || 'N/A'
+                    };
+                });
+
+                $scope.gridOptions.data = processedData;
+            } else {
+                Swal.fire(res.data.ResponseMSG || "No records found.");
+                $scope.gridOptions.data = [];
+            }
+        }, function (reason) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            Swal.fire("Failed to load data. Please try again.");
+            $scope.gridOptions.data = [];
+        });
+    };
+
+    $scope.IsValidBookLostDetail = function () {
+        
+        return true;
+    }
+
+    $scope.SaveBookLostDetail = function () {
+      
+        
+        // Validate required fields
+        if (!$scope.newLostDamage.BookEntryId) {
+            Swal.fire('Please select a book.');
+            return;
+        }
+
+        // Map date
+        if ($scope.newLostDamage.LostDamageDate_TMP) {
+            $scope.newLostDamage.LostDamageDate = $filter('date')($scope.newLostDamage.LostDamageDate_TMP, 'yyyy-MM-dd');
+        } else {
+            Swal.fire('Please enter Lost/Damage date.');
+            return;
+        }
+
+        // Map student or teacher ID
+        if ($scope.newLostDamage.IssueTo === 1) {
+            $scope.newLostDamage.EmployeeId = null;
+            if (!$scope.newLostDamage.StudentId) {
+                Swal.fire('Please select a student.');
+                return;
+            }
+        } else if ($scope.newLostDamage.IssueTo === 2) {
+            $scope.newLostDamage.StudentId = null;
+            if (!$scope.newLostDamage.EmployeeId) {
+                Swal.fire('Please select a teacher.');
+                return;
+            }
+        }
+
+        // Confirm and Save
+        if ($scope.confirmMSG.Accept == true) {
+            Swal.fire({
+                title: 'Do you want to save the current data?',
+                showCancelButton: true,
+                confirmButtonText: 'Save',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $scope.CallSaveBookLostDetail();
+                }
+            });
+        } else {
+            $scope.CallSaveBookLostDetail();
+        }
+    };
+
+    $scope.CallSaveBookLostDetail = function () {
+
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        $scope.newLostDamage.StudentId = $scope.newLostDamage.StudentId;
+        $scope.newLostDamage.BookEntryId = $scope.newLostDamage.BookEntryId;
+
+
+        if ($scope.newLostDamage.IssueDateDet) {
+            $scope.newLostDamage.IssueDate = $filter('date')($scope.newLostDamage.IssueDateDet.dateAD, 'yyyy-MM-dd');
+        } else
+            $scope.newLostDamage.IssueDate = null;
+        
+
+        if ($scope.newLostDamage.LostDamageDateDet) {
+            $scope.newLostDamage.LostDamageDate = $filter('date')($scope.newLostDamage.LostDamageDateDet.dateAD, 'yyyy-MM-dd');
+        } else
+            $scope.newLostDamage.LostDamageDate = null;
+
+
+        $http({
+            method: 'POST',
+            url: base_url + "Library/Master/SaveBookLostDamage",
+            headers: { 'Content-Type': undefined },
+            transformRequest: function (data) {
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+
+               
+                return formData;
+            },
+            data: { jsonData: $scope.newLostDamage}
+
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.ClearDetails();
+            }
+        }, function (errormessage) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+        });
+    }
+
+
+    //added now
+    $scope.getPreviousBookList = function () {
+        $scope.PreviousBookDetailsColl = [];
+        var para = {
+            StudentId: $scope.newLostDamage.StudentId || null,
+            EmployeeId: $scope.newLostDamage.EmployeeId || null,
+        };
+        $http({
+            method: 'POST',
+            url: base_url + "Library/Master/GetPreviousBookDetailsList",
+            dataType: "json",
+            data: JSON.stringify(para)
+        }).then(function (res) {
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.PreviousBookDetailsColl = res.data.Data;
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+    }
+
+    //added now
+    $scope.CurDues = null;
+    $scope.DefaultPhoto = '/wwwroot/dynamic/images/avatar-img.jpg';
+    $scope.getDuesDetails = function () {
+        $scope.CurDues = null;
+        $scope.CurCreditRule = null;
+        $scope.PreviousBookDetailsColl = [];
+        if ($scope.newBookLost.StudentId && $scope.newBookLost.StudentId > 0) {
+            var para = {
+                StudentId: $scope.newBookLost.StudentId,
+                PaidUpToMonth: 0,
+                PaidUpMonthColl: '',
+                SemesterId: ($scope.newBookLost.StudentDetails ? $scope.newBookLost.StudentDetails.SemesterId : null),
+                ClassYearId: ($scope.newBookLost.StudentDetails ? $scope.newBookLost.StudentDetails.ClassYearId : null)
+            };
+            $http({
+                method: 'POST',
+                url: base_url + "Fee/Transaction/GetDuesForReceipt",
+                dataType: "json",
+                data: JSON.stringify(para)
+            }).then(function (res) {
+                if (res.data.IsSuccess && res.data.Data) {
+                    $scope.CurDues = res.data.Data;
+
+                    if (!$scope.CurDues.PhotoPath || $scope.CurDues.PhotoPath.length == 0)
+                        $scope.CurDues.PhotoPath = $scope.DefaultPhoto;
+
+                    $timeout(function () {
+                        $scope.getPreviousBookList();
+                    });
+                }
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+
+            var para1 = {
+                StudentId: $scope.newBookLost.StudentId,
+                EmployeeId: null,
+            };
+            $http({
+                method: 'POST',
+                url: base_url + "Library/Master/GetCreditRules",
+                dataType: "json",
+                data: JSON.stringify(para1)
+            }).then(function (res) {
+                if (res.data.IsSuccess && res.data.Data) {
+                    $scope.CurCreditRule = res.data.Data;
+                }
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+
+
+        }
+
+    }
+
+});
+

@@ -1,0 +1,687 @@
+﻿
+<script src="~/jslib/frontdesk/transaction/postal-services.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<link href="~/wwwroot/dynamic-erp/css/Tableresize.css" rel="stylesheet" />
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="PostalServicesController" ng-init="LoadData()">
+
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-12">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                            id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active"
+                                                   id="home-tab"
+                                                   data-toggle="tab"
+                                                   href="#home"
+                                                   role="tab"
+                                                   aria-controls="home"
+                                                   aria-selected="true">Postal Received</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="profile-tab"
+                                                   data-toggle="tab"
+                                                   href="#profile"
+                                                   role="tab"
+                                                   aria-controls="profile"
+                                                   aria-selected="false">Postal Dispatch</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Postal Received Start -->
+                                <div class="tab-pane fade show active main-section"
+                                     id="home"
+                                     role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div id="postreceived-section" class="card py-2 mb-0">
+
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="form-group mb-1 d-flex">
+                                                    <label class="mt-1" for="" style="min-width:63px">From Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newReceivedSearch.DateFrom_TMP" date-detail="newReceivedSearch.DateFromDet" confirm-action="validateDatesRcv('fromDate')">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group mb-1 d-flex">
+                                                    <label class="mt-1" for="" style="min-width:63px">To Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newReceivedSearch.DateTo_TMP" date-detail="newReceivedSearch.DateToDet" confirm-action="validateDatesRcv('toDate')">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group mb-1">
+                                                    <button class="btn btn-sm btn-success" ng-click="GetAllReceivedList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Received">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Received">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Received">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#postalreceived'" sheet-name="'PostalReceived'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#postalreceived').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+
+                                                <a print-tbl table-id="'#postalreceived'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        id="add-postal-received"
+                                                        style="min-width: 90px">
+                                                    <i class="fas fa-plus w-t"></i> Add Postal
+                                                    Received
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y table-container flex-grow-1">
+                                            <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                                <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 13.5rem)!important">
+                                                    <table id="postalreceived"
+                                                           make-table-resizable
+                                                           class="main-table table table-sm table-bordered bg-white">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 90px" title="S.No.">S.No.</th>
+                                                                <th style="width: 200px" title="FromTitle" ng-click="sortReceived('FromTitle')">From Title</th>
+                                                                <th style="width: 200px" title="Totitle" ng-click="sortReceived('Totitle')">To Title</th>
+                                                                <th style="width: 100px" title="ReferenceNumber" ng-click="sortReceived('ReferenceNumber')">Reference No.</th>
+                                                                <th style="width: 100px" title="Address">Address</th>
+                                                                <th style="width: 100px" title="Date" ng-click="sortReceived('Miti')">Date</th>
+                                                                <th style="width: 200px" title="Remarks">Remarks</th>
+                                                                <th rowspan="2" title="Action" class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll py-1" style="width: 100px;">
+                                                                    <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                        <option value="" disabled selected>Action</option>
+                                                                        <option value="save">Save Layout</option>
+                                                                        <option value="reset">Reset Layout</option>
+                                                                    </select>
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr dir-paginate="cl in ReceivedList | filter:searchData.Received | itemsPerPage: perPage.Received |orderBy:sortKeys.Received:reverses.Received track by $index" current-page="currentPages.Received" pagination-id="ReceivedPagination">
+                                                                <td>{{$index+1}}</td>
+                                                                <td>{{cl.FromTitle}}</td>
+                                                                <td>{{cl.Totitle}}</td>
+                                                                <td>{{cl.ReferenceNumber}}</td>
+                                                                <td>{{cl.Address}}</td>
+
+                                                                <td>{{cl.Miti}}</td>
+                                                                <td>{{cl.Remarks}}</td>
+                                                                <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="z-index:3;">
+                                                                    <a class="p-1" href="#" ng-click="GetReceivedById(cl)">
+                                                                        <i class="fas fa-edit text-info"></i>
+                                                                    </a>
+                                                                    <a class="p-1" href="#" ng-click="DelReceivedById(cl)">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <!-- table end -->
+                                            </div>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="ReceivedPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                    <div id="postal-received-form" class="card">
+                                        <div class="card-body p-2">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="title">From Title<span class="text-danger">*</span></label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newReceived.FromTitle" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="title">To Title<span class="text-danger">*</span></label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newReceived.Totitle" />
+                                                    </div>
+                                                </div>
+                                                <!-- /.col -->
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="reference">Reference Number</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newReceived.ReferenceNumber" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="address">Address<span class="text-danger">*</span></label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newReceived.Address" />
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="date">For Date<span class="text-danger">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newReceived.Date_TMP" date-detail="newReceived.DateDet">
+                                                    </div>
+                                                </div>
+                                                <!-- /.col -->
+
+                                                <div class="col-md-9">
+                                                    <!--  -->
+                                                    <div class="form-group">
+                                                        <label for="remarks">Remarks<span class="text-danger">*</span></label>
+                                                        <textarea class="form-control form-control-sm" ng-model="newReceived.Remarks"
+                                                                  rows="1"></textarea>
+                                                    </div>
+                                                </div>
+                                                <!-- /.col -->
+                                            </div>
+
+                                            <!-- File Upload Starts -->
+                                            <span><b>Attach Document(s)</b></span>
+                                            <div class="timeline-item">
+                                                <div class="pb-1 add-more-than-one-form-block">
+                                                    <form>
+                                                        <article>
+                                                            <div class="row">
+                                                                <div class="col-sm-2">
+                                                                    <div class="form-group">
+                                                                        <label>Type Of Document</label>
+                                                                        <select class="form-control form-control-sm select2" ng-model="docType">
+                                                                            <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <div class="row">
+                                                                        <div class="col-sm-4">
+                                                                            <div class="form-group">
+                                                                                <label>Attach Document</label>
+                                                                                <div class="form-group">
+                                                                                    <input type="file" id="flMoreFiles" class="form-control-file border p-0 bg-white" file-model accept="image/png, image/gif, image/jpeg, image/jpg, application/pdf, application/msword" ng-model="attachFile">
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Description</label>
+                                                                                <input type="text" class="form-control form-control-sm"
+                                                                                       ng-model="docDescription"
+                                                                                       placeholder="">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2">
+                                                                            <div class="d-flex">
+                                                                                <div>
+                                                                                    <label class="invisible d-block">for height</label>
+                                                                                    <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFilesReceived(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </article>
+                                                    </form>
+                                                </div>
+                                                <div class="pb-3">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover border bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col" style="width: 20px" title="S.No">SN.</th>
+                                                                    <th scope="col" style="width: 40%" title="DocumentType">Document Type</th>
+                                                                    <th scope="col" title="File Name">File Name</th>
+                                                                    <th scope="col" title="Description">Description</th>
+                                                                    <th scope="col" style="width: 130px" title="Action">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="ac in newReceived.AttachmentColl">
+                                                                    <th scope="row">{{$index+1}}</th>
+                                                                    <td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>
+                                                                    @*<td>{{ac.DocumentTypeName}}</td>*@
+                                                                    <td>{{ac.Name}}</td>
+                                                                    <td>{{ac.Description}}</td>
+                                                                    <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="z-index:3;">
+                                                                        <div>
+                                                                            <a @*ng-hide="ac.DocPath==null"*@ ng-click="ShowDoc(ac)" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                                <i class="fas fa-eye text-secondary"></i>
+                                                                            </a>
+                                                                            <a @*ng-hide="ac.DocPath==null"*@ class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+                                                                                <i class="fas fa-download  text-info"></i>
+                                                                            </a>
+                                                                            <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFilesReceived($index)">
+                                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- File Upload Ends -->
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-info"
+                                                        id="postalback-btn"
+                                                        style="min-width: 90px">
+                                                    Back to List
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearReceived()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateReceived()">{{newReceived.Mode}}</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Postal Received Ends -->
+                                <!-- Postal Dispatch Start -->
+                                <div class="tab-pane fade main-section"
+                                     id="profile"
+                                     role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    <div id="postdispatch-section" class="card py-2 mb-0">
+                                        <div class="row">
+                                            @*<div class="col-md-4">
+                                                    <input type="text"
+                                                           class="form-control form-control-sm"
+                                                           id="datepicker-1"
+                                                           placeholder="Select date"
+                                                           value="" />
+                                                </div>*@
+                                            <div class="col-md-2">
+                                                <div class="form-group d-flex mb-1">
+                                                    <label class="mt-1" style="min-width:63px" for="">From Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newDispatch.dateFrom" date-detail="newDispatch.FromDateDet" confirm-action="validateDatesDispatch('fromDate')">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group d-flex mb-1">
+                                                    <label class="mt-1" for="" style="min-width:63px">To Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newDispatch.dateTo" date-detail="newDispatch.ToDateDet" confirm-action="validateDatesDispatch('toDate')">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group mb-1">
+                                                    <button class="btn btn-sm btn-success" ng-click="GetAllDispatchList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Dispatch">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Dispatch">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Dispatch">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table1'" sheet-name="'PostalDispatch'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+                                               
+                                                <a print-tbl table-id="'#main-table1'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        id="add-postal-dispatch"
+                                                        style="min-width: 90px">
+                                                    <i class="fas fa-plus w-t"></i> Add Postal
+                                                    Dispatch
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y table-container flex-grow-1">
+                                            <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                                <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 13.5rem)!important">
+                                                    <table id="main-table1" make-table-resizable
+                                                           class="main-table table table-sm table-bordered bg-white">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 50px" title="S.No.">S.No.</th>
+                                                                <th style="width: 200px" title="To Title" ng-click="sortDispatch('Totitle')">To Title</th>
+                                                                <th style="width: 130px" title="Reference No." ng-click="sortDispatch('ReferenceNumber')">Reference No.</th>
+                                                                <th style="width: 200px" title="From Title" ng-click="sortDispatch('FromTitle')">From Title</th>
+                                                                <th style="width: 120px" title="Date" ng-click="sortDispatch('Dates')">Date</th>
+                                                                <th style="width: 250px">Remarks</th>
+                                                                <th rowspan="2" class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll py-1" style="width: 90px;">
+                                                                    <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                        <option value="" disabled selected>Action</option>
+                                                                        <option value="save">Save Layout</option>
+                                                                        <option value="reset">Reset Layout</option>
+                                                                    </select>
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr dir-paginate="cl in DispatchList | filter:searchData.Dispatch | itemsPerPage: perPage.Class |orderBy:sortKeys.Dispatch:reverses.Dispatch track by $index" current-page="currentPages.Dispatch" pagination-id="DispatchPagination">
+                                                                <td>{{$index+1}}</td>
+                                                                <td>{{cl.Totitle}}</td>
+                                                                <td>{{cl.ReferenceNumber}}</td>
+                                                                <td>{{cl.FromTitle}}</td>
+                                                                <td>{{cl.Dates}}</td>
+                                                                <td>{{cl.Remarks}}</td>
+                                                                <td>
+
+                                                                    <a class="p-1" href="#" ng-click="GetDispatchById(cl)">
+                                                                        <i class="fas fa-edit text-info"></i>
+                                                                    </a>
+                                                                    <a class="p-1" href="#" ng-click="DelDispatchById(cl)">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <!-- table end -->
+                                            </div>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="DispatchPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                    <!-- source form starts -->
+                                    <div id="postal-dispatch-form" class="card">
+                                        <div class="card-body p-2">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="title">To Title</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newDispatch.Totitle"
+                                                               placeholder="" />
+                                                    </div>
+                                                </div>
+                                                <!-- /.col -->
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="reference">Reference Number</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newDispatch.ReferenceNumber" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="address">Address</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newDispatch.Address" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- /.col -->
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="title">From Title</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newDispatch.FromTitle" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="date">Date</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newDispatch.Date_TMP" date-detail="newDispatch.DateDet">
+                                                    </div>
+                                                </div>
+
+                                                <!-- /.col -->
+
+                                                <div class="col-md-9">
+                                                    <!--  -->
+                                                    <label for="remarks">Remarks</label>
+                                                    <div class="form-group">
+                                                        <textarea class="form-control form-control-sm" ng-model="newDispatch.Remarks"
+                                                                  rows="1"></textarea>
+                                                    </div>
+                                                </div>
+                                                <!-- /.col -->
+                                            </div>
+
+                                            <!-- File Upload Starts -->
+                                            <span><b>Attach Document(s)</b></span>
+                                            <div class="timeline-item">
+                                                <div class="pb-1 add-more-than-one-form-block">
+                                                    <form>
+                                                        <article>
+                                                            <div class="row">
+                                                                <div class="col-sm-2">
+                                                                    <div class="form-group">
+                                                                        <label>Type Of Document</label>
+                                                                        <select class="form-control form-control-sm select2" ng-model="docType1">
+                                                                            <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <div class="row">
+                                                                        <div class="col-sm-4">
+                                                                            <div class="form-group">
+                                                                                <label>Attach Document</label>
+                                                                                <div class="form-group">
+                                                                                    <input type="file" id="flMoreFiles" class="form-control-file border p-0 bg-white" file-model accept="image/png, image/gif, image/jpeg, image/jpg, application/pdf, application/msword" ng-model="attachFile1">
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Description</label>
+                                                                                <input type="text" class="form-control form-control-sm"
+                                                                                       ng-model="docDescription1"
+                                                                                       placeholder="">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2">
+                                                                            <div class="d-flex">
+                                                                                <div>
+                                                                                    <label class="invisible d-block">for height</label>
+                                                                                    <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFiles1(attachFile1,docType1,docDescription1)"><i class="fas fa-plus"></i> Add More</button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </article>
+                                                    </form>
+                                                </div>
+                                                <div class="pb-3">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover border bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col" style="width: 20px">SN.</th>
+                                                                    <th scope="col" style="width: 40%">Document Type</th>
+                                                                    <th scope="col">File Name</th>
+                                                                    <th scope="col">Description</th>
+                                                                    <th scope="col" style="width: 130px">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="ac in newDispatch.AttachmentColl">
+                                                                    <th scope="row">{{$index+1}}</th>
+                                                                    <td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>
+                                                                    <td>{{ac.Name}}</td>
+                                                                    <td>{{ac.Description}}</td>
+                                                                    <td>
+                                                                        <div>
+                                                                            <a @*ng-hide="ac.DocPath==null"*@ ng-click="ShowDoc(ac)" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                                <i class="fas fa-eye text-secondary"></i>
+                                                                            </a>
+                                                                            <a @*ng-hide="ac.DocPath==null"*@ class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+                                                                                <i class="fas fa-download  text-info"></i>
+                                                                            </a>
+                                                                            <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- File Upload Ends -->
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-info"
+                                                        id="postaldispatchback-btn"
+                                                        style="min-width: 90px">
+                                                    Back to List
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearDispatch()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateDispatch()">{{newDispatch.Mode}}</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- source form ends -->
+                                </div>
+                                <!-- Postal Dispatch Ends -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <iframe ng-hide="viewImg.File" src="{{viewImg.ContentPath}}" style="width:100%; height: 70vh;">
+                    </iframe>
+                    <img ng-show="viewImg.File" ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;" id="imgPreviewAdd">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

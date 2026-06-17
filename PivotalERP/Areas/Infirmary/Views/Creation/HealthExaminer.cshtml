@@ -1,0 +1,335 @@
+﻿<style>
+    .page-button-disabled {
+        z-index: 2;
+        color: #0056b3;
+        text-decoration: none;
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+    }
+    .document-delete {
+        display : none ;
+    }
+</style>
+<script src="~/jslib/Infirmary/HealthExaminer.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="HealthExaminerController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" style="margin-top:-10px">
+                    <div class="HealthExaminer-section card pr-0" id="HealthExaminer-section">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline mb-2">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.HealthExaminer">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.HealthExaminer">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.HealthExaminer" />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#Examiner'" sheet-name="'ExaminerList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#Examiner').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        
+                                    </div>
+                                </div>
+
+                                <a print-tbl table-id="'#Examiner'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+
+                                <button type="button" class="btn btn-sm btn-success" id="add-HealthExaminer" style="min-width: 90px" ng-click="ClearExaminer( ) ; ClearPhoto( ) ; ">
+                                    <i class="fas fa-plus w-t"></i> Add Examiner
+                                </button>
+                            </div>
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y sales-main-table table-scroll mb-2">
+                                <table id="Examiner" class="main-table table table-sm table-bordered bg-white">
+                                    <thead class="text-nowrap">
+                                        <tr>
+                                            <th style="width: 40px">S.No.</th>
+                                            <th style="width: 200px">Examiner Name</th>
+                                            <th style="width: 110px">Examiner Regd.No</th>
+                                            <th style="width: 95px">Mobile No.</th>
+                                            <th style="width: 150px">Email</th>
+                                            <th style="width: 150px">Specialization</th>
+                                            <th style="width: 150px">Address</th>
+                                            <th style="width: 140px">Username</th>
+                                            <th style="width: 70px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="ex in ExaminerList | filter:searchData.HealthExaminer | itemsPerPage: perPage.HealthExaminer" current-page="currentPages.HealthExaminer" pagination-id="HealthExaminerPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>
+                                                <b> {{ ex.Name }} </b><br />
+                                                <label>( {{ ex.Designation }} )</label>
+                                            </td>
+                                            <td> {{ ex.ExaminerRegdNo }} </td>
+                                            <td> {{ ex.MobileNo }} </td>
+                                            <td> {{ ex.Email }} </td>
+                                            <td> {{ ex.Specialization }} </td>
+                                            <td> {{ ex.Address }} </td>
+                                            <td> {{ ex.UserName }} </td>
+                                            <td class="">
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-edit text-info" ng-click="GetExaminerById(ex) "></i>
+                                                </a>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-trash-alt text-danger" ng-click="DelExaminerById(ex) "></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- table end -->
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="HealthExaminerPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+
+                <!-- form area starts -->
+                <div id="HealthExaminer-form">
+                    <div class="card card-default">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="row">
+                                        <div class="col-md-3" id="meet-others">
+                                            <div class="form-group">
+                                                <label for="">Examiner Name</label> <span style="color:red">*</span>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newHealthExaminer.Name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Designation</label> <span style="color:red">*</span>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newHealthExaminer.Designation" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Examiner Registration No</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newHealthExaminer.ExaminerRegdNo" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Mobile No</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newHealthExaminer.MobileNo" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Email</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newHealthExaminer.Email" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Qualification</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newHealthExaminer.Qualification" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="">Address</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newHealthExaminer.Address" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="form-group">
+                                                <label for="">Specialization</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newHealthExaminer.Specialization" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Username</label>
+
+                                                <select class="form-control form-control-sm" ng-model="newHealthExaminer.UsernameId">
+                                                    <option ng-repeat="H in UserNameList" ng-value="H.UserId" ng-selected="newHealthExaminer.UsernameId==H.UserId">
+                                                        {{H.UserName}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="">Remarks</label>
+                                                <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="newHealthExaminer.Remarks"></textarea>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+
+                                    <div class="person-photo-attachment-wrap text-center">
+                                        <div class="img-wrap mx-auto">
+                                            <img ng-src="{{newHealthExaminer.PhotoData || newHealthExaminer.PhotoPath}}" class="img-fluid" alt="" id="imgPhoto1" style="height:150px; width:150px; border:1px solid #ccc">
+                                        </div>
+                                        <label for="choose-sfile" type="button" class="btn btn-default btn-sm mt-2">Upload Photo</label>
+                                        <input id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newHealthExaminer.Photo_TMP" fileread="newHealthExaminer.PhotoData" />
+                                        <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                        <a ng-click="ClearPhoto()" href="#" class="text-danger d-block mt-1">Remove Current Photo</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- timeline item -->
+                            <!-- timeline time label -->
+                            <div class="my-1">
+                                <label style="font-weight: bold; font-size: 15px;">Document Attachment</label>
+                            </div>
+                            <!-- /.timeline-label -->
+                            <div>
+                                <div class="timeline-item">
+                                    <div class="pb-2 add-more-than-one-form-block">
+                                        <form class="mb-0">
+                                            <article>
+                                                <div class="row">
+                                                    <div class="col-sm-2">
+                                                        <div class="form-group">
+                                                            <label>Type Of Document</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="docType">
+                                                                <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-10">
+                                                        <div class="row">
+                                                            <div class="col-sm-4">
+                                                                <div class="form-group">
+                                                                    <label>Attach Document</label>
+                                                                    <div class="form-group">
+                                                                        <input type="file" id="flMoreFiles" class="form-control-file form-control form-control-sm border bg-white" file-model ng-model="attachFile">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label>Description</label>
+                                                                    <input type="text" class="form-control form-control-sm"
+                                                                           ng-model="docDescription"
+                                                                           placeholder="">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                <div class="d-flex">
+                                                                    <div>
+                                                                        <label class="invisible d-block">for height</label>
+                                                                        <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFilesReceived(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        </form>
+                                    </div>
+                                    <div class="pb-3">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover border bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col" style="width: 20px">S.No.</th>
+                                                        <th scope="col" style="width: 40%">Document Type</th>
+                                                        <th scope="col">File Size</th>
+                                                        <th scope="col">Description</th>
+                                                        <th scope="col" style="width: 100px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="ac in newHealthExaminer.AttachmentColl">
+                                                        <th scope="row">{{$index+1}}</th>
+                                                        <td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>
+                                                        <td>{{ac.Name}}</td>
+                                                        <td>{{ac.Description}}</td>
+                                                        <td>
+
+                                                            <div>
+                                                                <a class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" ng-click="ShowPersonalImg(ac)" data-original-title="View doc">
+                                                                    <i class="fas fa-eye text-secondary"></i>
+                                                                </a>
+                                                                <a ng-hide="ac.DocPath==null" class="p-1" href="{{ac.DocPath}}" download="" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+                                                                    <i class="fas fa-download  text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentDoc($index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- timeline time label -->
+                        <div class="time-label pb-3" style="margin-top: -10px">
+                            <span class="d-block border-0 p-1 text-center">
+                                <button type="button" class="btn btn-sm btn-info" id="back-to-list-HealthExaminer"
+                                        style="min-width: 90px">
+                                    Back To List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearExaminer()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateExaminer()">{{newHealthExaminer.Mode}}</button>
+                            </span>
+                        </div>
+                        <!-- /.timeline-label -->
+                    </div>
+                </div>
+            </section>
+
+            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1" style="margin-top:30px!important">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body mb-0 p-0">
+                            <iframe ng-hide="viewImg.File" src="{{viewImg.ContentPath}}" style="width:100%; height: 70vh;">
+                            </iframe>
+                            <img ng-show="viewImg.File" ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;" id="imgPreviewAdd">
+                        </div>
+                        <div class="modal-footer">
+                            <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                            <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

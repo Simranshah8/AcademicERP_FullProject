@@ -1,0 +1,662 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+
+    .t-h-10 .table td, .t-h-10 .table th {
+        line-height: 1;
+        padding: 0.5rem !important;
+        font-size: 0.7875rem !important;
+    }
+
+    .panel-title > a, .panel-title > a:active {
+        font-family: "IBM Plex Sans", sans-serif;
+        display: block;
+        padding: 8px 15px;
+        color: #2D3333;
+        font-size: 0.813rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        word-spacing: 3px;
+        text-decoration: none;
+    }
+
+    .snj-panel .panel-title a {
+        display: block;
+        text-decoration: none;
+        background: #E9F2EE;
+    }
+</style>
+<script src="~/jslib/Library/BookLost.js"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BookLostController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here main-section" style="margin-top: 0px;">
+                <div class="tab-content">
+                    <div class="card-primary card-tabs">
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="booklost-tab" data-toggle="tab" href="#booklost" role="tab" aria-controls="booklost" aria-selected="true"> Book Lost</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="booklostlist-tab" data-toggle="tab" href="#booklostlist" role="tab" aria-controls="booklostlist" aria-selected="false">Book Lost List</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="booklost" role="tabpanel" aria-labelledby="booklost-tab">
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="row ">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Lost/Damage By</label>
+                                                    <select class="form-control form-control-sm" ng-model="newBookLost.LostDamageFrom" onchange="showDetails(this)">
+                                                        <option ng-value="it.id" ng-repeat="it in IssueToList" ng-selected="it.id==newBookIssue.LostFrom">{{it.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-9 col-lg-9 col-md-9" ng-show="newBookLost.LostDamageFrom==2" id="selectEmp">
+                                                <label class="sr-only" for="inlineFormInputGroup">Select Teacher</label>
+                                                <div class="input-group-prepend mt-4">
+                                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset; margin-right: -3px; z-index: 1; font-size: 13px; " ng-model="newBookLost.SelectEmployee">
+                                                        <option class="dropdown-item float-left" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newBookLost.SelectEmployee">
+                                                            {{ss.text}}
+                                                        </option>
+                                                    </select>
+                                                    <select class="form-control select2 form-control-sm" all-employee ng-model="newBookLost.EmployeeId" employee-detail="newBookLost.EmployeeDetails" side-bar-data="newBookLost.EmpSideBarData" search-by="newBookLost.SelectEmployee" style="width: 100%;" confirm-action="getPreviousBookList(2)">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-9 col-lg-9 col-md-9" ng-show="newBookLost.LostDamageFrom==1" id="selectStu">
+                                                <div class="custom-control custom-checkbox text-right">
+                                                    <input class="custom-control-input" type="checkbox" ng-model="newBookLost.ShowLeftStudent" id="customCheckbox111" value="option1">
+                                                    <label for="customCheckbox111" class="custom-control-label">Show Left Student </label>
+                                                </div>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset; margin-right: -3px; z-index: 1; font-size: 13px; " ng-model="newBookLost.SelectStudent">
+                                                        <option class="float-left" ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newBookLost.SelectStudent">
+                                                            {{ss.text}}
+                                                        </option>
+                                                    </select>
+                                                    <select class="form-control select2 form-control-sm" all-student ng-model="newBookLost.StudentId" student-detail="newBookLost.StudentDetails" side-bar-data="newBookLost.SideBarData" search-by="newBookLost.SelectStudent" confirm-action="getDuesDetails()" include-left="newBookLost.ShowLeftStudent">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="" ng-show="newBookLost.LostFrom==1" id="stu_dues" style="margin-top: -5px;">
+                                            <div class="">
+                                                <label class="float-right">Dues Fee :  {{CurDues.TotalDues |number:2}}/-</label>
+                                                <!-- <button class="btn btn-sm btn-info float-right" style="min-width:90px;padding: 3px; font-size: 12px;" data-toggle="modal" data-target="#feedetail">Show Details</button> -->
+                                            </div>
+                                        </div>
+
+                                        <div class="table-section">
+                                            <div class="card-tools" style="margin-bottom: -15px;">
+                                                <label class=""><b>Previous Book Record</b></label> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                                <label for="" class="align-items-center"><b>Total Pending : {{PreviousBookDetailsColl.length}}</b></label>
+                                            </div>
+
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mb-4 mt-4 t-h-10 bg-white" style="height: 200px;">
+                                                <table id="main-table" class="main-table table table-sm bg-white order-list">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 60px;">S.No</th>
+                                                            <th style="width: 90px;" title="Accession No.">Acc. No.</th>
+                                                            <th style="width: 100px;">Title</th>
+                                                            <th style="width: 120px;">Issue Date</th>
+                                                            <th style="width: 80px;" title="Credit Days">Credit Days</th>
+                                                            <th style="width: 85px;" title="Outstanding days">Outstanding Days</th>
+                                                            <th style="width: 80px;" title="Fine Amount">Fine Amt</th>
+                                                            <th style="text-align: center; width: 150px;">Action</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="pbr in PreviousBookDetailsColl" ng-click="GetBookDetails(pbr)">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{pbr.AccessionNo}}</td>
+                                                            <td>{{pbr.BookTitle}}</td>
+                                                            <td>{{pbr.IssueDate_BS}}</td>
+                                                            <td>{{pbr.CreditDays}}</td>
+                                                            <td>{{pbr.OutStandingDays}}</td>
+                                                            <td class="text-right">{{pbr.FineAmt |number:2}}</td>
+                                                            <td class="align-middle text-center">
+                                                                <button type="button" class="btn btn-sm btn-danger" style="min-width: 60px; padding:2px 4px; font-size:12px"title="Lost" ng-click="AddLostBookDetails($index,pbr)">Lost</button>
+                                                                <button type="button" class="btn btn-sm btn-warning" style="min-width: 60px; padding:2px 4px; font-size:12px" title="Damage" ng-click="AddDamageBookDetails($index,pbr)">Damage</button>
+                                                               
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-section mt-2">
+                                            <div class="card-tools" style="margin-bottom: -15px;">
+                                                <label class=""><b>Lost Book</b></label>
+
+                                            </div>
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mb-4 mt-4 t-h-10">
+                                                <table id="main-table" class="main-table table table-sm bg-white order-list">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 60px;">S.No</th>
+                                                            <th style="width: 90px;" title="Accession No.">Accession No.</th>
+                                                            <th style="width: 100px;">Title</th>
+                                                            <th style="width: 120px;">Issue Date</th>
+                                                            <th style="width: 70px;" title="Book Price">Book Price</th>
+                                                            <th style="width: 120px;" title="Lost Date">Lost Date</th>
+                                                            <th style="width: 150px;" title="Action Type">Action Type</th>
+                                                            <th style="width: 120px;">{{recoveryHeaderForLost}}</th>
+                                                            <th style="width: 170px;">Remarks</th>
+                                                            <th style="text-align: center;width: 60px;">Action</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="rb in newBookLost.LostBookDetailsColl" ng-click="GetBookDetails(rb.BookDet)">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{rb.BookDet.AccessionNo}}</td>
+                                                            <td>{{rb.BookDet.BookTitle}}</td>
+                                                            <td>{{rb.BookDet.IssueDate_BS}}</td>
+                                                            <td class="text-right">{{rb.BookDet.BookPrice | number:2}}</td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="rb.LostDate_TMP" date-picker date-detail="rb.LostDateDet" style="height:25px" confirm-action="validateForDate(rb)">
+                                                            </td>
+                                                            <td>
+                                                                <select class="form-control form-control-sm" ng-model="rb.ActionTypeId" style="height:25px" ng-change="onActionTypeChange(rb.ActionTypeId,1)">
+                                                                    <option ng-repeat="BD in ActionTypeColl" ng-value="BD.id" ng-selected="BD.id==rb.ActionTypeId">
+                                                                        {{BD.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </td>
+                                                            <td class="text-center" ng-click="onActionTypeChange(rb.ActionTypeId,1)">
+                                                                <div class="custom-control custom-checkbox" ng-if="rb.ActionTypeId == 2">
+                                                                    <input class="custom-control-input" type="checkbox" ng-model="rb.IsBookSubmitted" id="customCheckbox1_{{$index+1}}" value="option1">
+                                                                    <label for="customCheckbox1_{{$index+1}}" class="custom-control-label"></label>
+                                                                </div>
+                                                                <input class="form-control form-control-sm text-right" number-input ng-show="rb.ActionTypeId == 1 || rb.ActionTypeId == 3" ng-model="rb.RecoveryAmount" style="height:25px" />
+                                                            </td>
+                                                            <td>
+                                                                <input class="form-control form-control-sm" ng-model="rb.LostRemarks" style="height:25px" />
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <a class="p-1" href="#" ng-click="delLostBookDetails($index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-section mt-2">
+                                            <div class="card-tools" style="margin-bottom: -15px;">
+                                                <label class=""><b>Damage Book</b></label>
+                                            </div>
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mb-4 mt-4 t-h-10">
+                                                <table id="main-table" class="main-table table table-sm bg-white order-list">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 60px;">S.No</th>
+                                                            <th style="width: 90px;" title="Accession No.">Accession No.</th>
+                                                            <th style="width: 100px;">Title</th>
+                                                            <th style="width: 120px;">Issue Date</th>
+                                                            <th style="width: 70px;" title="Book Price">Book Price</th>
+                                                            <th style="width: 120px;" title="Damage Date">Damage Date</th>
+                                                            <th style="width: 150px;" title="Action Type">Action Type</th>
+                                                            <th style="width: 120px;">{{recoveryHeader_Damage}}</th>
+                                                            <th style="width: 170px;">Remarks</th>
+                                                            <th style="text-align: center;width: 60px;">Action</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="rb in newBookLost.DamageBookDetailsColl" ng-click="GetBookDetails(rb.BookDet)">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{rb.BookDet.AccessionNo}}</td>
+                                                            <td>{{rb.BookDet.BookTitle}}</td>
+                                                            <td>{{rb.BookDet.IssueDate_BS}}</td>
+                                                            <td class="text-right">{{rb.BookDet.BookPrice | number:2}}</td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="rb.LostDate_TMP" date-picker date-detail="rb.LostDateDet" style="height:25px" confirm-action="validateForDate(rb)">
+                                                            </td>
+                                                            <td>
+                                                                <select class="form-control form-control-sm" ng-model="rb.ActionTypeId" style="height:25px" ng-change="onActionTypeChange(rb.ActionTypeId,2)">
+                                                                    <option ng-repeat="BD in ActionTypeColl" ng-value="BD.id" ng-selected="BD.id==rb.ActionTypeId">
+                                                                        {{BD.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </td>
+                                                            <td class="text-center" ng-click="onActionTypeChange(rb.ActionTypeId,2)">
+                                                                <div class="custom-control custom-checkbox" ng-if="rb.ActionTypeId == 2">
+                                                                    <input class="custom-control-input" type="checkbox" ng-model="rb.IsBookSubmitted" id="customCheckbox2_{{$index+1}}" value="option1">
+                                                                    <label for="customCheckbox2_{{$index+1}}" class="custom-control-label"></label>
+                                                                </div>
+                                                                <input class="form-control form-control-sm text-right" number-input ng-show="rb.ActionTypeId == 1 || rb.ActionTypeId == 3" ng-model="rb.RecoveryAmount" style="height:25px" />
+                                                            </td>
+                                                            <td>
+                                                                <input class="form-control form-control-sm" ng-model="rb.DamageRemarks" style="height:25px" />
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <a class="p-1" href="#" ng-click="delDamageBookDetails($index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+
+                                        </div>
+
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearBookLost()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateBookLost()">{{newBookLost.Mode}}</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="wrapper ">
+                                            <div class="panel-group snj-panel" id="accordion" role="tablist" aria-multiselectable="true">
+                                                <div class="panel panel-default" id="stu_Details" ng-show="newBookLost.LostDamageFrom==1">
+                                                    <div class="panel-heading active" role="tab" id="headingOne">
+                                                        <h4 class="panel-title">
+                                                            <a class="panel-title d-flex justify-content-between align-items-center" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+                                                               aria-expanded="true" aria-controls="collapseOne">
+                                                                Student Details
+                                                                <i class="fas fa-chevron-down arrow-icon"></i>
+                                                            </a>
+                                                        </h4>
+                                                    </div>
+                                                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel"
+                                                         aria-labelledby="headingOne">
+                                                        <div class="panel-body">
+                                                            <div class="col-sm-12 col-md-12 col-lg-12">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        @*<img src="~/wwwroot/dynamic/images/fee_receipt/profile_30.png" />*@
+                                                                        <img style="height:50px; width:50px;" class="rounded-circle" ng-src="{{CurDues.PhotoPath}}" />
+                                                                    </div>
+                                                                    <div class="col-sm-8 col-md-8 col-lg-8">
+                                                                        <span class="s-text">Name</span><br>
+                                                                        <span><b>{{CurDues.Name}}</b></span><br>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mt-2">
+                                                                    <div class="col-sm-6 col-md-6 col-lg-6">
+                                                                        <span class="s-text">Adm. No.: </span>
+                                                                        <b>  <span>{{CurDues.RegdNo}}</span></b>
+                                                                    </div>
+                                                                    <div class="col-sm-6 col-md-6 col-lg-6">
+                                                                        <span class="s-text">Roll :</span>
+                                                                        <b> <span>{{CurDues.RollNo}}</span></b>
+                                                                    </div>
+                                                                    <div class="col-sm-12 col-md-12 col-lg-12">
+                                                                        <span>
+                                                                            Class: <b>
+                                                                                <span>
+                                                                                    {{CurDues.ClassName ? CurDues.ClassName : ''}}
+                                                                                    {{CurDues.SectionName ? ' - ' + CurDues.SectionName : ''}}
+                                                                                    {{CurDues.Batch ? ' - ' + CurDues.Batch : ''}}
+                                                                                    {{CurDues.Semester ? ' - ' + CurDues.Semester : ''}}
+                                                                                    {{CurDues.ClassYear ? ' - ' + CurDues.ClassYear : ''}}
+                                                                                </span>
+                                                                            </b>
+                                                                        </span>
+                                                                        @*<span class="s-text">Class/Sec.</span><br>
+                                                                <span>{{CurDues.ClassName}} {{CurDues.SectionName}}</span>*@
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mt-2">
+                                                                    <div class="col-sm-12 col-md-12 col-lg-12">
+                                                                        <span class="s-text">Address : </span>
+                                                                        <b> <span>{{CurDues.Address}}</span></b>
+                                                                    </div>
+                                                                    <div class="col-sm-12 col-md-12 col-lg-12">
+                                                                        <span class="s-text">Father Name : </span>
+                                                                        <b> <span>{{CurDues.FatherName}}</span></b>
+                                                                    </div>
+                                                                    <div class="col-sm-12 col-md-12 col-lg-12">
+                                                                        <span class="s-text">Contact : </span>
+                                                                        <b>  <span>{{CurDues.ContactNo}}</span></b>
+                                                                    </div>
+                                                                </div>
+                                                                <!--Added by suresh on 25 kartik starts-->
+                                                                <div class="row mt-2">
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <span class="s-text">Book Limit</span><br>
+                                                                        <span>{{CurDues.BookLimit}}</span>
+                                                                    </div>
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <span class="s-text">Credit Days</span><br>
+                                                                        <span>{{CurDues.BookCreditDays}}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <!--ends-->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="panel panel-default" id="emp_Details" ng-show="newBookLost.LostDamageFrom==2">
+                                                    <div class="panel-heading active" role="tab" id="headingOne">
+                                                        <h4 class="panel-title">
+                                                            <a class="panel-title d-flex justify-content-between align-items-center" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+                                                               aria-expanded="true" aria-controls="collapseOne">
+                                                                Employee Details
+                                                                <i class="fas fa-chevron-down arrow-icon"></i>
+                                                            </a>
+                                                        </h4>
+                                                    </div>
+                                                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel"
+                                                         aria-labelledby="headingOne">
+                                                        <div class="panel-body">
+                                                            <div class="col-sm-12 col-md-12 col-lg-12">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <a href="#" data-target="#modalIMG-profile" data-toggle="modal" class="color-gray-darker c6 td-hover-none ">
+                                                                            <div class="ba-0 ds-1">
+                                                                                <img ng-src="{{DefaultPhoto}}" style="height:50px; width:50px;" class="rounded-circle" />
+                                                                            </div>
+                                                                        </a>
+
+                                                                    </div>
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <span><b>{{newBookLost.EmployeeDetails.Name}}</b></span><br>
+                                                                        <span>{{newBookLost.EmployeeDetails.Designation}}</span>
+                                                                    </div>
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <span class="s-text">Employee Code</span><br>
+                                                                        <span>{{newBookLost.EmployeeDetails.Code}}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mt-2">
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <span class="s-text">Contact No.</span><br>
+                                                                        <span>{{newBookLost.EmployeeDetails.MobileNo}}</span>
+                                                                    </div>
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <span class="s-text">Address</span><br>
+                                                                        <span>{{newBookLost.EmployeeDetails.Address}}</span>
+                                                                    </div>
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <span class="s-text">Subject Teacher</span><br>
+                                                                        <span>{{newBookLost.EmployeeDetails.SubjectTeacher}}</span>
+                                                                    </div>
+                                                                </div>
+
+
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading current_due" role="tab" id="headingThree">
+                                                        <h4 class="panel-title mb-0">
+                                                            <a class="panel-title d-flex justify-content-between align-items-center" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree"
+                                                               aria-expanded="true" aria-controls="collapseThree">
+                                                                Book Details
+
+                                                                <i class="fas fa-chevron-down arrow-icon"></i>
+                                                            </a>
+                                                        </h4>
+                                                    </div>
+                                                    <div id="collapseThree" class="panel-collapse collapse" role="tabpanel"
+                                                         aria-labelledby="headingThree">
+                                                        <div class="panel-body">
+                                                            <div class="col-md-12" style="font-size: 0.7rem;">
+                                                                <div class="row">
+                                                                    <div class="col-sm-9 col-md-9 col-lg-9">
+                                                                        <span><b>Book Title</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.BookTitle}}</span>
+                                                                    </div>
+                                                                    <div class="col-sm-3 col-md-3 col-lg-3 float-right">
+                                                                        <a href="#" data-target="#modalIMG-general" data-toggle="modal" class="color-gray-darker c6 td-hover-none ">
+                                                                            <div class="ba-0 ds-1">
+                                                                                <img ng-src="{{newBookLost.BookDetails.FrontCoverPath}}" style="height: 60px; width: 100%;" />
+                                                                            </div>
+                                                                        </a>
+                                                                        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalIMG-general" role="dialog" tabindex="-1">
+                                                                            <div class="modal-dialog modal-lg" role="document">
+                                                                                <div class="modal-content">
+                                                                                    <div class="modal-body mb-0 p-0">
+                                                                                        <img ng-src="{{newBookLost.BookDetails.FrontCoverPath}}" alt="" style="width:100%; height: 30vh;" class="d-flex mx-auto">
+                                                                                    </div>
+                                                                                    <div class="modal-footer">
+                                                                                        <!-- <div><a href="dynamic/images/book-1.png" target="_blank" download>Download</a></div> -->
+                                                                                        <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4 " style="margin-top: -15px;">
+                                                                        <span class="s-text"><b>Bar Code</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.Barcode}}</span>
+                                                                    </div>
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4 " style="margin-top: -15px;">
+                                                                        <span class="s-text"><b>Subject</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.Subject}}</span>
+                                                                    </div>
+
+
+                                                                </div>
+                                                                <div class="row mt-3">
+                                                                    <div class="col-sm-8 col-md-8 col-lg-8">
+                                                                        <span class="s-text"><b>Authors</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.Authors}}</span>
+                                                                    </div>
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <span class="s-text"><b>Credit Days</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.CreditDays}} Days</span>
+                                                                    </div>
+                                                                    <div class="col-sm-12 col-md-12 col-lg-12 mt-3">
+                                                                        <span class="s-text"><b>Publisher</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.Publication}}</span>
+                                                                    </div>
+                                                                    <div class="col-sm-12 col-md-12 col-lg-12 mt-3">
+                                                                        <span class="s-text"><b>Category</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.BookCategory}}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row mt-3">
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                                        <span class="s-text"><b>Level</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.ClassName}}</span>
+                                                                    </div>
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4 ">
+                                                                        <span class="s-text"><b>Department</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.Department}}</span>
+                                                                    </div>
+                                                                    <!--Field added by suresh on 25 kartik starts-->
+                                                                    <div class="col-sm-4 col-md-4 col-lg-4 ">
+                                                                        <span class="s-text"><b>Class</b></span><br>
+                                                                        <span>{{newBookLost.BookDetails.ClassName}}</span>
+                                                                    </div>
+                                                                    <!--Ends-->
+                                                                </div>
+
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section" id="booklostlist" role="tabpanel" aria-labelledby="booklostlist-tab">
+                                <form action="">
+                                    <div class="row">
+                                        <div class="col-md-3 mt-2">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1" style="width: 100px;">Date From</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newFilter.DateFrom_TMP" date-detail="newFilter.DateFromDet" confirm-action="onDateFromChange()">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-2">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1" style="width: 80px;">Date To</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newFilter.DateTo_TMP" date-detail="newFilter.DateToDet" after-days="0" confirm-action="onDateToChange()">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mt-2 text-right">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success"
+                                                    style="min-width: 70px;"
+                                                    ng-click="GetBookLostList()">
+                                                <i class="fas fa-sync-alt mr-1"></i> Load
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </form>
+                                <div class="card p-0">
+
+                                    <div id="stSummaryDiv" style="height: calc(100vh - 11rem);" ui-grid="gridOptions" 
+                                         ui-grid-resize-columns
+                                         ui-grid-move-columns 
+                                         ui-grid-selection
+                                         ui-grid-exporter 
+                                         ui-grid-pinning 
+                                         ui-grid-filtering 
+                                         ui-grid-auto-resize 
+                                         ui-grid-save-state>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Send Message -->
+                <div class="modal fade" id="actionTaken" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+                     aria-hidden="true" style="margin-top: 30px">
+                    <div class="modal-dialog modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header" style="padding: 6px">
+                                <h5 class="modal-title" id="exampleModalLongTitle" style="font-size: 16px">
+                                    Book {{beData.LostDamage}} By {{beData.IssueTo}} ({{beData.Name}} - {{beData.RegdNo}})
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body p-2">
+                                <div class="col-md-12" style="font-size: 0.7rem;">
+                                    <div class="row">
+                                        <div class="col-md-4 mt-2">
+                                            <span><b>Book Title</b></span><br />
+                                            <span>{{beData.BookTitle}}</span>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <span class="s-text"><b>Bar Code</b></span><br>
+                                            <span>{{beData.BarCode}}</span>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <span class="s-text"><b>Subject</b></span><br>
+                                            <span>{{beData.Subject}}</span>
+                                        </div>
+
+                                        <div class="col-md-4 mt-2">
+                                            <span class="s-text"><b>Authors</b></span><br>
+                                            <span>{{beData.Authors}}</span>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <span class="s-text"><b>Credit Days</b></span><br>
+                                            <span>{{beData.CreditDays}} Days</span>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <span class="s-text"><b>Publisher</b></span><br>
+                                            <span>{{beData.Publication}}</span>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <span class="s-text"><b>Category</b></span><br>
+                                            <span>{{beData.BookCategory}}</span>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <span class="s-text"><b>Level</b></span><br>
+                                            <span>{{beData.ClassName}}</span>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <span class="s-text"><b>Department</b></span><br>
+                                            <span>{{beData.Department}}</span>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <span class="s-text"><b>Class</b></span><br>
+                                            <span>{{beData.ClassName}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-4 mt-3" ng-show="beData.ActionTypeId == 1 || beData.ActionTypeId == 3" >
+                                            <div class="form-group">
+                                                <label><b>{{recoveryHeaderForLost}}</b></label>
+                                                <input class="form-control form-control-sm text-right" number-input ng-model="beData.RecoveryAmount" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mt-3" ng-if="beData.ActionTypeId == 2" >
+                                            <div class="form-group">
+                                                <label><b>{{recoveryHeaderForLost}}</b></label>
+                                                <div class="custom-control custom-checkbox checkbox-lg">
+                                                    <input type="checkbox" class="custom-control-input" id="checkbox-2" ng-model="beData.IsBookSubmitted" />
+                                                    <label class="custom-control-label" for="checkbox-2">{{recoveryHeaderForLost}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>                                    
+                                </div>
+                            </div>
+                            <div class="modal-footer" style="padding: 6px">
+                                <button class="btn btn-sm text-center btn-success" style="min-width: 90px" ng-click="UpdateBookLostAction(beData)">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Send Notification -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>

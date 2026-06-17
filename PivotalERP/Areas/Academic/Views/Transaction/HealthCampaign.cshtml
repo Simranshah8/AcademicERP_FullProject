@@ -1,0 +1,231 @@
+﻿<script src="~/jslib/Health/HealthCampaign.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="HealthCampaignController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div id="campaigntable" class="card p-2">
+                    <header class="row mb-1">
+                        <div class="col-md-7">
+                            <div class="clearfix">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm mr-sm-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text cstm">Show</span>
+                                        </div>
+                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.HealthCampaign">
+                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.HealthCampaign">{{pp.text}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar"
+                                               type="search" placeholder="Search"
+                                               aria-label="Search" ng-model="searchData.HealthCampaign">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0"
+                                                    type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- end col-md-8 -->
+                        <div class="col-md-5 text-right">
+                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                 data-placement="top" title="Download File">
+                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                        type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item" href="#">
+                                        <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                             class="img-fluid exports-icon" alt="Excel image">
+                                        Excel
+                                    </a>
+                                    <a class="dropdown-item" href="#">
+                                        <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                             class="img-fluid exports-icon" alt="Excel image">
+                                        CSV
+                                    </a>
+                                </div>
+                            </div>
+                            <a href="#" class="btn btn-secondary btn-light btn-sm"
+                               data-toggle="tooltip" data-placement="bottom" title="Print">
+                                <i class="fas fa-print"></i>
+                            </a>
+                            <a href="#" class="btn btn-success btn-sm"
+                               id="add-healthcampaign">
+                                <i class="fas fa-plus w-t"></i>Add
+                                Health Campaign
+                            </a>
+                        </div>
+                    </header>
+                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                        <table id="main-table"
+                               class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px;">S.No.</th>
+                                    <th style="width: 200px;">Campaign Name</th>
+                                    <th style="width: 120px;">Date</th>
+                                    <th style="width: 200px;">Organized By</th>
+                                    <th style="width: 80px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="Hc in CampaignColl|orderBy:sortKey:reverse|filter:searchData.HealthCampaign|itemsPerPage:perPage.HealthCampaign" current-page="currentPages.HealthCampaign" pagination-id="CampaignPagination">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{Hc.CampaignName}}</td>
+                                    <td>{{Hc.ForMiti}}</td>
+                                    <td>{{Hc.OrganizedBy}}</td>
+                                    <td>
+                                        <a class="p-1" href="#">
+                                            <i class="fas fa-edit text-info" ng-click="getHealthCampaignById(Hc)"></i>
+                                        </a>
+                                        <a class="p-1" href="#">
+                                            <i class="fas fa-trash-alt text-danger" ng-click="deleteHealthCampaign(Hc,$index)"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="CampaignPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+                <div id="healthcampaignform" class="card p-2">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Campaign Name</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="HealthCampaign.CampaignName">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="HealthCampaign.ForDate_TMP" date-picker date-detail="HealthCampaign.ForDateDet">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Organized By</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="HealthCampaign.OrganizedBy">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control form-control-sm" rows="1" ng-model="HealthCampaign.Description"
+                                          placeholder=""></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <label>Campaign Representative </label>
+                    <div class="table-responsive">
+                        <div class="table-scroll-x-y sales-main-table table-scroll mt-2">
+                            <table id=""
+                                   class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                <thead class="text-nowrap">
+                                    <tr>
+                                        <th style="width: 70px">S.No</th>
+                                        <th style="width: 250px">Name</th>
+                                        <th style="width: 170px">Designation</th>
+                                        <th style="width: 150px">Contact No</th>
+                                        <th style="width: 90px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="W in HealthCampaign.HealthCampaignColl">
+                                        <td>{{$index+1}}</td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" ng-model="W.Name">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" ng-model="W.Designation">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" ng-model="W.ContactNo">
+                                        </td>
+                                        <td>
+                                            <a class="p-1" ng-click="AddHealthCampaign()" data-original-title="View doc">
+                                                <i class="fas fa-plus text-secondary"></i>
+                                            </a>
+                                            <a class="p-1" ng-click="delHealthCampaign($index)">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-sm btn-info" id="backtolist" ng-click="ClearHealthCampaign()"
+                                style="min-width: 90px;">
+                            Back to List
+                        </button>
+                        <button type="button" class="btn btn-sm btn-default" ng-click="ClearHealthCampaign()"
+                                style="min-width: 90px;">
+                            Reset
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success" ng-click="AddHealth()"
+                                style="min-width: 90px;">
+                            {{HealthCampaign.Mode}}
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <!-- <span aria-hidden="true">&times;</span> -->
+                            <i class="flaticon-close"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="photo-upload-wrap">
+                            <!-- <img src="dynamic/images/avatar-img.jpg" class="img-fluid" alt=""> -->
+                            <span class="static-content">
+                                <img src="./dynamic/images/upload-dummy-img.png" class="img-fluid"
+                                     alt="dummy-img">
+                                <span>Drag & Drop your<br>image here</span>
+                            </span>
+                        </div>
+                        <div class="text-muted pb-3">or</div>
+                        <a href="#" class="btn btn-secondary btn-light btn-sm mr-2">
+                            <i class="flaticon-webcam w-t"></i>
+                            WebCam
+                        </a>
+                        <button type="button" class="btn btn-secondary btn-light btn-sm">Upload a photo</button>
+                        <a href="#" class="text-danger d-block mt-3">remove current photo</a>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-dafault" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary px-4">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>

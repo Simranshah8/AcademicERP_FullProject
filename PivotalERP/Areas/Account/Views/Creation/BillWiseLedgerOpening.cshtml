@@ -1,0 +1,143 @@
+﻿<script>
+    var voucherTypeColls = "@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.PurchaseInvoice),@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.SalesInvoice)";
+</script>
+
+<script src="~/jslib/account/creation/BillWiseLedgerOpening.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BillWiseLedgerOpeningController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:53px!important">
+                <div class="tab-content">
+                    <div id="billwise-form">
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="name">Select Branch</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newBillWiseLedgerOpening.BranchId" data-placeholder="**Select Branch**">
+                                        <option ng-value="pl.id" ng-repeat="pl in BranchList" ng-selected="pl.id==newBillWiseLedgerOpening.BranchId">{{pl.text}}</option>
+                                    </select>
+
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="name">CostClass</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newBillWiseLedgerOpening.CostClassId" data-placeholder="**Select CostClass**">
+                                        <option ng-value="pl.CostClassId" ng-repeat="pl in CostClassList" ng-selected="pl.CostClassId==newBillWiseLedgerOpening.CostClassId">{{pl.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="">Ledger</label>
+                                    <select autoShowHide="true" class="form-control form-control-sm" all-ledger ng-model="newBillWiseLedgerOpening.LedgerId" ledgertype="1"
+                                            placeholder="** Select Ledger Name **" showdetails="true" confirm-action="ChangeParticularLedger(newBillWiseLedgerOpening)" ledger-detail="newBillWiseLedgerOpening.LedgerDetails" side-bar-data="newBillWiseLedgerOpening.partySideBarData"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mt-4">
+                                <div class="form-group">
+                                    <label for="">Opening Amt: {{newBillWiseLedgerOpening.OpeningAmt |formatNumberAC}}</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2" ng-hide="true">
+                                <div class="form-group">
+                                    <label for="">Opening Date</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="newBillWiseLedgerOpening.VoucherDate_TMP" date-picker date-detail="newBillWiseLedgerOpening.VoucherDateDet">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                   
+                            <!-- /.card-header -->
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table class="table table-bordered table-head-fixed text-nowrap">
+                                    <thead class=" text-nowrap">
+                                        <tr>
+                                            <th class="text-center" style="width: 50px;">S.No.</th>
+
+                                            <th style="width: 200px;">Voucher</th>
+                                            <th style="width: 110px;">Date</th>
+                                            <th style="width: 120px;">Bill No</th>
+
+                                            <th style="width: 80px;">Amount</th>
+                                            <th class="text-center" style="width: 70px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="op in newBillWiseLedgerOpening.OpeningColl">
+                                            <td class="text-center">{{$index+1}}</td>
+                                            <td>
+                                                <select class="form-control form-control-sm select2" ng-model="op.VoucherId" data-placeholder="**Select Voucher**">
+                                                    <option ng-value="pl.VoucherId" ng-repeat="pl in VoucherTypeList" ng-selected="pl.VoucherId==op.VoucherId">{{pl.VoucherName}}</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" onfocus="this.select();" ng-model="op.VoucherDate_TMP" date-picker date-detail="op.VoucherDateDet">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" onfocus="this.select();" ng-model="op.BillNo">
+                                            </td>
+                                            <td>
+                                                <input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="op.TotalAmount" ng-change="ChangeAmount()">
+                                            </td>
+                                            <td class="text-center">
+                                         
+                                                <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInOpening($index)">
+                                                    <i class="fas fa-plus text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowOpening($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <!-- /.card-body -->
+
+                            <div class="clearfix">
+
+
+                                <div class="row">
+                                    <div class="col-md-9"></div>
+                                    <div class="col-md-3">
+                                        <span class="">Total : {{newBillWiseLedgerOpening.GrandTotal |number:2}}</span> <br>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+                        <div class="time-label">
+                            <span class="d-block border-0 mb-3 text-center">
+
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearBillWiseLedgerOpening()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateBillWiseLedgerOpening()">Save</button>
+
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Table Area Ends -->
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+
+
+

@@ -1,0 +1,831 @@
+﻿<script src="/jslib/export/tableExport.js"></script>
+<script src="/jslib/export/jquery.base64.js"></script>
+
+<script src="/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="/jslib/export/jspdf/jspdf.js"></script>
+<script src="/jslib/export/jspdf/libs/base64.js"></script>
+<style>
+    /* Add to your stylesheet */
+    .card-header.bg-primary {
+        background: linear-gradient(45deg, #4e73df, #224abe);
+    }
+
+    .card-header.bg-info {
+        background: linear-gradient(45deg, #36b9cc, #1a8a9c);
+    }
+
+    .table-borderless th {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        margin-right: 5px;
+    }
+
+    .badge-success {
+    }
+
+    .image-set .m-2 {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+        .image-set .m-2:hover {
+            transform: translateY(-5px);
+            border-color: #007bff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+    .description-hover {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 270px;
+        cursor: default;
+    }
+</style>
+<script>
+    var WEBURLPATH = "@ViewBag.WEBURLPATH";
+</script>
+<script src="~/jslib/homework/AddHomework.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="AddHomeworkController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:48px!important">
+                <div class="homework-add-form" id="homework-add-section">
+                    <div class="card">
+                        <!-- Table nav menu -->
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label for="start">Date From</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newFilter.FromDate_TMP" date-detail="newFilter.FromDateDet" confirm-action="validateDates1('fromDate')">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label for="start">Date To</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newFilter.ToDate_TMP" date-detail="newFilter.ToDateDet" confirm-action="validateDates1('toDate')">
+                                </div>
+                            </div>
+                            <div class="col-md-3" ng-show="AcademicConfig.ActiveBatch==true">
+                                <label for="">Batch</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.BatchId">
+                                    <option ng-value="0">**Select Batch**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newFilter.BatchId">{{cl.text}}</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label for="">Class/Sec</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newFilter.SelectedClass">
+                                        <option ng-value="cl" ng-repeat="cl in ClassListsection.SectionListWithClass">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3" ng-show="newFilter.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                <div class="form-group">
+                                    <label for="">Class Year</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newFilter.ClassYearId">
+                                        <option ng-value="0">**Select Year**</option>
+                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newFilter.ClassYearId">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3" ng-show="newFilter.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                <div class="form-group">
+                                    <label for="">Semester</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newFilter.SemesterId">
+                                        <option ng-value="0">**Select Semester**</option>
+                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newFilter.SemesterId">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label for="">Subject</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newFilter.SubjectId">
+                                        <option ng-repeat="S in SubjectList" ng-value="S.SubjectId" ng-selected="newFilter.SubjectId==S.SubjectId">{{S.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label for="">Teacher Name</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newFilter.TeacherId">
+                                        <option ng-repeat="T in TeacherNameList" ng-value="T.EmployeeId" ng-selected="newFilter.TeacherId==T.EmployeeId">{{T.Name}}- {{ T.EmployeeCode}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mt-4">
+                                <div class="form-group mb-2">
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 70px" ng-click="GetAllAddHomework1()">
+                                        <i class="fas fa-sync-alt mr-2"></i> Load
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline mb-2">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AddHomework">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AddHomework">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.AddHomework" />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#AddHomework'" sheet-name="'AddHomeworkList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#AddHomework').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                    </div>
+                                </div>
+                                <a print-tbl table-id="'#AddHomework'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <button type="button" class="btn addBtn btn-sm btn-success" ng-click="ClearAddHomework()" id="add-homework-add-btn"
+                                        style="min-width: 70px">
+                                    <i class="fas fa-plus w-t"></i> Add Homework
+                                </button>
+                            </div>
+                        </header>
+                        <!--Table nav menu Ending -->
+                        <div class="table-responsive">
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="AddHomework" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px">S.N.</th>
+                                            <th style="width: 110px">HOMEWORK DATE</th>
+                                            <th style="width: 110px">CLASS/SECTION</th>
+                                            <th style="width: 120px">SUBJECT</th>
+                                            <th style="width: 200px">LESSON/TOPIC</th>
+                                            <th style="width: 90px">DEADLINE</th>
+                                            <th style="width: 270px">DESCRIPTION</th>
+                                            <th class="no-print" style="width: 85px">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in AddedHomeworkList | filter:searchData.AddHomework | itemsPerPage: perPage.AddHomework" current-page="currentPages.AddHomework" pagination-id="AddHomeworkPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.AsignDateTime_BS}}</td>
+                                            <td>
+                                                {{cl.ClassName}} {{cl.SectionName}}  {{cl.Batch}} {{cl.Semester}}
+                                                <span ng-if="cl.Batch">
+                                                    - {{cl.Batch}}
+                                                </span>
+                                                <span ng-if="cl.Semester">
+                                                    -  {{cl.Semester}}
+                                                </span>
+                                                <span ng-if="cl.ClassYear">
+                                                    - {{cl.ClassYear}}
+                                                </span>
+                                            </td>
+                                            <td>{{cl.SubjectName}}</td>
+                                            <td><p class="mb-0"><b>{{cl.Lession}}</b></p> <p class="mb-0">{{cl.Topic}}</p></td>
+                                            <td>{{cl.DeadlineDate_BS}}</td>
+                                            @*<td>
+                                                    <div ng-bind-html="cl.Description | unsafe">
+                                                    </div>
+                                                </td>*@
+                                            <td title="{{ cl.Description | unsafe }}">
+                                                <div class="description-hover" ng-bind-html="cl.Description | unsafe"></div>
+                                            </td>
+                                            <td class="no-print">
+                                                <a class="p-1" ng-click="viewAttachmentsOnly(cl)">
+                                                    <i class="fas fa-file-alt text-success"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="GetAddHomeworkById(cl)">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="DelAddedHomeWork(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="AddHomeworkPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+
+                    </div>
+                </div>
+
+                <div class="homework-add-form" id="homework-add-form">
+                    <div class="card py-2">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">Teacher Name <span class="text-danger">*</span></label>
+                                    <select class="form-control form-control-sm select2" ng-disabled="newAddHomework.HomeWorkId" ng-model="newAddHomework.TeacherId" @*ng-change="GetTeacherWiseClassList()"*@>
+                                        <option ng-repeat="T in TeacherNameList" ng-value="T.EmployeeId" ng-selected="newAddHomework.TeacherId==T.EmployeeId">{{T.Name}}- {{ T.EmployeeCode}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                <label for="">Batch</label>
+                                <select class="form-control form-control-sm select2" ng-disabled="newAddHomework.HomeWorkId" ng-model="newAddHomework.BatchId">
+                                    <option ng-value="0">**Select Batch**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newAddHomework.BatchId">{{cl.text}}</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">Class <span class="text-danger">*</span></label>
+                                    <select class="form-control form-control-sm select2" ng-model="newAddHomework.SelectedClass" ng-disabled="newAddHomework.HomeWorkId" ng-change="GetClassWiseSubMap()">
+                                        <option ng-value="cl" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group" ng-show="!newAddHomework.HomeWorkId">
+                                    <label for="">Section</label>
+                                    @*<select class="form-control form-control-sm select2" multiple data-placeholder="Select Section" ng-model="newAddHomework.SectionId" ng-disabled="newAddHomework.HomeWorkId" ng-change="GetClassWiseSubMap()">
+                                            <option ng-value="se.SectionId" ng-repeat="se in ClassSection.SectionList |  filter: { ClassId: newAddHomework.SelectedClass.ClassId }:true">{{se.SectionName}}</option>
+                                        </select>*@
+                                    <select class="form-control form-control-sm select2" multiple data-placeholder="Select Section" ng-model="newAddHomework.SectionIdColl" ng-disabled="newAddHomework.HomeWorkId">
+                                        <option value="{{se.SectionId}}" ng-repeat="se in ClassSection.SectionList |  filter: { ClassId: newAddHomework.SelectedClass.ClassId }:true">{{se.SectionName}}</option>
+                                    </select>
+
+                                </div>
+                                <div ng-show="newAddHomework.HomeWorkId">
+                                    <label for="">Section</label>
+                                    <label class="form-control form-control-sm bg-light" style="width: max-content; min-width: 100%;" title="{{newAddHomework.SectionListName}}">
+                                        {{newAddHomework.SectionListName}}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-2" ng-show="newAddHomework.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                <div class="form-group">
+                                    <label for="">Class Year</label>
+                                    <select class="form-control form-control-sm select2" ng-disabled="newAddHomework.HomeWorkId" ng-model="newAddHomework.ClassYearId">
+                                        <option ng-value="0">**Select Year**</option>
+                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newAddHomework.ClassYearId">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2" ng-show="newAddHomework.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                <div class="form-group">
+                                    <label for="">Semester</label>
+                                    <select class="form-control form-control-sm select2" ng-disabled="newAddHomework.HomeWorkId" ng-model="newAddHomework.SemesterId">
+                                        <option ng-value="0">**Select Semester**</option>
+                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newAddHomework.SemesterId">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-2">
+                                <div class="form-group" ng-show="!newAddHomework.HomeWorkId">
+                                    <label for="">Subject<span class="text-danger">*</span></label>
+                                    @*<select class="form-control form-control-sm select2" ng-disabled="newAddHomework.HomeWorkId" ng-model="newAddHomework.SubjectId" ng-change="GetSubjectLessonWise()">
+                                            <option ng-repeat="S in newAddHomework.SubjectList" ng-value="S.SubjectId" ng-selected="newAddHomework.SubjectId==S.SubjectId">{{S.text}}</option>
+                                        </select>*@
+
+                                    <select class="form-control form-control-sm select2" ng-disabled="newAddHomework.HomeWorkId" ng-model="newAddHomework.SubjectId" ng-change="GetSubjectLessonWise()">
+                                        <option ng-repeat="ct in newAddHomework.SubjectList" ng-value="ct.SubjectId" ng-selected="newAddHomework.SubjectId==ct.SubjectId">
+                                            {{ct.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div ng-show="newAddHomework.HomeWorkId">
+                                    <label for="">Subject</label>
+                                    <label class="form-control form-control-sm bg-light" style="width: max-content; min-width: 100%;" title="{{newAddHomework.SubjectName}}">
+                                        {{newAddHomework.SubjectName}}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="">Lesson</label>
+                                    <input type="text" placeholder="" class="form-control form-control-sm" ng-if="!Configuration.HomeworkLesson || newAddHomework.HomeWorkId" ng-disabled="Configuration.HomeworkLesson && newAddHomework.HomeWorkId" ng-model="newAddHomework.Lesson" />
+                                    <select class="form-control form-control-sm select2" ng-disabled="newAddHomework.HomeWorkId"
+                                            ng-if="Configuration.HomeworkLesson && !newAddHomework.HomeWorkId" ng-model="newAddHomework.Lesson"
+                                            ng-change="GetLessonTopicDetailsWise(newAddHomework.Lesson)">
+                                        <option ng-repeat="S in SubjectLessonWiseList" value="{{S.LessonName}}">{{S.LessonName}}</option>
+                                    </select>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="">Topic</label>
+                                    <input type="text" placeholder="" class="form-control form-control-sm" ng-if="!Configuration.HomeworkTopic|| newAddHomework.HomeWorkId" ng-disabled="Configuration.HomeworkTopic && newAddHomework.HomeWorkId" ng-model="newAddHomework.Topic" />
+                                    <select class="form-control form-control-sm select2" ng-disabled="newAddHomework.HomeWorkId" ng-if="Configuration.HomeworkTopic && !newAddHomework.HomeWorkId" ng-model="newAddHomework.Topic">
+                                        <option ng-repeat="S in LessonTopicDetailsWiseList" ng-value="S.TopicName" @*ng-selected="newAddHomework.Topic==S.TopicId"*@>{{S.TopicName}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for=""> Homework Type <span class="text-danger">*</span> </label>
+                                    <select class="form-control form-control-sm select2" ng-disabled="newAddHomework.HomeWorkId" ng-model="newAddHomework.HomeworkTypeId">
+                                        <option ng-repeat="T in HomeworkTypeList" ng-value="T.HomeworkTypeId" ng-selected="newAddHomework.HomeworkTypeId==T.HomeworkTypeId">{{T.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="">Homework Description</label>
+                                    <textarea class="textarea" placeholder="Place some text here" style=" width: 100%; height: 183.062px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px; " ng-model="newAddHomework.Description" html-editor></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Deadline Date<span class="text-danger">*</span></label>
+                                            <input type="text" date-picker ng-model="newAddHomework.DeadlineDate_TMP" date-detail="newAddHomework.DeadlineDateDet" placeholder="" class="form-control form-control-sm" confirm-action="validateDates2('DeadlineDate')"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Time<span class="text-danger">*</span></label>
+                                            <input type="time" placeholder="" class="form-control form-control-sm" ng-model="newAddHomework.DeadlineTime_TMP" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Deadline for Re-do</label>
+                                            <input type="text" date-picker placeholder="" class="form-control form-control-sm" date-detail="newAddHomework.DeadlineforRedoDet" ng-model="newAddHomework.DeadlineforRedo_TMP" confirm-action="validateDates2('DeadlineforRedo')"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Time</label>
+                                            <input type="time" placeholder="" class="form-control form-control-sm" ng-model="newAddHomework.DeadlineForReDoTime_TMP"  />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group mt-3">
+                                            <label class="checkbox-wrap">
+                                                Student Submissions Required?
+                                                <input type="checkbox" ng-disabled="newAddHomework.HomeWorkId" ng-model="newAddHomework.SubmissionsRequired" />
+                                                <span class="checkmark"></span>
+                                            </label>
+                                            <label class="checkbox-wrap">
+                                                Allow Submission After Deadline
+                                                <input type="checkbox" ng-disabled="newAddHomework.HomeWorkId" ng-model="newAddHomework.IsAllowLateSibmission" />
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Attach Files</label>
+                                    <div class="input-group">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="flHomeWork"
+                                                   multiple
+                                                   onchange="angular.element(this).scope().onFileSelect()"
+                                                   accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+                                            <label class="custom-file-label" for="flHomeWork">Choose files</label>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Supported formats: Images, PDF, Word, Excel, PowerPoint, Text</small>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="row" ng-if="previewAttachments.length > 0">
+                            <div class="col-md-12">
+                                <div class="card mt-2 mb-2">
+                                    <div class="card-header p-2" style="background-color: #76be4e26">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-file"></i>
+                                            Attachments ({{previewAttachments.length}})
+                                            <span ng-if="hasExistingAttachments()" class="ml-2">
+                                                <span class="badge badge-info">Existing: {{getExistingAttachmentsCount()}}</span>
+                                            </span>
+                                            <span ng-if="hasNewAttachments()" class="ml-1">
+                                                <span class="badge badge-success">New: {{getNewAttachmentsCount()}}</span>
+                                            </span>
+                                        </h6>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <div class="image-set d-flex flex-wrap">
+                                            <div class="m-2 text-center position-relative" ng-repeat="file in previewAttachments track by $index + (file.isExisting ? '_existing' : '_new') + file.name">
+                                                <!-- Remove button for all files -->
+                                                <button type="button"
+                                                        class="btn btn-danger btn-sm position-absolute"
+                                                        style="top: -8px; right: -8px; border-radius: 50%; width: 25px; height: 25px; padding: 0; z-index: 10; line-height: 1;"
+                                                        ng-click="removeFile($index, $event)">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+
+                                                <!-- File type indicator badge -->
+                                                <span class="position-absolute badge"
+                                                      style="background-color: orange; color: white;left:0; font-size: 10px;"
+                                                      ng-class="{'badge-info': file.isExisting, 'badge-success': !file.isExisting}">
+                                                    {{file.isExisting ? 'Existing' : 'New'}}
+                                                </span>
+
+                                                <!-- Click to view -->
+                                                <div ng-click="viewFile(file)" style="cursor: pointer;">
+
+                                                    <!-- Image Preview -->
+                                                    <div ng-if="file.fileType === 'image'"
+                                                         style="width:130px; border:1px solid #ddd; border-radius:4px; padding:5px; background: #f8f9fa;">
+                                                        <img ng-src="{{file.previewUrl}}"
+                                                             alt="{{file.name}}"
+                                                             style="height:100px; width:100%; object-fit: cover; border-radius: 3px;"
+                                                             onerror="this.src='https://via.placeholder.com/130x100?text=Image+Error'" />
+                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                            {{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}
+                                                        </small>
+                                                        <small class="d-block text-muted">
+                                                            {{file.extension | uppercase}}
+                                                            <span ng-if="!file.isExisting">| {{(file.size/1024).toFixed(2)}} KB</span>
+                                                        </small>
+                                                    </div>
+
+                                                    <!-- PDF Preview -->
+                                                    <div ng-if="file.fileType === 'pdf'"
+                                                         style="width:130px; height:150px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                        <i class="fas fa-file-pdf fa-4x text-danger"></i>
+                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                            {{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}
+                                                        </small>
+                                                        <small class="d-block text-muted">
+                                                            PDF
+                                                            <span ng-if="!file.isExisting">| {{(file.size/1024).toFixed(2)}} KB</span>
+                                                        </small>
+                                                    </div>
+
+                                                    <!-- Word Preview -->
+                                                    <div ng-if="file.fileType === 'word'"
+                                                         style="width:130px; height:150px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                        <i class="fas fa-file-word fa-4x text-primary"></i>
+                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                            {{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}
+                                                        </small>
+                                                        <small class="d-block text-muted">
+                                                            Word
+                                                            <span ng-if="!file.isExisting">| {{(file.size/1024).toFixed(2)}} KB</span>
+                                                        </small>
+                                                    </div>
+
+                                                    <!-- Excel Preview -->
+                                                    <div ng-if="file.fileType === 'excel'"
+                                                         style="width:130px; height:150px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                        <i class="fas fa-file-excel fa-4x text-success"></i>
+                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                            {{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}
+                                                        </small>
+                                                        <small class="d-block text-muted">
+                                                            Excel
+                                                            <span ng-if="!file.isExisting">| {{(file.size/1024).toFixed(2)}} KB</span>
+                                                        </small>
+                                                    </div>
+
+                                                    <!-- PowerPoint Preview -->
+                                                    <div ng-if="file.fileType === 'powerpoint'"
+                                                         style="width:130px; height:150px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                        <i class="fas fa-file-powerpoint fa-4x text-warning"></i>
+                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                            {{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}
+                                                        </small>
+                                                        <small class="d-block text-muted">
+                                                            PowerPoint
+                                                            <span ng-if="!file.isExisting">| {{(file.size/1024).toFixed(2)}} KB</span>
+                                                        </small>
+                                                    </div>
+
+                                                    <!-- Text Preview -->
+                                                    <div ng-if="file.fileType === 'text'"
+                                                         style="width:130px; height:150px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                        <i class="fas fa-file-alt fa-4x text-secondary"></i>
+                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                            {{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}
+                                                        </small>
+                                                        <small class="d-block text-muted">
+                                                            Text
+                                                            <span ng-if="!file.isExisting">| {{(file.size/1024).toFixed(2)}} KB</span>
+                                                        </small>
+                                                    </div>
+
+                                                    <!-- Other Files Preview -->
+                                                    <div ng-if="file.fileType === 'other'"
+                                                         style="width:130px; height:150px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                        <i class="fas fa-file fa-4x text-secondary"></i>
+                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                            {{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}
+                                                        </small>
+                                                        <small class="d-block text-muted">
+                                                            {{file.extension | uppercase}}
+                                                            <span ng-if="!file.isExisting">| {{(file.size/1024).toFixed(2)}} KB</span>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="time-label pb-3">
+                            <span class="d-block border-0 text-center">
+                                <button type="button" class="btn btn-sm btn-info" id="back-homework-btn" style="min-width: 90px">
+                                    Back to List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearAddHomework()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateAddHomework()">{{newAddHomework.Mode}}</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="attachmentModalOnly" tabindex="-1" role="dialog" aria-labelledby="attachmentModalOnlyLabel" aria-hidden="true" style="margin-top: 25px;">
+                    <div class="modal-dialog modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h6 class="modal-title text-secondary" id="attachmentModalOnlyLabel">
+                                    <i class="fas fa-paperclip"></i> Homework Details & Attachments
+                                </h6>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Homework Details Section -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="card mb-0" style="border: 1px solid #bac7b369">
+                                            <div class="card-header p-2" style="background-color: #76be4e26">
+                                                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Homework Information</h6>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <div class="row">
+                                                    <!-- Left Column -->
+                                                    <div class="col-md-6">
+                                                        <table class="table table-sm table-borderless">
+                                                            <tr>
+                                                                <th width="27%"><i class="fas fa-calendar-alt"></i> Date</th>
+                                                                <td>: {{homeworkDetails.AsignDateTime_BS}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="fas fa-tag"></i> Homework Type</th>
+                                                                <td>: {{homeworkDetails.HomeworkTypeName || 'N/A'}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="fas fa-users"></i> Class - Section</th>
+                                                                <td>: {{homeworkDetails.ClassName}} <span ng-if="homeworkDetails.SectionListName"> - </span>{{homeworkDetails.SectionListName}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="fas fa-book"></i> Subject</th>
+                                                                <td>: {{homeworkDetails.SubjectName || 'N/A'}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th ng-if="homeworkDetails.BatchName"><i class="fas fa-layer-group"></i><span ng-if="homeworkDetails.BatchName">Batch</span> <span ng-if="homeworkDetails.SemesterName">/Semester</span><span ng-if="homeworkDetails.ClassYearName">/ClassYear</span></th>
+                                                                <td>
+                                                                    <span ng-if="homeworkDetails.BatchName">: {{homeworkDetails.BatchName}}</span>
+                                                                    <span ng-if="homeworkDetails.SemesterName"> {{homeworkDetails.SemesterName}}</span>
+                                                                    <span ng-if="homeworkDetails.ClassYearName">{{homeworkDetails.ClassYearName}}</span>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+
+                                                    <!-- Right Column -->
+                                                    <div class="col-md-6">
+                                                        <table class="table table-sm table-borderless">
+                                                            <tr>
+                                                                <th width="27%"><i class="fas fa-chalkboard"></i> Lesson</th>
+                                                                <td>: {{homeworkDetails.Lesson || 'N/A'}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="fas fa-tasks"></i> Topic</th>
+                                                                <td>: {{homeworkDetails.Topic || 'N/A'}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="fas fa-clock"></i> Deadline Date</th>
+                                                                <td>
+                                                                    :
+                                                                    {{homeworkDetails.DeadlineMiti}}
+                                                                    <span ng-if="homeworkDetails.DeadlineTime">at {{homeworkDetails.DeadlineTime | date:'shortTime'}}</span>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="fas fa-redo-alt"></i> Redo Deadline</th>
+                                                                <td>
+                                                                    :
+                                                                    <span ng-if="homeworkDetails.DeadlineforRedo">
+                                                                        {{homeworkDetails.DeadlineforRedo | date:'dd/MM/yyyy'}}
+                                                                        <span ng-if="homeworkDetails.DeadlineforRedoTime">at {{homeworkDetails.DeadlineforRedoTime | date:'shortTime'}}</span>
+                                                                    </span>
+                                                                    <span ng-if="!homeworkDetails.DeadlineforRedo">N/A</span>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th><i class="fas fa-check-circle"></i> Options</th>
+                                                                <td>
+                                                                    :
+                                                                    <span class="badge badge-success" ng-if="homeworkDetails.IsAllowLateSibmission">Late Submission Allowed</span>
+                                                                    <span class="badge badge-info" ng-if="homeworkDetails.SubmissionsRequired">Submission Required</span>
+                                                                    <span ng-if="!homeworkDetails.IsAllowLateSibmission && !homeworkDetails.SubmissionsRequired">No Options Set</span>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card mb-0" style="border: 1px solid #bac7b369">
+                                            <div class="card-header p-2" style="background-color: #76be4e26">
+                                                <b><i class="fas fa-align-left"></i> Description:</b>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <p class="mb-0">{{homeworkDetails.Description || 'No description provided.'}}</p>
+                                            </div>
+                                        </div>
+                                        <div class="card mb-0" style="border: 1px solid #bac7b369">
+                                            <div class="card-header p-2" style="background-color: #76be4e26">
+                                                <h6 class="mb-0"><i class="fas fa-paperclip"></i> Attachments ({{AttFilesViewOnly.length}})</h6>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <div class="image-set m-t-20 d-flex flex-wrap">
+                                                    <div class="m-2 text-center" ng-repeat="file in AttFilesViewOnly">
+
+                                                        <!-- Image -->
+                                                        <div ng-if="file.type === 'image'"
+                                                             style="width:130px; cursor:pointer; border:1px solid #ddd; border-radius:4px; padding:5px;"
+                                                             ng-click="previewFile(file)"
+                                                             title="{{file.fullName || file.name}}">
+                                                            <img ng-src="{{file.url}}"
+                                                                 alt="{{file.name}}"
+                                                                 style="height:130px; width:100%; object-fit: cover;"
+                                                                 onerror="this.src='assets/images/placeholder-image.png'" />
+                                                            <small class="d-block text-truncate">{{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}</small>
+                                                            <small class="d-block text-muted">{{file.extension | uppercase}}</small>
+                                                        </div>
+
+                                                        <!-- PDF -->
+                                                        <div ng-if="file.type === 'pdf'"
+                                                             style="width:130px; height:160px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; padding:5px;"
+                                                             ng-click="previewFile(file)"
+                                                             title="{{file.fullName || file.name}}">
+                                                            <div class="text-center">
+                                                                <i class="fas fa-file-pdf fa-4x text-danger"></i>
+                                                                <small class="d-block text-truncate">{{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}</small>
+                                                                <small class="d-block text-muted">PDF</small>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Word Document -->
+                                                        <div ng-if="file.type === 'word'"
+                                                             style="width:130px; height:160px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; padding:5px;"
+                                                             ng-click="previewFile(file)"
+                                                             title="{{file.fullName || file.name}}">
+                                                            <div class="text-center">
+                                                                <i class="fas fa-file-word fa-4x text-primary"></i>
+                                                                <small class="d-block text-truncate">{{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}</small>
+                                                                <small class="d-block text-muted">Word</small>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Excel Document -->
+                                                        <div ng-if="file.type === 'excel'"
+                                                             style="width:130px; height:160px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; padding:5px;"
+                                                             ng-click="previewFile(file)"
+                                                             title="{{file.fullName || file.name}}">
+                                                            <div class="text-center">
+                                                                <i class="fas fa-file-excel fa-4x text-success"></i>
+                                                                <small class="d-block text-truncate">{{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}</small>
+                                                                <small class="d-block text-muted">Excel</small>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- PowerPoint Document -->
+                                                        <div ng-if="file.type === 'powerpoint'"
+                                                             style="width:130px; height:160px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; padding:5px;"
+                                                             ng-click="previewFile(file)"
+                                                             title="{{file.fullName || file.name}}">
+                                                            <div class="text-center">
+                                                                <i class="fas fa-file-powerpoint fa-4x text-warning"></i>
+                                                                <small class="d-block text-truncate">{{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}</small>
+                                                                <small class="d-block text-muted">PowerPoint</small>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Default/Other -->
+                                                        <div ng-if="!['image','pdf','word','excel','powerpoint','text','video','audio'].includes(file.type)"
+                                                             style="width:130px; height:160px; border:1px solid #ddd; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; padding:5px;"
+                                                             ng-click="previewFile(file)"
+                                                             title="{{file.fullName || file.name}}">
+                                                            <div class="text-center">
+                                                                <i class="fas fa-file fa-4x text-secondary"></i>
+                                                                <small class="d-block text-truncate">{{file.name | limitTo:15}}{{file.name.length > 15 ? '...' : ''}}</small>
+                                                                <small class="d-block text-muted">{{file.extension | uppercase}}</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div ng-if="!AttFilesViewOnly.length" class="text-center p-4 text-muted">
+                                                    <i class="fas fa-paperclip fa-3x mb-2"></i>
+                                                    <p>No attachments found for this homework.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Attachments Section -->
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attachment Modal 2-->
+                <div aria-hidden="true" aria-labelledby="previewModalLabel" class="modal fade" id="previewModal" role="dialog" tabindex="-1" style="margin-top:50px;">
+                    <div class="modal-dialog" role="document" style="margin-top: 0; width: auto; max-width: 90vw; padding: 3px; display: flex; justify-content: center; align-items: center;">
+                        <div class="modal-content" style="width: auto; display: inline-block; padding: 10px;">
+
+                            <div class="modal-body p-0" style="padding: 10px; text-align: center;">
+
+                                <!-- Image Preview -->
+                                <img ng-if="SelectedFilePreview.type === 'image'"
+                                     ng-src="{{SelectedFilePreview.url}}"
+                                     alt="Preview"
+                                     id="modalImage"
+                                     style="display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain;" />
+                                <!-- PDF Preview -->
+                                <iframe ng-if="SelectedFilePreview.type === 'pdf'"
+                                        ng-src="{{SelectedFilePreview.safeUrl || SelectedFilePreview.url}}"
+                                        type="application/pdf"
+                                        style="width: 80vw; height: 70vh; border: none;"></iframe>
+                            </div>
+                            <div class="modal-footer px-0 pt-2 pb-0" style="display: flex; justify-content: flex-end; gap: 3px;">
+                                <a ng-href="{{SelectedFilePreview.url}}" class="btn btn-sm btn-success" target="_blank" download style="text-decoration: none; font-size: 14px;">
+                                    Download
+                                </a>
+                                <button class="btn btn-danger btn-rounded btn-sm text-center" data-dismiss="modal" type="button" style="min-width: 80px;">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>

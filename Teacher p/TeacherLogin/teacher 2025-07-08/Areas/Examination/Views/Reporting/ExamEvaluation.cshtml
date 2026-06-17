@@ -1,0 +1,247 @@
+﻿
+@{
+    ViewBag.Title = "Analysis";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+<style>
+
+
+    #printcard {
+        width: 210mm !important;
+        height: 100%; /* A4 paper height */
+        margin: 0 auto; /* Centering for print layout */
+        box-sizing: border-box;
+    }
+
+    .printonecard {
+        height: auto; /* Let height adjust based on content */
+        border: 1px solid; /* Keep your border style */
+        overflow: hidden; /* Hide overflow if needed */
+    }
+
+    @@media print {
+        /* Ensure the print area matches A4 size */
+        #printcard {
+            width: 210mm;
+            height: 297mm;
+            padding: 10mm;
+            box-sizing: border-box;
+            page-break-after: always; /* Add page break after each card */
+        }
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="~/AngularJs/Creation/ExamEvaluation.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ExamEvaluationController" ng-init="LoadData()">
+    <div class="content-wrapper">
+        <div class="container-fluid">
+            <section class="">
+                <div class="row">
+                    <div class="col-md-2 mt-2">
+                        <div class="form-group">
+                            <label>Class/Section</label>
+                            <select class="form-control form-control-sm select2" ng-model="newDet.SelectedClass" ng-change="GetStudentColl()">
+                                <option ng-repeat="ct in SectionClassColl track by $index" ng-value="{{ct}}">
+                                    {{ct.text}}
+                                </option>
+                            </select>
+
+
+                        </div>
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <div class="form-group">
+                            <label>Exam Types</label>
+
+                            <select class="form-control form-control-sm select2" multiple ng-model="newDet.SelectExamTypeId" ng-change="GetClassWiseStudent()">
+                                <option ng-value="{{cl.ExamTypeId}}" ng-repeat="cl in ExamTypeList">{{cl.Name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mt-2">
+                        <div class="form-group">
+                            <label>Current Exam</label>
+                            <select class="form-control form-control-sm select2" ng-model="newDet.ExamTypeId" ng-change="GetStudentForSubjectBA()">
+                                <option ng-value="{{cl.ExamTypeId}}" ng-repeat="cl in ExamTypeList">{{cl.Name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <div class="form-group">
+                            <label>Select Student</label>
+                            <select class="form-control form-control-sm select2" ng-model="newDet.StudentId" id="StudentId">
+                                <option ng-repeat="ct in StudentColl track by $index" value="{{ ct.StudentId }}">
+                                    {{ct.Name}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-1 text-right">
+                        <button class="mt-4 btn btn-sm btn-success" ng-click="GetStudentEval()"><i class="fas fa-sync-alt"></i> Load</button>
+                    </div>
+                </div>
+
+                <div id="previewprint" ng-if="showPrintCard">
+                    <div class=" px-2" id="infocard">
+                        <div class="row" style="border:1px solid #a1a1a1">
+                            <div class="col-md-4" style="background-color: #181d1fb8; z-index: 3; ">
+                                <div class="py-1">
+                                    <h6 class="mb-0 mt-1" style="color: #ffffff"><b>Preview</b></h6>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3" style="background-color: #181d1fb8; z-index: 3; ">
+                                <p class="mt-2 mb-0"><b class="mb-0" style="color: #ffffff">Total Pages: {{(PrintList | filter:searchData.Printsearch).length}}</b></p>
+                            </div>
+
+                            <div class="col-md-5" style="background-color: #181d1fb8; z-index: 3; ">
+                                <div class="form-inline float-right">
+                                    <div class="input-group input-group-sm table-search-filed py-1">
+                                        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.Printsearch" />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0" type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button class="ml-2 btn btn-sm btn-default" ng-click="PrintForm()"><i class="fas fa-print"></i> Print</button>
+
+                                    <button class="ml-2 btn btn-sm btn-default" ng-click="Print()">
+                                        <i class="fas fa-pdf"></i>
+                                       <i class="fas fa-file-pdf"></i> Pdf
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="max-height:calc(100vh - 14rem); overflow:auto;border:1px solid #a1a1a1" ng-if="Print">
+                        <div id="printcard" style=" margin: 0 auto;">
+                            <div class="p-3 chart-container" ng-repeat="P in PrintList  | filter:searchData.Printsearch" style="page-break-after: always;">
+                                <div class="card mb-0  px-3 printonecard" style="border: 1px solid;">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <img class="mt-2" src="{{P.CompLogoPath}}" style="max-height:50px" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="text-center">
+                                                <h4 class="mb-2">Exam Evaluation</h4>
+                                                <h5 class="mb-2">{{ExamCollName}}</h5>
+                                                <label class="px-2 my-2 py-1" style="background-color:#000000;color:#ffffff;border-radius:13px;font-size:14px"><b>Student's Information</b></label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 mt-2 text-right">
+                                            <img class="img-fluid" src="{{base_url+P.Photopath}}" style="height: 100px; width: 150px; border: 1px solid #000000; border-radius: 12px;" />
+                                        </div>
+                                    </div>
+                                    <div class="studentinfo p-2" style="border: 2px solid; border-radius: 15px;">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Name</b></label>
+                                                <label>: <b>{{P.Name}}</b></label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Grade</b></label>
+                                                <label>: <b>{{P.ClassName}} {{P.SectionName}}</b></label>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Regd No</b></label>
+                                                <label>: <b>{{P.RegNo}}</b></label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Roll No</b></label>
+                                                <label>: <b>{{P.RollNo}}</b></label>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Address</b></label>
+                                                <label>: <b>{{P.Address}}</b></label>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Father's Name</b></label>
+                                                <label>: <b>{{P.FatherName}}</b></label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>DOB (B.S)</b></label>
+                                                <label>: <b>{{P.DOB_BS}}</b></label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Contact Number</b></label>
+                                                <label>: <b>{{P.F_ContactNo}}</b></label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Weight (kg)</b></label>
+                                                <label>: <b>{{P.Weigth}}</b></label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Mother's Name</b></label>
+                                                <label>: <b>{{P.MotherName}}</b></label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Height (ft)</b></label>
+                                                <label>: <b>{{P.Height}}</b></label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label style="width:100px"><b>Contact Number</b></label>
+                                                <label>: <b>{{P.M_Contact}}</b></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="studentinfo p-2 my-3" id="barheader" style="border: 2px solid; border-radius: 15px;">
+                                        <div class="row">
+                                            <div class="col-md-12 text-center">
+                                                <label class="px-2 py-1" style="background-color: #000000; color: #ffffff; border-radius: 13px; font-size: 14px"><b>Evaluation Bar Diagram</b></label><br />
+                                                <canvas id="barChart{{$index}}" class="text-center" style="height: 335px !important;"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="studentinfo p-2 mb-3" id="achievementsec" style="border: 2px solid; border-radius: 15px; min-height: 320px;">
+                                        <div class="row">
+                                            <div class="col-md-3"></div>
+                                            <div class="col-md-6">
+                                                <div class="text-center">
+                                                    <label class="p-2" style="background-color: #000000; color: #ffffff; border-radius: 12px; font-size: 14px">
+                                                        <label class="mb-0"><b>Achievement</b></label><br />
+                                                        ( <label class="mb-0"><b>ECA/CCA</b></label>)
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="text-right">
+                                                    <b> No of Green Card : {{P.Point}}</b>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <ul class="pl-4" style="list-style:none">
+                                            <li ng-repeat="A in P.AchievementColl">
+                                                <b>  {{$index+1}}. {{A.Remarks}}</b>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+
+    </div>
+
+</div>

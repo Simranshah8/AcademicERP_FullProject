@@ -1,0 +1,268 @@
+﻿<script src="~/jslib/Transport/TransportMapping.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="TransportMappingController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:55px!important">
+                <div class="tab-content" id="calllist-section">
+                    <div class="row">
+                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                            <label for="">Batch</label>
+                            <select class="form-control form-control-sm select2" ng-model="newTransportMapping.BatchId" ng-change="GetStudentLstForMapping()">
+                                <option ng-value="0">**Select Batch**</option>
+                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newTransportMapping.BatchId">{{cl.text}}</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="">Class/Sec</label>
+                                <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newTransportMapping.SelectedClass" ng-change="GetStudentLstForMapping()">
+                                    <option value="0">All</option>
+                                    <option ng-value="cs" ng-repeat="cs in ClassList.SectionListWithClass">{{cs.text}}</option>
+                                </select>                               
+                            </div>
+                        </div>
+
+                        <div class="col-md-2" ng-show="newTransportMapping.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                            <div class="form-group">
+                                <label for="">Year</label>
+                                <select class="form-control form-control-sm select2" ng-model="newTransportMapping.ClassYearId" ng-change="GetStudentLstForMapping()">
+                                    <option ng-value="0">**Select Year**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newTransportMapping.ClassYearId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2" ng-show="newTransportMapping.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                            <div class="form-group">
+                                <label for="">Semester</label>
+                                <select class="form-control form-control-sm select2" ng-model="newTransportMapping.SemesterId" ng-change="GetStudentLstForMapping()">
+                                    <option ng-value="0">**Select Semester**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newTransportMapping.SemesterId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        @*<div class="col-md-3">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1">Class/Sec</label>
+                                <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newTransportMapping.SelectedClass" ng-change="GetStudentLstForMapping()">
+                                    <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList">{{cs.text}}</option>
+                                </select>
+                            </div>
+                        </div>*@
+                    </div>
+                    <div class="card p-0">
+                        <header class="row">
+                            <div class="col-md-5">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm mr-sm-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text cstm">Show</span>
+                                        </div>
+                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Transportmapping">
+                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Transportmapping">{{pp.text}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar"
+                                               type="search" placeholder="Search"
+                                               aria-label="Search" ng-model="searchData.TransportMapping">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0"
+                                                    type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-7 text-right">
+                                <form class="form-inline float-right">
+                                    <div class="dropdown dnld-file mx-2" data-toggle="tooltip"
+                                         data-placement="top" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false" style="height: 30px;">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                        </div>
+                                    </div>
+                                    @*<a href="#" class="btn btn-secondary btn-light btn-sm"
+                                           data-toggle="tooltip" data-placement="top" title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>*@
+                                    <button type="button" class="btn btn-sm btn-default mr-2" style="min-width: 60px;" ng-click="ClearTransportMapping()">Reset</button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 60px;" ng-click="SaveUpdateTransportMapping()">Save</button>
+                                </form>
+
+                            </div>
+                        </header>
+                        <div class="table-scroll-x-y sales-main-table table-scroll" style="height:auto; max-height: calc(100vh - 13rem)!important;">
+                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th class="align-middle cstm-sticky" style="width: 105px; left: 0; z-index: 2; background-color: #fff" ng-click="sort('RegdNo')">@*{{'REGDNO_LNG' | translate}}*@ Admission No.</th>
+                                        <th class="align-middle cstm-sticky" style="width: 200px; left: 105px; z-index: 2; background-color: #fff; background-color: #fff" ng-click="sort('Name')">Name</th>
+                                        <th class="align-middle cstm-sticky" style="width: 80px; left: 305px; z-index: 2; background-color: #fff" ng-click="sort('RollNo')">Roll No</th>
+                                        <th style="width: 180px;" ng-click="sort('ClassSection')">Class/Section</th>
+                                        <th style="width: 180px;" ng-click="sort('FatherName')">Father Name</th>
+                                        <th style="width: 200px;" ng-click="sort('Address')">Address</th>
+                                        <th style="width: 150px;" ng-click="sort('PointId')">Transport Point</th>
+                                        <th style="width: 230px;" ng-click="sort('RouteId')">Route</th>
+                                        <th style="width: 120px;" ng-click="sort('TravelType')">Travel Type</th>
+                                        <th style="width: 100px;" ng-click="sort('Rate')">Rate</th>
+                                        <th style="width: 100px;" ng-click="sort('DiscountPer')">Dis %</th>
+                                        <th style="width: 100px;" ng-click="sort('DiscountAmt')">Dis. Amt.</th>
+                                        <th style="width: 110px;" ng-click="sort('PayableAmt')">Payable Amt.</th>
+                                        <th style="width: 130px;z-index:2"> Month</th>
+                                        <th style="width: 60px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @*<tr ng-repeat="st in newTransportMapping.StudentColl |orderBy:sortKey:reverse | filter:searchData.TransportMapping">*@
+                                    <tr dir-paginate="st in newTransportMapping.StudentColl |orderBy:sortKey:reverse | filter:searchData.TransportMapping | itemsPerPage: perPage.Transportmapping" current-page="currentPages.Transportmapping" pagination-id="TransportmappingPagination">
+                                        <th class="align-middle cstm-sticky" style="width: 105px; left: 0; z-index: 1; background-color: #f5f5f9">{{st.RegdNo}}</th>
+                                        <td class="align-middle cstm-sticky" style="width: 200px; left: 105px; z-index: 1; background-color: #f5f5f9">
+                                            {{st.Name}}
+                                        </td>
+                                        <td class="align-middle cstm-sticky" style="width: 80px; left: 305px; z-index: 1; background-color: #f5f5f9">
+                                            {{st.RollNo}}
+                                        </td>
+                                        <td>
+                                            <label ng-if="st.Batch || st.ClassName || st.SectionName || st.ClassYear || st.Semester">
+                                                <i>
+                                                    <span ng-if="st.ClassName">{{ st.ClassName }}</span>
+                                                    <span ng-if="st.SectionName">-{{ st.SectionName }}</span>
+                                                    <span ng-if="(st.ClassName || st.SectionName) && st.Batch"> - {{ st.Batch }}</span>
+                                                    <span ng-if="st.ClassYear || st.Semester"> - </span>
+                                                    <span ng-if="st.ClassYear">{{ st.ClassYear }}</span>
+                                                    <span ng-if="st.Semester">{{ st.Semester }}</span>
+                                                </i>
+                                            </label>
+                                        </td>
+                                        <td>{{st.FatherName}}</td>
+                                        <td>{{st.Address}}</td>
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="st.PointId" ng-change="ChangeTransportPoint(st,1)">
+                                                <option ng-value="0">** Select Point**</option>
+                                                <option ng-selected="st.PointId==tp.PointId" ng-value="tp.PointId" ng-repeat="tp in TransportPointList">{{tp.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="st.RouteId">
+                                                <option ng-value="0">** Select Route**</option>
+                                                <option ng-selected="st.RouteId==tp.RouteId" ng-value="tp.RouteId" ng-repeat="tp in st.TransportRouteList">{{tp.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="st.TravelType" ng-change="ChangeTransportPoint(st,2)">
+                                                <option ng-selected="st.TravelType==tt.id" ng-value="tt.id" ng-repeat="tt in TravelTypes">{{tt.text}}</option>
+                                            </select>
+                                        </td>
+                                        <td> <input type="number" ng-model="st.Rate" class="form-control form-control-sm" ng-change="ChangeTransportPoint(st,3)"></td>
+                                        <td> <input type="number" ng-model="st.DiscountPer" class="form-control form-control-sm" ng-change="ChangeTransportPoint(st,4)"></td>
+                                        <td> <input type="number" ng-model="st.DiscountAmt" class="form-control form-control-sm" ng-change="ChangeTransportPoint(st,5)"></td>
+                                        <td> <input type="number" ng-model="st.PayableAmt" class="form-control form-control-sm" readonly></td>
+                                        <td style="padding: 4px;">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox" id="customCheckbox1-{{$index}}" ng-model="st.ForAll" ng-change="CheckedAll(st)">
+                                                <label for="customCheckbox1-{{$index}}" class="custom-control-label">All</label>
+                                                <button type="button" class="btn btn-sm btn-info ml-2" style="font-size: 13px; padding:1px 10px;" ng-click="ShowMonthSelection(st)">Custom</button>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="btn btn-sm btn-success" href="#" ng-click="SaveUpdateStudentWise(st)">
+                                                <i class="fas fa-save"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!-- table end -->
+                        </div>
+
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="TransportmappingPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+    <!-- Month Modal Starts -->
+    <div class="modal fade" id="modal-custom-month-fee" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="overflow-y: hidden;margin-top:80px;">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <label>Month Details</label>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <div aria-hidden="true">&times;</div>
+                    </button>
+                </div>
+                <div class="card p-2">
+                    <div class="table-scroll-x-y sales-main-table table-scroll" style="height: 430px;">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    @*<th style="z-index: 1;width: 110px">
+                                            <div class="custom-control custom-checkbox checkbox-sm ">
+                                                <input type="checkbox" class="custom-control-input" id="checkbox-include-fee" value=""> &nbsp;
+                                                <label class="custom-control-label" for="checkbox-include-fee">Include</label>
+                                            </div>
+                                        </th>*@
+                                    <th style="width: 150px"> Month</th>
+                                    <th style="width: 100px"> Rate</th>
+                                    <th style="width: 100px">Dis %</th>
+                                    <th style="width: 110px">Dis.Amt.</th>
+                                    <th style="width: 120px">Payable Amt.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="md in CurMonthDetailsColl">
+                                    @*<td style="z-index: 1; background-color: #f5f5f9">
+                                            <div class="custom-control custom-checkbox checkbox-sm ">
+                                                <input type="checkbox" class="custom-control-input" id="checkbox-include-{{$index}}" value=""> &nbsp;
+                                                <label class="custom-control-label" for="checkbox-include-{{$index}}"></label>
+                                            </div>
+                                        </td>*@
+                                    <td style="z-index: 1; background-color: #f5f5f9">{{md.text}}</td>
+                                    <td> <input type="number" class="form-control form-control-sm" ng-model="md.Rate" ng-change="ChangeDetRate(md,1)" /></td>
+                                    <td> <input type="number" class="form-control form-control-sm" ng-model="md.DiscountPer" ng-change="ChangeDetRate(md,2)" /></td>
+                                    <td> <input type="number" class="form-control form-control-sm" ng-model="md.DiscountAmt" ng-change="ChangeDetRate(md,3)" /></td>
+                                    <td> <input type="number" class="form-control form-control-sm" ng-model="md.PayableAmt" readonly /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- table end -->
+                    </div>
+
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        @*<button type="button" class="btn btn-sm btn-default" style="min-width: 90px">
+                                Reset
+                            </button>*@
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" data-dismiss="modal">
+                            Save
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,375 @@
+﻿
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/academic/reporting/ClassSchedule.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ScheduleReportController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Class Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">All Class Schedule</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="contact-tab" data-toggle="tab"
+                                               href="#contact" role="tab" aria-controls="contact"
+                                               aria-selected="false">Teacher Wise Schedule</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="medium-tab" data-toggle="tab"
+                                               href="#medium" role="tab" aria-controls="medium"
+                                               aria-selected="false">Vacant (Free) Teachers</a>
+                                        </li>
+
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="classteacher-tab" data-toggle="tab"
+                                               href="#classteacher" role="tab" aria-controls="classteacher"
+                                               aria-selected="false">Class Schedule Status</a>
+                                        </li>
+
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="hod-tab" data-toggle="tab"
+                                               href="#hod" role="tab" aria-controls="medium"
+                                               aria-selected="false">HOD List</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="class-wise-content">
+                                    <div class="row mt-2">
+                                        <div class="col-sm-4 col-lg-2 col-md-2">
+                                            <label>Shift</label>
+                                            <select ng-model="SelectedShift" class="form-control form-control-sm select2" ng-options="x.text for x in ClassShiftList" ng-change="PrintClassWiseSchedule(1)"></select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                            <label>Batch</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.BatchId" ng-change="PrintClassWiseSchedule(2)">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Class</label>
+                                            <select ng-model="SelectedClass" class="form-control form-control-sm select2" ng-options="x.text for x in ClassList.SectionList" ng-change="PrintClassWiseSchedule(3)"></select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass1.ClassType==3">
+                                            <label>Semester</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.SemesterId" ng-change="PrintClassWiseSchedule(4)">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass1.ClassType==2">
+                                            <label>Year</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.ClassYearId" ng-change="PrintClassWiseSchedule(4)">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div id="schedule-report-table">
+                                                <iframe id="frmRpt" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="class-schedule-content">
+                                    <div class="row mt-2">
+                                        <div class="col-sm-4 col-lg-4 col-md-4">
+                                            <label>Class Shift</label>
+                                            <select ng-model="SelectedShift_A" class="form-control form-control-sm select2" ng-options="x.text for x in ClassShiftList" ng-change="PrintAllClassSchedule()"></select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2" id="schedule-report-table">
+                                        <iframe id="frmRpt1" style='width: 100%;height:calc(100vh - 170px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="contact" role="tabpanel"
+                                 aria-labelledby="contact-tab">
+                                <div id="class-wise-content">
+                                    <div class="row mt-2">
+                                        <div class="col-sm-6 col-lg-6 col-md-6">
+                                            <label class="sr-only" for="inlineFormInputGroup">Select Teacher</label>
+                                            <div class="input-group-prepend">
+                                                <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newTeacherWise.SelectEmployee">
+
+                                                    <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newTeacherWise.SelectEmployee">
+                                                        {{ss.text}}
+                                                    </option>
+
+                                                </select>
+
+                                                <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newTeacherWise.EmployeeId" employee-detail="newTeacherWise.EmployeeDetails" side-bar-data="newTeacherWise.EmpSideBarData" search-by="newTeacherWise.SelectEmployee" confirm-action="PrintEmpClassSchedule()">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2" id="schedule-report-table">
+                                        <iframe id="frmRpt2" style='width: 100%;height:calc(100vh - 170px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="medium" role="tabpanel"
+                                 aria-labelledby="medium-tab">
+                                <div>
+                                    No content
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="classteacher" role="tabpanel"
+                                 aria-labelledby="classteacher-tab">
+                                <div>
+                                    <div class="card ">
+                                        <div class="card card-primary card-tabs m-0">
+                                            <div class="card-header with-gradient-bg p-0 pt-2">
+                                                <ul class="nav nav-tabs" role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link active" id="custom-tabs-one-home-tab"
+                                                           data-toggle="pill" href="#custom-tabs-one-completed" role="tab"
+                                                           aria-controls="custom-tabs-one-completed" aria-selected="true" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Completed({{CompletedColl.length}})</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" data-toggle="pill"
+                                                           href="#Pending" role="tab"
+                                                           aria-controls="Pending"
+                                                           aria-selected="false" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Pending({{PendingColl.length}})</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="tab-content" id="tabContent">
+                                                @*Table*@
+                                                <div class="tab-pane fade show active" id="custom-tabs-one-completed" role="tabpanel">
+                                                    <!-- Controls ONLY for Completed -->
+                                                    <div class="row mt-2">
+                                                        <div class="col-md-7">
+                                                            <div class="clearfix">
+                                                                <form class="form-inline">
+                                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text cstm">Show</span>
+                                                                        </div>
+                                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Completed">
+                                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl">{{pp.text}}</option>
+                                                                        </select>
+                                                                        <div class="input-group-append">
+                                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="input-group input-group-sm table-search-filed">
+                                                                        <input class="form-control form-control-navbar" type="search" placeholder="Search Completed" ng-model="searchData.Completed">
+                                                                        <div class="input-group-append">
+                                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                                <i class="fas fa-search"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-5 text-right">
+                                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                                 data-placement="top" title="Download File">
+                                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                                        aria-haspopup="true" aria-expanded="false">
+                                                                    <i class="fas fa-download"></i>
+                                                                </button>
+                                                                <div class="dropdown-menu dropdown-menu-right"
+                                                                     aria-labelledby="dropdownMenuButton">
+                                                                    <span class="dropdown-item">Choose an option:</span>
+                                                                    <a class="dropdown-item wait" export-excel table-id="'#Completed-table'" sheet-name="'ClassScheduleStatus'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                                    <a class="dropdown-item wait" onClick="$('#Completed-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                                </div>
+                                                            </div>
+                                                            <a print-tbl table-id="'#Completed-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                                               data-toggle="tooltip" data-placement="bottom"
+                                                               title="Print">
+                                                                <i class="fas fa-print"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Completed Table -->
+                                                    <div class="table-scroll-x-y sales-main-table table-scroll mt-1" style="max-height: calc(100vh - 14rem) !important;">
+                                                        <table id="Completed-table" class="table table-bordered table-head-fixed table-head-fixed">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width:5px;">S.N</th>
+                                                                    <th style="width:30px;">Class/Sec</th>
+                                                                    <th style="width:20px;">Shift</th>
+                                                                    <th style="width:5px;">Total Period</th>
+                                                                    <th style="width:5px;">Period Assigned</th>
+                                                                    <th style="width:36px;">Class Teacher</th>
+                                                                    <th style="width:30px;">Created At</th>
+                                                                    <th style="width:10px;">User</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr dir-paginate="cl in CompletedColl | filter:searchData.Completed | itemsPerPage: perPage.Completed" current-page="currentPages.Completed" pagination-id="CompletedPagination">
+                                                                    <td>{{$index + 1}}</td>
+                                                                    <td>{{cl.ClassSection}}</td>
+                                                                    <td>{{cl.Shift}}</td>
+                                                                    <td>{{cl.TotalPeriod}}</td>
+                                                                    <td>{{cl.PeriodAssigned}}</td>
+                                                                    <td>{{cl.TeacherName}}</td>
+                                                                    <td>{{cl.CreatedAt}} {{cl.LogDateTime | timeFormat}}</td>
+                                                                    <td>{{cl.User}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <dir-pagination-controls pagination-id="CompletedPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                                </div>
+
+
+                                                <div class="tab-pane fade" id="Pending" role="tabpanel">
+                                                    <!-- Controls ONLY for Pending -->
+                                                    <div class="row mt-2">
+                                                        <div class="col-md-7">
+                                                            <div class="clearfix">
+                                                                <form class="form-inline">
+                                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text cstm">Show</span>
+                                                                        </div>
+                                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Pending">
+                                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl">{{pp.text}}</option>
+                                                                        </select>
+                                                                        <div class="input-group-append">
+                                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="input-group input-group-sm table-search-filed">
+                                                                        <input class="form-control form-control-navbar" type="search" placeholder="Search Pending" ng-model="searchData.Pending">
+                                                                        <div class="input-group-append">
+                                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                                <i class="fas fa-search"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-5 text-right">
+                                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                                 data-placement="top" title="Download File">
+                                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                                        aria-haspopup="true" aria-expanded="false">
+                                                                    <i class="fas fa-download"></i>
+                                                                </button>
+                                                                <div class="dropdown-menu dropdown-menu-right"
+                                                                     aria-labelledby="dropdownMenuButton">
+                                                                    <span class="dropdown-item">Choose an option:</span>
+                                                                    <a class="dropdown-item wait" export-excel table-id="'#Pending-Table'" sheet-name="'PendingList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                                    <a class="dropdown-item wait" onClick="$('#Pending-Table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                                </div>
+                                                            </div>
+                                                            <a print-tbl table-id="'#Pending-Table'" class="btn btn-secondary btn-light btn-sm wait"
+                                                               data-toggle="tooltip" data-placement="bottom"
+                                                               title="Print">
+                                                                <i class="fas fa-print"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Pending Table -->
+                                                    <div class="table-scroll-x-y sales-main-table table-scroll mt-1" style="max-height: calc(100vh - 14rem) !important;">
+                                                        <table id="Pending-Table" class="table table-bordered table-head-fixed table-head-fixed">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width:5px;">S.N</th>
+                                                                    <th style="width:200px;">Class/Sec</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr dir-paginate="hdc in PendingColl | filter:searchData.Pending | itemsPerPage: perPage.Pending" current-page="currentPages.Pending" pagination-id="PendingPagination">
+                                                                    <td>{{$index + 1}}</td>
+                                                                    <td>{{hdc.ClassSection}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <dir-pagination-controls pagination-id="PendingPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="hod" role="tabpanel"
+                                 aria-labelledby="hod-tab">
+                                <div>
+                                    HOD No content
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+

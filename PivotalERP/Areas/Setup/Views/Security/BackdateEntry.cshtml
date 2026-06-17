@@ -1,0 +1,132 @@
+﻿<script src="~/jslib/Setup/Backdate-entry.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BackdateEntryController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:50px!important">
+                <div class="row mt-2">
+                    <div class="col-md-3">
+                        <div class="form-group d-flex">
+                            <div class="d-flex">
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input type="radio"
+                                               class="form-check-input"
+                                               name="optradio" ng-value="1" ng-model="newBackdateEntry.UserWise" ng-click="ClearData()"/>User Wise
+                                    </label>
+                                </div>
+                                <div class="form-check ml-3">
+                                    <label class="form-check-label">
+                                        <input type="radio"
+                                               class="form-check-input"
+                                               name="optradio" ng-value="2" ng-model="newBackdateEntry.UserWise"  ng-click="ClearData()"/>Group Wise
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4" ng-show="newBackdateEntry.UserWise==1">
+                        <div class="form-group d-flex">
+                            <label class="mr-2">User </label>
+                            <select class="form-control form-control-sm select2" ng-model="newBackdateEntry.UserId" ng-change="GetAllowUserWise()">
+                                <option ng-value="0">**Select User**</option>
+                                <option ng-value="cl.UserId" ng-repeat="cl in UserList">{{cl.UserName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4" ng-show="newBackdateEntry.UserWise==2">
+                        <div class="form-group d-flex">
+                            <label style="width:110px;">User Group </label>
+                            <select class="form-control form-control-sm select2" ng-model="newBackdateEntry.GroupId" ng-change="GetAllowGroupWise()">
+                                <option ng-value="0">**Select Group**</option>
+                                <option ng-value="cl.GroupId" ng-repeat="cl in UserGroupList">{{cl.GroupName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                  
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 70px;" ng-click="SaveUpdateBackdateEntry()">Save</button>
+                    </div>
+                </div>
+
+                <div class="card p-0">
+                    <div class="table-responsive p-0" style="max-height: calc(100vh - 8.5rem);">
+                        <table class="table table-head-fixed text-nowrap table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="align-middle" style="width: 70px">S.No.</th>
+                                    <th class="align-middle" style="width: 200px">
+                                        <div class="d-flex">
+                                            <div class="mt-2">Voucher Name</div>
+                                            <input type="text" class="form-control form-control-sm ml-2" style="width: 150px;" ng-model="searchData.BackdateEntry" />
+                                        </div>
+                                    </th>
+                                    <th class="align-middle" style="width: 120px">
+                                        <div class="d-flex">
+                                            <div class="mt-1">Allow Any Date</div>
+                                            <div class="custom-control custom-checkbox ml-2">
+                                                <input class="custom-control-input" type="checkbox" id="chkAll" ng-change="CheckUncheckAll()" ng-model="newBackdateEntry.CheckedAll">
+                                                <label for="chkAll" class="custom-control-label"></label>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th class="align-middle" style="width: 200px">
+                                        <div class="d-flex">
+                                            <div class="mt-2">ALLOW BACK DAYS</div>
+                                            <input type="number" class="form-control form-control-sm ml-2" style="width: 100px;" ng-model="newBackdateEntry.TotalBackDaysAllow" ng-change="ChangeForAllVoucher()" />
+                                        </div>
+                                    </th>
+                                    <th class="text-center" style="width: 220px; z-index: 2">
+                                        <div class="d-flex">
+                                            <div class="mt-2" style="width:100px;">
+                                                Post Back Days
+                                            </div>
+                                            <input type="number" class="form-control form-control-sm ml-2" style="width:100px;" ng-model="newBackdateEntry.PostBackDaysAllow" ng-change="CheckAllForPostBackDaysAllow()" />
+
+                                        </div>
+                                    </th>
+                                    <th class="text-center" style="width: 230px; z-index: 2;">
+                                        <div class="d-flex">
+                                            <div class="mt-2" style="width:100px;">
+                                                Cancel Back Days
+                                            </div>
+                                            <input type="number" class="form-control form-control-sm ml-2" style="width:100px;" ng-model="newBackdateEntry.CancelBackDaysAllow" ng-change="CheckAllForCancelBackDaysAllow()" />
+
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="av in AllowBackDateList |filter:searchData.BackdateEntry">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{av.VoucherName}}</td>
+                                    <td class="text-center">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox" id="customCheckbox{{$index}}" ng-model="av.AllowAnyDate">
+                                            <label for="customCheckbox{{$index}}" class="custom-control-label"></label>
+                                        </div>
+                                    </td>
+                                    <td><input type="number" value="0" class="form-control form-control-sm" ng-model="av.TotalBackDaysAllow" /></td>
+                                    <td class="text-center"><input type="number" class="form-control form-control-sm" ng-model="av.PostBackDaysAllow" /></td>
+                                    <td class="text-center"><input type="number" class="form-control form-control-sm" ng-model="av.CancelBackDaysAllow" /></td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+<script>
+    $('#select_box').change(function () {
+        var select = $(this).find(':selected').val();
+        $(".hide").hide();
+        $('#' + select).show();
+
+    }).change();
+</script>

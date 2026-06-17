@@ -1,0 +1,633 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<link href="~/wwwroot/dynamic/css/fee_receipt.css" rel="stylesheet" />
+<style>
+    .numericAlignment {
+        text-align: right;
+    }
+
+    .headerAligment {
+        text-align: center;
+    }
+
+    .dateAlignment {
+        text-align: center;
+    }
+
+    @@media (min-width: 1024px) and (max-width: 1197px) {
+        .tab-content {
+            margin-top: 0px !important;
+        }
+    }
+   .description {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%; /* Adjust as needed */
+    position: relative;
+}
+
+/* Hover effect to display full content */
+.description:hover {
+    white-space: normal;
+    overflow: visible;
+    z-index: 9999;
+    background-color: aliceblue;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+}
+
+/* Custom tooltip */
+    .description:hover::after {
+        content: attr(data-title); /* Use custom attribute */
+        position: absolute;
+        background: #ffffff;
+        color: #000000;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 5px;
+        white-space: normal;
+        max-width: 500px;
+        word-wrap: break-word;
+        z-index: 10000;
+        box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
+        /* Positioning */
+        left: 50%;
+        transform: translateX(-50%);
+        top: 100%;
+        margin-top: 5px;
+        /* Prevent overflow */
+        white-space: normal;
+        overflow-wrap: break-word;
+        text-align: left;
+    }
+
+/* Adjust positioning when tooltip is near the right edge */
+.description:hover::after {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+/* Adjust positioning when tooltip is near the left edge */
+@@media (max-width: 400px) {
+    .description:hover::after {
+        left: 0;
+        right: auto;
+        transform: none;
+    }
+}
+
+</style>
+
+
+<link href="~/Content/printrules.css" rel="stylesheet" />
+<script src="~/jslib/fee/reporting/student-statement.js?v=20251115"></script>
+<script>
+    var entityStudentLedger = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.StudentLedger)";
+    var entityStudentVoucher = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.StudentVoucher)";
+</script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="StudentStatementController" @*ng-init="LoadData()"*@>
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content1">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-12">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                            id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active"
+                                                   id="home-tab"
+                                                   data-toggle="tab"
+                                                   href="#home"
+                                                   role="tab"
+                                                   aria-controls="home"
+                                                   aria-selected="true">Student Ledger</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="profile-tab"
+                                                   data-toggle="tab"
+                                                   href="#profile"
+                                                   role="tab"
+                                                   aria-controls="profile"
+                                                   aria-selected="false">Student Voucher</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="contact-tab"
+                                                   data-toggle="tab"
+                                                   href="#contact"
+                                                   role="tab"
+                                                   aria-controls="contact"
+                                                   aria-selected="false">Class Ledger</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Student Ledger Starts -->
+                                 <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                    <div class="card" id="divLedger">
+                                        <div class="card-body p-0">
+                                            <div class="row">
+                                                <div class="col-sm-9 col-md-9 col-lg-9">
+                                                    <div class="row">
+                                                        <div class="col-sm-7 col-lg-7 col-md-7">
+                                                          
+                                                            <div class="row">
+                                                                <div class="col-md-6">  <label>Select Student</label></div>
+                                                                <div class="col-md-6 text-right">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox" ng-model="newStudentLedger.ShowLeftStudent"
+                                                                               id="customCheckbox1" value="option1">
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            Show Left Student
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group-prepend">
+                                                                <select class="input-group-text dropdown-toggle p-0"
+                                                                        style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;" ng-model="newStudentLedger.SelectStudent">
+
+                                                                    <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newStudentLedger.SelectStudent">
+                                                                        {{ss.text}}
+                                                                    </option>
+
+                                                                </select>
+                                                                <select class="form-control select2 form-control-sm" all-student ng-model="newStudentLedger.StudentId" student-detail="newStudentLedger.StudentDetails" side-bar-data="newStudentLedger.SideBarData" search-by="newStudentLedger.SelectStudent" confirm-action="getStudentLedger()" include-left="newStudentLedger.ShowLeftStudent" >
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-sm-4 col-lg-4 col-md-4 no-print-this">
+                                                            <label>Select Report</label>
+                                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newStudentLedger.RptTranId">
+                                                                <option ng-value="0" ng-selected="true">**Select Report**</option>
+                                                                <option ng-value="rt.RptTranId" ng-repeat="rt in newStudentLedger.TemplatesColl">{{rt.ReportName}}</option>
+                                                                <option ng-value="-1">HTML Format</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-1 col-lg-1 col-md-1 mt-4 no-print-this">
+                                                            @*<a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                               data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintPDFStudentLedger()">
+                                                                <i class="fas fa-print"></i>
+                                                            </a>*@
+                                                            <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                               data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintStudentLedger()">
+                                                                <i class="fas fa-print"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="bill-detail">
+                                                        <div class="col-md-12">
+                                                            <div class="row due_det" style="border: 1px solid #9bc99b;background-color:#fff;">
+                                                                <div class="active">
+
+                                                                    <span><b>Upto Month</b></span><br>
+                                                                    <span><strong class="mgreen">{{StudentLedger.BillUpToMonth}}</strong></span>
+                                                                </div>
+                                                                <div>
+                                                                    <span><b>Opening Amount</b></span><br>
+                                                                    <span><strong class="mgreen">{{StudentLedger.OpeningAmt |number:2}}</strong></span>
+                                                                </div>
+                                                                <div>
+                                                                    <span><b>Fee Amount</b></span><br>
+                                                                    <span><strong class="mgreen">{{StudentLedger.FeeAmt |number:2}}</strong></span>
+                                                                </div>
+                                                                <div>
+                                                                    <span><b>Discount Amount</b></span><br>
+                                                                    <span><strong class="mgreen">{{StudentLedger.DiscountAmt |number:2}}</strong></span>
+                                                                </div>
+                                                                <div>
+                                                                    <span><b>Paid Amount</b></span><br>
+                                                                    <span><strong class="mgreen">{{StudentLedger.PaidAmt |number:2}}</strong></span>
+                                                                </div>
+                                                                <div>
+                                                                    <span><b>Balance Amount</b></span><br>
+                                                                    <span><strong class="mgreen">{{StudentLedger.BalanceAmt |number:2}}</strong></span>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-3 col-md-3 col-lg-3">
+                                                    <div class="panel panel-default" style="border: 1px solid #9bc99b;">
+                                                        <div class="panel-heading active" style="background-color: #e9f2ee;">
+                                                            <h6 class="p-1">
+                                                                <a role="button">
+                                                                    Student Profile
+                                                                </a>
+                                                            </h6>
+                                                        </div>
+                                                        <div>
+                                                            <div class="panel-body">
+                                                                <div class="col-sm-12 col-md-12 col-lg-12">
+                                                                    <div class="row">
+                                                                        <div class="col-sm-6 col-md-6 col-lg-4">
+                                                                            <img style="height:50px; width:50px;" class="rounded-circle" ng-src="{{StudentLedger.PhotoPath}}" />
+
+                                                                        </div>
+                                                                        <div class="col-sm-6 col-md-6 col-lg-8">
+                                                                            <span><b>{{StudentLedger.Name}}</b></span><br>
+                                                                            <span>
+                                                                                Class: {{StudentLedger.ClassName}} {{StudentLedger.SectionName}}
+                                                                                <span ng-if="StudentLedger.Batch || StudentLedger.Semester || StudentLedger.ClassYear">
+                                                                                    - {{StudentLedger.Batch}} {{StudentLedger.Semester}} {{StudentLedger.ClassYear}}
+                                                                                </span>
+                                                                            </span>
+                                                                            @*<span>Class: {{StudentLedger.ClassName}}-{{StudentLedger.SectionName}}</span>*@
+                                                                        </div>
+                                                                        <div class="col-sm-7 col-md-7 col-lg-7 mt-2">
+                                                                            <span class="s-text">Regd No. :</span>
+                                                                            <span><b>{{StudentLedger.RegNo}}</b></span>
+                                                                        </div>
+                                                                        <div class="col-sm-5 col-md-5 col-lg-5 mt-2">
+                                                                            <span class="s-text">Roll :</span>
+                                                                            <span><b>{{StudentLedger.RollNo}}</b></span>
+                                                                        </div>
+                                                                        <div class="col-sm-7 col-md-7 col-lg-7 mt-2">
+                                                                            <span class="s-text">Father Name :</span><br>
+                                                                            <span><b>{{StudentLedger.FatherName}}</b></span>
+                                                                        </div>
+                                                                        <div class="col-sm-5 col-md-5 col-lg-5 mt-2">
+                                                                            <span class="s-text">Contact :</span><br>
+                                                                            <span><b>{{StudentLedger.ContactNo}}</b></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="table-scroll-x-y table-scroll mt-2" style="height: calc(100vh - 17rem)!important ;overflow-x:auto">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="align-middle cstm-sticky pl-2" style="left: 0; z-index: 3; width: 50px;background-color: #fff; ">S.No.</th>
+                                                            <th class="align-middle cstm-sticky" style="left: 50px; z-index: 3; width: 90px;background-color: #fff;">Particulars</th>
+                                                            <th style=" z-index: 2; width: 100px;background-color: #fff; text-align:center;">Pre.Dues</th>
+                                                            <th style=" z-index: 2; width: 100px; background-color: #fff; text-align: center;" ng-repeat="ff in StudentLedger.FeeHeadingColl">{{ff.text}}</th>
+                                                            <th style=" z-index: 2; width: 100px; background-color: #fff; text-align: center;">Total Amount</th>
+                                                            <th style=" z-index: 2; width: 100px; background-color: #fff; text-align: center;">Dis.Amt.</th>
+                                                            <th style=" z-index: 2; width: 100px; background-color: #fff; text-align: center;">Paid</th>
+                                                            <th style=" z-index: 2; width: 100px; background-color: #fff; text-align: center;">Balance</th>
+                                                            <th style=" z-index: 2; width: 140px; background-color: #fff; text-align: center;">Ref. No.</th>
+                                                            <th style=" z-index: 2; width: 100px; background-color: #fff; text-align: center;">Receipt No.</th>
+                                                            <th style=" z-index: 2; width: 133px; background-color: #fff; text-align: center;">Receipt Date.</th>
+                                                            <th style=" z-index: 2; width: 160px; background-color: #fff; text-align: center;">Remarks</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="led in StudentLedger.LedgerColl">
+                                                            <td class="align-middle cstm-sticky" style="width: 50px; left: 0; z-index: 1;background-color: #fff">{{led.SNo}}</td>
+                                                            <td class="align-middle cstm-sticky" style="width: 90px; left: 50px; z-index: 1; background-color: #fff">{{led.MonthName}}</td>
+                                                            <td align="right">{{led.Opening |number:2}}</td>
+                                                            <td align="right" ng-repeat="ff in led.DataColl">{{ff.DebitAmt |number:2}}</td>
+                                                            <td align="right">{{led.Amount |number:2}}</td>
+                                                            <td align="right">{{led.DisAmt |number:2}}</td>
+                                                            <td align="right">{{led.PaidAmt |number:2}}</td>
+                                                            <td align="right">{{led.Balance |number:2}}</td>
+                                                            <td class="description" data-title="{{ led.RefNo }}">
+                                                                <label style="font-size:13px">{{ led.RefNo.length > 20 ? led.RefNo.slice(0, 15) + '...' : led.RefNo }}</label>
+                                                            </td>
+
+                                                            <td align="left">{{led.VoucherNo}}</td>
+                                                            <td class="description" data-title="{{ led.VoucherDate }}">
+                                                                <label style="font-size:13px">{{ led.VoucherDate.length > 20 ? led.VoucherDate.slice(0, 15) + '...' : led.VoucherDate }}</label>
+                                                            </td>
+                                                            @*<td align="left">{{led.VoucherDate}}</td>*@
+                                                            <td class="description" data-title="{{ led.Narration }}">
+                                                                <label style="font-size:13px">{{ led.Narration.length > 20 ? led.Narration.slice(0, 15) + '...' : led.Narration }}</label>
+                                                            </td>
+
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Student Ledger Ends -->
+                                <!-- Student Voucher Starts -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                    <!-- Table Starts -->
+                                    <div class="card p-0 mb-0">
+                                        <div class="row">
+                                            <div class="col-sm-9 col-md-9 col-lg-9">
+                                                <div class="row">
+                                                    <div class="col-sm-7 col-lg-7 col-md-7">
+                                                        <div class="row">
+                                                            <div class="col-md-4">  <label>Select Student</label></div>
+
+                                                            <div class="col-md-4">
+                                                                <div class="custom-control custom-checkbox" ng-show="newStudentVoucher.StudentDetails.SemesterId>0 || newStudentVoucher.StudentDetails.ClassYearId>0">
+                                                                    <input class="custom-control-input" type="checkbox" ng-model="newStudentVoucher.DisplayAllTran"
+                                                                           id="chkDisplayAllTran" ng-change="getStudentVoucher()">
+                                                                    <label for="chkDisplayAllTran"
+                                                                           class="custom-control-label">
+                                                                        Display All Tran
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4 text-right">
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox" ng-model="newStudentVoucher.ShowLeftStudent"
+                                                                           id="customCheckbox11" value="option1">
+                                                                    <label for="customCheckbox11"
+                                                                           class="custom-control-label">
+                                                                        Show Left Student
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                     
+                                                        <div class="input-group-prepend">
+                                                            <select class="input-group-text dropdown-toggle p-0"
+                                                                    style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;" ng-model="newStudentVoucher.SelectStudent">
+
+                                                                <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newStudentVoucher.SelectStudent">
+                                                                    {{ss.text}}
+                                                                </option>
+                                                            </select>
+                                                            <select class="form-control select2 form-control-sm" all-student ng-model="newStudentVoucher.StudentId" student-detail="newStudentVoucher.StudentDetails" side-bar-data="newStudentVoucher.SideBarData" search-by="newStudentVoucher.SelectStudent" include-left="newStudentVoucher.ShowLeftStudent" confirm-action="getStudentVoucher()">
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4 col-lg-4 col-md-4 no-print-this">
+                                                        <label>Select Report</label>                                                        
+                                                        <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newStudentVoucher.RptTranId">
+                                                            <option ng-value="0" ng-selected="true">**Select Report**</option>
+                                                            <option ng-value="rt.RptTranId" ng-repeat="rt in newStudentVoucher.TemplatesColl">{{rt.ReportName}}</option>
+                                                            <option ng-value="-1">HTML Format</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-sm-1 col-lg-1 col-md-1 mt-4  no-print-this">
+                                                        <a ng-click="PrintPDFStudentVoucher()" class="btn btn-secondary btn-light btn-sm wait"
+                                                           data-toggle="tooltip" data-placement="bottom"
+                                                           title="Print">
+                                                            <i class="fas fa-print"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+
+                                                <div class="bill-detail">
+                                                    <div class="col-md-12">
+                                                        <div class="row due_det" style="border: 1px solid #9bc99b;background-color:#fff;">
+                                                            <div class="active">
+
+                                                                <span><b>Upto Month</b></span><br>
+                                                                <span><strong class="mgreen">{{StudentVoucher.BillUpToMonth}}</strong></span>
+                                                            </div>
+                                                            <div>
+                                                                <span><b>Opening Amount</b></span><br>
+                                                                <span><strong class="mgreen">{{StudentVoucher.OpeningAmt |number:2}}</strong></span>
+                                                            </div>
+                                                            <div>
+                                                                <span><b>Fee Amount</b></span><br>
+                                                                <span><strong class="mgreen">{{StudentVoucher.FeeAmt |number:2}}</strong></span>
+                                                            </div>
+                                                            <div>
+                                                                <span><b>Discount Amount</b></span><br>
+                                                                <span><strong class="mgreen">{{StudentVoucher.DiscountAmt |number:2}}</strong></span>
+                                                            </div>
+                                                            <div>
+                                                                <span><b>Paid Amount</b></span><br>
+                                                                <span><strong class="mgreen">{{StudentVoucher.PaidAmt |number:2}}</strong></span>
+                                                            </div>
+                                                            <div>
+                                                                <span><b>Balance Amount</b></span><br>
+                                                                <span><strong class="mgreen">{{StudentVoucher.BalanceAmt |number:2}}</strong></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-3 col-md-3 col-lg-3">
+                                                <div class="panel panel-default" style="border: 1px solid #9bc99b;">
+                                                    <div class="panel-heading active" style="background-color: #e9f2ee;">
+                                                        <h6 class="p-1"><a role="button">Student Profile</a></h6>
+                                                    </div>
+                                                    <div>
+                                                        <div class="panel-body">
+                                                            <div class="col-sm-12 col-md-12 col-lg-12">
+                                                                <div class="row">
+                                                                    <div class="col-sm-6 col-md-6 col-lg-4">
+                                                                        <img style="height:50px; width:50px;" class="rounded-circle" ng-src="{{StudentVoucher.PhotoPath}}" />
+                                                                    </div>
+                                                                    <div class="col-sm-6 col-md-6 col-lg-8">
+                                                                        <span><b>{{StudentVoucher.Name}}</b></span><br>
+
+                                                                        <span>
+                                                                            Class: {{StudentVoucher.ClassName}} {{StudentVoucher.SectionName}}
+                                                                            <span ng-if="StudentVoucher.Batch || StudentVoucher.Semester || StudentVoucher.ClassYear">
+                                                                                - {{StudentVoucher.Batch}} {{StudentVoucher.Semester}} {{StudentVoucher.ClassYear}}
+                                                                            </span>
+                                                                        </span>
+                                                                        @*<span>Class: {{StudentVoucher.ClassName}}-{{StudentVoucher.SectionName}}</span>*@
+                                                                    </div>
+                                                                    <div class="col-sm-7 col-md-7 col-lg-7 mt-2">
+                                                                        <span class="s-text">Regd No. :</span>
+                                                                        <span><b>{{StudentVoucher.RegNo}}</b></span>
+                                                                    </div>
+                                                                    <div class="col-sm-5 col-md-5 col-lg-5 mt-2">
+                                                                        <span class="s-text">Roll :</span>
+                                                                        <span><b>{{StudentVoucher.RollNo}}</b></span>
+                                                                    </div>
+                                                                    <div class="col-sm-7 col-md-7 col-lg-7 mt-2">
+                                                                        <span class="s-text">Father Name :</span><br>
+                                                                        <span><b>{{StudentVoucher.FatherName}}</b></span>
+                                                                    </div>
+                                                                    <div class="col-sm-5 col-md-5 col-lg-5 mt-2">
+                                                                        <span class="s-text">Contact :</span><br>
+                                                                        <span><b>{{StudentVoucher.ContactNo}}</b></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card p-0 mb-0 mt-1">
+                                            <div ui-grid="gridOptions1"
+                                                 ui-grid-auto-resize
+                                                 ui-grid-resize-columns
+                                                 ui-grid-move-columns
+                                                 ui-grid-selection
+                                                 ui-grid-exporter
+                                                 ui-grid-pinning
+                                                 ui-grid-filtering
+                                                 ui-grid-tree-view
+                                                 ui-grid-save-state style="height: calc(100vh - 16rem);"></div>
+
+                                        </div>
+                                    </div>
+                                    <!-- Table Ends -->
+                                </div>
+                                <!-- Student Voucher Ends -->
+                                <!-- Class Ledger Starts -->
+                                <div class="tab-pane fade main-section" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                                    <div class="card mb-0">
+                                        <div class="card-body p-0">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <form action="">
+                                                        <div class="row mt-2">
+                                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                                <label>Class</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newClassLedger.ClassId">
+                                                                    <option ng-value="0">**Select Class**</option>
+                                                                    <option ng-value="cl.id" ng-repeat="cl in ClassList.ClassList" ng-selected="cl.id==newClassLedger.ClassId">{{cl.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                                <label>From Month</label>
+                                                                <select class="form-control form-control-sm " ng-model="newClassLedger.FromMonthId">
+                                                                    <option ng-value="0">**Select Month**</option>
+                                                                    <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newClassLedger.FromMonthId">{{cl.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                                <label>To Month</label>
+                                                                <select class="form-control form-control-sm " ng-model="newClassLedger.ToMonthId">
+                                                                    <option ng-value="0">**Select Month**</option>
+                                                                    <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newClassLedger.ToMonthId">{{cl.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                                <label>For Student</label>
+                                                                <select name="class-group" class="form-control form-control-sm select2" ng-model="newStudentVoucher.ForStudentId">
+                                                                    <option value="">All</option>
+                                                                    <option value="">Continue</option>
+                                                                    <option value="">Left</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Class Ledger Ends -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- Modal after Date Click -->
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Billing Baishakh</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 220px;">Fee Item</th>
+                                    <th style="width: 130px;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Annual fee</td>
+                                    <td>1000</td>
+                                </tr>
+                                <tr>
+                                    <td>Monthly fee</td>
+                                    <td>1000</td>
+                                <tr>
+                                    <td>Computer fee</td>
+                                    <td>1000</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" style="min-width: 90px;">Close</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:30px!important">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height:calc(100vh - 7rem)">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

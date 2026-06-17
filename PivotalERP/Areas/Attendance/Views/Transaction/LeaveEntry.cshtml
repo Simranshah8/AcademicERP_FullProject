@@ -1,0 +1,239 @@
+﻿<script src="~/jslib/Attendance/LeaveEntry.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="LeaveEntryController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid1">
+            <section class="iframe-content-starts-here" style="padding-top:40px!important;">
+                <div class="card p-2">
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Leave For</label>
+                                        <select class="form-control form-control-sm"
+                                                style="width: 100%" ng-model="newLeaveEntry.LeaveTo">
+                                            <option ng-value="1"> Student </option>
+                                            <option ng-value="2"> Employee </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- fields after clicking the radio button starts -->
+                                <!-- meet to student field -->
+                                <div class="col-sm-6 col-lg-6 col-md-6 mt-4"
+                                     id="meet-student" ng-show="newLeaveEntry.LeaveTo==1">
+                                    <label class="sr-only"
+                                           for="inlineFormInputGroup">Select Student</label>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px;  z-index: 1; " ng-model="newLeaveEntry.SelectStudent">
+                                            <option ng-repeat="ss in StudentSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newLeaveEntry.SelectStudent}}">
+                                                {{ss.text}}
+                                            </option>
+                                        </select>
+                                        <select class="form-control select2 form-control-sm" all-student ng-model="newLeaveEntry.StudentId" student-detail="newLeaveEntry.StudentDetails" side-bar-data="newLeaveEntry.SideBarData" search-by="newLeaveEntry.SelectStudent">
+                                        </select>
+
+                                    </div>
+                                </div>
+
+                                <!-- Field For meet Teacher -->
+                                <div class="col-sm-6 col-lg-6 col-md-6 mt-4"
+                                     id="meet-employee" ng-show="newLeaveEntry.LeaveTo==2">
+                                    <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px; z-index: 1; " ng-model="newLeaveEntry.SelectEmployee">
+
+                                            <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newLeaveEntry.SelectEmployee}}">
+                                                {{ss.text}}
+                                            </option>
+                                        </select>
+                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newLeaveEntry.EmployeeId" employee-detail="newLeaveEntry.EmployeeDetails" side-bar-data="newLeaveEntry.EmpSideBarData" search-by="newLeaveEntry.SelectEmployee">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Leave Type<span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm select2" ng-model="newLeaveEntry.LeaveTypeId">
+                                            <option ng-repeat="L in LeaveTypeList" ng-value="L.LeaveTypeId" ng-selected="newLeaveEntry.LeaveTypeId==L.LeaveTypeId">{{L.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Duration Type<span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm select2" ng-model="newLeaveEntry.LeaveDuration" ng-change="DateChanged()">
+                                            <option ng-repeat="D in LeaveDurationList" ng-value="D.id" ng-selected="newLeaveEntry.LeaveDuration==D.id">{{D.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <!-- fields after clicking radio button ends -->
+
+
+                                <div class="col-md-2" ng-show="newLeaveEntry.LeaveDuration==2">
+                                    <div class="form-group">
+                                        <label>Leave Period<span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm" ng-model="newLeaveEntry.LeavePeriod" ng-change="DateChanged()">
+                                            <option ng-repeat="D in LeavePeriodList" ng-value="D.id" ng-selected="newLeaveEntry.LeavePeriod==D.id">{{D.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2" ng-show="newLeaveEntry.LeaveDuration==3">
+                                    <div class="form-group">
+                                        <label for="">Start Time<span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control form-control-sm" id="StartTime" ng-model="newLeaveEntry.StartTime_TMP" ng-change="calculateLeaveHours()">
+                                    </div>
+                                </div>
+                                <div class="col-md-2" ng-show="newLeaveEntry.LeaveDuration==3">
+                                    <div class="form-group">
+                                        <label for="">End Time<span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control form-control-sm" id="EndTime_" ng-model="newLeaveEntry.EndTime_TMP" ng-change="calculateLeaveHours()">
+                                    </div>
+                                </div>
+                                <div class="col-md-2" ng-show="newLeaveEntry.LeaveDuration==3">
+                                    <div class="form-group">
+                                        <label for="">Leave Hours</label>
+                                        <input type="number" class="form-control form-control-sm" ng-model="newLeaveEntry.LeaveHours" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">From Date<span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newLeaveEntry.DateFrom_TMP" date-detail="newLeaveEntry.DateFromDet" confirm-action="DateChanged()">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">To Date<span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newLeaveEntry.DateTo_TMP" date-detail="newLeaveEntry.DateToDet" confirm-action="DateChanged()">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">No Of Days</label>
+                                        <input type="number" class="form-control form-control-sm" disabled ng-model="newLeaveEntry.TotalDays" />
+                                        @*<input type="number" class="form-control form-control-sm" disabled ng-model="newLeaveEntry.NoOfDays" />*@
+                                    </div>
+                                </div>
+                                <!--Added by simran on 6th poush-->
+                                @*<div class="col-md-2" ng-show="newLeaveEntry.LeaveTo==2">
+                                        <div class="form-group">
+                                            <label for="">Leave Balance (Days)</label>
+                                            <label class="form-control form-control-sm" style="background-color: #e9ecef;">{{newLeaveEntry.RemainingLeave | number:2}}</label>
+                                        </div>
+                                    </div>*@
+                                <!--End-->
+                                <div class="col-md-4" ng-show="newLeaveEntry.LeaveTo==2">
+                                    <div class="form-group">
+                                        <label for="">Substitue Employee (Optional)</label>
+                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newLeaveEntry.AlternativeEmployeeId" student-detail="newLeaveEntry.EmployeeDetails">
+                                        </select>
+                                        @*<select class="form-control form-control-sm" ng-model="newLeaveEntry.SubstitueEmpId">
+                                                <option ng-repeat="D in EmployeeList" ng-value="D.EmployeeId" ng-selected="newLeaveEntry.SubstitueEmpId==D.EmployeeId">{{D.Name}}</option>
+                                            </select>*@
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label>Reason For Leave<span style="color:red">*</span></label>
+                                        <textarea class="form-control form-control-sm" ng-model="newLeaveEntry.Remarks" rows="1"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Attach Document</label>
+                                        <input id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newLeaveEntry.Photo_TMP" fileread="newLeaveEntry.PhotoData" />
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearLeaveEntry()">Reset</button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateLeaveEntry()">{{newLeaveEntry.Mode}}</button>
+                                </span>
+                            </div>
+                            <div style="background:#e8f5e9; border-left:5px solid #2e7d32; padding:15px; border-radius:8px; color:#1b5e20; font-family:Arial, sans-serif;">
+
+                                <!-- Note Section -->
+                                <div style="margin-bottom:15px;">
+                                    <strong style="color:#1b5e20;"><i class="fa fa-info-circle"></i> Note:</strong>
+                                    <div ng-show="newLeaveEntry.LeaveDuration==1" style="margin-top:5px;">
+                                        No. of Days is equal to Total No. of days
+                                    </div>
+                                    <div ng-show="newLeaveEntry.LeaveDuration==2" style="margin-top:5px;">
+                                        No. of Days = Total No. of days × 0.5 (Half Day)
+                                    </div>
+                                    <div ng-show="newLeaveEntry.LeaveDuration==3" style="margin-top:5px;">
+                                        No. of Days = Leave Hours × Total No. of days / 8 (Shift hour per day)
+                                    </div>
+                                </div>
+
+                                <!-- Approval Table -->
+                                @*<div>
+                                        <strong style="color:#1b5e20;"><i class="fa fa-check-circle"></i> Approval</strong>
+                                        <div class="table-scroll-x-y" style="overflow-x:auto; margin-top:10px;">
+                                            <table class="table table-sm table-bordered bg-white" style="width:100%; border:1px solid #2e7d32; border-radius:6px;">
+                                                <thead style="background:#a5d6a7; color:#1b5e20; font-weight:600;">
+                                                    <tr>
+                                                        <th style="width:50px; text-align:center;">S.No.</th>
+                                                        <th style="width:200px;">Level</th>
+                                                        <th style="width:100px;">Emp. Code</th>
+                                                        <th style="width:200px;">Employee Name</th>
+                                                        <th style="width:200px;">Designation</th>
+                                                        <th style="width:200px;">Department</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr style="transition: background 0.2s;">
+                                                        <td style="text-align:center;">1</td>
+                                                        <td ng-show="newLeaveEntry.LeaveTo==1">Class Teacher</td>
+                                                        <td ng-show="newLeaveEntry.LeaveTo==2">First Level Supervisor</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr style="transition: background 0.2s;">
+                                                        <td style="text-align:center;">2</td>
+                                                        <td ng-show="newLeaveEntry.LeaveTo==1">HOD</td>
+                                                        <td ng-show="newLeaveEntry.LeaveTo==2">Second Level Supervisor</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr style="transition: background 0.2s;">
+                                                        <td style="text-align:center;">3</td>
+                                                        <td ng-show="newLeaveEntry.LeaveTo==1">Co-Ordinator</td>
+                                                        <td ng-show="newLeaveEntry.LeaveTo==2">Third Level Supervisor</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>*@
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- Main content -->
+    <!-- /.content -->
+
+
+</div>

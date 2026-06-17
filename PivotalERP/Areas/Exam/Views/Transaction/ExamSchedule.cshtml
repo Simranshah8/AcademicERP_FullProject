@@ -1,0 +1,856 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<script src="~/jslib/Exam/Transaction/ExamSchedule.js?v=20251115"></script>
+<script>
+    var entityStudentForExam = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.StudentForExam)";
+    var entityAllClassExamSchedule = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.AllClassExamSchedule)";
+</script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ExamScheduleController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-12">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="examshift-tab" data-toggle="tab"
+                                                   href="#examshift" role="tab" aria-controls="profile"
+                                                   aria-selected="false">Shift</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="home-tab" data-toggle="tab"
+                                                   href="#home" role="tab" aria-controls="home"
+                                                   aria-selected="true">Schedule</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                   href="#profile" role="tab" aria-controls="profile"
+                                                   aria-selected="false">Schedule Status</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="contact-tab" data-toggle="tab"
+                                                   href="#contact" role="tab" aria-controls="contact"
+                                                   aria-selected="false">AdmitCard</a>
+                                            </li>
+                                            @*<li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="studentlist-tab" data-toggle="tab"
+                                                   href="#studentlist" role="tab" aria-controls="studentlist"
+                                                   aria-selected="false">Student for Exam</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="restudentlist-tab" data-toggle="tab"
+                                                   href="#restudentlist" role="tab" aria-controls="restudentlist"
+                                                   aria-selected="false">Student for Re-Exam</a>
+                                            </li>*@
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="printexamschedule-tab" data-toggle="tab"
+                                                   href="#printexamschedule" role="tab" aria-controls="printexamschedule"
+                                                   aria-selected="false">Print Schedule</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+
+                                <!-- Exam Shift Starts -->
+                                <div class="tab-pane fade  show active main-section" id="examshift" role="tabpanel"
+                                     aria-labelledby="examshift-tab">
+                                    <div id="examshift-section" class="card px-0 pt-2">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ExamShift">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ExamShift">{{pp.text}}</option>
+                                                            </select>
+
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.ExamShift">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                       
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-success" id="add-exam-shift" style="min-width: 90px;">
+                                                    <i class="fas fa-plus w-t"></i> Add
+                                                    Exam Shift
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div>
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 300px;">Name</th>
+                                                            <th style="width: 120px;">Start Time</th>
+                                                            <th style="width: 120px;">End Time</th>
+                                                            <th style="width: 80px;">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="es in ExamShiftList | filter:searchData.ExamShift | itemsPerPage: perPage.ExamShift" current-page="currentPages.ExamShift" pagination-id="examshiftPagination">
+
+                                                            <td>{{es.Name}}</td>
+                                                            <td>{{es.StartTime}}</td>
+                                                            <td>{{es.EndTime}}</td>
+                                                            <td>
+
+                                                                <a class="p-1" href="#" ng-click="GetExamShiftById(es)">
+                                                                    <i class="fas fa-edit text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#" ng-click="DelExamShiftById(es)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="examshiftPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                    <div id="examshift-form" class="card">
+                                        <div class="card-body px-0">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Name</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newExamShift.Name">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Start Time</label>
+                                                        <input type="time"
+                                                               class="form-control form-control-sm" ng-model="newExamShift.StartTime_TMP">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">End Time</label>
+                                                        <input type="time"
+                                                               class="form-control form-control-sm" ng-model="newExamShift.EndTime_TMP">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-info" id="examshift-back-btn" style="min-width: 90px;">Back to List</button>
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearExamShift()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateExamShift()">{{newExamShift.Mode}}</button>
+
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- Exam Shift Ends -->
+                                <!-- Exam Schedule TAb Starts -->
+                                <div class="tab-pane fade show main-section" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div id="purpose-section">
+                                        <div class="row">
+                                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                                <label>Batch</label>
+                                                <div class="form-group">
+                                                    <select class="form-control form-control-sm select2" ng-model="newExamSchedule.BatchId" ng-change="GetClassWiseSubMap(1)">
+                                                        <option ng-value="0">**Select Batch**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <div class="form-group">
+                                                    <label>Class</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newExamSchedule.ClassId" ng-change="GetClassWiseSubMap(2)">
+                                                        <option ng-value="0">**Select Class**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==3">
+                                                <label>Semester</label>
+                                                <div class="form-group">
+                                                    <select class="form-control form-control-sm select2" ng-model="newExamSchedule.SemesterId" ng-change="GetClassWiseSubMap(3)">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==2">
+                                                <label>Year</label>
+                                                <div class="form-group">
+                                                    <select class="form-control form-control-sm select2" ng-model="newExamSchedule.ClassYearId" ng-change="GetClassWiseSubMap(4)">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2" >
+                                                <label for="">Section</label>
+                                                <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newExamSchedule.SectionId" multiple ng-change="GetClassWiseSubMap(5)" ng-disabled="!(AcademicConfig.SectionWiseExamSchedule === true || AcademicConfig.SectionWiseExamSchedule === 'true')">
+                                                    <option ng-value="0">**Select Section**</option>
+                                                    <option ng-value="se.SectionId" ng-repeat="se in ClassSection.SectionList |  filter: { ClassId: newExamSchedule.ClassId }:true">{{se.SectionName}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-sm-4 col-lg-4 col-md-4">
+                                                <label>Exam Type</label>
+                                                <div class="form-group">
+                                                    <select class="form-control form-control-sm select2" ng-model="newExamSchedule.ExamTypeId" ng-change="GetClassWiseSubMap(6)">
+                                                        <option ng-value="0">**Select ExamType**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newExamSchedule.ExamTypeId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Start Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newExamSchedule.StartDate_TMP" date-picker date-detail="newExamSchedule.StartDateDet" before-days="0" after-days="90" confirm-action="validateDates('StartDate')">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Start Time</label>
+                                                    <input type="time"
+                                                           class="form-control form-control-sm" ng-model="newExamSchedule.StartTime_TMP" ng-blur="UpdateStartEndTimeSubjectwise()">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">End Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newExamSchedule.EndDate_TMP" date-picker date-detail="newExamSchedule.EndDateDet" before-days="0" after-days="90" confirm-action="validateDates('EndDate')">
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">End Time</label>
+                                                    <input type="time"
+                                                           class="form-control form-control-sm" ng-model="newExamSchedule.EndTime_TMP" ng-blur="UpdateStartEndTimeSubjectwise()">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Copy To Class</label>
+                                                <div class="form-group">
+                                                    <select class="form-control form-control-sm select2" ng-model="newExamSchedule.ToClassId_TMP" multiple>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Copy To Section</label>
+                                                <div class="form-group">
+                                                    <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newExamSchedule.ToSectionId_TMP" multiple ng-disabled="!(AcademicConfig.SectionWiseExamSchedule === true || AcademicConfig.SectionWiseExamSchedule === 'true')">
+                                                        <option ng-value="se.SectionId" ng-repeat="se in SectionList">{{se.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="card py-2">
+                                            <div class="table-scroll-x-y sales-main-table table-scroll ">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+
+                                                    <thead>
+                                                        <tr class="text-center">
+                                                            <th style="width: 60px;">S.No.</th>
+                                                            <th style="width: 350px;">Subject Name</th>
+                                                            <th style="width: 150px;">Paper Type</th>
+                                                            <th style="width: 160px;">Exam Date</th>
+                                                            <th style="width: 120px;">Shift</th>
+                                                            <th style="width: 140px;">Start Time</th>
+                                                            <th style="width: 140px;">End Time</th>
+                                                            <th style="width: 350px;">Remarks</th>
+                                                            <th class="cstm-sticky" style="width: 80px;right:0">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="es in newExamSchedule.ExamScheduleDetailsColl">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>
+                                                                <select name="comment-group"
+                                                                        class="form-control form-control-sm select2" ng-model="es.SubjectId">
+                                                                    <option ng-value="s.SubjectId" ng-repeat="s in newExamSchedule.SubjectList" ng-selected="s.SubjectId==es.SubjectId">{{s.Name}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <select name="exam-type-group"
+                                                                        class="form-control form-control-sm select2" ng-model="es.PaperTypeId">
+                                                                    <option ng-value="pr.id" ng-repeat="pr in PaperTypeList" ng-selected="es.PaperTypeId==pr.id">{{pr.text}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm" ng-model="es.ExamDate_TMP" date-picker date-detail="es.ExamDateDet" />
+                                                            </td>
+                                                            <td>
+                                                                <select name="comment-group"
+                                                                        class="form-control form-control-sm select2" ng-model="es.ExamShiftId" ng-change="ChangeExamShift(es)">
+                                                                    <option ng-value="s.ExamShiftId" ng-repeat="s in ExamShiftList" ng-selected="s.ExamShiftId==es.ExamShiftId">{{s.Name}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td style="min-width:100px">
+                                                                <input type="time"
+                                                                       class="form-control form-control-sm" ng-model="es.StartTime_TMP" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="time"
+                                                                       class="form-control form-control-sm" ng-model="es.EndTime_TMP" />
+                                                            </td>
+                                                            <td>
+                                                                <textarea cols="30" rows="1" class="form-control form-control-sm" ng-model="es.Remarks"></textarea>
+
+                                                            </td>
+                                                            <td class="text-center cstm-sticky" style="right:0; background-color:#fff;">
+
+                                                                <a class="p-1" ng-click="AddExamScheduleDetails($index)">
+                                                                    <i class="fas fa-plus text-primary"></i>
+                                                                </a>
+                                                                <a class="p-1" ng-click="delExamScheduleDetails($index)">
+                                                                    <i class="fas fa-trash-alt w-t text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearExamSchedule()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-danger" style="min-width: 90px;" ng-click="DelExamScheduleById()">Delete</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateExamSchedule()">{{newExamSchedule.Mode}}</button>
+
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Exam Schedule Tab Ends  -->
+                                <!-- Exam Schedule Status Starts -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    <div id="examschedule-section">
+                                        <div class="tab-pane fade show active" id="pills-four" role="tabpanel" aria-labelledby="pills-four-tab">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label>Exam Type</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newExamScheduleStatus.ExamTypeId" ng-change="GetExamScheduleStatus()">
+                                                            <option ng-value="cl.ExamTypeId" ng-repeat="cl in ExamTypeList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card card-primary card-tabs ">
+                                                <div class="card-header with-gradient-bg p-0 pt-1">
+                                                    <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                                        <li class="nav-item">
+                                                            <a class="nav-link active" id="custom-tabs-one-home-tab"
+                                                               data-toggle="pill" href="#custom-tabs-one-home" role="tab"
+                                                               aria-controls="custom-tabs-one-home" aria-selected="true" style="padding-left: 3rem;
+                                                                        padding-right: 3rem;">Completed</a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                                               href="#custom-tabs-one-profile" role="tab"
+                                                               aria-controls="custom-tabs-one-profile"
+                                                               aria-selected="false" style="padding-left: 3rem;
+                                                                        padding-right: 3rem;">Pending</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="card-body p-2">
+                                                    <div class="tab-content" id="custom-tabs-one-tabContent">
+                                                        <div class="tab-pane fade show active" id="custom-tabs-one-home"
+                                                             role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                                                            <div class="row">
+                                                                <div class="col-md-2">
+                                                                    <div class="input-group input-group-sm table-search-filed">
+                                                                        <input class="form-control form-control-navbar"
+                                                                               type="search" placeholder="Search"
+                                                                               aria-label="Search" ng-model="searchData.CompletedStatus">
+                                                                        <div class="input-group-append">
+                                                                            <button class="btn btn-default border-left-0"
+                                                                                    type="submit">
+                                                                                <i class="fas fa-search"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="table-scroll-x-y mt-2 sales-main-table table-scroll" style="max-height: calc(100vh - 13rem)">
+                                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white  table-head-fixed">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="width:150px">S.No.</th>
+                                                                            <th style="width:250px">Class/Sec.</th>
+                                                                            <th style="width:250px">Exam Date</th>
+                                                                            <th style="width:250px">Create At</th>
+                                                                            <th style="width:100px">User</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr ng-repeat="es in CompletedExamScheduleList | filter:searchData.CompletedStatus">
+                                                                            <td>{{$index+1}}</td>
+                                                                            <td>{{es.ClassName}} <span ng-if="es.SectionName">-{{es.SectionName}}</span> <span ng-if="es.Batch">- {{es.Batch}}</span> <span ng-if="es.ClassYear">- {{es.ClassYear}}</span> <span ng-if="es.Semester">- {{es.Semester}}</span></td>
+                                                                            <td>{{es.StartDate_BS}}-{{es.EndDate_BS}}</td>
+                                                                            <td>{{es.CreateDateTime_BS}}</td>
+                                                                            <td>{{es.UserName}}</td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                                <!-- table end -->
+                                                            </div>
+                                                        </div>
+                                                        <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel"
+                                                             aria-labelledby="custom-tabs-one-profile-tab">
+                                                            <div class="row">
+                                                                <div class="col-md-2">
+                                                                    <div class="input-group input-group-sm table-search-filed">
+                                                                        <input class="form-control form-control-navbar"
+                                                                               type="search" placeholder="Search"
+                                                                               aria-label="Search" ng-model="searchData.PendingStatus">
+                                                                        <div class="input-group-append">
+                                                                            <button class="btn btn-default border-left-0"
+                                                                                    type="submit">
+                                                                                <i class="fas fa-search"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="table-scroll-x-y mt-2 sales-main-table table-scroll" style="max-height: calc(100vh - 13rem)">
+                                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white  table-head-fixed">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="width:100px">S.No.</th>
+                                                                            <th style="width:350px">Class/Sec.</th>
+
+                                                                            @*<th style="width:120px">Action</th>*@
+
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr ng-repeat="es in PendingExamScheduleList | filter:searchData.PendingStatus">
+                                                                            <td>{{$index+1}}</td>
+                                                                            <td>{{es.ClassName}} <span ng-if="es.SectionName">-{{es.SectionName}}</span> <span ng-if="es.Batch">- {{es.Batch}}</span> <span ng-if="es.ClassYear">- {{es.ClassYear}}</span> <span ng-if="es.Semester">- {{es.Semester}}</span></td>
+                                                                            @*<td>
+                            <a class="btn btn-sm btn-info" ng-click="CreateExamScheduleStatusPending($index)" style="min-width: 90px; color:#fff">
+                                <i class="fas fa-plus"></i> &nbsp; Create Schedule
+                            </a>
+                        </td>*@
+
+                                                                        </tr>
+
+                                                                    </tbody>
+                                                                </table>
+                                                                <!-- table end -->
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <!-- /.card -->
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                                <!-- Exam Schedule Status Ends -->
+                                <!-- Print Admit Card Starts -->
+                                <div class="tab-pane fade main-section" id="contact" role="tabpanel"
+                                     aria-labelledby="contact-tab">
+                                    <div class="row">
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                            <label>Batch</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newPrintAdmitCard.BatchId" ng-change="PrintNormalAdmitCard(1)">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>Class</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newPrintAdmitCard.SelectedClass" ng-change="PrintNormalAdmitCard(2)">
+                                                <option ng-value="0" selected>**Select Class**</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassSection.SectionList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass1.ClassType==3">
+                                            <label>Semester</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newPrintAdmitCard.SemesterId" ng-change="PrintNormalAdmitCard(3)">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList1">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass1.ClassType==2">
+                                            <label>Year</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newPrintAdmitCard.ClassYearId" ng-change="PrintNormalAdmitCard(4)">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList1">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Exam Type</label>
+                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newPrintAdmitCard.ExamTypeId" ng-change="PrintNormalAdmitCard()">
+                                                <option value="0" selected>Select Exam</option>
+                                                <option ng-value="cl.ExamTypeId" ng-repeat="cl in ExamTypeList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Minimum Dues Amount</label>
+                                                <input type="number"
+                                                       class="form-control form-control-sm" placeholder="Minimum Dues Amount" ng-model="newPrintAdmitCard.DuesAmt">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <span>Select Report</span>
+                                                <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintNormalAdmitCard()" ng-model="newPrintAdmitCard.RptTranId">
+                                                    <option ng-value="0" ng-selected="true">Select Report</option>
+                                                    <option ng-value="rt.RptTranId" ng-repeat="rt in newPrintAdmitCard.TemplatesColl">{{rt.ReportName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Select Student(s)</label>
+                                                <select multiple class="form-control form-control-sm select2" ng-change="PrintStudentAdmitCard()" ng-model="newPrintAdmitCard.StudentIdColl" style="width:100%">
+                                                    <option ng-value="0" ng-selected="true">** Select Student **</option>
+                                                    <option ng-value="st.StudentId" ng-repeat="st in AllStudentColl">{{st.Name}}-{{st.RegNo}}-{{st.ClassName}}({{st.SectionName}})-{{st.RollNo}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+
+                                    <div class="row mt-2" id="schedule-report-table">
+                                        <iframe id="frmRptTabulation" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                    </div>
+
+                                    <div class="card p-2 mt-2">
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+
+                                                        <th style="width:50px">S.No.</th>
+                                                        <th style="width:80px">Id</th>
+                                                        <th style="width:250px">Name</th>
+                                                        <th style="width:80px">Roll No.</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="pa in PrintAdmitCardList | filter:searchData.PrintAdmitCard | itemsPerPage: perPage.PrintAdmitCard" current-page="currentPages.PrintAdmitCard" @*pagination-id="printadmitcardPagination"*@>
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{pa.Id}}</td>
+                                                        <td>{{pa.Name}}</td>
+                                                        <td>{{pa.RollNo}}</td>
+
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Print Admit Card Ends -->
+                                <!-- Student List for Exam Starts -->
+                                <!--<div class="tab-pane fade main-section" id="studentlist" role="tabpanel"
+                                     aria-labelledby="studentlist-tab">
+                                    <header class="row">
+                                        <div class="col-md-2">
+                                            <label>Class/Sec</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudentList.SelectedClass" ng-change="GetStudentListForExam()">
+                                                <option ng-value="0" selected>**All Class**</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassSection.SectionListWithClass">{{cl.text}}</option>-->
+                                                @*<option ng-value="cl" ng-repeat="cl in ClassSection.SectionList">{{cl.text}}</option>*@
+                                            <!--</select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>Exam</label>
+                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newStudentList.ExamTypeId" ng-change="GetStudentListForExam()">
+                                                <option value="0" selected>Select Exam</option>
+                                                <option ng-value="cl.ExamTypeId" ng-repeat="cl in ExamTypeList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>Subject</label>
+                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newStudentList.SubjectId" ng-change="GetStudentListForExam()">
+                                                <option value="0" selected>Select Subject</option>
+                                                <option ng-value="cl.SubjectId" ng-repeat="cl in AllSubjectList">{{cl.Name}}-{{cl.Code}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:90px" ng-click="GetStudentListForExam()">Load</button>
+                                        </div>-->
+                                        <!-- end col-md-8 -->
+                                        <!--<div class="col-md-4 text-right mt-4">
+                                            <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                  
+                                                </div>
+                                            </div>
+
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="top"
+                                               title="Print" ng-click="PrintStudentListForExam()">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </header>
+                                    <div class="card py-2 ">
+                                        <div ui-grid="gridOptions"
+                                             ui-grid-auto-resize
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-save-state style="height: calc(100vh - 10rem);">
+
+                                        </div>
+                                    </div>
+                                </div>-->
+                                <!-- Student List for Exam Ends -->
+                                <!-- ReStudent List for Exam Starts -->
+                                <!--<div class="tab-pane fade main-section" id="restudentlist" role="tabpanel"
+                                     aria-labelledby="restudentlist-tab">
+                                    <header class="row">
+                                        <div class="col-md-2">
+                                            <label>Class/Sec</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newReStudentList.SelectedClass" ng-change="GetStudentListForReExam()">
+                                                <option ng-value="0" selected>**All Class**</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassSection.SectionList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>Exam</label>
+                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newReStudentList.ExamTypeId" ng-change="GetStudentListForReExam()">
+                                                <option value="0" selected>Select Exam</option>
+                                                <option ng-value="cl.ExamTypeId" ng-repeat="cl in ExamTypeList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>Re-Exam</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newReStudentList.ReExamTypeId" ng-change="GetStudentListForReExam()">
+                                                <option ng-value="0">**Select ReExamType**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ReExamTypeList | filter: { ExamTypeId: newReStudentList.ExamTypeId }:true" ng-selected="cl.id==newReStudentList.ReExamTypeId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>Subject</label>
+                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newReStudentList.SubjectId" ng-change="GetStudentListForReExam()">
+                                                <option value="0" selected>Select Subject</option>
+                                                <option ng-value="cl.SubjectId" ng-repeat="cl in AllSubjectList">{{cl.Name}}-{{cl.Code}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:90px" ng-click="GetStudentListForReExam()">Load</button>
+                                        </div>-->
+                                        <!-- end col-md-8 -->
+                                        <!--<div class="col-md-2 text-right mt-4">
+                                            <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                   
+                                                </div>
+                                            </div>
+
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="top"
+                                               title="Print" ng-click="PrintStudentListForReExam()">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </header>
+                                    <div class="card py-2">
+                                        <div ui-grid="gridOptions1"
+                                             ui-grid-auto-resize
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-save-state style="height: calc(100vh - 10rem);">
+
+                                        </div>
+                                    </div>
+                                </div>-->
+                                <!-- Student List for Exam Ends -->
+                                <!-- Print Exam Schedule for All Class Start-->
+                                <div class="tab-pane fade main-section" id="printexamschedule" role="tabpanel"
+                                     aria-labelledby="printexamschedule-tab">
+                                    <header class="row">
+                                        <div class="col-md-4">
+                                            <label>Exam Type</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="printExamSchedule.ExamTypeId" ng-change="PrintExamSchedule()">
+                                                    <option value="0">**Select ExamType**</option>
+                                                    <option ng-value="cl.ExamTypeId" ng-repeat="cl in ExamTypeList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="custom-control custom-checkbox mt-4">
+                                                <input class="custom-control-input" type="checkbox" id="customCheckbox1"
+                                                       ng-model="printExamSchedule.SectionWise">
+                                                <label for="customCheckbox1" class="custom-control-label">
+                                                    Section Wise
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mt-4">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox3" ng-model="printExamSchedule.InDetails">
+                                                <label for="customCheckbox3"
+                                                       class="custom-control-label">Show In Details</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Select Report Template</label>
+                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintExamSchedule()" ng-model="printExamSchedule.RptTranId">
+                                                <option ng-value="0" ng-selected="true">Select Report</option>
+                                                <option ng-value="rt.RptTranId" ng-repeat="rt in printExamSchedule.TemplatesColl">{{rt.ReportName}}</option>
+                                            </select>
+                                        </div>
+                                    </header>
+                                    <div class="row mt-2" id="examschedule-report-table">
+                                        <iframe id="frmRptExamSchedule" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                    </div>
+                                </div>
+                                <!-- Print Exam Schedule for All Class Ends -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

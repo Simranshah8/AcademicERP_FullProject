@@ -1,0 +1,715 @@
+﻿<script src="~/jslib/academic/reporting/OnlineClass.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="OnlineClassController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div id="timelinesection">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="date"> Date</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" ng-model="onlineClass.StartDate_TMP" date-picker date-detail="onlineClass.ForDateDet" before-days="30" after-days="40" confirm-action="GetAllRunningClassesList()">
+                            </div>
+                        </div>
+                        <div class="col-md-3 mt-4">
+                            <label><b>Total Scheduled Classes: {{OCAdmin.MissedColl.length+OCAdmin.ConductColl.length}}</b></label>
+                        </div>
+                        <div class="col-md-2 mt-4">
+                            <label><b>Running : {{OCAdmin.RunningColl.length}}</b></label>
+                        </div>
+                        <div class="col-md-2 mt-4">
+                            <label><b>Completed : {{OCAdmin.PassedColl.length}}</b></label>
+                        </div>
+                        <div class="col-md-2 mt-4">
+                            <label><b>Missed : {{OCAdmin.MissedColl.length}}</b></label>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Starts -->
+                    <div class="timeline registration-form">
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Running Classes</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="card p-2">
+                                    <header class="row mb-1">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.RunningClasses">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.RunningClasses">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search"
+                                                               placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.RunningClasses"/>
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 60px">S.No</th>
+                                                    <th style="width: 100px">Class/Sec</th>
+                                                    <th style="width: 150px">Subject</th>
+                                                    <th style="width: 150px">Teacher</th>
+                                                    <th style="width: 140px">ClassTime</th>
+                                                    <th style="width: 110px">Duratio(min)</th>
+                                                    <th style="width: 140px">Action</th>
+                                                    <th style="width: 200px">Remarks</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="rc in OCAdmin.RunningColl | filter:searchData.RunningClasses | itemsPerPage: perPage.RunningClasses" current-page="currentPages.RunningClasses" pagination-id="RunningClassesPagination">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{rc.ClassName}}-{{rc.SectionName}}</td>
+                                                    <td>{{rc.SubjectName}}</td>
+                                                    <td>{{rc.TeacherName}}</td>
+                                                    <td>{{rc.StartDateTime |timeFormat}}-{{rc.EndDateTime |timeFormat}}({{rc.TimeDiff}})</td>
+                                                    <td>{{rc.TimeDiff}}</td>
+                                                    <td>
+                                                        <a class="btn btn-sm py-0 btn-success" href="{{rc.Link}}" target="_blank">Join({{rc.Present}})</a>
+                                                        <a class="btn btn-sm py-0 btn-danger" ng-click="EndOnlineClass(rc)">End</a>
+                                                    </td>
+
+                                                    <td>
+                                                        <div class="inline-form d-flex">
+                                                            <textarea class="form-control form-control-sm" rows="1" placeholder=""></textarea> <a href="#"
+                                                                                                                                                  class="ml-2 text-info" style="font-size: 18px;"><i class="fas fa-save"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="RunningClassesPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                    <!-- table end -->
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Completed Classes</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="card p-2">
+                                    <header class="row mb-1">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.CompletedClasses">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.CompletedClasses">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search"
+                                                               placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.CompletedClasses"/>
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+
+
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table1'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table1'" class="btn btn-secondary btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                        <table id="main-table1" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 50px">S.No</th>
+                                                    <th style="width: 120px">Class/Sec</th>
+                                                    <th style="width: 150px">Subject</th>
+                                                    <th style="width: 170px">Teacher</th>
+                                                    <th style="width: 170px">ClassTime</th>
+                                                    <th style="width: 100px">No.Of Student</th>
+                                                    <th style="width: 70px">Present</th>
+                                                    <th style="width: 70px">Absent</th>
+                                                    <th style="width: 70px">Attend.(%)</th>
+                                                    <th style="width: 90px">Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="rc in OCAdmin.PassedColl | filter:searchData.CompletedClasses | itemsPerPage: perPage.CompletedClasses" current-page="currentPages.CompletedClasses" pagination-id="CompletedClassesPagination">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{rc.ClassName}}-{{rc.SectionName}}</td>
+                                                    <td>{{rc.SubjectName}}</td>
+                                                    <td>{{rc.TeacherName}}</td>
+                                                    <td>{{rc.StartDateTime_AD |timeFormat}}-{{rc.EndDateTime_AD |timeFormat}}={{rc.Duration}}min.</td>
+                                                    <td>{{rc.NoOfStudent}}</td>
+                                                    <td>{{rc.NoOfPresent}}</td>
+                                                    <td>{{rc.NoOfStudent-rc.NoOfPresent}}</td>
+                                                    <td>{{(rc.NoOfPresent/rc.NoOfStudent)*100 |number:2}}</td>
+                                                    <td><button class="btn btn-sm btn-info py-0 px-3" ng-click="ShowAttendance(rc)">Show</button></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td></td>
+                                                    <td colspan="4" style="text-align:right">TOTAL -</td>
+                                                    <td>{{summary.NoOfStudent}}</td>
+                                                    <td>{{summary.NoOfPresent}}</td>
+                                                    <td>{{summary.NoOfStudent-summary.NoOfPresent}}</td>
+                                                    <td>{{(summary.NoOfPresent/summary.NoOfStudent)*100 |number:2}}</td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    <!-- table end -->
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="CompletedClassesPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Missed Classes</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="card p-2">
+
+                                    <header class="row mb-1">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.MissedClasses">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.MissedClasses">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search"
+                                                               placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.MissedClasses" />
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table2'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table2').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table2').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table2').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table2').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table2'" class="btn btn-secondary btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-success " data-toggle="modal" data-target="#modal-xl"><i class="far fa-bell"></i> Notification</button>
+
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                        <table id="main-table2" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 60px">S.No</th>
+                                                    <th style="width: 90px">Class</th>
+                                                    <th style="width: 170px">Subject</th>
+                                                    <th style="width: 170px">Teacher</th>
+                                                    <th style="width: 120px">Scheduled Time</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="rc in OCAdmin.MissedColl | filter:searchData.MissedClasses | itemsPerPage: perPage.MissedClasses" current-page="currentPages.MissedClasses" pagination-id="MissedClassesPagination">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{rc.ClassName}}-{{rc.SectionName}}</td>
+                                                    <td>{{rc.SubjectName}}</td>
+                                                    <td>{{rc.TeacherName}}</td>
+                                                    <td>{{rc.StartTime}}-{{rc.EndTime}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- table end -->
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="MissedClassesPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+
+                    </div>
+                    <!-- form area ends -->
+                </div>
+                <div id="attendance-form">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label class="form-group" for=""><b>Class/Sec : {{PClass.ClassName}}-{{PClass.SectionName}}</b></label>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="" class="form-group"><b>Subject : {{PClass.SubjectName}}</b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="" class="form-group"><b>Teacher : {{PClass.TeacherName}}</b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="" class="form-group"><b>Class Time : {{PClass.StartDateTime_AD |timeFormat}}-{{PClass.EndDateTime_AD |timeFormat}}</b></label>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="" class="form-group"><b>Total Student : {{PClass.TotalStudent}}</b></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submitted and not sublitted tab starts -->
+                    <div class="card card-primary card-tabs mt-2">
+                        <div class="card-header with-gradient-bg p-0 pt-2">
+                            <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="custom-tabs-one-home-tab"
+                                       data-toggle="pill" href="#custom-tabs-one-home" role="tab"
+                                       aria-controls="custom-tabs-one-home" aria-selected="true" style="padding-left: 3rem;
+                                padding-right: 3rem;">Present({{PClass.Present}})</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-profile" role="tab"
+                                       aria-controls="custom-tabs-one-profile"
+                                       aria-selected="false" style="padding-left: 3rem;
+                                padding-right: 3rem;">Absent({{PClass.Absent}})</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="custom-tabs-one-tabContent">
+                                <div class="tab-pane fade show active" id="custom-tabs-one-home"
+                                     role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                                    <div>
+                                        <header class="row mb-1">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PresentStudents">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PresentStudents">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.PresentStudents">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+
+                                            </div>
+                                        </header>
+
+                                        <div class="table-scroll-x-y sales-main-table table-scroll mt-2 mb-2">
+                                            <table class="table table-bordered table-head-fixed text-nowrap">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px;">S.N.</th>
+                                                        <th style="width: 70px;">Section</th>
+                                                        <th style="width: 300px;">Name</th>
+                                                        <th style="width: 100px;">Roll No.</th>
+                                                        <th style="width: 200px;">Join Time</th>
+                                                        <th style="width: 100px;">Late</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in PresentStudentsList | filter:searchData.PresentStudents | itemsPerPage: perPage.PresentStudents" current-page="currentPages.PresentStudents" pagination-id="PresentStudentsPagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.ClassName}}-{{cl.SectionName}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.RollNo}}</td>
+                                                        <td>{{cl.FirstJoinAt}}</td>
+                                                        <td>{{cl.LateMinute}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- Pagination -->
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="PresentStudentsPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                        <!-- Pagniation End -->
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel"
+                                     aria-labelledby="custom-tabs-one-profile-tab">
+                                    <div>
+                                        <header class="row mb-1">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AbsentStudents">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AbsentStudents">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.AbsentStudents">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot//dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-success " data-toggle="modal" data-target="#modal-xl1"><i class="far fa-bell"></i> Notification</button>
+
+
+                                            </div>
+                                        </header>
+
+                                        <div class="table-scroll-x-y sales-main-table table-scroll mt-2 mb-2">
+                                            <table class="table table-bordered table-head-fixed text-nowrap">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px;">S.N.</th>
+                                                        <th style="width: 100px;">Section</th>
+                                                        <th style="width: 300px;">Name</th>
+                                                        <th style="width: 100px;">Roll No.</th>
+                                                        <th style="width: 100px;">FatherName</th>
+                                                        <th style="width: 100px;">ContactNo</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in AbsentStudentsList | filter:searchData.AbsentStudents | itemsPerPage: perPage.AbsentStudents" current-page="currentPages.AbsentStudents" pagination-id="AbsentStudentsPagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.ClassName}}-{{cl.SectionName}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.RollNo}}</td>
+                                                        <td>{{cl.FatherName}}</td>
+                                                        <td>{{cl.ContactNo}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- Pagination -->
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="AbsentStudentsPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                        <!-- Pagniation End -->
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- /.card -->
+                    </div>
+
+
+                    <!-- Submitted and Not Submitted Tab ends -->
+
+                    <div class="d-flex justify-content-center">
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button"
+                                        class="btn btn-sm btn-info"
+                                        id="back-to-list"
+                                        style="min-width: 90px">
+                                    Back to List
+                                </button>
+
+                            </span>
+                        </div>
+                    </div>
+                    <!-- The contents after the detail button is clicked ends -->
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <!-- Modal -->
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Notice Title</label>
+                        <input type="text" class="form-control form-control-sm" ng-model="missedNotice.title">
+                    </div>
+                    <div class="form-group">
+                        <label>Notice</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="missedNotice.notice"></textarea>
+                    </div>
+
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearMissedNotice()">Reset</button>
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SendNotificeToMissedClass()">Send</button>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+    </div>
+    <!-- /.modal-dialog -->
+    <!-- Modal -->
+    <div class="modal fade" id="modal-xl1">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Notice Title</label>
+                        <input type="text" class="form-control form-control-sm" ng-model="absentNotice.title">
+                    </div>
+                    <div class="form-group">
+                        <label>Notice</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="absentNotice.notice"></textarea>
+                    </div>
+
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearAbsentNotice()">Reset</button>
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SendNotificeToAbsStudent()">Send</button>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+

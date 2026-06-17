@@ -1,0 +1,748 @@
+﻿<style>
+    .table td {
+        padding: 0.25rem;
+    }
+</style>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/global/math.min.js"></script>
+<script src="~/jslib/attendance/SalarySheet.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="SalarySheetController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="card p-0" style="margin-top:-13px">
+                    <div class="row">
+                        <div class="col-sm-2 col-md-2">
+                            <div class="form-group">
+                                <label>For Year</label>
+                                <select class="form-control form-control-sm" ng-model="newFilter.YearId">
+                                    <option ng-value="A.id" ng-repeat="A in AcademicYearColl" ng-selected="A.id==newFilter.YearId">{{A.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-2 col-md-2">
+                            <div class="form-group">
+                                <label for="">For Month</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.MonthId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFilter.MonthId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Branch</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.BranchId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newFilter.BranchId">{{B.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Department</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.DepartmentId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==newFilter.DepartmentId">{{c.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.CategoryId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.id" ng-repeat="c in CategoryList" ng-selected="c.id==newFilter.CategoryId">{{c.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-sm btn-success mt-4 float-right" ng-click="GetEmployeeForSalarySheet()"><i class="fas fa-sync-alt mr-2"></i> Load</button>
+                        </div>
+                    </div>
+                    <header class="row">
+                        <div class="col-md-7">
+                            <div class="clearfix">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm mr-sm-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text cstm">Show</span>
+                                        </div>
+                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.SalarySheet">
+                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.SalarySheet">{{pp.text}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar"
+                                               type="search" placeholder="Search"
+                                               aria-label="Search" ng-model="searchData.SalarySheet">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0"
+                                                    type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-right">
+                            <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                 data-placement="top" title="Download File">
+                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-download py-1"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item wait" export-excel table-id="'#SalarySheet'" sheet-name="'SalarySheetList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                    <a class="dropdown-item wait" onClick="$('#SalarySheet').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                </div>
+                            </div>
+
+                            @*<button class="btn btn-sm btn-secondary" style="min-width:70px" ng-click="GenerateJV()">Generate JV</button>*@
+                            <button class="btn btn-sm btn-secondary" style="min-width:70px" ng-click="GetSalaryJV()">Generate JV</button>
+                            @*<button class="btn btn-sm btn-info"><i class="fas fa-eye mr-1"></i>Show Closing</button>*@
+                            <button class="btn btn-sm btn-success" style="min-width:70px" ng-click="SaveSalarySheet()">Save</button>
+                            <button class="btn btn-sm btn-danger" style="min-width:70px" ng-click="DeleteSalarySheet()"> Delete</button>
+                        </div>
+                    </header>
+                    <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 13rem);">
+                        <table id="SalarySheet"
+                               class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="text-center align-middle cstm-sticky" rowspan="2" style="width: 70px; left: 0; z-index: 3; background-color: #fff" ng-click="sortEmpData('EmployeeCode')">Code</th>
+                                    <th class="text-center align-middle cstm-sticky" rowspan="2" style="width: 80px; left: 70px; z-index: 3; background-color: #fff" ng-click="sortEmpData('EnrollNo')">Enroll No</th>
+                                    <th class="align-middle cstm-sticky" rowspan="2" style="width: 180px; left: 150px; z-index: 3; background-color: #fff" ng-click="sortEmpData('EmployeeName')">Name</th>
+                                    <th class="text-center" @*ng-rowspan="(Ph.ActiveTotalInput==true ? 2 : 1)"*@ style="width: 120px;z-index:2" ng-repeat="Ph in AttendanceTypeList">
+                                        {{Ph.Name}}
+                                    </th>
+                                    <th class="text-center" rowspan="2" style="width: 120px;z-index:2" ng-repeat="Ph in PayHeadingList">
+                                        {{Ph.Name}}
+                                    </th>
+                                    <th class="text-center align-middle" rowspan="2" style="width: 120px;z-index:2">
+                                        Earning
+                                    </th>
+                                    <th class="text-center align-middle" rowspan="2" style="width: 120px;z-index:2">
+                                        Deduction
+                                    </th>
+                                    <th class="text-center align-middle" rowspan="2" style="width: 120px;z-index:2">
+                                        Tax
+                                    </th>
+                                    <th class="text-center align-middle" rowspan="2" style="width: 120px;z-index:2">
+                                        Net Payable
+                                    </th>
+                                    <th class="text-center align-middle cstm-sticky" rowspan="2" style="width:100px;right:0;z-index:3">Action</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-center" style="width: 120px;z-index:2" ng-repeat="Ph in AttendanceTypeList" @*ng-show="Ph.ActiveTotalInput==true"*@>
+                                        <input ng-show="Ph.ActiveTotalInput==true" type="text" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="Ph.Value" ng-change="ChangeTotalAttendance(Ph)">
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="cl in EmployeeListForSalarySheet  |orderBy:sortKeySS:reverseSS | filter:searchData.SalarySheet | itemsPerPage: perPage.SalarySheet" current-page="currentPages.SalarySheet" pagination-id="SalarySheetPagination">
+                                    <td class="align-middle text-center cstm-sticky" style="width: 70px; left: 0; z-index: 1; background-color: #fff">{{cl.EmployeeCode}}</td>
+                                    <td class="align-middle text-center cstm-sticky" style="width: 80px; left: 70px; z-index: 1; background-color: #fff">{{cl.EnrollNo}}</td>
+                                    <td class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 1; background-color: #fff">{{cl.EmployeeName}}</td>
+                                    <td class="text-center" ng-repeat="AT in cl.AttendanceTypeColl">
+                                        <span ng-show="false">{{AT.Value}}</span>
+                                        <input type="text" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="AT.Value" ng-change="ChangeAttendance(cl,AT)">
+                                    </td>
+                                    <td class="text-center" ng-repeat="Ph in cl.PayHeadColl">
+                                        <span ng-show="false">{{Ph.Amount |number:noofdec}}</span>
+                                        <div class="input-group input-group-sm ">
+                                            <input ng-disabled="Ph.IsEditable==false" type="text" number-input noofdecimal="noofdec" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="Ph.Amount" ng-change="ChangeRate(cl,Ph)">
+                                            <div class="input-group-append" style=" z-index: 1; " ng-show="Ph.PayheadType==4 || Ph.PayheadType==6">
+                                                <button class="btn btn-info" ng-click="ShowTaxDetails(cl,Ph)">
+                                                    ...
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span ng-show="false">{{cl.Earning |number:noofdec}}</span>
+                                        <input readonly type="text" number-input noofdecimal="noofdec" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="cl.Earning">
+                                    </td>
+                                    <td>
+                                        <span ng-show="false">{{cl.Deducation |number:noofdec}}</span>
+                                        <input readonly type="text" number-input noofdecimal="noofdec" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="cl.Deducation">
+                                    </td>
+                                    <td>
+                                        <span ng-show="false">{{cl.Tax |number:noofdec}}</span>
+                                        <input readonly type="text" number-input noofdecimal="noofdec" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="cl.Tax">
+                                    </td>
+                                    <td>
+                                        <span ng-show="false">{{cl.Netpayable |number:noofdec}}</span>
+                                        <input readonly type="text" number-input noofdecimal="noofdec" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="cl.Netpayable">
+                                    </td>
+                                    <td class="text-center cstm-sticky" style="width:100px;right:0;z-index:2;background-color:#ececec">
+                                        <a class="px-2 btn btn-info btn-sm" data-toggle="tooltip" title="Tax Calculation" href="#" ng-click="GetTaxCalcDetail(cl)">
+                                            <i class="fas fa-info"></i>
+                                        </a>
+                                        <a class="p-1 btn btn-sm btn-info" data-toggle="tooltip" title="Update" href="#" ng-click="UpdateDetailData(cl,$index)">
+                                            <i class="fas fa-save "></i>
+                                        </a>
+                                        <a class="p-1 btn btn-danger btn-sm" data-toggle="tooltip" title="Delete" href="#" ng-click="DelSalarySheetData(cl)">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="{{AttendanceTypeList.length+3}}" align="center">
+                                        TOTAL :-
+                                    </td>
+                                    <td class="text-center" ng-repeat="Ph in PayHeadingList">
+                                        <span>{{Ph.GTAmount |number:2}}</span>
+                                    </td>
+                                    <td align="right">
+                                        <span>{{TotalRow.Earning |number:2}}</span>
+                                    </td>
+                                    <td align="right">
+                                        <span>{{TotalRow.Deducation |number:2}}</span>
+                                    </td>
+                                    <td align="right">
+                                        <span>{{TotalRow.Tax |number:2}}</span>
+                                    </td>
+                                    <td align="right">
+                                        <span>{{TotalRow.Netpayable |number:2}}</span>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="SalarySheetPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+            </section>
+        </div>
+
+        <div class="modal fade" id="detailmodel" style="margin-top:35px;">
+            <div class="modal-dialog modal-xl" style="max-width:680px!important">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title">Tax Calculation Detail</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-scroll-x-y table-scroll" style="max-height:430px!important">
+                            <table id="main-table"
+                                   class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th style="width: 40px">S.No.</th>
+                                        <th style="width: 110px">Amount</th>
+                                        <th style="width: 110px">Rate</th>
+                                        <th style="width: 100px">Year Tax</th>
+                                        <th style="width: 100px">Month Tax</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="TD in CurTaxDetailsColl">
+                                        <td class="text-center">{{$index+1}}</td>
+                                        <td class="text-right">{{TD.Amount |number:2}}</td>
+                                        <td class="text-center">{{TD.Rate |number:2}}</td>
+                                        <td class="text-right">{{TD.TotalTax |number:2}}</td>
+                                        <td class="text-right">{{TD.Tax |number:2}}</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td class="text-right"><b>Total</b></td>
+                                        <td class="text-right"><b>{{SumTotalAmount |number:2}}</b></td>
+                                        <td></td>
+                                        <td class="text-right"><b>{{SumYearTax |number:2}}</b></td>
+                                        <td class="text-right"><b>{{SumMonthTax |number:2}}</b></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="GenerateJVModal" style="margin-top:35px;">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title">Salary Journal Voucher Detail <b>(Year: {{newDet.Year}},  Month : {{newDet.Month}} )</b></h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div id="printcard">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <h6 class="text-secondary mt-3">Ledger Wise Details</h6>
+                                </div>
+                                <div class="col-md-3 text-right">
+                                    <a class="btn btn-sm btn-default " style="min-width: 90px;" id="add-preview" ng-click="PrintData()"><i class="fas fa-print"></i> Print</a>
+                                    <a class="btn btn-sm btn-default mb-1" export-excel table-id="'#LedgerDetailJV'" sheet-name="'LedgerDetailJV'"><i class="fas fa-file-export"></i> Export</a>
+                                </div>
+                            </div>
+
+                            <div class="table-scroll-x-y table-scroll" style="max-height:430px!important">
+                                <table id="LedgerDetailJV"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th style="width: 40px">S.No.</th>
+                                            <th style="width: 80px">Ledger Code</th>
+                                            <th style="width: 130px">Ledger Name</th>
+                                            <th style="width: 130px">Ledger Group</th>
+                                            <th style="width: 90px">Dr.Amount</th>
+                                            <th style="width: 90px">Cr.Amount</th>
+                                            <th style="width: 400px">Pay Heading Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="TD in SalaryJV.LedgerSJV">
+                                            <td class="text-center">{{$index + 1}}</td>
+                                            <td>{{TD.Code}}</td>
+                                            <td>{{TD.Name}}</td>
+                                            <td>{{TD.LedgerGroup}}</td>
+                                            <td class="text-right">{{TD.DrAmount | number:2}}</td>
+                                            <td class="text-right">{{TD.CrAmount | number:2}}</td>
+                                            <td>{{TD.PayHeadColl}}</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot style="background-color: #dee2e66e">
+                                        <tr>
+                                            <td class="text-center" colspan="4"><b>Total</b></td>
+                                            <td class="text-right"><b>{{ledger.TotalDR | number:2}}</b></td>
+                                            <td class="text-right"><b>{{ledger.TotalCR | number:2}}</b></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <h6 class="text-secondary mt-3">Pay Heading Wise Details</h6>
+                                </div>
+                                <div class="col-md-3 text-right">
+
+                                    <a class="btn btn-sm btn-default my-1" export-excel table-id="'#PayheaddetailJV'" sheet-name="'PayheaddetailJV'"><i class="fas fa-file-export"></i> Export</a>
+                                </div>
+                            </div>
+
+                            <div class="table-scroll-x-y table-scroll mt-2" style="max-height:430px!important">
+                                <table id="PayheaddetailJV"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th style="width: 40px">S.No.</th>
+                                            <th style="width: 100px">Pay Heading</th>
+                                            <th style="width: 100px">Pay Head Type</th>
+                                            <th style="width: 90px">Ledger Code</th>
+                                            <th style="width: 110px">Ledger Name</th>
+                                            <th style="width: 150px">Ledger Group</th>
+                                            <th style="width: 90px">Dr.Amount</th>
+                                            <th style="width: 90px">Cr.Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="TD in SalaryJV.PayHeadSJV">
+                                            <td class="text-center">{{$index + 1}}</td>
+                                            <td>{{TD.PayHeading}}</td>
+                                            <td>{{TD.PayHeadType}}</td>
+                                            <td>{{TD.LedgerCode}}</td>
+                                            <td>{{TD.LedgerName}}</td>
+                                            <td>{{TD.LedgerGroup}}</td>
+                                            <td class="text-right">{{TD.DrAmount | number:2}}</td>
+                                            <td class="text-right">{{TD.CrAmount | number:2}}</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot style="background-color: #dee2e66e">
+                                        <tr>
+                                            <td class="text-center" colspan="6"><b>Total</b></td>
+                                            <td class="text-right"><b>{{PayHead.TotalDR | number:2}}</b></td>
+                                            <td class="text-right"><b>{{PayHead.TotalCR | number:2}}</b></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <button class="btn btn-sm btn-secondary mt-2" style="min-width:70px" ng-click="GenerateJV()">Generate JV</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!--Tax Calculation modal starts-->
+        <div class="modal fade" id="GetTaxCalcDetail" style="margin-top:22px;">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-light text-white text-center">
+                        <h5 class="modal-title" id="taxCalculationModalTitle">
+                           <i class="fas fa-calculator mr-2"></i> Tax Calculation of : {{bdet.EmployeeName}} ({{bdet.EmployeeCode}})- {{bdet.YearId}} - {{bdet.MonthName}}
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-2">
+                        <div class="card-header p-0 bg-light text-dark text-center">
+                            <strong>Previous Month Details</strong>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead class="thead-light">
+                                    <!-- Main Header Row -->
+                                    <tr>
+                                        <th rowspan="2" class="align-middle text-center">Month Name</th>
+                                        <th class="text-center" ng-repeat="M in MonthList">{{M.text}}</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <!-- Earning Row -->
+                                    <tr>
+                                        <td class="font-weight-bold text-left pl-3">Earning</td>
+                                        <td class="text-right" ng-repeat="M in MonthList">0</td>
+                                        <td class="text-right">0</td>
+                                    </tr>
+
+                                    <!-- Deduction Row -->
+                                    <tr>
+                                        <td class="font-weight-bold text-left pl-3">Deduction</td>
+                                        <td class="text-right" ng-repeat="M in MonthList">0</td>
+                                        <td class="text-right">0</td>
+                                    </tr>
+
+                                    <!-- Tax Exemption Row -->
+                                    <tr>
+                                        <td class="font-weight-bold text-left pl-3">Tax Exemption</td>
+                                        <td class="text-right" ng-repeat="M in MonthList">0</td>
+                                        <td class="text-right">0</td>
+                                    </tr>
+
+                                    <!-- Income Tax Row -->
+                                    <tr>
+                                        <td class="font-weight-bold text-left pl-3">Income Tax</td>
+                                        <td class="text-right" ng-repeat="M in MonthList">0</td>
+                                        <td class="text-right">0</td>
+                                    </tr>
+
+                                    <!-- Tax Row -->
+                                    <tr>
+                                        <td class="font-weight-bold text-left pl-3">Tax</td>
+                                        <td class="text-right" ng-repeat="M in MonthList">0</td>
+                                        <td class="text-right">0</td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+                        <!-- Current Month Details -->
+                        <div class="card-header bg-light p-1 text-dark text-center">
+                            <strong>Current Month Details</strong>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card mb-0">
+                                    <div class="card-header p-1 bg-light text-white text-center">
+                                        <strong>Earning</strong>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <tbody>
+                                                <tr><td>Basic</td><td class="text-right">{{newDet.CurEarningBasic}}</td></tr>
+                                                <tr><td>Allowance</td><td class="text-right">{{newDet.CurEarningAllowance}}</td></tr>
+                                                <tr><td>PF</td><td class="text-right">{{newDet.CurPf}}</td></tr>
+                                                <tr class="table-secondary"><td><strong>Total</strong></td><td class="text-right"><strong>{{newDet.CurTotalEarning}}</strong></td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card mb-0">
+                                    <div class="card-header p-1 bg-light text-dark text-center">
+                                        <strong>Deduction</strong>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <tbody>
+                                                <tr><td>PF Deduction</td><td class="text-right">{{newDet.CurTotalPfDeduction}}</td></tr>
+                                                <tr class="table-secondary"><td><strong>Total</strong></td><td class="text-right"><strong>{{newDet.CurTotalDeduction}}</strong></td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card mb-0">
+                                    <div class="card-header p-1 bg-light text-white text-center">
+                                        <strong>Tax Exemption</strong>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <tbody>
+                                                <tr><td>PF Deduction</td><td class="text-right">{{newDet.CurTaxExePfDeduction}}</td></tr>
+                                                <tr class="table-secondary"><td><strong>Total</strong></td><td class="text-right"><strong>{{newDet.CurTotalTaxExePfDeduction}}</strong></td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Months  -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card border-warning mb-0">
+                                    <div class="card-header  p-1 bg-light text-dark text-center">
+                                        <strong>Pending Months Details</strong>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="row">
+                                            <!-- Earnings -->
+                                            <div class="col-md-4">
+                                                <table class="table table-sm table-bordered">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Earning</th>
+                                                            <th>Rate</th>
+                                                            <th>Pending Month</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Basic</td>
+                                                            <td class="text-right">30000</td>
+                                                            <td class="text-right">11</td>
+                                                            <td class="text-right">330000</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Allowance</td>
+                                                            <td class="text-right">20,000</td>
+                                                            <td class="text-right">11</td>
+                                                            <td class="text-right">330000</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>PF</td>
+                                                            <td class="text-right">3000</td>
+                                                            <td class="text-right">11</td>
+                                                            <td class="text-right">33000</td>
+                                                        </tr>
+                                                        <tr class="table-secondary">
+                                                            <td colspan="3"><strong>Total</strong></td>
+                                                            <td class="text-right"><strong>583000</strong></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            @*2ND PART*@
+                                            <div class="col-md-4">
+                                                <table class="table table-sm table-bordered">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Deduction</th>
+                                                            <th>Rate</th>
+                                                            <th>Pending Month</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>PF Deduction</td>
+                                                            <td class="text-right">6000</td>
+                                                            <td class="text-right">11</td>
+                                                            <td class="text-right">66000</td>
+                                                        </tr>
+
+                                                        <tr class="table-secondary">
+                                                            <td colspan="3"><strong>Total</strong></td>
+                                                            <td class="text-right"><strong>66000</strong></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            @*3rd part*@
+                                            <div class="col-md-4">
+                                                <table class="table table-sm table-bordered">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Tax Exemption</th>
+                                                            <th>Rate</th>
+                                                            <th>Pending Month</th>
+                                                            <th>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Insurance</td>
+                                                            <td class="text-right">333.33</td>
+                                                            <td class="text-right">11</td>
+                                                            <td class="text-right">36666.63</td>
+                                                        </tr>
+
+                                                        <tr class="table-secondary">
+                                                            <td colspan="3"><strong>Total</strong></td>
+                                                            <td class="text-right"><strong>36666.63</strong></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Final Calculation -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-2">
+                                    <div class="card-header p-1 bg-light text-center">
+                                        <strong>Final Calculation</strong>
+                                    </div>
+                                    <div class="card-body1">
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <td>Yearly Income</td>
+                                                    <td class="text-right">{{newDet.FCYearlyIncome}}</td>
+                                                    <td></td>
+                                                    <td>One Third</td>
+                                                    <td class="text-right">{{newDet.FCOneThird}}</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Deduction</td>
+                                                    <td class="text-right">{{newDet.FCDeduction}}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Contribution Fund</td>
+                                                    <td class="text-right">{{newDet.ContributionFund}}</td>
+                                                    <td class="text-right">Statutory Limit</td>
+                                                    <td class="text-right">{{newDet.StatutoryLimit}}</td>
+                                                    <td>Eligible Deduction</td>
+                                                    <td class="text-right">{{newDet.EligibleDeduction}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Tax Exemption</td>
+                                                    <td class="text-right">{{newDet.FCTaxExemption}}</td>
+                                                    <td class="text-right">Permissible Limit</td>
+                                                    <td class="text-right">{{newDet.PermissibleLimit}}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Taxable Income</td>
+                                                    <td class="text-right">{{newDet.FCIncomeTax}}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Total Income Tax</td>
+                                                    <td class="text-right">{{newDet.FCTotalIncomeTax}}</td>
+                                                    <td class="text-right">Slab Wise Details</td>
+                                                    <td class="text-right">{{newDet.FCTotalIncomeTaxSlabwise}}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Total  Tax</td>
+                                                    <td class="text-right">{{newDet.FCTotalTax}}</td>
+                                                    <td class="text-right">Slab Wise Details</td>
+                                                    <td class="text-right">{{newDet.FCTotalTaxSlabwise}}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Tax From Current Month</th>
+                                            <th>Income Tax Till Month</th>
+                                            <th>Income Tax Adjustment</th>
+                                            <th>Income Tax</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-right">{{newDet.TaxFromCurMonth}}</td>
+                                            <td class="text-right">{{newDet.IncomeTaxTillMonth}}</td>
+                                            <td class="text-right">{{newDet.IncomeTaxAdjustment}}</td>
+                                            <td class="text-right">{{newDet.IncomeTax}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-8">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Tax From Current Month</th>
+                                            <th>Tax Till Month</th>
+                                            <th>Tax Adjustment</th>
+                                            <th>Tax</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{{newDet.TaxFromCurMonth}}</td>
+                                            <td>{{newDet.TaxTillMonth}}</td>
+                                            <td>{{newDet.TaxAdjustment}}</td>
+                                            <td>{{newDet.Tax}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

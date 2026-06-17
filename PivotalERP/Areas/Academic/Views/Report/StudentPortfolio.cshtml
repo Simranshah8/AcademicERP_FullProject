@@ -1,0 +1,475 @@
+﻿
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script src="~/jslib/academic/reporting/StudentProtofolio.js?v=20251115"></script>
+<div ng-app="myApp" ng-controller="StudentProtofolioController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top: 52px !important;">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="" for="inlineFormInputGroup">Select Student</label>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" type="checkbox" ng-model="newStudentPortfolio.ShowLeftStudent"
+                                           id="customCheckbox1" value="option1">
+                                    <label for="customCheckbox1"
+                                           class="custom-control-label">
+                                        Show Left Student
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group-prepend">
+                            <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset; margin-right: -3px; z-index: 1;" ng-model="newStudentPortfolio.SelectStudent">
+                                <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value"
+                                        ng-selected="ss.value==newStudentPortfolio.SelectStudent">
+                                    {{ss.text}}
+                                </option>
+                            </select>
+                            <select class="form-control select2 form-control-sm" all-student
+                                    ng-model="newStudentPortfolio.StudentId" student-detail="newStudentPortfolio.StudentDetails"
+                                    side-bar-data="newStudentPortfolio.SideBarData" search-by="newStudentPortfolio.SelectStudent" confirm-action="getStudentPortfolio()" include-left="newStudentPortfolio.ShowLeftStudent"></select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="mt-1 mr-2">Month</label>
+                            <select class="form-select form-control-sm select2" ng-model="newStudentPortfolio.MonthId" style="width: 100%;" ng-change="updateMonthName()">
+                                <option ng-repeat="ss in MonthList" ng-value="ss.id" ng-selected="ss.id==newStudentPortfolio.MonthId">
+                                    {{ss.text}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-sm btn-default float-right mt-4 " style="min-width: 90px;" ng-click="PrintData()"><i class="fas fa-print mr-2"></i> Print</button>
+                    </div>
+
+                </div>
+                <div class="report-card" id="printcard" style=" margin: auto;">
+                    <div id="calenderheader">
+                        <div class="row">
+                            <div class="col-md-2 mb-0">
+                                <img ng-src="{{ Logo.LogoPath}}" class="img-fluid" style="height: 100px; width: auto;" />
+                            </div>
+                            <div class="col-md-8 text-center">
+                                <p style="font-weight: 700; margin-bottom: 0%; color: #01817e; font-size: x-large; margin-top: 0px">{{CompanyConfig.Name}} </p>
+                                <p style="font-weight: bold; font-size: 15px; margin-bottom: 0%;">{{CompanyConfig.Address}}</p>
+                                <p style="font-weight: bold; font-size: 15px; margin-bottom: 0%;">Contact:  {{ CompanyConfig.PhoneNo.includes(':') ? CompanyConfig.PhoneNo.split(':')[1].trim() : CompanyConfig.PhoneNo }} | Email:  {{ CompanyConfig.EmailId.includes(':') ? CompanyConfig.EmailId.split(':')[1].trim() : CompanyConfig.EmailId }}</p>
+                            </div>
+                            <div class="col-md-2 mb-0">
+                            </div>
+                        </div>
+                        <div class="calendar-month" style="background-color: #01817e; color: white; font-weight: bold; text-align: center; padding: 5px;">
+                            <h5 style="margin-right: 2%; margin-right: 7%;">Student Protofolio - {{ CurDate.NY }} ( Class {{newStudentPortfolio.ClassName}} )</h5>
+                        </div>
+                    </div>
+
+                    <div class="row mb-1 mt-4 ml-1 mr-2 mb-2">
+                        <div class="col-md-6">
+                            <div class="row ">
+                                <div class="col-md-12">
+                                    <strong>Student Name:</strong> <span style="display: inline-block; border-bottom: 1px solid black; width: 70%;">{{newStudentPortfolio.Name}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="row ">
+                                <div class="col-md-12">
+                                    <strong>Roll No:</strong> <span style="display: inline-block; border-bottom: 1px solid black; width: 50%;">{{newStudentPortfolio.RollNo}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="row ">
+                                <div class="col-md-12">
+                                    <strong>Month:</strong> <span style="display: inline-block; border-bottom: 1px solid black; width: 50%;">{{newStudentPortfolio.MonthName}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="max-height: 410px; flex-grow: 1; margin: 5px;">
+                        <table style="width: 100%; font-size: 12px; line-height: 1.6;  border-collapse: collapse; border-color: #666;">
+                            <thead style="background-color: #e1e9f1;">
+                                <tr>
+                                    <th rowspan="2" style="width: 50px; border: 1px solid black; padding: 3px; text-align: center;">Date</th>
+                                    <th rowspan="2" style="width: 50px; border: 1px solid black; padding: 3px; text-align: center;">Day</th>
+                                    <th style="border: 1px solid black; width: 68px; padding: 3px; text-align: center;">Attendance</th>
+                                    <th style="border: 1px solid black; width: 68px; padding: 3px; text-align: center;">Punctual</th>
+                                    <th colspan="7" style="border: 1px solid black; padding: 3px; text-align: center;">Homework</th>
+                                    <th rowspan="2" style="border: 1px solid black; width: 108px; padding: 3px; text-align: center;">Project Work</th>
+                                    <th rowspan="2" style="border: 1px solid black; width:62px; padding: 3px; text-align: center;">PC</th>
+                                    <th rowspan="2" style="border: 1px solid black; width:62px; padding: 3px; text-align: center;">CW</th>
+                                    <th rowspan="2" style="border: 1px solid black; width: 62px; padding: 3px; text-align: center;">HW</th>
+                                    <th rowspan="2" style="width: 50px; border: 1px solid black; padding: 3px; text-align: center;">CCs</th>
+                                    <th colspan="3" style="width: 50px; border: 1px solid black; padding: 3px; text-align: center;">Teacher's Comments</th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 50px; border: 1px solid black; padding: 3px; text-align: center;">Present</th>
+                                    <th style="width: 50px; border: 1px solid black; padding: 3px; text-align: center;">Late</th>
+                                    <th style="width: 62px; border: 1px solid black; padding: 3px; text-align: center;">Nepali</th>
+                                    <th style="width: 62px; border: 1px solid black; padding: 3px; text-align: center;">English</th>
+                                    <th style="width: 62px; border: 1px solid black; padding: 3px; text-align: center;">Maths</th>
+                                    <th style="width: 62px; border: 1px solid black; padding: 3px; text-align: center;">Science</th>
+                                    <th style="width: 62px; border: 1px solid black; padding: 3px; text-align: center;">Social</th>
+                                    <th style="width: 62px; border: 1px solid black; padding: 3px; text-align: center;">Comp.</th>
+                                    <th style="width: 62px; border: 1px solid black; padding: 3px; text-align: center;">HP</th>
+                                    <th style="width: 50px; border: 1px solid black; padding: 3px; text-align: center;">A</th>
+                                    <th style="width: 50px; border: 1px solid black; padding: 3px; text-align: center;">B</th>
+                                    <th style="width: 50px; border: 1px solid black; padding: 3px; text-align: center;">C</th>
+
+                                </tr>
+                            </thead>
+                            <tbody style="background-color: #f9f9f9;">
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">14</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Sun</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">15</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Mon</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">16</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Tue</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">17</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Wed</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">18</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Thru</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">19</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Fri</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">21</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Sun</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">22</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Mon</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">23</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Tue</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">24</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Wed</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">25</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Thru</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">26</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Fri</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">28</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Mon</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">29</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">Mon</td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"></td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class=" mt-4">
+                        <h6><b> Remarks :</b></h6>
+                        <div style="font-size:14px;">
+                            <ol>
+                                <li>
+                                    Present=P, Absent=AB, UF& NP= Uniform& Neatness in Person, Homework: Done = D, Partially Done = PD, Undone = UD, PC = Participation in Class, PW/CW =Project Work/Creative Work, HW = Hand Writing, LCS = Language Communicating Skill,
+                                </li>
+                                <li>
+                                    Grading System:Excellent=A, Good=B, Satisfactory=C, Poor=D
+                                </li>
+                            </ol>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </section>
+        </div>
+    </section>
+</div>

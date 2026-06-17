@@ -1,0 +1,440 @@
+﻿<style>
+    .table td, .table th {
+        padding: 0.3rem;
+    }
+</style>
+<script src="~/jslib/Transport/TransportAttendance.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="TransportAttendanceController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:48px!important;">
+                <div class="tab-content">
+                    <div class="TransportAttendance-section card p-2" id="TransportAttendance-section">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="start">Date from</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newFilter.FromDate_TMP" date-detail="newFilter.FromDateDet" confirm-action="validateDates('fromDate')">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="start">Date to</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newFilter.ToDate_TMP" date-detail="newFilter.ToDateDet" confirm-action="validateDates('toDate')">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mt-4">
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="GetAllTransportAttendanceList()">
+                                        <i class="fas fa-sync-alt mr-2"></i> Load
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline mb-2">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0"
+                                                    id="exampleFormControlSelect1" ng-model="perPage.TransportAttendance">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.TransportAttendance">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.TransportAttendance" />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#TransportAttend'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#TransportAttend').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+
+                                <button type="button" class="btn btn-sm btn-success" id="add-TransportAttendance" style="min-width: 90px">
+                                    <i class="fas fa-plus w-t"></i> Add Transport Attendance
+                                </button>
+                            </div>
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="#TransportAttend" class="main-table table table-sm table-bordered bg-white">
+                                    <thead class="text-nowrap">
+                                        <tr>
+                                            <th style="width: 50px">S.No.</th>
+                                            <th style="width: 100px">Date</th>
+                                            <th style="width: 100px">Vehicle Name</th>
+                                            <th style="width: 100px">Vehicle No.</th>
+                                            <th style="width: 150px">Route</th>
+                                            <th style="width: 150px">Total Student</th>
+                                            <th style="width: 90px">Total PickUp</th>
+                                            <th style="width: 90px">Total DropOff</th>
+                                            <th style="width: 90px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in TransportAttendanceList | filter:searchData.TransportAttendance | itemsPerPage: perPage.TransportAttendance" current-page="currentPages.TransportAttendance" pagination-id="TransportAttendancePagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.ForMiti}}</td>
+                                            <td>{{cl.VehicleName}}</td>
+                                            <td>{{cl.VehicleNumber}}</td>
+                                            <td>{{cl.Route}}</td>
+                                            <td>{{cl.TotalStudents}}</td>
+                                            <td>{{cl.TotalPickup}}</td>
+                                            <td>{{cl.TotalDropOff}}</td>
+                                            <td class="project-actions text-center" style="text-align:center">
+                                                @*<button type="button" class="btn btn-sm btn-info" id="TransportAttendance-det"
+                                                        style="min-width: 90px">
+                                                    Details
+                                                </button>*@
+
+                                                <div class="btn-group-sm">
+                                                    <a class="btn btn-success btn-sm" ng-click="GetDetails(cl)" style="color:#fff;min-width: 90px; cursor:pointer;">Details</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- table end -->
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="TransportAttendancePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <div id="TransportAttendance-form">
+                    <div class="card card-default">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="start"> Date</label>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newTransportAttendance.ForDate_TMP" date-detail="newTransportAttendance.ForDateDet" confirm-action="validateForDate()">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Vehicle Name</label>
+
+                                            <select class="form-control form-control-sm select2" ng-model="newTransportAttendance.VehicleId" ng-change="getVechicleRouteById()">
+                                                <option ng-repeat="V in VehicleDetailsList" ng-value="V.VehicleId" ng-selected="newTransportAttendance.VehicleId==V.VehicleId">{{V.VehicleName}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Transport Route</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newTransportAttendance.RouteId">
+                                                <option ng-repeat="TR in VechicleRouteByIdList" ng-value="TR.RouteId" ng-selected="newTransportAttendance.RouteId==TR.RouteId">{{TR.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Attendance For</label>
+                                            <select class="form-control form-control-sm" ng-model="newTransportAttendance.AttendanceForId" style="width: 100%;" ng-change="GetAllStudentByTransportRoutList()">
+                                                <option ng-repeat=" Af in AttendanceForColl" ng-value="Af.id" ng-selected="newTransportAttendance.AttendanceForId==Af.id">{{Af.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button class="btn btn-sm btn-success mt-4" style="min-width: 90px" ng-click="GetAllStudentByTransportRoutList()"><i class="fas fa-sync-alt mr-2"></i> Load</button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-scroll-x-y sales-main-table table-scroll mb-2" style="max-height:calc(100vh - 12rem);">
+                            <table id="#TransportAttend" class="main-table table table-sm table-bordered bg-white">
+                                <thead class="text-nowrap">
+                                    <tr>
+                                        <th rowspan="2" class="align-middle" style="width: 40px">S.No.</th>
+                                        @*<th rowspan="2" class="align-middle" style="width: 97px">Admission No</th>*@
+                                        <th rowspan="2" class="align-middle" style="width: 200px">Student Name</th>
+                                        @*<th rowspan="2" class="align-middle" style="width: 100px">Class/Section</th>*@
+                                        <th rowspan="2" class="align-middle" style="width: 100px">Contact No</th>
+                                        <th rowspan="2" class="align-middle" style="width: 140px">Address</th>
+                                        <th rowspan="2" class="align-middle" style="width: 140px">Transport Point</th>
+                                        <th colspan="2" class="text-center" style="width: 150px;z-index:2" ng-hide="newTransportAttendance.AttendanceForId==2">
+                                            PickUp
+
+                                        </th>
+                                        <th colspan="2" class="text-center" style="width: 150px; z-index: 2" ng-hide="newTransportAttendance.AttendanceForId==1">
+                                            Drop Off
+                                        </th>
+                                        <th rowspan="2" class="align-middle" style="width: 180px">Remarks</th>
+                                    </tr>
+                                    <tr>
+                                        <th ng-hide="newTransportAttendance.AttendanceForId==2" scope="col" class="cstm-sticky" style="top: 26px; z-index: 2">
+                                            <div class="justify-content-center d-flex">
+                                                Present
+                                                <input type="checkbox" class="pl-1" style="margin-top: 2px;" ng-model="newTransportAttendance.PresentforPick" ng-change="updatePickupAttendance()">
+                                            </div>
+                                        </th>
+                                        <th ng-hide="newTransportAttendance.AttendanceForId==2" scope="col" class="cstm-sticky" style="top: 26px; z-index: 2">Absent</th>
+                                        <th ng-hide="newTransportAttendance.AttendanceForId==1" scope="col" class="cstm-sticky" style="top: 26px; z-index: 2">
+                                            <div class="justify-content-center d-flex">
+                                                Present
+                                                <input type="checkbox" class="pl-1" style="margin-top: 2px;" ng-model="newTransportAttendance.PresentforDrop" ng-change="updateDropoffAttendance()">
+
+                                            </div>
+                                        </th>
+                                        <th ng-hide="newTransportAttendance.AttendanceForId==1" scope="col" class="cstm-sticky" style="top: 26px; z-index: 2">Absent</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="ST in StudentByTransportRoutList">
+                                        <td>{{$index+1}}</td>
+                                        <td>
+                                            <p class="mb-0"><b>{{ST.StudentName }} ({{ST.RegNo}})</b></p>
+                                            <label class="ml-3" ng-if="ST.Batch || ST.Class || ST.Section || ST.ClassYear || ST.Semester">
+                                                <i>
+                                                    <span ng-if="ST.Class">{{ ST.Class }}</span>
+                                                    <span ng-if="ST.Section">-{{ ST.Section }}</span>
+                                                    <span ng-if="(ST.Class || ST.Section) && ST.Batch"> - {{ ST.Batch }}</span>
+                                                    <span ng-if="ST.ClassYear || ST.Semester"> - </span>
+                                                    <span ng-if="ST.ClassYear">{{ ST.ClassYear }}</span>
+                                                    <span ng-if="ST.Semester">{{ ST.Semester }}</span>
+                                                </i>
+                                            </label>
+
+                                        </td>
+                                        <td>{{ST.SContactNo}}</td>
+                                        <td>{{ST.SAddress}}</td>
+                                        <td>{{ST.PointName}} <label hidden>{{ST.VehiclePointId}}</label> </td>
+                                        <td class="text-center" ng-hide="newTransportAttendance.AttendanceForId==2">
+                                            <input type="radio" class="iradio_flat-green input-sm" name="pick+{{$index}}" ng-value="true" ng-model="ST.PickUp" />
+                                        </td>
+                                        <td class="text-center" ng-hide="newTransportAttendance.AttendanceForId==2">
+                                            <input type="radio" class="iradio_flat-green input-sm" name="pick+{{$index}}" ng-value="false" ng-model="ST.PickUp" />
+                                        </td>
+                                        <td class="text-center" ng-hide="newTransportAttendance.AttendanceForId==1">
+                                            <input type="radio" class="iradio_flat-green input-sm" name="drop+{{$index}}" ng-value="true" ng-model="ST.DropOff" />
+                                        </td>
+                                        <td class="text-center" ng-hide="newTransportAttendance.AttendanceForId==1">
+                                            <input type="radio" class="iradio_flat-green input-sm" name="drop+{{$index}}" ng-value="false" ng-model="ST.DropOff" />
+                                        </td>
+                                        <td>
+                                            <textarea class="form-control form-control-sm" rows="1" ng-model="ST.Remarks"></textarea>
+                                        </td>
+                                    </tr>
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- timeline time label -->
+                        <div class="time-label pb-3">
+                            <span class="d-block border-0 p-1 text-center">
+                                <button type="button" class="btn btn-sm btn-info" id="back-to-list-TransportAttendance"
+                                        style="min-width: 90px">
+                                    Back To List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px" ng-click="ClearTransportAttendance()">
+                                    Reset
+                                </button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="SaveUpdateTransportAttendance(ST)">
+                                    Save
+                                </button>
+                            </span>
+                        </div>
+                        <!-- /.timeline-label -->
+                    </div>
+                </div>
+
+                <div id="TransportAttendance-details">
+                    <div id="status-tab">
+                        <div class="card mb-2 p-2" style="background-color: #86c5661f">
+                            <div class="row mt-2">
+                                <div class="col-md-3">
+                                    <label style="width:107px">Attendance Date</label>
+                                    <label><b> : {{TransportDetail.ForMiti}}  </b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label style="width:107px">Vehicle Name</label>
+                                    <label for=""><b> : {{TransportDetail.VehicleName}}  </b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label style="width:107px">Vehicle No.</label>
+                                    <label for=""><b>: {{TransportDetail.VehicleNumber}}  </b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label style="width:107px">Total Student</label>
+                                    <label for=""><b> : {{ getUniqueStudentCount() }} </b></label>
+                                </div>
+                                <!--<div class="col-md-3">
+        <label style="width:107px">Total Student</label>
+        <label for=""><b> : {{TransportDetailList.length}} </b></label>
+    </div>-->
+                                <div class="col-md-3">
+                                    <label style="width:107px">Route</label>
+                                    <label for=""><b>: {{TransportDetail.Route}}</b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label style="width:107px">Driver Name</label>
+                                    <label for=""><b>: {{TransportDetail.DriverName}}  </b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label style="width:107px">Conductor Name</label>
+                                    <label for=""><b>: {{TransportDetail.ConductorName}} </b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label style="width:107px">Incharge</label>
+                                    <label for=""><b>: {{TransportDetail.InchargeName}} </b></label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Submitted and not sublitted tab starts -->
+                        <div class="card card-primary card-tabs mt-2">
+                            <div class="card-header with-gradient-bg p-0 pt-2">
+                                <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="custom-tabs-one-home-tab"
+                                           data-toggle="pill" href="#custom-tabs-one-home" role="tab"
+                                           aria-controls="custom-tabs-one-home" aria-selected="true" style="padding-left: 3rem;
+                                          padding-right: 3rem;">
+                                            PickUp({{ (TransportDetailList | filter:{Attendance:true, AttendanceForId:1}).length }}/{{ (TransportDetailList | filter:{AttendanceForId:1}).length }})
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                           href="#custom-tabs-one-profile" role="tab"
+                                           aria-controls="custom-tabs-one-profile"
+                                           aria-selected="false" style="padding-left: 3rem;
+                                          padding-right: 3rem;">
+                                            DropOff({{ (TransportDetailList | filter:{Attendance:true, AttendanceForId:2}).length }}/{{ (TransportDetailList | filter:{AttendanceForId:2}).length }})
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body px-2">
+                                <div class="tab-content" id="custom-tabs-one-tabContent">
+                                    <div class="tab-pane fade show active" id="custom-tabs-one-home" role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                                        <div class="pt-0">
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-2 mb-2" style="max-height: calc(100vh - 20rem) ;overflow-x:auto">
+                                                <table class="table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px;">S.N.</th>
+                                                            <th style="width: 150px;">Adm. No.</th>
+                                                            <th style="width: 200px;">Name</th>
+                                                            <th style="width: 200px;">Class/Sec</th>
+                                                            <th style="width: 110px;">Contact No</th>
+                                                            <th style="width: 100px;">Address</th>
+                                                            <th style="width: 120px;">Transport Point</th>
+                                                            <th style="width: 120px">Attendance </th>
+                                                            <th style="width: 120px">Remarks </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="hdc in TransportDetailList | filter:{AttendanceForId:1}">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{hdc.RegNo}}</td>
+                                                            <td>{{hdc.StudentName}}</td>
+                                                            <td>{{hdc.ClassDetails}}</td>
+                                                            <td>{{hdc.ContactNo}}</td>
+                                                            <td>{{hdc.Address}}</td>
+                                                            <td>{{hdc.TransportPoint}}</td>
+                                                            <td>{{hdc.Attendance ? 'P' : 'A' }}</td>
+                                                            <td>{{hdc.Remarks}}</td>
+
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel"
+                                         aria-labelledby="custom-tabs-one-profile-tab">
+                                        <div class="pt-0">
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-2 mb-2" style="max-height: calc(100vh - 20rem) ;overflow-x:auto">
+                                                <table class="table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px;">S.N.</th>
+                                                            <th style="width: 150px;">Adm. No.</th>
+                                                            <th style="width: 200px;">Name</th>
+                                                            <th style="width: 200px;">Class/Sec</th>
+                                                            <th style="width: 110px;">Contact No</th>
+                                                            <th style="width: 100px;">Address</th>
+                                                            <th style="width: 120px;">Transport Point</th>
+                                                            <th style="width: 120px">Attendance </th>
+                                                            <th style="width: 120px">Remarks </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="hdc in TransportDetailList | filter:{AttendanceForId:2}">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{hdc.RegNo}}</td>
+                                                            <td>{{hdc.StudentName}}</td>
+                                                            <td>{{hdc.ClassDetails}}</td>
+                                                            <td>{{hdc.ContactNo}}</td>
+                                                            <td>{{hdc.Address}}</td>
+                                                            <td>{{hdc.TransportPoint}}</td>
+                                                            <td>{{hdc.Attendance ? 'P' : 'A' }}</td>
+                                                            <td>{{hdc.Remarks}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info"
+                                                    id="back-from-details"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <!-- /.card -->
+
+
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </section>
+</div>

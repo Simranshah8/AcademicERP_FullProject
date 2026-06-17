@@ -1,0 +1,455 @@
+﻿<script src="~/jslib/frontdesk/transaction/Complain.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<link href="~/wwwroot/dynamic-erp/css/Tableresize.css" rel="stylesheet" />
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ComplainController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="complain-listing">
+                    <!-- Second Tab Content -->
+
+                    <div class="row" style="margin-top: -10px;">
+
+                        <div class="col-md-2">
+                            <div class="form-group mb-1">
+                                <label for="">From Date</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="newFilter.FromDate_TMP" date-detail="newFilter.FromDateDet" confirm-action="validateDates('fromDate')">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group mb-1">
+                                <label for="">To Date</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="newFilter.ToDate_TMP" date-detail="newFilter.ToDateDet" confirm-action="validateDates('toDate')">
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-2">
+                            <div class="form-group mb-1">
+                                <label>Source</label>
+                                <select class="select2 form-control-sm" ng-model="newFilter.SourceId" style="width: 100%">
+                                    <option ng-value=" ">All</option>
+                                    <option ng-repeat="S in SourceList" ng-value="S.SourceId" ng-selected="newFilter.SourceId==S.SourceId">{{S.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group mb-1">
+                                <label>Complaint Type</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.ComplainTypeId" style="width: 100%">
+                                    <option ng-value=" ">All</option>
+                                    <option ng-repeat="C in ComplainTypeList" ng-value="C.ComplainTypeId" ng-selected="newFilter.ComplainTypeId==C.ComplainTypeId">{{C.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group mb-1">
+                                <label>Select Status</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.StatusId" style="width: 100%">
+                                    <option ng-value=" ">All</option>
+                                    <option ng-repeat="C in Statuslist" ng-value="C.id" ng-selected="newFilter.StatusId==C.id">{{C.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-sm btn-success mt-4" ng-click="GetAllComplainList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                        </div>
+                    </div>
+                    <div class="card mb-1 py-1">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Complain">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Complain">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search" ng-model="searchData.Complain"
+                                                   aria-label="Search">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                     data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ComplainList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-success"
+                                        id="add-complain-btn"
+                                        style="min-width: 90px" ng-click="ClearComplain()">
+                                    <i class="fas fa-plus w-t"></i> Add Complaint
+                                </button>
+                            </div>
+                        </header>
+                        <div class="table-scroll-x-y table-container flex-grow-1">
+                            <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 13rem)!important">
+                                    <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th class="align-middle" style="width: 50px" title="S.No.">S.No.</th>
+                                                <th class="align-middle" style="width: 90px;" title="Date" ng-click="sortComplain('Date')">Date</th>
+                                                <th class="align-middle" style="width: 155px" title="ComplainType" ng-click="sortComplain('ComplainTypeName')">Complaint Type</th>
+                                                <th class="align-middle" style="width: 200px" title="Name"ng-click="sortComplain('Name')">Name</th>
+                                                <th class="align-middle" style="width: 100px" title="Phone" ng-click="sortComplain('Phone')">Phone</th>
+                                                <th class="align-middle" style="width: 200px" title="Remarks" >Remarks</th>
+                                                <th class="align-middle" style="width: 150px" title="AssignedTo" >Assigned To</th>
+                                                <th class="align-middle" style="width: 115px" title="ActionTakenBy" >Action Taken By</th>
+                                                <th class="align-middle" style="width: 100px" title="ActionDate" ng-click="sortComplain('ActionMiti')">Action Date</th>
+                                                <th style="width: 150px" title="Action Remarks" >Action Remarks</th>
+                                                <th rowspan="2" class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll py-1" style="width: 120px;">
+                                                    <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                        <option value="" disabled selected>Action</option>
+                                                        <option value="save">Save Layout</option>
+                                                        <option value="reset">Reset Layout</option>
+                                                    </select>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="cl in ComplainList | filter:searchData.Complain | itemsPerPage: perPage.Complain |orderBy:sortKeys.Complain:reverses.Complain track by $index" current-page="currentPages.Complain" pagination-id="ComplainPagination">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{cl.ComplainMiti}}</td>
+                                                <td>{{cl.ComplainTypeName}}</td>
+                                                <td>{{cl.OthersName}}</td>
+                                                <td>{{cl.PhoneNo}}</td>
+                                                <td>{{cl.Remarks}}</td>
+                                                <td>{{cl.AssignToName}}</td>
+                                                <td>{{cl.ActionTakenBy}}</td>
+                                                <td>{{cl.ActionMiti}}</td>
+                                                <td>{{cl.ActionRemarks}}</td>
+                                                <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="z-index:3;">
+                                                    <a class="btn btn-secondary btn-sm" ng-show="!cl.ActionRemarks" ng-click="openReplyModal(cl)" style="padding-top: 1px !important; color: #ffffff; padding-bottom: 1px;">Reply</a>
+                                                    <a class="p-1" href="#" ng-click="GetComplainById(cl)">
+                                                        <i class="fas fa-edit text-info"></i>
+                                                    </a>
+                                                    <a class="p-1" href="#" ng-click="DelComplainById(cl,$index)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="ComplainPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+                <div id="complain-form">
+                    <div class="card card-default">
+                        <div class="card-body p-2">
+                            <!-- The time line -->
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Complaint By <span style="color:red">*</span></label>
+                                        <select ng-model-options="newComplain.ComplainBy"
+                                                class="form-control form-control-sm select2"
+                                                style="width: 100%" ng-model="newComplain.ComplainBy">
+                                            <option ng-value="1"> Student </option>
+                                            <option ng-value="2">  Employee </option>
+                                            <option ng-value="3">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- fields after clicking the radio button starts -->
+                                <!-- meet to student field -->
+                                <div class="col-sm-7 col-lg-7 col-md-7 mt-4"
+                                     id="meet-student" ng-show="newComplain.ComplainBy==1">
+                                    <label class="sr-only"
+                                           for="inlineFormInputGroup">Select Student</label>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px;  z-index: 1; " ng-model="newComplain.SelectStudent">
+                                            <option ng-repeat="ss in StudentSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newGatePass.SelectStudent}}">
+                                                {{ss.text}}
+                                            </option>
+                                        </select>
+                                        <select class="form-control select2 form-control-sm" all-student ng-model="newComplain.StudentId" student-detail="newComplain.StudentDetails" side-bar-data="newComplain.SideBarData" search-by="newComplain.SelectStudent">
+                                        </select>
+
+                                    </div>
+                                </div>
+
+                                <!-- Field For meet Teacher -->
+                                <div class="col-sm-7 col-lg-7 col-md-7 mt-4"
+                                     id="meet-employee" ng-show="newComplain.ComplainBy==2">
+                                    <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px; z-index: 1; " ng-model="newComplain.SelectEmployee">
+
+                                            <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newComplain.SelectEmployee}}">
+                                                {{ss.text}}
+                                            </option>
+                                        </select>
+                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newComplain.EmployeeId" employee-detail="newComplain.EmployeeDetails" side-bar-data="newComplain.EmpSideBarData" search-by="newComplain.SelectEmployee">
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <!-- select for others -->
+                                <div class="col-md-7" id="meet-others" ng-show="newComplain.ComplainBy==3">
+                                    <div class="form-group">
+                                        <label for="">Name <span style="color:red">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newComplain.OthersName" />
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Complaint Date</label>
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newComplain.ComplainDate_TMP" date-detail="newComplain.ComplainDateDet">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Complaint Type <span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm select2" ng-model="newComplain.ComplainTypeId" style="width: 100%">
+                                            <option ng-repeat="C in ComplainTypeList" ng-value="C.ComplainTypeId" ng-selected="newComplain.ComplainTypeId==C.ComplainTypeId">{{C.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Source <span style="color:red">*</span></label>
+                                        <select class="select2 form-control-sm" ng-model="newComplain.SourceId" style="width: 100%">
+                                            <option ng-repeat="S in SourceList" ng-value="S.SourceId" ng-selected="newComplain.SourceId==S.SourceId">{{S.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Phone No.<span style="color:red">*</span></label>
+                                        <input type="text"
+                                               class="form-control form-control-sm" ng-model="newComplain.PhoneNo" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Assigned To </label>
+                                        <div class="input-group-prepend">
+                                            <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newComplain.AssignToId" employee-detail="newComplain.EmployeeDetails" side-bar-data="newComplain.EmpSideBarData" search-by="newComplain.EmployeeSearchBy">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Complaint Details <span style="color:red">*</span></label>
+                                        <textarea class="form-control form-control-sm" ng-model="newComplain.Remarks"
+                                                  rows="1"
+                                                  placeholder=""></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- File Upload Starts -->
+                            <span><b>Attach Document(s)</b></span>
+                            <div class="timeline-item">
+                                <div class="pb-3 add-more-than-one-form-block">
+                                    <form>
+                                        <article>
+                                            <div class="row">
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>Type Of Document</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="docType">
+                                                            <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-10">
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <div class="form-group">
+                                                                <label>Attach Document</label>
+                                                                <div class="form-group">
+                                                                    <input type="file" id="flMoreFiles" class="form-control-file border p-0 bg-white" file-model  accept="image/png, image/gif, image/jpeg, image/jpg, application/pdf, application/msword"  ng-model="attachFile">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Description</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                       ng-model="docDescription"
+                                                                       placeholder="">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div class="d-flex">
+                                                                <div>
+                                                                    <label class="invisible d-block">for height</label>
+                                                                    <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFiles(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </form>
+                                </div>
+                                <div class="pb-3">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover border bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" style="width: 20px">SN.</th>
+                                                    <th scope="col" style="width: 40%">Document Type</th>
+                                                    <th scope="col">File Name</th>
+                                                    <th scope="col">Description</th>
+                                                    <th scope="col" style="width: 130px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="ac in newComplain.AttachmentColl">
+                                                    <th scope="row">{{$index+1}}</th>
+                                                    <td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>
+                                                    <td>{{ac.Name}}</td>
+                                                    <td>{{ac.Description}}</td>
+                                                    <td>
+                                                        <div>
+                                                            <a class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                <i class="fas fa-eye text-secondary"></i>
+                                                            </a>
+                                                            @*<a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+                                                                    <i class="fas fa-download  text-info"></i>
+                                                                </a>*@
+                                                            <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- File Upload Ends -->
+
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button"
+                                        class="btn btn-sm btn-info"
+                                        id="back-complain-list"
+                                        style="min-width: 90px">
+                                    Back to List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearComplain()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateComplain()">{{newComplain.Mode}}</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Followup Modal Starts -->
+            <div class="modal fade" id="replymodal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header py-2">
+                            <h6 class="modal-title">Action Details</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Remarks</label>
+                                        <textarea class="form-control form-control-sm" ng-model="newDet.Remarks" rows="2"
+                                                  placeholder=""></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveComplainReply()">Save</button>
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+
+
+            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1" style="margin-top: 40px!important;">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body mb-0 p-0">
+                            <iframe ng-hide="viewImg.File" src="{{viewImg.ContentPath}}" style="width:100%; height: 70vh;">
+                            </iframe>
+                            <img ng-show="viewImg.File" ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;" id="imgPreviewAdd">
+                        </div>
+                        <div class="modal-footer">
+                            <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                            <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- form area ends -->
+    </section>
+    <!-- /.row -->
+</div>

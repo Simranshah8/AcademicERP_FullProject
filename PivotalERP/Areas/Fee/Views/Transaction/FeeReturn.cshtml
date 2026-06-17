@@ -1,0 +1,780 @@
+﻿<link href="~/wwwroot/dynamic/css/fee_receipt.css" rel="stylesheet" />
+<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+    /*New added css starts for table footer fixing of Previous Receipt detail added on 10 mangsir starts */
+    .table-scroll {
+        position: relative;
+        width: 100%;
+        z-index: 1;
+        margin: auto;
+        overflow: auto;
+    }
+
+        .table-scroll table {
+            width: 100%;
+            margin: auto;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+    .table-wrap {
+        position: relative;
+    }
+
+    .table-scroll th,
+    .table-scroll td {
+        padding: 5px 10px;
+        border: 1px solid #e4e5e5;
+        background: #fff;
+        vertical-align: top;
+    }
+
+    .table-scroll thead th {
+        background: #e8f1ed;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+    }
+
+    .table-scroll tfoot,
+    .table-scroll tfoot th,
+    .table-scroll tfoot td {
+        position: -webkit-sticky;
+        position: sticky;
+        bottom: 0;
+        z-index: 4;
+    }
+
+    .prev_table {
+        height: 150px;
+        overflow: auto;
+    }
+
+    /*New added css starts for table footer fixing of Previous Receipt detail added on 10 mangsir Ends */
+
+
+</style>
+
+<style>
+    .numericAlignment {
+        text-align: right;
+    }
+
+    .headerAligment {
+        text-align: center;
+    }
+
+    .dateAlignment {
+        text-align: center;
+    }
+</style>
+
+<script>
+    var entityFeeReeceiptColl =@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.FeeReturnCollection);
+    var EntityId=@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.FeeReturn);
+</script>
+<script src="~/jslib/fee/FeeReturn.js?v=20251115"></script> 
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="FeeReturnController" @*ng-init="LoadData()"*@>
+    <section class="content">
+        <div class="container-fluid1">
+            <section class="iframe-content-starts-here" style="margin-top:60px;">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                                               aria-controls="home" aria-selected="true">Fee Return</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                                               aria-controls="profile" aria-selected="false">Fee Return Collection</a>
+                                        </li> 
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="col-sm-12 col-md-12 col-lg-12">
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Fee Receipt Tab Starts -->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div class="row">
+                                        <div class="col-sm-9 col-md-9 col-lg-9">
+                                            <div id="fee-recepit-section">
+                                                <div class="row">
+                                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                                        <label>Receipt No.</label>
+                                                        <input disabled type="text" class="form-control form-control-sm" placeholder="" ng-model="newFeeReceipt.AutoManualNo" />
+                                                    </div>
+                                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                                        <label>Reference No.</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newFeeReceipt.RefNo" />
+                                                    </div>
+                                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                                        <label>Date</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newFeeReceipt.Date_TMP" date-detail="newFeeReceipt.DateDet" confirm-action="LoadDefaultMonth()" />
+                                                    </div>
+                                                    <div class="col-sm-6 col-lg-6 col-md-6 ">
+                                                        <div class="row">
+                                                            <div class="col-sm-12 col-lg-12 col-md-12">
+                                                                <label>Select Student</label><span class="float-right">
+                                                                    <input type="checkbox" name="leftStudent"
+                                                                           id="leftStudent" class="mr-2" ng-model="newFeeReceipt.ShowLeftStudent"><label for="leftStudent">
+                                                                        Show Left Students
+                                                                    </label>
+                                                                </span>
+                                                                <div class="input-group-prepend">
+                                                                    <select class="input-group-text dropdown-toggle p-0"
+                                                                            style="outline: none; border-top-right-radius: unset;border-bottom-right-radius: unset;margin-right: -3px;z-index: 1;" ng-model="newFeeReceipt.SelectStudent">
+
+                                                                        <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newFeeReceipt.SelectStudent">
+                                                                            {{ss.text}}
+                                                                        </option>
+                                                                    </select>
+                                                                    <select class="form-control select2 form-control-sm" all-student ng-model="newFeeReceipt.StudentId" student-detail="newFeeReceipt.StudentDetails" side-bar-data="newFeeReceipt.SideBarData" search-by="newFeeReceipt.SelectStudent" confirm-action="getDuesDetails()" include-left="newFeeReceipt.ShowLeftStudent">
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="row due_det" style="border: 1px solid #9bc99b;background-color:#fff;">
+                                                        <div class="active">
+
+                                                            <span><b>Bill Generated Upto Month</b></span><br>
+                                                            <span><strong class="mgreen">{{CurDues.BillGenerateUpToMonth}}</strong></span>
+                                                        </div>
+                                                        <div>
+                                                            <span><b>Previous Received</b></span><br>
+                                                            <span><strong class="mgreen">{{CurDues.PreviousDues |number:2}}</strong></span>
+                                                        </div>
+                                                        @*<div>
+                    <span><b>Previous Discount</b></span><br>
+                    <span><strong class="mgreen">{{CurDues.CurrentDues |number:2}}</strong></span>
+                </div>*@
+                                                        <div>
+                                                            <span><b>Current Received</b></span><br>
+                                                            <span><strong class="mgreen">{{CurDues.CurrentDues |number:2}}</strong></span>
+                                                        </div>
+                                                        <div>
+                                                            <span><b>Total Received</b></span><br>
+                                                            <span><strong class="mgreen">{{CurDues.TotalDues |number:2}}</strong></span>
+                                                        </div>
+                                                        <div>
+                                                            <span><b>Paid Upto Month</b></span>
+                                                            <select class="form-control form-control-sm " ng-model="newFeeReceipt.PaidUpToMonth" ng-change="getDuesDetails()">
+                                                                <option ng-value="0">**Select Month**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFeeReceipt.PaidUpToMonth">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="table-scroll-x-y sales-main-table table-scroll mb-4 mt-4 t-h-10">
+                                                    <table id="main-table" class="main-table table table-sm bg-white order-list" ng-hide="FeeConfig.MonthWiseFeeHeading==true">
+                                                        <thead class=" text-nowrap">
+                                                            <tr>
+                                                                <th>S.No</th>
+                                                                <th class="fees-item">Fees Item</th>
+                                                                <th ng-show="FeeConfig.ShowRate==true">Rate</th>
+                                                                <th>Total<br> Received</th>
+
+                                                                @*<th ng-show="FeeConfig.AllowFine==true">Fine<br> Amount</th>*@
+                                                                <th>Return<br> Amount</th>
+                                                                <th>Paid after<br>Return</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="fDet in CurDues.FeeItemWiseDuesColl">
+                                                                <td>{{$index+1}}</td>
+                                                                <td>{{fDet.PrintName || fDet.FeeItemName}}</td>
+                                                                <td ng-show="FeeConfig.ShowRate==true">{{fDet.Rate |number:2}}</td>
+
+                                                                <td>{{fDet.TotalDues |number:2}}</td>
+                                                                <td><input class="serial" type="text" number-input placeholder="0" ng-model="fDet.ReceivedAmt" ng-change="Calculation(fDet,4)" /></td>
+                                                                <td>{{fDet.AfterReceivedDues |number:2}}</td>
+                                                            </tr>
+                                                            <tr ng-repeat="fDet in CurDues.ManualFeeDetailsColl">
+                                                                <td>M-{{$index+1}}</td>
+                                                                <td class="d-flex">
+                                                                    <a class="p-1" ng-click="delFeeDetails($index)">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                    </a>
+                                                                    <select class="form-control form-control-sm select2" ng-model="fDet.FeeItemId">
+                                                                        <option ng-value="fi.FeeItemId" ng-repeat="fi in FeeItemList" ng-selected="fi.FeeItemId==fDet.FeeItemId">{{fi.Name}}</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td ng-show="FeeConfig.ShowRate==true">{{fDet.Rate |number:2}}</td>
+                                                                <td><input type="text" number-input placeholder="0" ng-model="fDet.ReceivedAmt" ng-change="Calculation(fDet,4)" /></td>
+                                                                <td>{{fDet.AfterReceivedDues |number:2}}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                    <table id="main-table1" class="main-table table table-sm bg-white order-list" ng-show="FeeConfig.MonthWiseFeeHeading==true">
+                                                        <thead class=" text-nowrap">
+                                                            <tr>
+                                                                <th>S.No</th>
+                                                                <th class="fees-item">Fees Item</th>
+                                                                <th>Fee Period</th>
+                                                                <th>Actual</th>
+                                                                <th>Concession</th>
+                                                                <th>Waiver</th>
+                                                                <th>Net Receivable</th>
+                                                                <th>Paid</th>
+                                                                <th>Balance</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="fDet in CurDues.FeeItemWiseDuesColl">
+                                                                <td>{{$index+1}}</td>
+                                                                <td>{{fDet.FeeItemName}} - {{fDet.PartialPaidAmt |number:2}}</td>
+                                                                <td>{{fDet.PeriodName}}</td>
+                                                                <td>{{((fDet.TotalDues+fDet.Concession+fDet.PartialPaidAmt) |number:2)}}</td>
+                                                                <td>{{fDet.Concession |number:2}}</td>
+                                                                <td><input type="text" number-input placeholder="Amount" ng-model="fDet.DiscountAmt" ng-change="Calculation(fDet,2)" /></td>
+                                                                <td>{{fDet.ReceivableAmt |number:2}}</td>
+                                                                <td><input class="serial" type="text" number-input placeholder="0" ng-model="fDet.ReceivedAmt" ng-change="Calculation(fDet,4)" /></td>
+                                                                <td>{{fDet.AfterReceivedDues |number:2}}</td>
+                                                            </tr>
+                                                            <tr ng-repeat="fDet in CurDues.ManualFeeDetailsColl">
+                                                                <td>M-{{$index+1}}</td>
+                                                                <td class="d-flex">
+                                                                    <a class="p-1" ng-click="delFeeDetails($index)">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                    </a>
+                                                                    <select class="form-control form-control-sm select2" ng-model="fDet.FeeItemId">
+                                                                        <option ng-value="fi.FeeItemId" ng-repeat="fi in FeeItemList" ng-selected="fi.FeeItemId==fDet.FeeItemId">{{fi.Name}}</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td></td>
+                                                                <td></td>
+                                                                <td></td>
+                                                                <td><input type="text" number-input placeholder="0" ng-model="fDet.DiscountAmt" ng-change="Calculation(fDet,2)" readonly /></td>
+                                                                <td>{{fDet.ReceivableAmt |number:2}}</td>
+                                                                <td><input type="text" number-input placeholder="0" ng-model="fDet.ReceivedAmt" ng-change="Calculation(fDet,4)" /></td>
+                                                                <td>{{fDet.AfterReceivedDues |number:2}}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-9">
+                                                        <div class="form-group row" ng-show="FeeConfig.AllowMultiplePaymentmode==false">
+                                                            <label for="" class="col-md-3 col-form-label">Select Cash/Bank</label>
+                                                            <div class="col-md-9">
+                                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newFeeReceipt.ReceiptAsLedgerId" id="cboCashBank" @*style="width:95%"*@ ledgertype="8"
+                                                                        placeholder="** Select Cash/Bank Ledger **" showdetails="true" confirm-action="PartySelectionChange(beData)" ledger-detail="newFeeReceipt.PartyLedger" side-bar-data="newFeeReceipt.partySideBarData"></select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="table-responsive" ng-show="FeeConfig.AllowMultiplePaymentmode==true">
+                                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                                <table id="" class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                                                    <thead class="text-nowrap">
+                                                                        <tr>
+                                                                            <th style="width: 150px">Payment Type</th>
+                                                                            <th style="width: 120px">Amount</th>
+                                                                            <th style="width: 200px">Remarks</th>
+                                                                            <th style="width: 90px;">Action</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr ng-repeat="pm in CurDues.PaymentModeColl">
+                                                                            <td>
+                                                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="pm.LedgerId" ledgertype="8"
+                                                                                        placeholder="** Select Cash/Bank Ledger **" showdetails="true" confirm-action="PartySelectionChange(newFeeReceipt)" ledger-detail="pm.PartyLedger" side-bar-data="pm.partySideBarData"></select>
+                                                                            </td>
+                                                                            <td><input type="text" number-input class="form-control form-control-sm" ng-model="pm.Amount" ng-change="CalculationOnTotal(4)"></td>
+                                                                            <td><input type="text" class="form-control form-control-sm" ng-model="pm.Remarks"></td>
+                                                                            <td>
+                                                                                <a class="p-1" href="#" ng-click="AddPaymentModeRow($index)">
+                                                                                    <i class="fas fa-plus text-secondary"></i>
+                                                                                </a>
+                                                                                <a class="p-1" href="#" ng-click="delPaymentModeRow($index)">
+                                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                                </a>
+                                                                            </td>
+                                                                        </tr>
+
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="time-label">
+                                                            <span class="d-block border-0 text-right">
+                                                                <!-- <button type="button" class="btn btn-sm btn-del ibtnDel" id="btn-del">Del Row</button>-->
+                                                                <button type="button" class="btn btn-sm btn-secondary" ng-click="AddFeeDetails($index)" style="min-width: 90px;">
+                                                                    <i class="fas fa-plus w-t"></i> Add Row
+                                                                </button>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                @* <div class="col-md-12">
+            <div class="row overall">
+                <a href="#">Overall Ledger</a>
+                <a href="#" class="ml-3">Current Year Ledger</a>
+                <a href="#" class="ml-3">Library Transactions</a>
+            </div>
+        </div>
+                                                *@
+                                            </div>
+
+                                            <div class="row  table-scroll">
+                                                <table class="main-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="s-text" style="width: 120px;">Class/Sec</th>
+                                                            <th class="s-text" style="width: 100px;">Regd No.</th>
+                                                            <th class="s-text" style="width: 250px;">Name</th>
+                                                            <th class="s-text text-center" style="width: 100px;">Roll No</th>
+                                                            <th class="text-center s-text" style="width: 100px;">Dues Amount</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr style="font-size: 0.85rem" ng-repeat="sd in CurDues.SiblingStudentColl">
+                                                            <td>{{sd.ClassName}}-{{sd.SectionName}}</td>
+                                                            <td>{{sd.RegdNo}}</td>
+                                                            <td>{{sd.Name}}</td>
+                                                            <td class="text-center">{{sd.RollNo}}</td>
+                                                            <td class="text-center">{{sd.DuesAmt |number:2}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-md-3 col-lg-3">
+                                            <div class="wrapper center-block">
+                                                <div class="panel-group snj-panel" id="accordion" role="tablist" aria-multiselectable="true">
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-heading active" role="tab" id="headingOne">
+                                                            <h4 class="panel-title">
+                                                                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                                    Student Profile
+                                                                </a>
+                                                            </h4>
+                                                        </div>
+                                                        <div id="collapseOne" class="panel-collapse collapse in show" role="tabpanel" aria-labelledby="headingOne">
+                                                            <div class="panel-body">
+                                                                <div class="col-sm-12 col-md-12 col-lg-12">
+                                                                    <div class="row">
+                                                                        <div class="col-sm-6 col-md-6 col-lg-4">
+                                                                            <img style="height:50px; width:50px;" class="rounded-circle" ng-src="{{CurDues.PhotoPath}}" />
+
+                                                                        </div>
+                                                                        <div class="col-sm-6 col-md-6 col-lg-8">
+                                                                            <span><b>{{CurDues.Name}}</b></span><br>
+                                                                            <span>Class: {{CurDues.ClassName}} {{CurDues.SectionName}}</span>
+                                                                        </div>
+                                                                        <div class="col-sm-7 col-md-7 col-lg-7 mt-2">
+                                                                            <span class="s-text">Regd. No. :</span>
+                                                                            <span><b>{{CurDues.RegdNo}}</b></span>
+                                                                        </div>
+                                                                        <div class="col-sm-5 col-md-5 col-lg-5 mt-2">
+                                                                            <span class="s-text">Roll :</span>
+                                                                            <span><b>{{CurDues.RollNo}}</b></span>
+                                                                        </div>
+                                                                        <div class="col-sm-7 col-md-7 col-lg-7 mt-2">
+                                                                            <span class="s-text">Father Name :</span><br>
+                                                                            <span><b>{{CurDues.FatherName}}</b></span>
+                                                                        </div>
+                                                                        <div class="col-sm-5 col-md-5 col-lg-5 mt-2">
+                                                                            <span class="s-text">Contact :</span><br>
+                                                                            <span><b>{{CurDues.ContactNo}}</b></span>
+                                                                        </div>
+                                                                        <div class="col-sm-12 col-md-12 col-lg-12 mt-2">
+                                                                            <span class="s-text">Address :</span>
+                                                                            <span><b>{{CurDues.Address}}</b></span>
+                                                                        </div>
+                                                                        <div class="col-sm-12 col-md-12 col-lg-12 mt-2">
+                                                                            <span class="s-text">Dis.Remarks :</span>
+                                                                            <span><b>{{CurDues.DisRemarks}}</b></span>
+                                                                        </div>
+                                                                        <div class="col-sm-12 col-md-12 col-lg-12 mt-2">
+                                                                            <span class="s-text">Transport :</span>
+                                                                            <span><b>{{CurDues.TransportRoute}},{{CurDues.TransportPoint}}</b></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-heading active" role="tab" id="headingTwo">
+                                                            <h4 class="panel-title">
+                                                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                                                    Previous Receipt Details
+                                                                </a>
+                                                            </h4>
+                                                        </div>
+                                                        <div id="collapseTwo" class="panel-collapse collapse in show p-0" role="tabpanel" aria-labelledby="headingTwo">
+                                                            <div class="panel-body">
+                                                                <div class="col-md-12 p-0">
+                                                                    <!--Changes made in table from here. Added table-scroll class and main-table class below-->
+                                                                    <div class="row prev_table table-scroll">
+                                                                        <table class="w-100 main-table">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th class="s-text">Date</th>
+                                                                                    <th class="s-text">Rec.No.</th>
+                                                                                    <th class="s-text">Amount</th>
+                                                                                    <th> </th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr ng-repeat="fr in CurDues.ReceiptColl">
+                                                                                    <td>{{fr.VoucherDate_BS}}({{(fr.TranType==1 ? 'R' : 'CR')}})</td>
+                                                                                    <td>{{fr.AutoManualNo}}</td>
+                                                                                    <td>{{fr.ReceivedAmt |number:2}}</td>
+                                                                                    <td><a href="#" ng-click="Print(fr.TranId,fr)"><i class="fas fa-eye text-secondary"></i></a></td>
+                                                                                </tr>
+                                                                                @*<tr>
+                                                                                        <td>1</td>
+                                                                                        <td>1</td>
+                                                                                        <td>1</td>
+                                                                                        <td><i class="fas fa-eye text-secondary" data-toggle="modal" data-target="#modal-xl"></i></td>
+                                                                                    </tr>*@
+
+                                                                            </tbody>
+                                                                            <tfoot>
+                                                                                <tr>
+                                                                                    <td></td>
+                                                                                    <td><b>Total</b></td>
+                                                                                    <td><b>{{CurDues.TotalCredit |number:2}}</b></td>
+                                                                                    <td></td>
+                                                                                </tr>
+                                                                            </tfoot>
+                                                                            <!--Table changes ends here done in 10 mangsir-->
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="panel panel-default mt-1">
+                                                        <div class="panel-heading current_due" role="tab" id="headingThree">
+                                                            <h4 class="panel-title mb-0">
+                                                                <a class="collapsed" role="button" data-parent="#accordion" href="javascript:void(0)" aria-expanded="false" aria-controls="collapseThree">
+                                                                    Current Dues
+                                                                </a>
+                                                            </h4>
+                                                        </div>
+                                                        <div id="collapseThree" class="panel-collapse collapse show" role="tabpanel" aria-labelledby="headingThree">
+                                                            <div class="panel-body">
+                                                                <div class="col-md-12">
+                                                                    <div class="row current_due">
+                                                                        
+                                                                        @*<div class="col-md-4" ng-show="FeeConfig.AllowFine==true">
+                                                                            <span>Fine Amt.</span>
+                                                                            <input type="text" name="" placeholder="XXXXX" ng-model="newFeeReceipt.FineAmt" ng-change="CalculationOnTotal(3)" readonly>
+                                                                        </div>*@
+                                                                        <div class="col-md-12 mt-3">
+                                                                            <span><b>Received Amount : {{newFeeReceipt.ReceivableAmt  |number:2 }}</b></span>
+                                                                        </div>
+                                                                        <div class="col-md-5 mt-3">
+                                                                            <span><b>Return Amount</b></span>
+                                                                        </div>
+                                                                        <div class="col-md-7 valgreen mt-2">
+                                                                            <input type="text" number-input ng-model="newFeeReceipt.ReceivedAmt" @*class="h-30px"*@ ng-change="CalculationOnTotal(4)">
+                                                                        </div>
+                                                                         
+                                                                        <div class="col-md-12 mt-3">
+                                                                            <span><b>Reason</b></span><br>
+                                                                            <textarea ng-model="newFeeReceipt.Narration"></textarea>
+                                                                        </div>
+                                                                        <div class="col-md-12 mt-2 ">
+                                                                            <div class="time-label">
+                                                                                <span class="d-block border-0 p-3 text-center">
+
+                                                                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearFeeReceipt()">Reset</button>
+                                                                                    <button type="button" class="btn btn-sm btn-success serial" style="min-width: 90px;" ng-click="SaveUpdateFeeReceipt()">Save</button>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Fee Receipt Tab Ends -->
+                                <!-- Fee Receipt Collection Tab Starts -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                    <div id="fee-receipt-collection-section">
+                                        <div class="row mb-2">
+                                            <div class="col-sm-3">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">From:</span>
+                                                        </div>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm ng-pristine ng-untouched ng-valid ng-isolate-scope ndp-nepali-calendar ng-not-empty"
+                                                               date-picker=""
+                                                               ng-model="newFeeReceiptCollection.DateFrom_TMP"
+                                                               date-detail="newFeeReceiptCollection.DateFromDet"
+                                                               confirm-action="GetAllFeeReceiptCollectionList()"
+                                                               id="MjAyMS0wNy0yOFQwODo0MTo1OS41NjJaMC4zMTY3MDQzNTU0NjI1NzM5"
+                                                               autocomplete="off"
+                                                               inputmode="text" />
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm ng-pristine ng-untouched ng-valid ng-isolate-scope ndp-nepali-calendar ng-not-empty"
+                                                               date-picker=""
+                                                               ng-model="newFeeReceiptCollection.DateTo_TMP"
+                                                               date-detail="newFeeReceiptCollection.DateToDet"
+                                                               confirm-action="GetAllFeeReceiptCollectionList()"
+                                                               id="MjAyMS0wNy0yOFQwODo0MTo1OS41NjNaMC42NTYwOTA5NTY5MTgxNjgx"
+                                                               autocomplete="off"
+                                                               inputmode="text" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Rec. No From:</span>
+                                                        </div>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm"
+                                                               ng-model="newFeeReceiptCollection.fromReceipt"
+                                                               autocomplete="off"
+                                                               inputmode="text" />
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm"
+                                                               ng-model="newFeeReceiptCollection.toReceipt"
+                                                               autocomplete="off"
+                                                               inputmode="text" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="custom-control custom-checkbox checkbox-lg">
+                                                    <input type="checkbox"
+                                                           class="custom-control-input bg-light ng-pristine ng-untouched ng-valid ng-empty"
+                                                           id="checkbox-9"
+                                                           style="background-color: #fff"
+                                                           ng-model="newFeeReceiptCollection.ShowCancel" />
+                                                    &nbsp;
+                                                    <label class="custom-control-label" for="checkbox-9">Show Cancel Receipt only  </label>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="custom-control custom-checkbox checkbox-lg">
+                                                    <input type="checkbox"
+                                                           class="custom-control-input bg-light ng-pristine ng-untouched ng-valid ng-empty"
+                                                           id="checkbox-9-2"
+                                                           style="background-color: #fff"
+                                                           ng-model="newFeeReceiptCollection.PrintDetails" />
+                                                    &nbsp;
+                                                    <label class="custom-control-label" for="checkbox-9-2">Print Details</label>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-md-2">
+                                               
+                                                <div class="float-right">
+                                                    <a class="btn btn-secondary btn-light btn-sm wait"
+                                                       data-toggle="tooltip" data-placement="bottom"
+                                                       title="Save State" ng-click="SaveRptState()">
+                                                        <i class="fas fa-save"></i>
+                                                    </a>
+                                                    <a class="btn btn-secondary btn-light btn-sm wait"
+                                                       data-toggle="tooltip" data-placement="bottom"
+                                                       title="Print" ng-click="PrintFeeeceiptCollections()">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+
+                                                    <button class="btn btn-sm btn-success"  type="button" ng-click="GetAllFeeReceiptCollectionList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div ui-grid="gridFRCollection"
+                                             ui-grid-auto-resize
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-tree-view
+                                             ui-grid-save-state style="height: calc(100vh - 160px);">
+                                        </div>
+                                        <div ng-repeat="col in gridFRCollection.columnDefs" class="ui-grid-cell ui-grid-row-header-cell"></div>
+                                    </div>
+                                </div>
+                                <!-- Fee Receipt Collection Tab Ends -->
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--View icon open modal added by Suresh on 2 Mangsir starts-->
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Opening Details</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body mt-2">
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px;">Fee Heading</th>
+                                    <th style="width: 100px;">Amount</th>
+                                    <th style="width: 150px;">Remarks</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Close</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+
+
+    <!--The modal code below is for the cancel icon inside the ui-grid table starts , added by suresh on 10 mangsir-->
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-cancel">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Cancel Fee Receipt {{ CancelVoucher.AutoVoucherNo }} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Cancel Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="CancelVoucher.CancelRemarks"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="CancelFR()">Save</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+</div>
+<script>
+    $(document).ready(function () {
+        $(document).on('keyup', '.serial', function (e) {
+            if (e.which == 13) {
+                var checkBoxChecked = true;//$('#chkColumnFocus').prop('checked');
+                if (checkBoxChecked == true) {
+                    var $this = $(this);
+                    var $td = $this.closest('td');
+                    var $row = $td.closest('tr');
+                    var $rows = $row.parent();
+                    var column = $td.index();
+                    while ($td.length) {
+                        $row = $row.next('tr');
+                        if ($row.length == 0) {
+                            $row = $rows.children().first();
+                            // $row = $rows.children().get(2);
+                            column++;
+                        }
+                        $td = $row.children().eq(column);
+                        var $input = $td.find('.serial');
+                        if ($input.length) {
+                            $input.focus();
+                            break;
+                        }
+                    }
+                } else {
+                    var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+                    if (key == 13) {
+                        e.preventDefault();
+                        var inputs = $(this).closest('form').find(':input:visible');
+                        inputs.eq(inputs.index(this) + 1).focus();
+                    }
+                }
+            }
+        });
+    });
+</script>

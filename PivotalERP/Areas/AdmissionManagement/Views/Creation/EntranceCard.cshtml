@@ -1,0 +1,587 @@
+﻿
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+
+<style>
+
+    .numericAlignment {
+        text-align: right;
+    }
+
+    .headerAligment {
+        text-align: center;
+    }
+
+    .dateAlignment {
+        text-align: center;
+    }
+
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+    .header, .footer {
+        text-align: center;
+    }
+
+    .admit-card {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        flex: 1;
+    }
+
+        .admit-card .personal-info {
+            flex: 0 0 65%;
+        }
+
+            .admit-card .personal-info img {
+                width: 120px;
+                height: 150px;
+                object-fit: cover;
+                margin-bottom: 10px;
+            }
+
+    .exam-info {
+        flex: 1;
+        text-align: center;
+    }
+
+        .exam-info p {
+            margin: 5px 0;
+        }
+
+    .exam-rules {
+        margin-top: 20px;
+        position: relative;
+        bottom: 0;
+    }
+
+        .exam-rules ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+            .exam-rules ul li {
+                margin-bottom: 10px;
+            }
+    .CardSection:nth-child(2n) {
+        page-break-after: always;
+    }
+           
+</style>
+<script src="~/jslib/admission/EntranceCard.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<div ng-cloak class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="EntranceCardController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-12">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                            id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active"
+                                                   id="examdetail-tab"
+                                                   data-toggle="tab"
+                                                   href="#examdetail"
+                                                   role="tab"
+                                                   aria-controls="examdetail"
+                                                   aria-selected="true">Entrance Exam Setup</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link " id="symbol-tab" data-toggle="tab"
+                                                   href="#symbol" role="tab" aria-controls="symbol"
+                                                   aria-selected="true">Symbol No</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="home-tab"
+                                                   data-toggle="tab"
+                                                   href="#home"
+                                                   role="tab"
+                                                   aria-controls="home"
+                                                   aria-selected="true">Print Enrance (Admit) Card</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="profile-tab"
+                                                   data-toggle="tab"
+                                                   href="#profile"
+                                                   role="tab"
+                                                   aria-controls="profile"
+                                                   aria-selected="false"> Printed Log</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Exam Detail Start -->
+                                <div class="tab-pane fade show active main-section"
+                                     id="examdetail"
+                                     role="tabpanel"
+                                     aria-labelledby="examdetail-tab">
+                                    <div class="tab-content" id="admission-section">
+                                        <div class="row mt-2">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Exam Name </label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.ExamName">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Exam Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.ExamDate_TMP" date-detail="newDet.ExamDateDet" confirm-action="validateExamAndResultDate(newDet)">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Start Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newDet.StartTime_TMP" ng-change="validateStartAndEndTime(newDet)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">End Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newDet.EndTime_TMP" ng-change="validateStartAndEndTime(newDet)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 d-flex px-0">
+                                                <div class="col-md-7">
+                                                    <div class="form-group">
+                                                        <label for="">Result Date</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.ResultDate_TMP" date-detail="newDet.ResultDateDet" confirm-action="validateExamAndResultDate(newDet)">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <div class="form-group">
+                                                        <label for="">Result Time</label>
+                                                        <input type="time" class="form-control form-control-sm" ng-model="newDet.ResultTime_TMP">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Subject Included</label>
+                                                    <select class="form-control form-control-sm select2" multiple ng-model="newDet.SubjectColl" data-placeholder="Select Subject">
+                                                        <option ng-value="S.id" ng-repeat="S in SubjectList" ng-selected="S.id==newDet.SubjectColl">{{S.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 d-flex">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="">Full Marks</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newDet.FullMarks" ng-change="validateFullAndPassMarks(newDet)">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="">Pass Marks</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newDet.PassMarks" ng-change="validateFullAndPassMarks(newDet)">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-10">
+                                                <div class="form-group">
+                                                    <label for="">Venue</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.Venue">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="checkbox-wrap mt-4">
+                                                    For Classwise
+                                                    <input type="checkbox" id="rankCheckbox" ng-model="newDet.ForClassWise" ng-change="copyToClassWiseList()"/>
+                                                    <span class="checkmark"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+
+                                        <div id="rankCheckboxdiv" ng-show="newDet.ForClassWise==true">
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-2" style="max-height: 300px;">
+                                                <table id="" class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 50px; left:0; z-index:3;" class="cstm-sticky">S.No</th>
+                                                            <th style="width: 140px; left: 50px; z-index: 3;" class="cstm-sticky">Class Name</th>
+                                                            <th style="width: 200px; z-index: 2;">Exam Name</th>
+                                                            <th style="width: 140px; z-index: 2;">Exam Date</th>
+                                                            <th style="width: 110px; z-index: 2;">Start Time</th>
+                                                            <th style="width: 110px; z-index: 2;">End Time</th>
+                                                            <th style="width: 250px; z-index: 2;">Result Date Time</th>
+                                                            <th style="width: 410px; z-index: 2;">Subject</th>
+                                                            <th style="width: 110px; z-index: 2;">Full Marks</th>
+                                                            <th style="width: 110px; z-index: 2;">Pass Marks</th>
+                                                            <th style="width: 240px; z-index: 2;">Venue</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="cl in newDet.ClassWiseEntranceSetupList">
+                                                            <td style="left:0; z-index:2; background-color: #fff !important;" class="cstm-sticky">{{$index+1}}</td>
+                                                            <td style="left:50px; z-index:2; background-color: #fff !important;" class="cstm-sticky">{{cl.text}}</td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="cl.ExamName"></td>
+                                                            <td><input type="text" class="form-control form-control-sm" date-picker ng-model="cl.ExamDate_TMP" date-detail="cl.ExamDateDet"></td>
+                                                            <td><input type="time" class="form-control form-control-sm" ng-model="cl.StartTime_TMP"></td>
+                                                            <td><input type="time" class="form-control form-control-sm" ng-model="cl.EndTime_TMP"></td>
+                                                            <td>
+                                                                <div class="d-flex">
+                                                                    <div style="min-width:100px;">
+                                                                        <input type="text" class="form-control form-control-sm mr-2" date-picker ng-model="cl.ResultDate_TMP" date-detail="cl.ResultDateDet">
+                                                                    </div>
+                                                                    <div style="min-width:80px;">
+                                                                        <input type="time" class="ml-1 form-control form-control-sm" ng-model="cl.ResultTime_TMP">
+                                                                    </div>
+
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <select class="form-control form-control-sm select2" active-select2 multiple ng-model="cl.SubjectColl" data-placeholder="Select Subject">
+                                                                    <option ng-value="S.id" ng-repeat="S in SubjectList" ng-selected="S.id==cl.SubjectColl">{{S.text}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td><input type="number" class="form-control form-control-sm" ng-model="cl.FullMarks"></td>
+                                                            <td><input type="number" class="form-control form-control-sm" ng-model="cl.PassMarks"></td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="cl.Venue"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mt-2">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for=""><b>Exam Rules</b></label>
+                                                    <textarea class="textarea" placeholder="Place some text here"
+                                                              style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" html-editor ng-model="newDet.ExamRules"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ResetEntranceExamSetup()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateSetup()">Save</button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- Exam Detail Ends -->
+                                <!--Symboll no Content STart-->
+                                <div class="tab-pane fade  main-section" id="symbol" role="tabpanel"
+                                     aria-labelledby="symbol-tab">
+                                    <div id="examwise-symbol-section">
+                                        <div class="card">
+                                            <div class="card-body px-0">
+                                                <div class="row">
+
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label>Class <span class="text-danger">*</span></label>
+                                                            <select class="form-control form-control-sm select2" data-placeholder="Select Class" ng-model="newSymbolNumber.ClassId" ng-change="GetEntranceSymbolNo()">
+                                                                <option ng-value=0>**Select Class**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Start No. <span class="text-danger">*</span></label>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.StartNo" >
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Start Alpha</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.StartAlpha" >
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Pad Width</label>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.PadWidth">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Prefix</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.Prefix">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Suffix</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.Suffix">
+                                                        </div>
+                                                    </div>
+                                                   
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <div class="input-group form-group input-group-sm ">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.SymbolNumber">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 text-right">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-info"
+                                                                style="min-width: 90px" ng-click="AutoGenerateSymbolNo()">
+                                                            Generate SymbolNo
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 70px;" ng-click="ClearSymbolNumber()">Reset</button>
+                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 70px;" ng-click="SaveUpdateSymbolNumber()">{{newSymbolNumber.Mode}}</button>
+
+                                                    </div>
+                                                </div>
+                                                <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 15.5rem)">
+                                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white table-head-fixed">
+                                                        <thead class="text-center text-nowrap">
+                                                            <tr>
+                                                                <th style="width: 100px" ng-click="sortSN('EnquiryRegNo')">Enquiry/Reg No.</th>
+                                                                <th style="width: 250px" ng-click="sortSN('Name')">Name</th>
+                                                                <th style="width: 100px" ng-click="sortSN('Gender')">Gender</th>
+                                                                <th style="width: 70px" ng-click="sortSN('RollNo')">Class</th>
+                                                                <th style="width: 200px">Symbol No</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="sn in newSymbolNumber.StudentList | filter: searchData.SymbolNumber| orderBy:sortKeySN:reverse1">
+                                                                <td>{{ sn.EnquiryId ? sn.EnquiryId : ''}} {{ sn.RegId ? sn.RegId : ''  }}</td>
+                                                                <td>{{sn.Name}}</td>
+                                                                <td>{{sn.Gender}}</td>
+                                                                <td>{{sn.ClassName}}</td>
+                                                                <td><input type="text" class="form-control form-control-sm" ng-model="sn.SymbolNo"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--Symboll no Content End-->
+
+                                <!-- Print Enrance (Admit) Card Start -->
+                                <div class="tab-pane fade main-section"
+                                     id="home"
+                                     role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div class="tab-content" id="admission-section">
+                                        <!-- Second Tab Content -->
+                                        <div class="row mt-2">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">From Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newEnquiry.FromDate_TMP" date-detail="newEnquiry.FromDateDet" confirm-action="validateDates('fromDate')">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">To Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newEnquiry.ToDate_TMP" date-detail="newEnquiry.ToDateDet" confirm-action="validateDates('toDate')">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1 mt-4">
+                                                <div class="form-group">
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 70px;" ng-click="GetEnqSummaryList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-7 mt-4">
+                                                <div class="form-group text-right">
+                                                    <button type="button" class="btn btn-sm btn-info" @*data-toggle="modal" data-target="#admitcardmodal"*@ng-click="ShowPrintDialog()" style="min-width: 90px;">
+                                                        <i class="fas fa-print w-t"></i> Print
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Table atrea starts -->
+                                        <div class="card p-0">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div ui-grid="gridOptions"
+                                                         ui-grid-resize-columns
+                                                         ui-grid-move-columns
+                                                         ui-grid-selection
+                                                         ui-grid-exporter
+                                                         ui-grid-pinning
+                                                         ui-grid-filtering
+                                                         ui-grid-auto-resize
+                                                         ui-grid-save-state style="height: calc(100vh - 180px);"></div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Table Area Ends -->
+                                    </div>
+
+                                </div>
+                                <!-- Print Enrance (Admit) Card Ends -->
+                                <!-- Printed Log Start -->
+                                <div class="tab-pane fade main-section"
+                                     id="profile"
+                                     role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    dgsdfdfgs
+                                </div>
+                                <!-- Printed Log Ends -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="modal fade" id="admitcardmodal" style="margin-top:26px;">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header py-2">
+                                <h6 class="modal-title">Print Entrance Admit Card</h6>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-12 text-right">
+                                        <button class="btn btn-sm btn-success mb-2" ng-click="PrintData()"> <i class="fas fa-print mr-2"></i>Print</button>
+                                    </div>
+                                </div>
+                                <div ng-repeat="P in newPrint.DataColl">
+                                    <div class="card p-3 CardSection" style="border: 2px solid #c1c6cb;margin-bottom:40px;">
+                                        <div class="row">
+                                            <div class="col-md-2 text-center">
+                                                <img ng-src="{{ Logo.LogoPath}}" class="img-fluid" style="height:120px; width:auto;" />
+                                            </div>
+                                            <div class="col-md-8 text-center">
+                                                <h3 class="mb-0 text-secondary" style="font-family: 'Cambria', serif; font-weight: bold; letter-spacing: 1px; font-size: 32px">
+
+                                                    {{newCompanyDet.Name}}
+                                                </h3>
+                                                <h6 class="mb-0" ng-if="newCompanyDet.Affiliated && newCompanyDet.Established"
+                                                    style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+
+                                                    Affiliated to {{newCompanyDet.Affiliated}} - {{newCompanyDet.Established}}
+                                                </h6>
+                                                <h6 class="mb-0" style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+
+                                                    {{newCompanyDet.Address}}
+                                                </h6>
+
+                                                <p class="mb-0" style="font-family: 'Times New Roman', serif; font-size: 20px; font-weight: bold;">
+
+                                                    {{newCompanyDet.PhoneNo}}
+                                                </p>
+                                                <p class="mb-0" style="font-family: 'Times New Roman', serif; font-size: 20px; font-weight: bold;">
+
+                                                    {{newCompanyDet.EmailId}}
+                                                </p>
+                                            </div>
+                                            <div class="col-md-2 text-center" ng-if=" Logo.AffiliatedLogo">
+                                                @*<img ng-src="{{ Logo.AffiliatedLogo}}" class="img-fluid" style="height:120px; width:auto;" />*@
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 text-center">
+                                                <p class="mb-0" style="color: steelblue; font-weight: 600; font-size: large; ">ADMIT CARD</p>
+                                                <p class="mb-0" style=" color: steelblue;font-size:20px"><b><u>{{P.ExamName}}</u></b></p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <div class="row mt-2">
+                                                    <div class="col-md-6">
+                                                        <p style="font-weight: bolder; font-size: 17px !important; color: steelblue; line-height: 0.8; ">Reg/Enquiry No.&nbsp;: {{ P.EnquiryId ? P.EnquiryId : ''}} {{ P.RegId ? P.RegId : ''  }}</p>
+                                                        <p style="font-weight: bolder; font-size: 17px !important; color: steelblue; line-height: 0.8; ">Name &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{P.Name}}</p>
+                                                        <p style="font-weight: bolder; font-size: 17px !important; color: steelblue; line-height: 0.8; ">Phone&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{P.ContactNo}}</p>
+
+
+                                                        <p style="font-weight: bolder; font-size: 17px !important; color: steelblue; line-height: 0.8;">Exam Time&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{P.ExamTime}}</p>
+                                                        <p style="font-weight: bolder; font-size: 17px !important; color: steelblue; line-height: 0.8;">Venue &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{P.Venue}}</p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p style="font-weight: bolder; font-size: 17px !important; color: steelblue; line-height: 0.8;">Symbol No.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{P.SymbolNo}}</p>
+                                                        <p style="font-weight: bolder; font-size: 17px !important; color: steelblue; line-height: 0.8;">Gender &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{P.Gender}}</p>
+                                                        <p style="font-weight: bolder; font-size: 17px !important; color: steelblue; line-height: 0.8;">Class &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{P.ClassName}}</p>
+
+                                                        <p style="font-weight: bolder; font-size: 17px !important; color: steelblue; line-height: 0.8;">Exam Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{P.ExamDateMiti}}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-if="P.PhotoPath">
+                                                <div class="text-center">
+                                                    <img ng-src="{{P.PhotoPath}}" style="height: 150px; width: auto;">
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="exam-rules " style=" position: relative; bottom: 0;">
+                                            <span style="margin-bottom: 5px; color: steelblue; font-weight: 600; font-size: large;">EXAM RULES :</span>
+                                            <div class="mt-2" style="list-style-type: none; margin-left: 2%;height:210px">
+                                                <div compile class="card" ng-bind-html="P.ExamRules | unsafe">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-10"></div>
+                                            <div class="col-sm-2 text-center">
+                                                <img ng-src="{{ Logo.AffiliatedLogo}}" @*src="~/wwwroot/dynamic/images/PrincipalSig.jpeg"*@ style="height: 80px; width: auto; border-bottom: dashed 2px #000000;" />
+
+                                                <p style=" "><strong>&nbsp;PRINCIPAL</strong></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+            </section>
+        </div>
+    </section>
+</div>
+
+
+

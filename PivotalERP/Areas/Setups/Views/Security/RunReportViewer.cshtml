@@ -1,0 +1,157 @@
+﻿@model Dynamic.BusinessEntity.Setup.ReportWriter
+@*@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")*@
+
+@*<link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>*@
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/6.3.0/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/6.3.0/js/tabulator.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+
+<link href="~/pivot-orb/orb.css" rel="stylesheet" />
+<script src="~/pivot-orb/react-0.12.2.js"></script>
+<script src="~/pivot-orb/orb.js?v=2"></script>
+<script src="~/jslib/setup/ReportWriter.js?v=3"></script>
+<script>
+    var TranId = "@Model.TranId";
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.ReportWriter)";
+</script>
+
+<style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        /* display: none; <- Crashes Chrome on hover */
+        -webkit-appearance: none;
+        margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+    }
+
+    input[type=number] {
+        -moz-appearance: textfield; /* Firefox */
+    }
+</style>
+<style>
+    .third-level-scroll-only {
+        height: 100px !important;
+        overflow: unset;
+    }
+</style>
+<div ng-app="myApp" ng-controller="reportViewerCntrl" ng-class="{waiting: loadingstatus=='running'}">
+    <div class="container-fluid">
+        <section class="iframe-content-starts-here" style="padding-top:50px!important">
+            @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+            <div class="content  third-level-scroll-only1">
+                <div class="form-group1">
+                    <div class="box box-info" id="frmUser">
+                        <div class="form-group">
+                            <div compile class="row" ng-bind-html="ParaHtml | unsafe" id="divHtml">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4" ng-show="beData.ReportType==4">
+                                    <div class="d-flex">
+                                        <label class="mr-2 mt-1">Report </label>
+                                        <select class="form-control form-control-sm" ng-change="ShowRdlReport()" ng-model="beData.SelectedTemplated" style="width:100%">
+                                            <option ng-selected="true">**Select Report**</option>
+                                            <option ng-value="rt" ng-repeat="rt in beData.TemplateColl">{{rt.ReportName}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2" ng-show="beData.ReportType==4">
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width:70px;" ng-click="ShowRdlReport()"><i class="fas fa-sync-alt"></i> Load</button>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2" ng-show="beData.ReportType==4">
+                                <iframe id="frmRpt" style='width: 100%;height:calc(100vh - 150px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                            </div>
+                            <div class="row" ng-hide="beData.ReportType==4 || beData.ReportType==5">
+                                <div class="col-md-12">
+                                    <div id="datatable" style="height: calc(100vh - 10rem); width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                                </div>
+                            </div>
+                            <div class="row" ng-show="beData.ReportType==5">
+                                <div class="col-md-12">
+                                    <div id="grouptableId" style="height: calc(100vh - 10rem); width: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="padding:35px!important">
+                <div class="p-0 modal-dialog" role="document" style="min-width:90%">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <iframe id="frmRptPrint" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+    <script type="text/javascript">
+        //function exportTableToExcel(tableID, filename = '') {
+        //    var downloadLink;
+        //    var dataType = 'application/vnd.ms-excel';
+        //    var tableSelect = document.getElementById(tableID);
+        //    var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+
+        //    filename = filename ? filename + '.xls' : 'excel_data.xls';
+        //    downloadLink = document.createElement("a");
+
+        //    document.body.appendChild(downloadLink);
+
+        //    if (navigator.msSaveOrOpenBlob) {
+        //        var blob = new Blob(['\ufeff', tableHTML], {
+        //            type: dataType
+        //        });
+        //        navigator.msSaveOrOpenBlob(blob, filename);
+        //    } else {
+
+        //        downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+
+        //        downloadLink.download = filename;
+
+        //        downloadLink.click();
+        //    }
+        //}
+
+        var tableToExcel = (function () {
+            var uri = 'data:application/vnd.ms-excel;base64,',
+                template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+                , base64 = function (s) {
+                    return window.btoa(unescape(encodeURIComponent(s)))
+                }
+                , format = function (s, c) {
+                    return s.replace(/{(\w+)}/g, function (m, p) {
+                        return c[p];
+                    })
+                };
+            return function (table, name) {
+                if (!table.nodeType) table = document.getElementById(table);
+                var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML };
+                window.location.href = uri + base64(format(template, ctx));
+            }
+        })();
+
+
+
+    </script>
+    <link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />

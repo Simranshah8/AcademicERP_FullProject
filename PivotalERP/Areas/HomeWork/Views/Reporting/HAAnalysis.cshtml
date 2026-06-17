@@ -1,0 +1,545 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .card {
+        border: 1px solid #dbeafe;
+    }
+    .table1.table-striped tbody tr:nth-of-type(odd), .table2.table-striped tbody tr:nth-of-type(odd) {
+        background-color: transparent;
+    }
+
+    .table1.table-striped tbody tr:nth-of-type(even), .table1.table-hover tbody tr:hover {
+        background-color: #F2FBFF;
+    }
+    .table1.table-striped thead th {
+        background-color: #E2F4F9 !important;
+        color: #53A2A5;
+    }
+
+    .table2.table-striped tbody tr:nth-of-type(even), .table2.table-hover tbody tr:hover {
+        background-color: #FFF6EF;
+    }
+
+    .table, .table thead th{
+        font-size: 0.508rem !important;
+    }
+
+    .table2.table-striped thead th {
+        background-color: #FFEBD8 !important;
+        color: #F4810F;
+    }
+
+    .title-css {
+        font-size: 14px;
+        font-weight: bold;
+        color: #1f2937;
+        border-bottom: 1px solid #D7E7F0;
+    }
+
+    .slider {
+        --slider-padding: 1rem;
+        --slider-column-gap: 1rem;
+        --slide-width: 25%;
+        --slide-min-width: 10rem;
+        position: relative;
+        overflow: hidden;
+        background-color: #fff !important;
+    }
+
+    .slider__track {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-inline: var(--slider-padding);
+        scroll-behavior: smooth;
+        list-style-type: none;
+        padding: 0;
+        margin-right: calc(var(--slider-column-gap) * -1);
+    }
+
+    .slider__track > * {
+        flex: 0 0 var(--slide-width);
+        min-width: var(--slide-min-width);
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        padding-right: var(--slider-column-gap);
+    }
+
+    .slider__track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .slider__button {
+        color: #000000;
+        border: 2px solid #00000033;
+    }
+
+    .slider__buttons [disabled] {
+        opacity: 0.5;
+    }
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="~/jslib/homework/HAAnalysis.js"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="HAAnalysisController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div class="root">
+                        <div class="card-primary px-0 card-tabs ">
+                            <div class="tab-content" id="myTabContent">
+                                <div class="tab-pane fade main-section active show" id="Branch" role="tabpanel" aria-labelledby="FromDate-tab" style="background:#F9FAFB;">
+                                    <div class="card p-2 mx-3 my-4 shadow-sm" style="background: #F3FAFD">
+                                        <div class="title-css mb-1 p-2">
+                                            <span>Total Homework</span>
+                                        </div>
+                                        <div style="height:350px;">
+                                            <canvas id="TotalHomework" class="w-100"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 mx-3 mb-4 shadow-sm" style="background: #FFF7EC ">
+                                        <div class="title-css mb-1 p-2">
+                                            <span>Total Assignment</span>
+                                        </div>
+                                        <div style="height:350px;">
+                                            <canvas id="TotalAssignment" class="w-100"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 mx-3 mb-4 shadow-sm" style="background: #F3FAFD">
+                                        <div class="title-css mb-1 p-2">
+                                            <span>Homework</span>
+                                        </div>
+                                        <div class="row px-1 mb-1">
+                                            <div class="col-md-4 px-2">
+                                                <div class="card mb-0 p-2 shadow-sm">
+                                                    <div class="title-css mb-1 p-2">
+                                                        <span>Submissions Completed</span>
+                                                    </div>
+                                                    <div>
+                                                        <canvas id="HomeworkSubmissionCompleted" class="w-100"></canvas>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 px-2">
+                                                <div class="card mb-0 p-2 shadow-sm">
+                                                    <div class="title-css mb-1 p-2">
+                                                        <span>Pending Submission</span>
+                                                    </div>
+                                                    <div>
+                                                        <canvas id="HomeworkSubmissionPending" class="w-100"></canvas>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 px-2">
+                                                <div class="card mb-0 p-2 shadow-sm">
+                                                    <div class="title-css mb-1 p-2">
+                                                        <span>Overdue Homework</span>
+                                                    </div>
+                                                    <div>
+                                                        <canvas id="HomeworkOverDueHomework" class="w-100"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 mx-3 mb-4 shadow-sm" style="background: #F3FAFD">
+                                        <div class="title-css mb-1 p-2">
+                                            <span>Assignments</span>
+                                        </div>
+
+                                        <div class="row px-1 mb-1">
+                                            <div class="col-md-4 px-2">
+                                                <div class="card mb-0 p-2 shadow-sm">
+                                                    <div class="title-css mb-1 p-2">
+                                                        <span>Submission Completed</span>
+                                                    </div>
+                                                    <div>
+                                                        <canvas id="AssignmentSubmissionCompleted" class="w-100"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 px-2">
+                                                <div class="card mb-0 p-2 shadow-sm">
+                                                    <div class="title-css mb-1 p-2">
+                                                        <span>Pending Submission</span>
+                                                    </div>
+                                                    <div>
+                                                        <canvas id="AssignmentSubmissionPending" class="w-100"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 px-2">
+                                                <div class="card mb-0 p-2 shadow-sm">
+                                                    <div class="title-css mb-1 p-2">
+                                                        <span>Overdue Assignments</span>
+                                                    </div>
+                                                    <div>
+                                                        <canvas id="AssignmentOverDueAssignments" class="w-100"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="card p-2 mx-3 mb-4 shadow-sm" style="background: #F3FAFD">
+                                        <div class="title-css mb-1 p-2">
+                                            <span>Class & Section-Wise Summary(Homework)</span>
+                                        </div>
+                                        <div style="height:350px;">
+                                            <canvas id="HomeworkClassAndSectionwiseSummary" class="w-100"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 mx-3 mb-4 shadow-sm" style="background: #FFF7EC">
+                                        <div class="title-css mb-1 p-2">
+                                            <span>Class & Section-Wise Summary(Assignment)</span>
+                                        </div>
+                                        <div style="height:350px;">
+                                            <canvas id="AssignmentClassAndSectionwiseSummary" class="w-100"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 mx-3 mb-4 shadow-sm">
+                                        <div class="row p-1">
+                                            <div class="col-md-7">
+                                                <div class="card shadow-sm mb-0">
+                                                    <div class="p-2">
+                                                        <div class="title-css mb-1 p-2">
+                                                            <span>Teacher Performance (Homework)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-scroll-x-y table-scroll m-0" style="height: calc(40px * 7); overflow-y: auto; ">
+                                                        <table class="table2 table table-hover table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 20px;">S.No</th>
+                                                                    <th style="width: 100px;">Teacher Name</th>
+                                                                    <th style="width: 35px;">Total Given</th>
+                                                                    <th style="width: 55px;">Submission Rate(%)</th>
+                                                                    <th style="width: 65px;">Overdue Homeworks</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="t in AnalysisData.TPHWColl">
+                                                                    <td>{{$index + 1}}</td>
+                                                                    <td>
+                                                                        <img ng-src="t.PhotoPath" alt="Avatar" style="width: 20px; height: 20px; border-radius: 50%; margin-right: 5px;">
+                                                                        <span>{{t.TeacherName}}</span>
+                                                                    </td>
+
+                                                                    <td>{{t.TPTHGiven}}</td>
+                                                                    <td>{{t.TPTHSubmittedPct}}</td>
+                                                                    <td>{{t.TPTHOverdue}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="card px-2 shadow-sm mb-0">
+                                                    <div class="p-2">
+                                                        <div class="title-css mb-1 p-2">
+                                                            <span>Submission vs Overdue by Teacher</span>
+                                                        </div>
+                                                    </div>
+                                                    <div style="height: calc(40px * 7); display: flex; align-items: center; justify-content: flex-end;">
+                                                        <div style="width: 75%; height: calc(42px * 6);">
+                                                            <canvas id="SubmissionVsOverdueFirst" class="w-100 h-100"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 mx-3 mb-4 shadow-sm">
+                                        <div class="row p-1">
+                                            <div class="col-md-7">
+                                                <div class="card shadow-sm mb-0">
+                                                    <div class="p-2">
+                                                        <div class="title-css mb-1 p-2">
+                                                            <span>Teacher Performance (Assignment)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-scroll-x-y table-scroll m-0"  style="height: calc(40px * 7); overflow-y: auto; ">
+                                                        <table class="table2 table table-hover table-striped mb-0">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 20px;">S.No</th>
+                                                                    <th style="width: 100px;">Teacher Name</th>
+                                                                    <th style="width: 35px;">Total Given</th>
+                                                                    <th style="width: 55px;">Submission Rate(%)</th>
+                                                                    <th style="width: 65px;">Overdue Assignments</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="t in AnalysisData.TPAColl">
+                                                                    <td>{{$index + 1}}</td>
+                                                                    <td>
+                                                                        <img ng-src="t.PhotoPath" alt="Avatar" style="width: 20px; height: 20px; border-radius: 50%; margin-right: 5px;">
+                                                                        <span>{{t.TeacherName}}</span>
+                                                                    </td>
+
+                                                                    <td>{{t.TPTAGiven}}</td>
+                                                                    <td>{{t.TPTASubmittedPct}}</td>
+                                                                    <td>{{t.TPTAOverdue}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="card px-2 shadow-sm mb-0">
+                                                    <div class="p-2">
+                                                        <div class="title-css mb-1 p-2">
+                                                            <span>Submission vs Overdue by Teacher</span>
+                                                        </div>
+                                                    </div>
+                                                    <div style="height: calc(40px * 7); display: flex; align-items: center; justify-content: flex-end;">
+                                                        <div style="width: 75%; height: calc(42px * 6);">
+                                                            <canvas id="SubmissionVsOverdueSecond" class="w-100 h-100"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 mx-3 mb-4 shadow-sm">
+                                        <div class="row p-1">
+                                            <div class="col-md-5">
+                                                <div class="card px-2 shadow-sm mb-0">
+                                                    <div class="p-2">
+                                                        <div class="title-css mb-1 p-2">
+                                                            <span>Subjectwise Submission(Homework)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <canvas id="SubjectWiseSubmissionHW" class="w-100" style="height: calc(40px * 7);"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <div class="card shadow-sm mb-0">
+                                                    <div class="p-2">
+                                                        <div class="title-css mb-1 p-2">
+                                                            <span>Subject Performance Report(Homework)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-scroll-x-y table-scroll m-0" style="height: calc(40px * 7); overflow-y: auto; ">
+                                                        <table class="table2 table table-hover table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 20px;">S.No</th>
+                                                                    <th style="width: 100px;">Subject</th>
+                                                                    <th style="width: 50px;">Total Homework</th>
+                                                                    <th style="width: 55px;">Submission Rate(%)</th>
+                                                                    <th style="width: 45px;">Average Marks</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="s in AnalysisData.SPRHWColl">
+                                                                    <td>{{$index + 1}}</td>
+                                                                    <td>{{s.SubjectName}}</td>
+                                                                    <td>{{s.SPRTotal}}</td>
+                                                                    <td>{{s.SPRSubmittedPct}}%</td>
+                                                                    <td>{{s.SPRAvgMark}}/{{s.SPRFullMark}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 mx-3 mb-4 shadow-sm" >
+                                        <div class="row p-1">
+                                            <div class="col-md-5">
+                                                <div class="card px-2 shadow-sm mb-0">
+                                                    <div class="p-2">
+                                                        <div class="title-css mb-1 p-2">
+                                                            <span>Subjectwise Submission(Assignmnet)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <canvas id="SubjectWiseSubmissionAssignment" class="w-100" style="height: calc(40px * 7);"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <div class="card shadow-sm mb-0">
+                                                    <div class="p-2">
+                                                        <div class="title-css mb-1 p-2">
+                                                            <span>Subject Performance Report(Assignments)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-scroll-x-y table-scroll m-0" style="height: calc(40px * 7); overflow-y: auto; ">
+                                                        <table class="table2 table table-hover table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 20px;">S.No</th>
+                                                                    <th style="width: 100px;">Subject</th>
+                                                                    <th style="width: 50px;">Total Assignment</th>
+                                                                    <th style="width: 55px;">Submission Rate(%)</th>
+                                                                    <th style="width: 50px;">Average Marks</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="s in AnalysisData.SPRAssignColl">
+                                                                    <td>{{$index + 1}}</td>
+                                                                    <td>{{s.SubjectName}}</td>
+                                                                    <td>{{s.SPRTotal}}</td>
+                                                                    <td>{{s.SPRSubmittedPct}}%</td>
+                                                                    <td>{{s.SPRAvgMark}}/{{s.SPRFullMark}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mx-2 mt-3">
+                                        <div class="col-md-6">
+                                            <div class="card p-3 shadow-sm mb-1">
+                                                <div class="slider" data-slider>
+                                                    <div class="slider__buttons text-right">
+                                                        <div class="row p-1" style="border-bottom:1px solid #D7E7F0;">
+                                                            <div class="col-md-8 mb-1 text-left">
+                                                                <p style="font: 16; font-weight: bold;" class="mb-0">Top Performers</p>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <button class="slider__button px-2 py-1" data-slider-prev disabled>
+                                                                    <i class="fas fa-chevron-left"></i>
+                                                                </button>
+                                                                <button class="slider__button px-2 py-1" data-slider-next>
+                                                                    <i class="fas fa-chevron-right"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="pt-2">
+                                                        <ul class="slider__track mb-0" style="height: 200px" data-slider-track>
+                                                            <li ng-repeat="SB in AnalysisData.TopPerformerColl">
+                                                                <div class="slide rounded p-3 d-flex flex-column align-items-center card shadow-sm mb-1 h-100" style="border: 1px solid #B9DDA4; max-width: 150px; background: #E3F1DB; ">
+                                                                    <div class="card shadow-sm mb-1" style="border: 1px solid #7BC47F; height: 100px; width: 110px; overflow: hidden">
+                                                                        <img ng-src="{{SB.PhotoPath}}"
+                                                                             class="img-fluid mx-auto d-block"
+                                                                             style="object-fit: contain; width: 100%; height: 100%">
+                                                                    </div>
+
+
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <div class="text-center" style="font-size: 10px;">
+                                                                            <p style="color: #077A56; margin: 0;"><b>{{SB.Name}}</b></p>
+                                                                            <p class="card-text" style="margin: 0;">Class:  {{SB.ClassName}}"{{SB.SectionName}}"</p>
+                                                                            <p class="card-text" style="margin: 0;">Avg.Marks: {{SB.AvgMarks}}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card p-3 shadow-sm mb-1">
+                                                <div class="slider" data-slider>
+                                                    <div class="slider__buttons text-right">
+                                                        <div class="row p-1" style="border-bottom:1px solid #D7E7F0;">
+                                                            <div class="col-md-8 mb-1 text-left">
+                                                                <p style="font: 16; font-weight: bold;" class="mb-0">Students Needing Attention</p>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <button class="slider__button px-2 py-1" data-slider-prev disabled>
+                                                                    <i class="fas fa-chevron-left"></i>
+                                                                </button>
+                                                                <button class="slider__button px-2 py-1" data-slider-next>
+                                                                    <i class="fas fa-chevron-right"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="pt-2">
+                                                        <ul class="slider__track mb-0" style="height: 200px" data-slider-track>
+                                                            <li ng-repeat="SB in AnalysisData.studentNeedAttent">
+                                                                <div class="slide rounded p-3 d-flex flex-column align-items-center card shadow-sm mb-1 h-100" style="border: 1px solid #FFD1D1; max-width: 150px; background: #FFEAEA ">
+                                                                    <div class="card shadow-sm mb-1" style="border: 1px solid #FFD1D1; height: 100px; width: 110px; overflow: hidden">
+                                                                        <img ng-src="{{SB.PhotoPath}}"
+                                                                             class="img-fluid mx-auto d-block"
+                                                                             style="object-fit: contain; width: 100%; height: 100%">
+                                                                    </div>
+
+
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <div class="d-flex flex-column text-center" style="font-size: 10px;">
+                                                                            <span style="color: #FF7F7F;"><b>{{SB.Name}}</b></span>
+                                                                            <span class="card-text">Class:  {{SB.ClassName}}"{{SB.SectionName}}"</span>
+                                                                            <span class="card-text">Avg.Marks: {{SB.AvgMarks}}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>
+
+
+
+
+
+<script>
+
+    function initSliders() {
+        document.querySelectorAll("[data-slider]").forEach((slider) => {
+            const track = slider.querySelector("[data-slider-track]");
+            const prev = slider.querySelector("[data-slider-prev]");
+            const next = slider.querySelector("[data-slider-next]");
+
+            if (!track || !prev || !next) return;
+
+            const step = () => (track.firstElementChild ? track.firstElementChild.offsetWidth : 0);
+
+            function updateButtons() {
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                prev.disabled = track.scrollLeft <= 0;
+                next.disabled = track.scrollLeft >= maxScroll - 1; 
+            }
+
+            prev.addEventListener("click", () => {
+                track.scrollBy({ left: -step(), behavior: "smooth" });
+                setTimeout(updateButtons, 250);
+            });
+
+            next.addEventListener("click", () => {
+                track.scrollBy({ left: step(), behavior: "smooth" });
+                setTimeout(updateButtons, 250);
+            });
+
+            track.addEventListener("scroll", updateButtons);
+
+            updateButtons();
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", initSliders);
+
+</script>

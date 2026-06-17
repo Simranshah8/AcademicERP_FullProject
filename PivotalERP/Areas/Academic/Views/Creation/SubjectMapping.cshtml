@@ -1,0 +1,441 @@
+﻿<script src="~/jslib/Academic/SubjectMapping.js?v=20251115"></script>
+<style>
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #main-table-studentwise, #main-table-studentwise * {
+            visibility: visible;
+        }
+
+        #main-table-studentwise {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .cstm-sticky {
+            position: static !important;
+            background-color: white !important;
+        }
+
+        .table-scroll-x-y {
+            overflow: visible !important;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        table {
+            page-break-after: auto;
+        }
+    }
+</style>
+
+
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="SubjectMappingController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Class Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">Student Wise</a>
+                                        </li>
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="class-wise-section">
+                                    <div class="row">
+                                        <div class="col-md-3" ng-show="BranchColl.length>1">
+                                            <div class="form-group">
+                                                <label for="">School<span style="color:red">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.BranchId">
+                                                    <option ng-value="0">**Select School**</option>
+                                                    <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newClassWise.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                            <label>Batch</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.BatchId" ng-change="GetClassWiseSubMap(1)">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Class</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.ClassId" ng-change="GetClassWiseSubMap(2)">
+                                                    <option ng-value="0">**Select Class**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==3">
+                                            <label>Semester</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.SemesterId" ng-change="GetClassWiseSubMap(3)">
+                                                    <option ng-value=" ">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==2">
+                                            <label>Year</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.ClassYearId" ng-change="GetClassWiseSubMap(4)">
+                                                    <option ng-value=" ">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Section</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newClassWise.SectionId" multiple ng-change="GetClassWiseSubMap(5)" ng-disabled="!newAcademic.SectionWiseSubjectMapping">
+                                                    <option ng-value="0">**Select Section**</option>
+                                                    <option ng-value="se.SectionId" ng-repeat="se in ClassSection.SectionList |  filter: { ClassId: newClassWise.ClassId }:true">{{se.SectionName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Optional Sub/Student</label>
+                                            <input type="number" class="form-control form-control-sm" placeholder="" ng-model="newClassWise.NoOfOptionalSub">
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Copy To Class</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.ToClassId_TMP" multiple>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Copy To Section</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newClassWise.ToSectionId_TMP" multiple ng-disabled="!newAcademic.SectionWiseSubjectMapping">
+                                                    <option ng-value="se.SectionId" ng-repeat="se in SectionList">{{se.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="card mb-2 p-0">
+                                        <div class="table-scroll-x-y sales-main-table table-scroll ">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead class="text-center">
+                                                    <tr>
+                                                        <th style="width: 60px">S.No.</th>
+                                                        <th style="width:250px">Subject</th>
+                                                        <th style="width: 160px" id="paper-type">Paper Type</th>
+                                                        <th id="code-th" style="width: 90px">Code (TH)</th>
+                                                        <th id="code-pr" style="width: 90px">Code (PR)</th>
+                                                        <th id="code-th" style="width: 90px">CH (TH)</th>
+                                                        <th id="code-pr" style="width: 90px">CH (PR)</th>
+                                                        <th style="width: 100px">Is Optional</th>
+                                                        <th style="width: 120px">Is Extra Subject</th>
+                                                        <th style="width: 80px">Action</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cw in newClassWise.ClassWiseDetailsColl">
+                                                        <td class="text-center">{{$index+1}}</td>
+
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" active-select2
+                                                                    style="width: 100%" ng-model="cw.SubjectId" ng-change="ChangeSubject(cw)" placeholder="*Select Subject*">
+                                                                <option ng-value="sb.id" ng-repeat="sb in SubjectList" ng-selected="sb.id==cw.SubjectId">{{sb.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2"
+                                                                    style="width: 100%" ng-model="cw.PaperType">
+                                                                <option ng-value="pt.id" ng-repeat="pt in PaperTypeList" ng-selected="pt.id==cw.PaperType">{{pt.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm"
+                                                                   placeholder="" ng-model="cw.CodeTH" />
+                                                        </td>
+                                                        <td id="data-pr">
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm"
+                                                                   placeholder="" ng-model="cw.CodePR" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm"
+                                                                   placeholder="" ng-model="cw.CRTH" />
+                                                        </td>
+                                                        <td id="data-pr">
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm"
+                                                                   placeholder="" ng-model="cw.CRPR" />
+                                                        </td>
+                                                        <td>
+                                                            <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                                <input type="checkbox"
+                                                                       ng-value="true" ng-model="cw.IsOptional" />
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                                <input type="checkbox"
+                                                                       ng-value="true" ng-model="cw.IsExtra" />
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center"
+                                                            style="align-items: center">
+                                                            <a class="p-1" ng-click="AddClassWiseDetails($index)">
+                                                                <i class="fas fa-plus text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delClassWiseDetails($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-2 text-center">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearClassWise()">Reset</button>
+                                            <!-- <button type="button" class="btn btn-sm btn-danger" style="min-width: 90px;">Cancel</button> -->
+                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateClassWise()">Save</button>
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="student-wise-section">
+                                    <div class="row">
+                                        <div class="col-md-3" ng-show="BranchColl.length>1">
+                                            <div class="form-group">
+                                                <label for="">School<span style="color:red">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.BranchId">
+                                                    <option ng-value="0">**Select School**</option>
+                                                    <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newStudentWise.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                            <label>Batch</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.BatchId" ng-change="GetStudentWiseSubMap(1)">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Class</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.ClassId" ng-change="GetStudentWiseSubMap(2)">
+                                                    <option ng-value="0">**Select Class**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass1.ClassType==3">
+                                            <label>Semester</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.SemesterId" ng-change="GetStudentWiseSubMap(3)">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList1">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass1.ClassType==2">
+                                            <label>Year</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.ClassYearId" ng-change="GetStudentWiseSubMap(4)">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList1">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Section</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" data-placeholder="Select Section" @*ng-disabled="!newAcademic.SectionWiseSubjectMapping"*@ ng-model="newStudentWise.SectionId" ng-change="GetStudentWiseSubMap()">
+                                                    <option ng-value="0">**Select Section**</option>
+                                                    <option ng-value="se.SectionId" ng-repeat="se in ClassSection.SectionList |  filter: { ClassId: newStudentWise.ClassId }:true">{{se.SectionName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--<div class="col-sm-3 col-lg-3 col-md-3 mt-4">-->
+                                        <!-- <label>Shorting As</label> -->
+                                        <!--<div class="input-group input-group-sm mb-3 ">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Sorting As</span>
+                                                </div>
+                                                <select name=""
+                                                        id=""
+                                                        form=""
+                                                        class="form-control form-control-sm select2bs4">
+
+                                                    <option value="">Name</option>
+                                                    <option value="">Section&Name</option>
+                                                    <option value="">Section&RollNo</option>
+                                                    <option value="">Section&RegdNo</option>
+                                                    <option value="">RegdNo</option>
+                                                    <option value="">RollNo</option>
+                                                </select>
+                                            </div>
+
+                                        </div>-->
+                                        <div class="col-md-2 mt-4">
+                                            <div class="custom-control custom-checkbox checkbox-lg">
+                                                <input type="checkbox"
+                                                       class="custom-control-input"
+                                                       id="subject"
+                                                       checked="" ng-model="newStudentWise.MatchOptSubject" ng-value="true" />
+                                                <label class="custom-control-label" for="subject">Match Subject StudentWise</label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.StudentWise">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.StudentWise">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.StudentWise">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 text-right">
+                                            <a href="#" onclick="window.print()" class="btn btn-secondary btn-light btn-sm"
+                                               data-toggle="tooltip" data-placement="top" title="Print">
+                                                <i class="fas fa-print" style="padding:3px"></i>
+                                            </a>
+
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 80px;" ng-click="ClearStudentWise()">Reset</button>
+                                            <!-- <button type="button" class="btn btn-sm btn-danger" style="min-width: 90px;">Cancel</button> -->
+                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 80px;" ng-click="SaveUpdateStudentWise()">Save</button>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0 mb-0">
+                                        <div id="main-table-studentwise" class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 15rem);">
+                                            <table class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 60px; left: 0; z-index: 3; background-color: #fff" ng-click="sortSubjectWise('RollNo')">
+                                                            Roll No.
+                                                            <span class="glyphicon sort-icon" ng-show="sortKeys.SubjectWise=='RollNo'" ng-class="{'glyphicon-chevron-up':reverses.SubjectWise,'glyphicon-chevron-down':!reverses.SubjectWise}"></span>
+                                                        </th>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 100px; left: 60px; z-index: 3; background-color: #fff" ng-click="sortSubjectWise('RegdNo')">Regd No.</th>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 80px; left: 140px; z-index: 3; background-color: #fff" ng-click="sortSubjectWise('BoardRegNo')">Board Reg.No.</th>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 200px; left: 220px; z-index: 3; background-color: #fff" ng-click="sortSubjectWise('Name')">Name</th>
+
+                                                        <th class="text-center" style="width: 120px;z-index: 2; background-color: #fff;" ng-repeat="os in newStudentWise.OptionalSubjectList">
+                                                            <div class="custom-control custom-checkbox">
+                                                                <input type="checkbox" ng-value="true" ng-model="os.Selected" ng-change="CheckUnCheckAll(os)" />
+                                                                {{os.Name}}
+                                                            </div>
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="sw in newStudentWise.StudentList | filter:searchData.StudentWise |orderBy:sortKeys.SubjectWise:reverses.SubjectWise | itemsPerPage: perPage.StudentWise" current-page="currentPages.StudentWise" pagination-id="StudentWisePagination">
+                                                        @*<tr ng-repeat="sw in newStudentWise.StudentList |orderBy:sortKeys.SubjectWise:reverses.SubjectWise | filter:searchData.StudentWise">*@
+                                                        <td class="align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 1; background-color: #f5f5f9">{{sw.RollNo}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 100px; left: 60px; z-index: 1; background-color: #f5f5f9">{{sw.RegdNo}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 100px; left: 140px; z-index: 1; background-color: #f5f5f9">{{sw.BoardRegNo}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 200px; left: 220px; z-index: 1; background-color: #f5f5f9">{{sw.Name}}</td>
+                                                        <td class="text-center" ng-repeat="os in sw.TranIdColl">
+                                                            <div class="custom-control custom-checkbox">
+                                                                <input type="checkbox" ng-value="true"
+                                                                       ng-model="os.Selected">
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="StudentWisePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

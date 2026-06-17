@@ -1,0 +1,365 @@
+﻿
+<link href="~/Scripts/nepalidate/nepali.datepicker.v3.5.min.css" rel="stylesheet" />
+<script src="~/Scripts/nepalidate/nepali.datepicker.v3.5.min.js"></script>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+
+<script>
+    var entityForSMS = @Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.PhoneCallLog);
+</script>
+
+<script src="~/jslib/frontdesk/transaction/phone-calllog.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<link href="~/wwwroot/dynamic-erp/css/Tableresize.css" rel="stylesheet" />
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="PhoneCallController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:55px!important">
+                <div class="tab-content" id="table-listing">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group mb-1 d-flex">
+                                <label class="mt-1" for="" style="min-width:63px">From Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newPhoneCall.FromDate_TMP" date-detail="newPhoneCall.FromDateDet" confirm-action="validateDates('fromDate')" @*confirm-action="GetAllPhoneCallList()"*@>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group mb-1 d-flex">
+                                <label class="mt-1" for="" style="min-width:63px">To Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newPhoneCall.ToDate_TMP" date-detail="newPhoneCall.ToDateDet" confirm-action="validateDates('toDate')" @*confirm-action="GetAllPhoneCallList()"*@>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-group-sm mr-sm-2">
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 80px;" ng-click="GetAllPhoneCallList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- Second Tab Content -->
+                    <div class="card p-0 mb-0">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PhoneCall">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PhoneCall">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.PhoneCall">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+
+                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'PhoneCallLog'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        @*<a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>*@
+                                    </div>
+                                </div>
+                                <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-success" id="open-form-btn" ng-click="open_form_btn()" style="min-width: 90px">
+                                    <i class="fas fa-plus w-t"></i> Add PhoneCall
+                                </button>
+                            </div>
+                        </header>
+                        <div class="table-scroll-x-y table-container flex-grow-1">
+                            <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 11rem)!important">
+                                    <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th class="align-middle" style="width: 50px" title="S.No.">S.No.</th>
+                                                <th class="align-middle" style="width: 200px" title="Name" ng-click="sortPhoneCall('OthersName')">Name</th>
+                                                <th class="align-middle" style="width: 100px" title="CallType" ng-click="sortPhoneCall('CallType')">Call Type</th>
+                                                <th class="align-middle" style="width: 100px" title="Contact" ng-click="sortPhoneCall('Contact')">Contact No.</th>
+                                                <th class="align-middle" style="width: 90px" title="From">From</th>
+                                                <th class="align-middle" style="width: 130px" title="Purpose">Purpose</th>
+                                                <th class="align-middle" style="width: 75px" title="AtTime">At Time</th>
+                                                <th class="align-middle" style="width: 105px" title="FollowupDate" ng-click="sortPhoneCall('NextFollowupDate')">Follow-up Date</th>
+                                                <th class="align-middle" style="width: 105px" title="CallDuration">Call Duration</th>
+                                                <th class="align-middle" style="width: 250px"title="Remarks">Remarks</th>
+                                                <th class="align-middle" style="width: 100px" title="LogDate" ng-click="sortPhoneCall('LogMiti')">Log Date</th>
+                                                @*<th style="width: 110px">User</th>*@
+                                                <th rowspan="2" class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll py-1" style="width: 110px; right:0;">
+                                                    <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                        <option value="" disabled selected>User</option>
+                                                        <option value="save">Save Layout</option>
+                                                        <option value="reset">Reset Layout</option>
+                                                    </select>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="cl in PhoneCallList | filter:searchData.PhoneCall | itemsPerPage: perPage.PhoneCall |orderBy:sortKeys.PhoneCall:reverses.PhoneCall track by $index" current-page="currentPages.PhoneCall" pagination-id="PhoneCallPagination">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{cl.OthersName}}</td>
+                                                <td>{{cl.CallType}}</td>
+                                                <td>{{cl.Contact}}</td>
+                                                <td>{{cl.MeeTo}}</td>
+                                                <td>{{cl.Purpose}}</td>
+                                                <td>{{cl.InOutTime |timeFormat}}</td>
+                                                <td>{{cl.NextFollowupDate |dateFormat}}</td>
+                                                <td>{{cl.CallDuration }}</td>
+                                                <td>{{cl.Remarks }}</td>
+                                                <td>{{cl.LogMiti}} {{cl.LogDateTime | timeFormat}}</td>
+                                                <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="z-index:3;">
+                                                    {{cl.UserName}}
+                                                    @*<a class="p-1" href="#" ng-click="GetPhoneCallById(cl)">
+                <i class="fas fa-edit text-info"></i>
+            </a>*@
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="PhoneCallPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+                <div id="enquiry-form">
+                    <!-- The time line -->
+                    <div class="timeline registration-form">
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="" style="border:2px solid #ececec">PhoneCall Information</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>From</label>
+                                                    <select ng-model-options="newPhoneCall.MeeTo"
+                                                            class="form-control form-control-sm select2"
+                                                            style="width: 100%" ng-model="newPhoneCall.MeeTo">
+                                                        <option ng-value="1"> Student </option>
+                                                        <option ng-value="2"> Employee </option>
+                                                        <option ng-value="3">Other</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!-- fields after clicking the radio button starts -->
+                                            <!-- meet to student field -->
+                                            <div class="col-sm-6 col-lg-6 col-md-6 mt-4"
+                                                 id="meet-student" ng-show="newPhoneCall.MeeTo==1">
+                                                <label class="sr-only"
+                                                       for="inlineFormInputGroup">Select Student</label>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px;  z-index: 1; " ng-model="newPhoneCall.SelectStudent">
+                                                        <option ng-repeat="ss in StudentSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newPhoneCall.SelectStudent}}">
+                                                            {{ss.text}}
+                                                        </option>
+                                                    </select>
+                                                    <select class="form-control select2 form-control-sm" all-student ng-model="newPhoneCall.StudentId" student-detail="newPhoneCall.StudentDetails" side-bar-data="newPhoneCall.SideBarData" search-by="newPhoneCall.SelectStudent">
+                                                    </select>
+
+                                                </div>
+                                            </div>
+
+                                            <!-- Field For meet Teacher -->
+                                            <div class="col-sm-6 col-lg-6 col-md-6 mt-4"
+                                                 id="meet-employee" ng-show="newPhoneCall.MeeTo==2">
+                                                <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px; z-index: 1; " ng-model="newPhoneCall.SelectEmployee">
+
+                                                        <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newPhoneCall.SelectEmployee}}">
+                                                            {{ss.text}}
+                                                        </option>
+                                                    </select>
+                                                    <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newPhoneCall.EmployeeId" employee-detail="newPhoneCall.EmployeeDetails" side-bar-data="newPhoneCall.EmpSideBarData" search-by="newPhoneCall.SelectEmployee">
+                                                    </select>
+                                                </div>
+
+                                            </div>
+                                            <!-- select for others -->
+                                            <div class="col-sm-6 col-lg-6 col-md-6" id="meet-others" ng-show="newPhoneCall.MeeTo==3">
+                                                <div class="form-group">
+                                                    <label for="">Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newPhoneCall.OthersName" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Date<span style="color:red">*</span></label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newPhoneCall.ForDate_TMP" date-detail="newPhoneCall.ForDateDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Contact No.<span style="color:red">*</span></label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newPhoneCall.Contact" />
+                                                </div>
+                                            </div>
+                                            <!-- fields after clicking radio button ends -->
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label>Purpose<span style="color:red">*</span></label>
+                                                    <textarea class="form-control form-control-sm" ng-model="newPhoneCall.Purpose" rows="1"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">At Time<span style="color:red">*</span></label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newPhoneCall.InOutTime_TMP" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Call Duration (minutes)</label>
+                                                    <input type="number" class="form-control form-control-sm" ng-model="newPhoneCall.CallDuration" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Next Followup</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newPhoneCall.NextFollowupDate_TMP" date-detail="newPhoneCall.NextFollowupDateDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="select-button pb-0 mt-4">
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <label>Call Type :</label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input"
+                                                                       type="radio"
+                                                                       name="calltype"
+                                                                       id="call-incoming" ng-value="1"
+                                                                       ng-model="newPhoneCall.CallType" />
+                                                                <label class="form-check-label" for="call-incoming">Incoming</label>
+                                                            </div>
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input"
+                                                                       type="radio"
+                                                                       name="calltype"
+                                                                       id="call-outgoing"
+                                                                       ng-value="2" ng-model="newPhoneCall.CallType" />
+                                                                <label class="form-check-label" for="call-outgoing">Outgoing</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Remarks</label>
+                                                    <textarea class="form-control form-control-sm" ng-model="newPhoneCall.Remarks" rows="1"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="time-label1">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button"
+                                        class="btn btn-sm btn-info"
+                                        id="back-to-list" ng-click="back_to_list()"
+                                        style="min-width: 90px">
+                                    Back to List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearPhoneCall()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdatePhoneCall()">{{newPhoneCall.Mode}}</button>
+                            </span>
+                        </div>
+                        <!-- /.timeline-label -->
+                    </div>
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- Main content -->
+    <!-- /.content -->
+    @*Photo upload Model*@
+    <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newPhoneCall.Photo_TMP" @*after-selected="AddPhoneCallPhoto()"*@ fileread="newPhoneCall.PhotoData">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newPhoneCall.PhotoData}}" class="img-fluid" id="imgPhoto">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newPhoneCall.Photo_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newPhoneCall.PhotoData" />
+                    <a ng-click="ClearPhoneCallPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAuthorImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

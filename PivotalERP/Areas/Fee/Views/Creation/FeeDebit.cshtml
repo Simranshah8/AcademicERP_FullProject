@@ -1,0 +1,388 @@
+﻿<script src="~/jslib/Fee/fee-debit.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="FeeDebitController" @*ng-init="LoadData()"*@>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">fee debit class wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">fee debit student wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="fee-tab" data-toggle="tab"
+                                               href="#fee" role="tab" aria-controls="fee"
+                                               aria-selected="false">fee debit fee item wise</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                               
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="fee-debit-class-wise-section">
+                                    <div class="row mt-2">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <span class="float-right">
+                                                    <input type="checkbox" name="leftStudent"
+                                                           id="leftStudent" class="mr-2" ng-model="newFeeDebitClasswise.ShowLeftStudent"><label for="leftStudent">
+                                                        Show Left Students
+                                                    </label>
+                                                </span>
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newFeeDebitClasswise.SelectedClass" ng-change="GetStudentLstForClassWise('class')">
+                                                    <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList">{{cs.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--New code added for college by suresh on 26 Kartik-->
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true && newFeeDebitClasswise.SelectedClass.ClassType!=1">
+                                            <label for="">Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newFeeDebitClasswise.BatchId">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newFeeDebitClasswise.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-2" ng-show="newFeeDebitClasswise.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group">
+                                                <label for="">Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newFeeDebitClasswise.ClassYearId">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newFeeDebitClasswise.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newFeeDebitClasswise.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newFeeDebitClasswise.SemesterId">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newFeeDebitClasswise.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+
+                                                <div class="form-group">
+                                                    <label>For Month</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newFeeDebitClasswise.MonthId" ng-change="GetStudentLstForClassWise('month')">
+                                                        <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFeeDebitClasswise.MonthId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label>Sorting</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newFeeDebitClasswise.SortAs" style="width: 100%" ng-change="DataSorting()">
+                                                    <option ng-value="s.value" ng-repeat="s in SortAsList">{{s.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="mt-4">
+                                                <button class="btn btn-sm btn-success" type="button" ng-click="SaveUpdateFeeDebitClasswise()">
+                                                    Accept
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+
+                                                <div class="form-group">
+                                                    <label>For Month</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newFeeDebitClasswise.ToMonthId">
+                                                        <option ng-value="0">**Select Month**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFeeDebitClasswise.MonthId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group mt-4">
+                                                <button class="btn btn-sm btn-success" type="button" ng-click="TransferFeeDebitClasswise()">
+                                                    Transfer
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 15rem);">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead class="text-center">
+                                                    <tr>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="width: 90px; left: 0; z-index: 2; background-color: #fff">Regd. No.</th>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="width: 90px;left:90px; z-index: 2; background-color: #fff">Roll No.</th>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="width: 160px;left: 180px; z-index: 2; background-color: #fff">Name</th>
+                                                        <th colspan="4" scope="colgroup" class="text-center" style="width: 400px" ng-repeat="fi in FeeItemList">{{fi.Name}}</th>
+                                                        <th colspan="3" scope="colgroup" class="text-center" style="width: 270px">Total</th>
+
+                                                    </tr>
+                                                    <tr class="text-center">
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px;" ng-repeat-start="fi in FeeItemList">Rate</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">Dis%</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">Dis.Amt.</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px" ng-repeat-end>Amount</th>
+
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">Rate</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">Dis.Amt.</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">PayableAmt</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cl in newFeeDebitClasswise.StudentColl">
+                                                        <td class="align-middle cstm-sticky" style="width: 90px; left: 0; z-index: 1; background-color: #f5f5f9">{{cl.RegdNo}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 90px; left: 90px; z-index: 1; background-color: #f5f5f9">{{cl.RollNo}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 160px; left: 180px; z-index: 1; background-color: #f5f5f9">{{cl.Name}}</td>
+                                                        <td ng-repeat-start="fid in cl.FeeItemColl">
+                                                            <input type="text" number-input class="form-control form-control-sm serial" ng-model="fid.Rate" ng-change="ChangeOnRateAmt(cl,fid, 1)" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" number-input class="form-control form-control-sm serial" ng-model="fid.DiscountPer" ng-change="ChangeOnRateAmt(cl,fid,2)" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" number-input class="form-control form-control-sm serial" ng-model="fid.DiscountAmt" ng-change="ChangeOnRateAmt(cl,fid,3)" />
+                                                        </td>
+                                                        <td ng-repeat-end>
+                                                            <input type="text" readonly class="form-control form-control-sm" ng-model="fid.PayableAmt" />
+                                                        </td>
+                                                        <td>{{cl.Rate |number:2}}</td>
+                                                        <td>{{cl.DiscountAmt |number:2}}</td>
+                                                        <td>{{cl.PayableAmt |number:2}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="fee-debit-student-section">
+                                    <div class="row mt-2">
+                                        <div class="col-sm-8 col-lg-8 col-md-8">
+                                            <label class="sr-only"
+                                                   for="inlineFormInputGroup">Select Student</label>
+                                            <div class="input-group-prepend">
+                                                <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newFeeDebitStudentWise.SelectStudent">
+
+                                                    <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newFeeDebitStudentWise.SelectStudent">
+                                                        {{ss.text}}
+                                                    </option>
+
+                                                </select>
+
+                                                <select class="form-control select2 form-control-sm" all-student ng-model="newFeeDebitStudentWise.StudentId" student-detail="newFeeDebitStudentWise.StudentDetails" side-bar-data="newFeeDebitStudentWise.SideBarData" search-by="newFeeDebitStudentWise.SelectStudent" confirm-action="GetStudentWise()">
+                                                </select>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div>
+                                                <button class="btn btn-sm btn-success" type="button" ng-click="SaveUpdateFeeDebitStudentWise()">
+                                                    Accept
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="card mb-2 py-2">
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 9rem);">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-nowrap text-center">
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="width:80px;left: 0; z-index: 2; background-color: #fff">S.No.</th>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="width: 110px;left: 80px; z-index: 2; background-color: #fff">Month</th>
+                                                        <th colspan="4" scope="colgroup" class="text-center" style="width: 320px" ng-repeat="fi in FeeItemList">{{fi.Name}}</th>
+                                                        <th colspan="3" style="width: 263px;">Total</th>
+                                                    </tr>
+                                                    <tr class="text-center">
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px" ng-repeat-start="fi in FeeItemList">Rate</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">Dis%</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">Dis.Amt.</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px" ng-repeat-end>Amount</th>
+
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">Rate</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">Dis.Amt.</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 32px">PayableAmt</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cl in newFeeDebitStudentWise.MonthDetailsColl">
+                                                        <td class="align-middle cstm-sticky" style="width: 80px; left: 0; z-index: 1; background-color: #f5f5f9">{{$index+1}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 110px; left: 80px; z-index: 1; background-color: #f5f5f9">{{cl.MonthName}}</td>
+                                                        <td ng-repeat-start="fid in cl.FeeItemColl">
+                                                            <input type="text" number-input class="form-control form-control-sm serialSub" ng-model="fid.Rate" ng-change="ChangeOnStudentRateAmt(cl,fid, 1)" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" number-input class="form-control form-control-sm serialSub" ng-model="fid.DiscountPer" ng-change="ChangeOnStudentRateAmt(cl,fid,2)" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" number-input class="form-control form-control-sm serialSub" ng-model="fid.DiscountAmt" ng-change="ChangeOnStudentRateAmt(cl,fid,3)" />
+                                                        </td>
+                                                        <td ng-repeat-end>
+                                                            <input type="text" readonly class="form-control form-control-sm" ng-model="fid.PayableAmt" />
+                                                        </td>
+                                                        <td>{{cl.Rate |number:2}}</td>
+                                                        <td>{{cl.DiscountAmt |number:2}}</td>
+                                                        <td>{{cl.PayableAmt |number:2}}</td>
+                                                    </tr>
+
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr class="text-nowrap text-center">
+                                                        <th colspan="2" class="text-center align-middle cstm-sticky" style="width: 190px; left: 0; z-index: 2; background-color: #f5f5f9">TOTAL :-</th>
+                                                        <th scope="col" class="cstm-sticky" ng-repeat-start="fi in newFeeDebitStudentWise.GrandTotalColl">{{fi.Rate |number:2}}</th>
+                                                        <th scope="col" class="cstm-sticky"></th>
+                                                        <th scope="col" class="cstm-sticky">{{fi.DiscountAmt |number:2}}</th>
+                                                        <th scope="col" class="cstm-sticky" style="top: 35px" ng-repeat-end>{{fi.PayableAmt |number:2}}</th>
+
+                                                        <th scope="col" class="cstm-sticky">{{newFeeDebitStudentWise.Rate |number:2}}</th>
+                                                        <th scope="col" class="cstm-sticky">{{newFeeDebitStudentWise.DiscountAmt |number:2}}</th>
+                                                        <th scope="col" class="cstm-sticky">{{newFeeDebitStudentWise.PayableAmt |number:2}}</th>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section" id="fee" role="tabpanel"
+                                 aria-labelledby="fee-tab">
+                                <div id="fee-debit-fee-wise-section">
+                                    <form action="">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Select Fee Item</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newFeeDebitFeeItemwise.FeeItemId" style="width: 100%">
+                                                        <option ng-value="0" selected="selected" disabled>**Select Fee Item**</option>
+                                                        <option ng-value="fi.FeeItemId" ng-repeat="fi in FeeItemList">{{fi.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Month Name</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newFeeDebitFeeItemwise.MonthId">
+                                                        <option ng-value="0">**Select Month**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFeeDebitFeeItemwise.MonthId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label>Amount</label>
+                                                <input type="text" number-input class="form-control form-control-sm" placeholder="Amount" ng-model="newFeeDebitFeeItemwise.Amount">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>For Class</label>
+                                                    <select class="form-control form-control-sm select2" multiple style="width: 100%" ng-model="newFeeDebitFeeItemwise.SelectedClassColl">
+                                                        <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList">{{cs.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            @*<div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true && newFeeDebitFeeItemwise.SelectedClass.ClassType!=1">
+                                                <label for="">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newFeeDebitFeeItemwise.BatchId">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newFeeDebitFeeItemwise.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-2" ng-show="newFeeDebitFeeItemwise.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group">
+                                                    <label for="">Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newFeeDebitFeeItemwise.ClassYearId">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newFeeDebitFeeItemwise.ClassYearId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-show="newFeeDebitFeeItemwise.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newFeeDebitFeeItemwise.SemesterId">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newFeeDebitFeeItemwise.SemesterId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>*@
+
+                                            @*<div class="col-md-2">
+            <label>Tax</label>
+            <input type="text" number-input class="form-control form-control-sm" placeholder="Tax">
+        </div>*@
+                                            <div class="col-md-1 mt-4">
+                                                <div class="">
+                                                    <button class="btn btn-sm btn-success" type="button" ng-click="SaveUpdateFeeDebitFeeItemwise()">
+                                                        Accept
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            @*<div class="col-md-2">
+            <div class="form-group">
+                <label>For Month</label>
+                <select class="form-control form-control-sm select2" ng-model="newFeeDebitFeeItemwise.ToMonthId">
+                    <option ng-value="0">**Select Month**</option>
+                    <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFeeDebitFeeItemwise.MonthId">{{cl.text}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-1 mt-4">
+            <div class="">
+                <button class="btn btn-sm btn-success" type="button">
+                    Transfer
+                </button>
+            </div>
+        </div>*@
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+

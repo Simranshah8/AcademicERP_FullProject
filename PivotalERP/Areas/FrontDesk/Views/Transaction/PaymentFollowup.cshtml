@@ -1,0 +1,484 @@
+﻿<style>
+    .modal {
+        margin-top: 30px !important;
+    }
+</style>
+<link rel="stylesheet" href="~/wwwroot/plugins/ag-grid/css/ag-grid.css">
+<link rel="stylesheet" href="~/wwwroot/plugins/ag-grid/css/ag-theme-alpine.css">
+<script src="~/wwwroot/plugins/ag-grid/js/ag-grid-community.min.noStyle.js"></script>
+<script src="~/wwwroot/js/aggrid-table.js"></script> 
+<script src="~/jslib/frontdesk/transaction/PaymentFollowup.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="PaymentFollowupController" @*ng-init="LoadData()"*@>
+    <div class="wrapper1">
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper1">
+            <section class="content">
+                <div class="container-fluid">
+                    <section class="iframe-content-starts-here">
+                        <div class="tab-content">
+                            <!-- Third Tab Content -->
+                            <div id="root">
+                                <div class="card-primary card-tabs">
+                                    <header class="if-page-have-nav-tabs px-2">
+                                        <div class="row upper-tab">
+                                            <div class="col-md-12">
+                                                <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                                    role="tablist">
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link active" id="first-tab" data-toggle="tab"
+                                                           href="#first" role="tab" aria-controls="first"
+                                                           aria-selected="true">Follow-ups</a>
+                                                    </li>
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link" id="second-tab" data-toggle="tab"
+                                                           href="#second" role="tab" aria-controls="second"
+                                                           aria-selected="false">Today’s Follow-ups</a>
+                                                    </li>
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link" id="third-tab" data-toggle="tab"
+                                                           href="#third" role="tab" aria-controls="third"
+                                                           aria-selected="false">Pending Follow-ups</a>
+                                                    </li>
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link" id="fourth-tab" data-toggle="tab"
+                                                           href="#fourth" role="tab" aria-controls="fourth"
+                                                           aria-selected="false">Upcoming Follow-ups</a>
+                                                    </li>
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link" id="fifth-tab" data-toggle="tab"
+                                                           href="#fifth" role="tab" aria-controls="fifth"
+                                                           aria-selected="false">Completed Follow-ups</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </header>
+                                    <div class="tab-content" id="myTabContent">
+                                        <div class="tab-pane fade show active main-section" id="first" role="tabpanel"
+                                             aria-labelledby="first-tab">
+                                            <div id="followup-content" class="card mb-0 py-2">
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label>Class</label>
+                                                            <select name="class-group" id="" form="" class="form-control form-control-sm select2" ng-model="feeSummary.SelectedClass" ng-change="getFeeSummary()">
+                                                                <option ng-value="0">All</option>
+                                                                <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2" ng-show="feeSummary.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                        <div class="form-group">
+                                                            <label for="">Year</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="feeSummary.ClassYearId">
+                                                                <option ng-value="0">**Select Year**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList" ng-selected="cl.id==feeSummary.ClassYearId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2" ng-show="feeSummary.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                        <div class="form-group">
+                                                            <label for="">Semester</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="feeSummary.SemesterId">
+                                                                <option ng-value="0">**Select Semester**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList" ng-selected="cl.id==feeSummary.SemesterId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                        <label for="">Batch</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="feeSummary.BatchId">
+                                                            <option ng-value="0">**Select Batch**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==feeSummary.BatchId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label>Up to Month</label>
+                                                            <select name="class-group" id="" form="" class="form-control form-control-sm " ng-model="feeSummary.ToMonthId" ng-change="getFeeSummary()">
+                                                                <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-1">
+                                                        <div class="form-group">
+                                                            <label>Student</label>
+                                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="feeSummary.ForStudent">
+                                                                <option ng-value="0">All</option>
+                                                                <option ng-value="1">Continue</option>
+                                                                <option ng-value="2">Left</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label>Fee Item</label>
+                                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="feeSummary.FeeItemIdColl" ng-change="getFeeSummary()">
+                                                                <option ng-value="0">All</option>
+                                                                <option ng-value="cl.FeeItemId" ng-repeat="cl in FeeItemList">{{cl.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label>Search</label>
+                                                            <input class="form-control form-control-sm" type="search" placeholder="Search" aria-label="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <button class="btn btn-sm btn-success px-2 float-right mt-4" ng-click="getFeeSummary()"><i class="fas fa-sync mr-2"></i>Load</button>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <div id="datatable22" style="height: calc(100vh - 11rem);width: 100%;" class="table-scroll-x-y sales-main-table table-scroll ag-theme-alpine" ag-grid="gridOptions"></div>
+                                                    @*<div id="myGridBottom" style="height: 120px;" class="ag-theme-balham"></div>*@
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="tab-pane fade main-section" id="second" role="tabpanel"
+                                             aria-labelledby="second-tab">
+                                            <div class="card mb-0 py-2">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group mb-2 d-flex">
+                                                            <label class="mt-1" style="width:60px;">Search</label>
+                                                            <input class="form-control form-control-sm" type="search" placeholder="Search" aria-label="Search" ng-model="searchToday" ng-change="onFilterTodayChanged()">
+                                                        </div>
+                                                    </div> 
+                                                    <div class="col-md-9">
+                                                        <button class="btn btn-sm btn-success px-2 float-right"  ng-click="getTodayFeeSummary()" style="width:80px;"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                    </div> 
+                                                </div>
+
+                                                <div>
+                                                    <div style="height: calc(100vh - 9rem);width: 100%;" class="table-scroll-x-y sales-main-table table-scroll ag-theme-alpine" ag-grid="gridOptions1"></div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="tab-pane fade main-section" id="third" role="tabpanel"
+                                             aria-labelledby="third-tab">
+                                            <div class="card mb-0 py-2">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group mb-2 d-flex ">
+                                                            <label class="mt-1" style="width:60px;">Search</label>
+                                                            <input class="form-control form-control-sm" type="search" placeholder="Search" aria-label="Search"  ng-model="searchPending" ng-change="onFilterPendingChanged()">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <button class="btn btn-sm btn-success px-2 float-right" ng-click="getPendingFeeSummary()" style="width:80px;"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                    </div>
+
+                                                </div>
+
+                                                <div>
+                                                    <div style="height: calc(100vh - 9rem);width: 100%;" class="table-scroll-x-y sales-main-table table-scroll ag-theme-alpine" ag-grid="gridOptions2"></div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <!-- Upcoming followup tab starts -->
+                                        <div class="tab-pane fade main-section" id="fourth" role="tabpanel"
+                                             aria-labelledby="fourth-tab">
+                                            <div class="card mb-0 py-2">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group mb-2 d-flex ">
+                                                            <label class="mt-1" style="width:60px;">Search</label>
+                                                            <input class="form-control form-control-sm" type="search" placeholder="Search" aria-label="Search" ng-model="searchUpcoming" ng-change="onFilterUpcomingChanged()">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <button class="btn btn-sm btn-success px-2 float-right" ng-click="getUpcomingFeeSummary()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                    </div>
+
+                                                </div>
+
+                                                <div>
+                                                    <div style="height: calc(100vh - 9rem);width: 100%;" class="table-scroll-x-y sales-main-table table-scroll ag-theme-alpine" ag-grid="gridOptions3"></div>
+                                                </div>
+                                                </div>
+                                            </div>
+                                            <!-- upcoming followup tab ends -->
+                                            <!-- Followup Not required starts -->
+                                        <div class="tab-pane fade main-section" id="fifth" role="tabpanel"
+                                             aria-labelledby="fifth-tab">
+                                            <div class="card mb-0 py-2">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group mb-2 d-flex ">
+                                                            <label class="mt-1" style="width:60px;">Search</label>
+                                                            <input class="form-control form-control-sm" type="search" placeholder="Search" aria-label="Search" ng-model="searchComplete" ng-change="onFilterCompleteChanged()">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4"></div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group d-flex float-right">
+                                                            <label class="mt-1" style="width:140px;">Followup Date</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm ng-pristine ng-untouched ng-valid ng-isolate-scope ndp-nepali-calendar ng-not-empty"
+                                                                   date-picker
+                                                                   ng-model="newComplete.DateFrom_TMP"
+                                                                   date-detail="newComplete.DateFromDet"
+                                                                   autocomplete="off"
+                                                                   inputmode="text" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <button class="btn btn-sm btn-success px-2 float-right" ng-click="getCompleteFeeSummary()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <div style="height: calc(100vh - 9rem);width: 100%;" class="table-scroll-x-y sales-main-table table-scroll ag-theme-alpine" ag-grid="gridOptions4"></div>
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <!-- /.card -->
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </section>
+                    <!-- /.row -->
+                </div>
+                <!--/. container-fluid -->
+            </section>
+            <!-- /.content -->
+        </div>
+    </div>
+
+    <!-- Followup Modal Starts -->
+    <div class="modal fade" id="followup">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title">Payment Followup</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="">Payment Due Date</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="newFollowup.PaymentDueDate_TMP" date-detail="newFollowup.PaymentDueDateDet">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>FollowUp Status</label>
+                                <select class="form-control form-control-sm" style="width: 100%;" ng-model="newFollowup.StatusId">
+                                    <option ng-value="FS.id" ng-repeat="FS in FollowStatusList" ng-selected="FS.id == newFollowup.StatusId">{{FS.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Followup Remarks</label>
+                                <textarea class="form-control form-control-sm" ng-model="newFollowup.Remarks" rows="1"
+                                          placeholder=""></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Next Followup Required</label>
+                            <div class="form-group clearfix mb-0 pb-0">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="required" name="r5" ng-value="true" ng-model="newFollowup.NextFollowupRequired">
+                                    <label class="form-check-label" for="required">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="not-required" name="r5" ng-value="false" ng-model="newFollowup.NextFollowupRequired">
+                                    <label class="form-check-label" for="not-required">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8" ng-show="newFollowup.NextFollowupRequired==true || newFollowup.NextFollowupRequired=='true'">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">Next Followup Date</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm" date-picker ng-model="newFollowup.NextFollowupDate_TMP" date-detail="newFollowup.NextFollowupDateDet">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">Next Followup Time</label>
+                                        <input type="time" class="form-control form-control-sm" ng-model="newFollowup.NextFollowupTime_TMP">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <hr class="p-1 m-1">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="">Student Name/Regd.No : {{newFollowup.ClassSection}} </label><br />
+                            <label><b>{{newFollowup.Name}} / {{newFollowup.RegdNo}}</b></label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="">Father Name :</label><br />
+                            <label><b>{{newFollowup.FatherName}}</b></label>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="">Contact :</label><br />
+                            <label><b>{{newFollowup.F_ContactNo}}</b></label>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="">Total Dues :</label><br />
+                            <label><b>{{newFollowup.TotalDues |number:2}}</b></label>
+                        </div>
+                    </div>
+                    <hr class="p-1 m-1">
+
+                    <div class="card-tools mb-2" style="width: 250px;">
+                        <div class="input-group input-group-sm table-search-filed">
+                            <input class="form-control form-control-navbar" type="search"
+                                   placeholder="Search" aria-label="Search" ng-model="searchData.History">
+                            <div class="input-group-append">
+                                <button class="btn btn-default border-left-0" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45px;">S.No.</th>
+                                    <th style="width: 100px;">Followup Date</th>
+                                    <th style="width: 140px;">Payment Due Date</th>
+                                    <th style="width: 110px;">Status</th>
+                                    <th style="width: 300px;">Remarks</th>
+                                    <th style="width: 150px;">Followup By</th>
+                                    <th style="width: 150px;">Closed Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="h in newFollowup.HistoryColl | filter:searchData.History">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{h.FollowupMiti}}</td>
+                                    <td>{{h.PaymentDueMiti}}</td>
+                                    <td>{{ h.StatusId == 1 ? 'Success' : (h.StatusId == 2 ? 'Failed' : h.StatusId) }}</td>
+                                    <td>{{h.Remarks}}</td>
+                                    <td>{{h.FollowupBy}}</td>
+                                    <td>{{h.ClosedRemarks}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearFollowup()">Reset</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateFollowup()">Save</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- Followup Modal Ends -->
+
+    <!-- Followup Modal Starts -->
+    <div class="modal fade" id="followupClosed">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title">Payment Followup Closed</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">                       
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Close Remarks</label>
+                                <textarea class="form-control form-control-sm" ng-model="newFollowup.ClosedRemarks" rows="1"
+                                          placeholder=""></textarea>
+                            </div>
+                        </div>
+                    </div>            
+                    <hr class="p-1 m-1">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="">Student Name/Regd.No : {{newFollowup.ClassSection}} </label><br />
+                            <label><b>{{newFollowup.Name}} / {{newFollowup.RegdNo}}</b></label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="">Father Name :</label><br />
+                            <label><b>{{newFollowup.FatherName}}</b></label>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="">Contact :</label><br />
+                            <label><b>{{newFollowup.F_ContactNo}}</b></label>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="">Total Dues :</label><br />
+                            <label><b>{{newFollowup.TotalDues |number:2}}</b></label>
+                        </div>
+                    </div>
+                    <hr class="p-1 m-1">
+
+                 
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">S.No.</th>
+                                    <th style="width: 120px;">Followup Date</th>
+                                    <th style="width: 140px;">Payment Due Date</th>
+                                    <th style="width: 200px;">Remarks</th>
+                                    <th style="width: 150px;">Followup By</th>
+                                    <th style="width: 150px;">Closed Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="h in newFollowup.HistoryColl">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{h.FollowupMiti}}</td>
+                                    <td>{{h.PaymentDueMiti}}</td>
+                                    <td>{{h.Remarks}}</td>
+                                    <td>{{h.FollowupBy}}</td>
+                                    <td>{{h.ClosedRemarks}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearFollowup()">Reset</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveFollowupClosed()">Save</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- Followup Modal Ends -->
+</div>

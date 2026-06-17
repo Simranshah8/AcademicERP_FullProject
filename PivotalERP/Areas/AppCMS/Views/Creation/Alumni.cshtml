@@ -1,0 +1,1284 @@
+﻿<style>
+    @@media print {
+        @@page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            -webkit-print-color-adjust: exact !important;
+        }
+
+        .modal, .modal-dialog {
+            position: static !important;
+            overflow: visible !important;
+        }
+
+        .modal-content {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .modal-header, .modal-footer {
+            display: none !important;
+        }
+
+        .modal-body {
+            padding: 0 !important;
+        }
+
+        img {
+            page-break-inside: avoid;
+            max-width: 100% !important;
+            height: auto !important;
+        }
+
+        .card {
+            page-break-inside: avoid;
+        }
+
+        .row {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        .col-md-3, .col-md-6, .col-md-9, .col-md-12 {
+            float: left;
+            box-sizing: border-box;
+        }
+
+        .col-md-3 {
+            width: 25%;
+        }
+
+        .col-md-6 {
+            width: 50%;
+        }
+
+        .col-md-9 {
+            width: 75%;
+        }
+
+        .col-md-12 {
+            width: 100%;
+        }
+    }
+</style>
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/appcms/AlumniRegForm.js?v=20251115"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="AlumniRegFormController" ng-init="LoadData()">
+
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:45px!important">
+                <div class="tab-content">
+                    <div id="root">
+                        <div class="card-primary px-0 card-tabs">
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Header -->
+                                <div id="AlumniDetailsList" class="card mb-0 py-2">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Alumni">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Alumni">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.Alumni">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="col-md-5 text-right">
+
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="bottom" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-md dropdown-toggle"
+                                                        type="button" id="dropdownMenuButton"
+                                                        data-toggle="dropdown" aria-haspopup="true"
+                                                        aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'AluminiRecords'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+
+                                                </div>
+                                            </div>
+
+
+                                            <button type="button" class="btn btn-sm btn-success" id="AddDetails" @*style="min-width: 85px"*@ ng-click="AddDetails()">
+                                                <i class="fas fa-plus w-t"></i>Add Details
+                                            </button>
+                                        </div>
+
+                                    </header>
+                                    <div class="table-scroll-x-y sales-main-table table-scroll table-responsive">
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 50px">S.No.</th>
+                                                    <th style="width: 150px">Full Name</th>
+                                                    <th style="width: 130px">Date of Birth</th>
+                                                    <th style="width: 200px">Original Address</th>
+                                                    <th style="width: 200px">Current Address</th>
+                                                    <th style="width: 130px">Contact</th>
+                                                    <th style="width: 180px">Email</th>
+                                                    <th style="width: 100px">Joined Year</th>
+                                                    <th style="width: 100px">Studied Up To</th>
+                                                    <th style="width: 120px">SEE</th>
+                                                    <th style="width: 120px">+2</th>
+                                                    <th style="width: 150px">Degree Title</th>
+                                                    <th style="width: 180px">University</th>
+                                                    <th style="width: 150px">Current Position</th>
+                                                    <th style="width: 180px">Current Company</th>
+                                                    <th style="width: 180px">Current University</th>
+                                                    <th style="width: 200px">Achievements</th>
+                                                    <th style="width: 200px">Bio</th>
+                                                    <th style="width: 100px">Remarks</th>
+                                                    <th class="cstm-sticky" style="width: 95px;right:0;z-index:3">Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="AL in AlumniList | filter:searchData.Alumni | itemsPerPage: perPage.Alumni" current-page="currentPages.Alumni" pagination-id="AlumniPagination">
+                                                    <td>{{$index + 1}}</td>
+                                                    <td>{{AL.FullName}}</td>
+                                                    <td>{{AL.DOB_BS}}</td>
+                                                    <td>{{AL.OriginalAddress}}</td>
+                                                    <td>{{AL.CurrentAddress}}</td>
+                                                    <td>{{AL.Contact}}</td>
+                                                    <td>{{AL.Email}}</td>
+                                                    <td>{{AL.JoinedYear}}</td>
+                                                    <td>{{AL.StudiedUpTo}}</td>
+                                                    <td>{{AL.SEE}}</td>
+                                                    <td>{{AL.PlusTwo}}</td>
+                                                    <td>{{AL.DegreeTitle}}</td>
+                                                    <td>{{AL.University}}</td>
+                                                    <td>{{AL.CurPosition}}</td>
+                                                    <td>{{AL.CurCompany}}</td>
+                                                    <td>{{AL.CurUniversity}}</td>
+                                                    <td title="{{AL.Achievements}}">
+                                                        {{ AL.Achievements | limitTo:50 }}{{ AL.Achievements.length > 50 ? '...' : '' }}
+                                                    </td>
+                                                    <td title="{{AL.Bio}}">
+                                                        {{ AL.Bio | limitTo:50 }}{{ AL.Bio.length > 50 ? '...' : '' }}
+                                                    </td>
+                                                    <td title="{{AL.Remarks}}">
+                                                        {{ AL.Remarks | limitTo:30 }}{{ AL.Remarks.length > 30 ? '...' : '' }}
+                                                    </td>
+                                                    <td class="text-center cstm-sticky" style="background-color:#ffffff!important;z-index:2;right:0">
+                                                        <!-- View Single Preview -->
+                                                        <i class="fas fa-user text-success"
+                                                           style="cursor: pointer; margin-right: 2px;"
+                                                           title="Profile Photo"
+                                                           data-toggle="tooltip"
+                                                           ng-click="previewTemplate(AL)"
+                                                           data-target="#templatePreviewModal">
+                                                        </i>
+
+                                                        <!-- View All Previews -->
+                                                        <i class="fas fa-file text-secondary mx-1"
+                                                           style="cursor: pointer; margin-right: 2px;"
+                                                           title="Preview All Images"
+                                                           data-toggle="tooltip"
+                                                           ng-click="openAllPreviews(AL)">
+                                                        </i>
+
+                                                        <!-- Delete Alumni -->
+                                                        <i class="fas fa-trash-alt text-danger"
+                                                           style="cursor: pointer; margin-right: 2px;"
+                                                           title="Delete Alumni"
+                                                           data-toggle="tooltip"
+                                                           ng-click="DelAlumnibyId(AL,$index)">
+                                                        </i>
+
+                                                        <!-- Copy to Form -->
+                                                        <i class="fas fa-eye text-info ml-1"
+                                                           style="cursor: pointer;"
+                                                           title="Form View"
+                                                           data-toggle="tooltip"
+                                                           ng-click="GetAlumniById(AL)">
+                                                        </i>
+
+                                                    </td>
+
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="AlumniPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <!--Profile photo modal-->
+    <div class="modal fade" style="margin-top:44px !important" id="templatePreviewModal" tabindex="-1" role="dialog" aria-labelledby="templatePreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #e9f2ee;">
+                </div>
+                <div class="modal-body text-center">
+                    <img ng-if="viewImg1.FileType === 'image'"
+                         ng-src="{{viewImg1.ContentPath}}"
+                         class="img-fluid rounded shadow mb-3"
+                         alt="Image Preview" />
+                    <iframe ng-if="viewImg1.FileType === 'pdf'"
+                            ng-src="{{viewImg1.ContentPath}}"
+                            frameborder="0" class="mb-3" style="width:100%; height:400px;"></iframe>
+
+                    <div class="text-right">
+                        <!-- Download Button -->
+                        <a ng-if="viewImg1.ContentPath"
+                           ng-href="{{viewImg1.ContentPath}}"
+                           download
+                           class="btn btn-success mr-2 px-4">
+                            Download
+                        </a>
+
+                        <!-- Close Button -->
+                        <button type="button" class="btn btn-danger px-4" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Other photo field modal-->
+
+    <div style="margin-top:33px !important" class="modal fade" id="unifiedPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title font-weight-bold">
+                        Document Preview
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="row" ng-if="allPreviews.length > 0">
+                        <div class="col-md-6 mb-4" ng-repeat="doc in allPreviews">
+                            <div class="card shadow-sm h-100 border">
+                                <div class="card-header bg-white text-center font-weight-bold text-secondary py-2">
+                                    {{ doc.label }}
+                                </div>
+
+                                <div class="card-body text-center">
+                                    <img ng-if="doc.FileType === 'image'"
+                                         ng-src="{{doc.ContentPath}}"
+                                         class="img-fluid rounded border"
+                                         style="max-height: 300px; object-fit: contain;"
+                                         alt="Image Preview" />
+
+                                    <iframe ng-if="doc.FileType === 'pdf'"
+                                            ng-src="{{doc.ContentPath}}"
+                                            frameborder="0"
+                                            style="width: 100%; height: 300px;"
+                                            class="border rounded"></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-if="allPreviews.length === 0" class="text-center text-muted">
+                        No documents available for preview.
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-danger px-4" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Alumni Form--->
+    <div id="AlumniDetailForm" class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <div class="">
+                        <div class="card mb-4" style="border: 1px solid #ccc;">
+                            <div class="card-body p-2">
+                                <h5 class="text-center mb-3 border-bottom text-secondary ">
+                                    Alumni Registration Form
+                                </h5>
+                                <form>
+                                    <div class="card mb-4" style="border: 1px solid #ccc;">
+                                        <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                            <h6 class="mb-0">Personal Information</h6>
+                                        </div>
+
+                                        <div class="card-body">
+                                            <div class="row g-3">
+
+                                                <div class="col-md-4">
+                                                    <div class="d-flex">
+                                                        <div class="flex-grow-1 ml-1">
+                                                            <label style="font-size:13px;">Full Name <span class="text-danger">*</span> </label>
+                                                            <input type="text" id="fullName" name="fullName" class="form-control form-control-sm" ng-model="newAlumniReg.FullName">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="d-flex">
+
+                                                        <div class="flex-grow-1 ml-1">
+                                                            <label style="font-size:13px;" for="dob">DoB (Nepali YYYY/MM/DD)</label>
+                                                            <input type="text" date-picker ng-model="newAlumniReg.DOB_TMP" date-detail="newAlumniReg.DOBDet" placeholder="Date of Birth *" class="form-control form-control-sm ndp-nepali-calendar">
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="d-flex">
+
+                                                        <div class="flex-grow-1 ml-1">
+                                                            <label style="font-size:13px;" for="originalAddress">Original Address</label>
+                                                            <input type="text" id="originalAddress" name="originalAddress" class="form-control form-control-sm" ng-model="newAlumniReg.OriginalAddress">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="d-flex">
+
+                                                        <div class="flex-grow-1 ml-1">
+                                                            <label style="font-size:13px;" for="currentAddress">Current Address</label>
+                                                            <input type="text" id="currentAddress" name="currentAddress" class="form-control form-control-sm" ng-model="newAlumniReg.CurrentAddress">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="d-flex">
+
+                                                        <div class="flex-grow-1 ml-1">
+                                                            <label style="font-size:13px;" for="contactNumber">Contact Number (with code)</label>
+                                                            <input type="text" id="contactNumber" name="contactNumber" class="form-control form-control-sm" ng-model="newAlumniReg.Contact">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="d-flex">
+
+                                                        <div class="flex-grow-1 ml-1">
+                                                            <label style="font-size:13px;" for="email">Email</label>
+                                                            <input type="text" id="email" name="email" class="form-control form-control-sm" ng-model="newAlumniReg.Email">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-4" style="border: 1px solid #ccc;">
+                                        <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                            <h6 class="mb-0">Education Information</h6>
+                                        </div>
+
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="d-flex">
+
+                                                        <div class="flex-grow-1 ml-0">
+                                                            <label style="font-size:13px;" for="joinedYear">Joined School in</label>
+                                                            <div class="input-group input-group-sm" style="height: 32px;">
+                                                                <input type="text" id="joinedYear" name="joinedYear"
+                                                                       class="form-control border" ng-model="newAlumniReg.JoinedYear"
+                                                                       style="height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                <span class="input-group-text"
+                                                                      style=" height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                    BS
+                                                                </span>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="d-flex">
+
+                                                        <div class="flex-grow-1 ml-0">
+                                                            <label style="font-size:13px;" for="studiedUpTo">Studied up to</label>
+                                                            <div class="input-group input-group-sm" style="height: 32px;">
+                                                                <input type="text" id="studiedUpTo" name="studiedUpTo"
+                                                                       class="form-control border" ng-model="newAlumniReg.StudiedUpTo"
+                                                                       style="height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                <span class="input-group-text"
+                                                                      style=" height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                    BS
+                                                                </span>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-4">
+                                                <div class="d-flex">
+                                                    <div class="flex-grow-1">
+
+                                                        <label class="form-label" style="font-size:13px;">Last exam attended from this school</label>
+                                                        <div class="row g-3 mt-2">
+                                                            <div class="col-md-6">
+                                                                <div class="input-group input-group-sm" style="height: 32px;">
+                                                                    <span class="input-group-text" style=" height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                        S.L.C./S.E.E.
+                                                                    </span>
+                                                                    <input type="text" name="lastExam"
+                                                                           class="form-control form-control-sm"
+                                                                           ng-model="newAlumniReg.SEE"
+                                                                           style="height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <div class="input-group input-group-sm" style="height: 32px;">
+                                                                    <span class="input-group-text" style=" height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                        Grade 12
+                                                                    </span>
+                                                                    <input type="text" name="lastExam"
+                                                                           class="form-control form-control-sm"
+                                                                           ng-model="newAlumniReg.PlusTwo"
+                                                                           style="height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-4">
+                                                <div>
+                                                    <label class="form-label" style="font-size:13px;">
+                                                        Attach your last exam mark sheet/grade sheet photo (.jpg, .pdf)
+                                                    </label>
+                                                </div>
+
+                                            </div>
+                                            <div class="position-relative rounded text-center w-25 border-secondary"
+                                                 style="padding-top: 60px; padding-bottom: 40px; margin-top: 10px; border: 2px dashed; cursor: pointer; float: left;">
+
+                                                <div class="photo-upload-wrap">
+                                                    <div class="modal-body"
+                                                         file-dropzone="[image/png, image/jpeg]"
+                                                         data-max-file-size="3"
+                                                         ng-model="newAlumniReg.MarksheetPhoto_TMP"
+                                                         fileread="newAlumniReg.MarksheetPhotoData">
+
+                                                        <!-- Show image preview if image file -->
+                                                        <img ng-if="isImage(newAlumniReg.MarksheetPhotoData)"
+                                                             ng-src="{{newAlumniReg.MarksheetPhotoData || newAlumniReg.MarksheetPhoto}}"
+                                                             class="img-fluid mb-2"
+                                                             id="imgMarksheet"
+                                                             style="max-height: 120px;" />
+
+                                                        <!-- Show PDF icon if PDF file -->
+                                                        <div ng-if="isPDF(newAlumniReg.MarksheetPhotoData)"
+                                                             ng-src="{{newAlumniReg.MarksheetPhotoData || newAlumniReg.MarksheetPhoto}}"
+                                                             class="mb-2">
+                                                            <i class="bi bi-file-earmark-pdf" style="font-size: 2.5rem; color: red;"></i>
+                                                            <div class="text-muted small">PDF Uploaded</div>
+                                                        </div>
+
+                                                        <!-- Prompt text -->
+                                                        <label for="choose-Marksheet">
+                                                            <span class="d-block mt-2 text-muted" ng-if="!newAlumniReg.MarksheetPhotoData">
+                                                                Drag & drop or click to upload (.jpg, .pdf)
+                                                            </span>
+                                                        </label>
+
+                                                        <!-- File input -->
+                                                        <input id="choose-Marksheet" type="file"
+                                                               accept=".jpg,.jpeg,.pdf,.png"
+                                                               style="display: none;"
+                                                               file-model
+                                                               ng-model="newAlumniReg.MarksheetPhoto_TMP"
+                                                               fileread="newAlumniReg.MarksheetPhotoData" />
+
+                                                        <!-- Clear uploaded file -->
+                                                        <button type="button" ng-if="newAlumniReg.MarksheetPhotoData"
+                                                                ng-click="ClearMarksheetUpload()"
+                                                                class="btn btn-sm btn-light border"
+                                                                style="position: absolute; top: 5px; right: 10px; z-index: 10; font-weight: bold; padding: 2px 6px; line-height: 1;">
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+                                        </div>
+                                    </div>
+
+
+                                    <div class="card mb-4" style="border: 1px solid #ccc;">
+                                        <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                            <h6 class="mb-0">Photos</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <div class="d-flex">
+
+                                                    <div class="flex-grow-1">
+                                                        <div class="mb-3">
+                                                            <label class="form-label" style="font-size:13px;float: left;">
+                                                                Upload your latest close up photo for alumni profile (.jpg)
+                                                            </label>
+                                                        </div>
+
+                                                        <div class="position-relative rounded text-center w-25 border-secondary"
+                                                             style="padding-top: 60px; padding-bottom: 40px; margin-top: 30px; border: 2px dashed; cursor: pointer;">
+
+                                                            <div class="photo-upload-wrap">
+                                                                <div class="modal-body"
+                                                                     file-dropzone="[image/png, image/jpeg]"
+                                                                     data-max-file-size="3"
+                                                                     ng-model="newAlumniReg.Photo_TMP"
+                                                                     fileread="newAlumniReg.PhotoData">
+
+                                                                    <!-- Image preview -->
+                                                                    <img ng-if="newAlumniReg.PhotoData"
+                                                                         ng-src="{{newAlumniReg.PhotoData || newAlumniReg.Photo}}"
+                                                                         class="img-fluid mb-2"
+                                                                         id="imgProfilePhoto"
+                                                                         style="max-height: 120px;" />
+
+                                                                    <!-- Upload instruction -->
+                                                                    <label for="profilePhoto">
+                                                                        <span class="d-block mt-2 text-muted" ng-if="!newAlumniReg.PhotoData">
+                                                                            Drag & drop or click to upload (.jpg)
+                                                                        </span>
+                                                                    </label>
+
+                                                                    <!-- Hidden file input -->
+                                                                    <input type="file" id="profilePhoto"
+                                                                           accept=".jpg,.jpeg"
+                                                                           style="display: none;"
+                                                                           file-model
+                                                                           ng-model="newAlumniReg.Photo_TMP"
+                                                                           fileread="newAlumniReg.PhotoData" />
+
+                                                                    <!-- Clear button -->
+                                                                    <button type="button" ng-if="newAlumniReg.PhotoData"
+                                                                            ng-click="ClearProfilePhoto()"
+                                                                            class="btn btn-sm btn-light border"
+                                                                            style="position: absolute; top: 5px; right: 10px; z-index: 10; font-weight: bold; padding: 2px 6px; line-height: 1;">
+                                                                        ×
+                                                                    </button>
+
+
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex">
+
+                                                <div class="flex-grow-1">
+                                                    <div class="mb-4">
+                                                        <label class="form-label" style="font-size: 13px; float: left;">
+                                                            Upload up to two photos related to school life memory in uniform (.jpg)
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="row mt-4">
+                                                        <!-- Upload Box 1 -->
+                                                        <div class="col-auto me-8">
+                                                            <div class="position-relative rounded text-center w-100 border-secondary"
+                                                                 style="padding-top: 60px; padding-bottom: 40px; margin-top: 10px; border: 2px dashed; cursor: pointer; width: 107% !important">
+
+                                                                <div class="photo-upload-wrap">
+                                                                    <div class="modal-body"
+                                                                         file-dropzone="[image/png, image/jpeg, application/pdf]"
+                                                                         data-max-file-size="3"
+                                                                         ng-model="newAlumniReg.MemoryPhoto1_TMP"
+                                                                         fileread="newAlumniReg.MemoryPhoto1Data">
+
+                                                                        <!-- Preview -->
+                                                                        <div class="d-flex justify-content-center flex-wrap gap-3 mb-2">
+                                                                            <div class="position-relative" ng-if="newAlumniReg.MemoryPhoto1Data">
+                                                                                <img ng-if="isImage(newAlumniReg.MemoryPhoto1Data)" ng-src="{{newAlumniReg.MemoryPhoto1Data}}"
+                                                                                     class="img-thumbnail" style="max-height: 100px; max-width: 100px;" />
+
+                                                                                <div ng-if="isPdf(newAlumniReg.MemoryPhoto1Data)"
+                                                                                     class="d-flex align-items-center justify-content-center bg-light border rounded"
+                                                                                     style="width: 100px; height: 100px;">
+                                                                                    <i class="fas fa-file-pdf text-danger" style="font-size: 2rem;"></i>
+                                                                                </div>
+
+                                                                                <button type="button"
+                                                                                        class="btn btn-sm btn-light border position-absolute"
+                                                                                        style="top: -8px; right: -8px; font-weight: bold; padding: 2px 6px; line-height: 1;"
+                                                                                        ng-click="newAlumniReg.MemoryPhoto1Data = null">
+                                                                                    ×
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Label -->
+                                                                        <label for="memoryPhotoInput1" type="button" class="mb-2 d-block" style="">
+                                                                            Drag & drop or click to upload 1 (.jpg, .pdf)
+                                                                        </label>
+
+                                                                        <!-- Hidden input -->
+                                                                        <input id="memoryPhotoInput1"
+                                                                               type="file"
+                                                                               accept=".jpg,.jpeg,.png,.pdf"
+                                                                               style="display: none;"
+                                                                               file-model
+                                                                               ng-model="newAlumniReg.MemoryPhoto1_TMP"
+                                                                               fileread="newAlumniReg.MemoryPhoto1Data" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Upload Box 2 -->
+                                                        <div class="col-auto ml-5">
+                                                            <div class="position-relative rounded text-center w-100 border-secondary"
+                                                                 style="padding-top: 60px; padding-bottom: 40px; margin-top: 8px; border: 2px dashed; cursor: pointer;">
+                                                                <div class="photo-upload-wrap">
+                                                                    <div class="modal-body"
+                                                                         file-dropzone="[image/png, image/jpeg, application/pdf]"
+                                                                         data-max-file-size="3"
+                                                                         ng-model="newAlumniReg.MemoryPhoto2_TMP"
+                                                                         fileread="newAlumniReg.MemoryPhoto2Data">
+
+                                                                        <!-- Preview -->
+                                                                        <div class="d-flex justify-content-center flex-wrap gap-3 mb-2">
+                                                                            <div class="position-relative" ng-if="newAlumniReg.MemoryPhoto2Data">
+                                                                                <img ng-if="isImage(newAlumniReg.MemoryPhoto2Data)" ng-src="{{newAlumniReg.MemoryPhoto2Data}}"
+                                                                                     class="img-thumbnail" style="max-height: 100px; max-width: 100px;" />
+
+                                                                                <div ng-if="isPdf(newAlumniReg.MemoryPhoto2Data)"
+                                                                                     class="d-flex align-items-center justify-content-center bg-light border rounded"
+                                                                                     style="width: 100px; height: 100px;">
+                                                                                    <i class="fas fa-file-pdf text-danger" style="font-size: 2rem;"></i>
+                                                                                </div>
+
+                                                                                <button type="button"
+                                                                                        class="btn btn-sm btn-light border position-absolute"
+                                                                                        style="top: -8px; right: -8px; font-weight: bold; padding: 2px 6px; line-height: 1;"
+                                                                                        ng-click="newAlumniReg.MemoryPhoto2Data = null">
+                                                                                    ×
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Label -->
+                                                                        <label for="memoryPhotoInput2" type="button" class="mb-2 d-block" style="">
+                                                                            Drag & drop or click to upload 2 (.jpg, .pdf)
+                                                                        </label>
+
+                                                                        <!-- Hidden input -->
+                                                                        <input id="memoryPhotoInput2"
+                                                                               type="file"
+                                                                               accept=".jpg,.jpeg,.png,.pdf"
+                                                                               style="display: none;"
+                                                                               file-model
+                                                                               ng-model="newAlumniReg.MemoryPhoto2_TMP"
+                                                                               fileread="newAlumniReg.MemoryPhoto2Data" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div class="card mb-4" style="border: 1px solid #ccc;">
+                                        <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                            <h6 class="h6 mb-0">Academic &amp; Professional Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-4">
+
+                                                <div class="d-flex">
+                                                    <div class="flex-grow-1">
+                                                        <label class="form-label" style="font-size: 13px;">Your highest academic degree till time so far</label>
+
+                                                        <div class="row g-3 mt-2">
+                                                            <div class="col-md-6">
+                                                                <div class="input-group input-group-sm" style="height: 32px;">
+                                                                    <span class="input-group-text" style=" height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                        Degree title:
+                                                                    </span>
+                                                                    <input type="text" name="degreeTitle"
+                                                                           class="form-control form-control-sm"
+                                                                           ng-model="newAlumniReg.DegreeTitle"
+                                                                           style="height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <div class="input-group input-group-sm" style="height: 32px;">
+                                                                    <span class="input-group-text" style=" height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                        University:
+                                                                    </span>
+                                                                    <input type="text" name="university"
+                                                                           class="form-control form-control-sm"
+                                                                           ng-model="newAlumniReg.University"
+                                                                           style="height: 100%; font-size: 16px; padding: 4px 10px;">
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                            <div class="mb-4">
+                                                <div class="d-flex">
+
+                                                    <div class="flex-grow-1">
+                                                        <label for="currentPosition" class="form-label" style="font-size: 13px;">
+                                                            Current position (if job holder)
+                                                        </label>
+                                                        <input type="text" id="currentPosition" name="currentPosition" class="form-control form-control-sm" ng-model="newAlumniReg.CurPosition">
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="mb-4">
+                                                <div class="d-flex">
+
+                                                    <div class="flex-grow-1">
+                                                        <label for="currentCompany" class="form-label" style="font-size: 13px;">
+                                                            Current company and address
+                                                        </label>
+                                                        <input type="text" id="currentCompany" name="currentCompany" class="form-control form-control-sm" ng-model="newAlumniReg.CurCompany">
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="d-flex">
+
+                                                    <div class="flex-grow-1">
+                                                        <label for="currentUniversity" class="form-label" style="font-size: 13px;">
+                                                            Current university and address (for student)
+                                                        </label>
+                                                        <input type="text" id="currentUniversity" name="currentUniversity" class="form-control form-control-sm" ng-model="newAlumniReg.CurUniversity">
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card mb-4" style="border: 1px solid #ccc;">
+                                        <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                            <h6 class="mb-0">Achievements &amp; Biography</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-4">
+                                                <div class="d-flex">
+
+                                                    <div class="flex-grow-1">
+                                                        <label for="achievements" class="form-label" style="font-size: 13px;">
+                                                            Outstanding/remarkable achievements (academic or professional)
+                                                        </label>
+                                                        <div class="d-flex flex-column flex-md-row mt-1 gap-3">
+                                                            <textarea id="achievements"
+                                                                      name="achievements"
+                                                                      class="form-control form-control-sm"
+                                                                      rows="3"
+                                                                      placeholder="Please mention the details here"
+                                                                      ng-model="newAlumniReg.Achievements"></textarea>
+                                                            <div>
+                                                                <div class="border rounded p-3 text-center border-secondary ml-3 position-relative">
+                                                                    <!-- Preview -->
+                                                                    <div class="photo-upload-wrap">
+                                                                        <div class="modal-body" file-dropzone="[image/png, image/jpeg]" data-max-file-size="3" ng-model="newAlumniReg.AchievementPhoto_TMP" fileread="newAlumniReg.AchievementPhotoData">
+
+                                                                            <!-- Image preview -->
+                                                                            <img ng-if="isImage(newAlumniReg.AchievementPhotoData)"
+                                                                                 ng-src="{{newAlumniReg.AchievementPhotoData || newAlumniReg.AchievementPhoto}}"
+                                                                                 class="img-fluid mb-2"
+                                                                                 style="max-height: 150px;" />
+
+                                                                            <!-- PDF preview icon -->
+                                                                            <div ng-if="isPDF(newAlumniReg.AchievementPhotoData)"
+                                                                                 ng-src="{{newAlumniReg.AchievementPhotoData || newAlumniReg.AchievementPhoto}}"
+                                                                                 class="mb-2">
+                                                                                <i class="bi bi-file-earmark-pdf" style="font-size: 3rem; color: red;"></i>
+                                                                                <div class="text-muted small">PDF Uploaded</div>
+                                                                            </div>
+
+                                                                            <!-- Upload prompt (if nothing is uploaded yet) -->
+                                                                            <label for="achievementEvidence" type="button"
+                                                                                   class="mb-2 d-block"
+                                                                                   style="">
+                                                                                <span class="d-block mt-2 text-muted" ng-if="!newAlumniReg.AchievementPhotoData">
+
+
+                                                                                    Drag & drop or click to upload (.jpg, .pdf)
+                                                                                </span>
+                                                                            </label>
+
+                                                                            <!-- File Input -->
+                                                                            <input id="achievementEvidence"
+                                                                                   type="file"
+                                                                                   accept=".jpg,.jpeg,.pdf,.png"
+                                                                                   style="display: none;"
+                                                                                   file-model
+                                                                                   ng-model="newAlumniReg.AchievementPhoto_TMP"
+                                                                                   @*onchange="angular.element(this).scope().handleAchievementDocChange(event)"*@
+                                                                                   fileread="newAlumniReg.AchievementPhotoData" />
+
+                                                                            <!-- Remove button -->
+                                                                            <button type="button"
+                                                                                    ng-if="newAlumniReg.AchievementPhotoData"
+                                                                                    ng-click="ClearAchievementDoc()"
+                                                                                    class="btn btn-sm btn-light border"
+                                                                                    style="position: absolute; top: 5px; right: 10px; z-index: 10; font-weight: bold; padding: 2px 6px; line-height: 1;">
+                                                                                ×
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="mb-4">
+                                                <div class="d-flex">
+
+                                                    <div class="flex-grow-1">
+                                                        <label for="shortBio" class="form-label" style="font-size: 13px;">
+                                                            Your short bio in 100 words (will be published in your profile)
+                                                        </label>
+                                                        <textarea id="shortBio"
+                                                                  name="shortBio"
+                                                                  class="form-control"
+                                                                  rows="4"
+                                                                  ng-model="newAlumniReg.Bio"></textarea>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="d-flex">
+
+                                                    <div class="flex-grow-1">
+                                                        <label for="remarks" class="form-label" style="font-size: 13px;">
+                                                            Your remarks about this school in 100 words (will be published in your profile)
+                                                        </label>
+                                                        <textarea id="remarks"
+                                                                  name="remarks"
+                                                                  class="form-control"
+                                                                  rows="4"
+                                                                  ng-model="newAlumniReg.Remarks"></textarea>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info"
+                                                    id="detailsback-btn"
+                                                    style="min-width: 70px" ng-click="ClearDetails()">
+                                                Back to List
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-default ml-1 mr-1"
+                                                    style="min-width: 70px;"
+                                                    ng-click="ClearDetails()">
+                                                Reset
+                                            </button>
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-success px-3 py-1"
+                                                    ng-click="CallSaveUpdateAlumniReg()">
+                                                Submit Registration
+                                            </button>
+
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!--Form Preview-->
+    <div class="modal fade" style="margin-top:23px;" id="previewModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+            <div class="modal-content" id="printArea">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title">Alumni Registration Preview</h5>
+
+                </div>
+
+                <div class="modal-body p-3">
+                    <div class="card">
+                        <div class="card-body px-3 py-2">
+
+                            <!-- Title -->
+                            <div class="text-center mb-3">
+                                <h4 class="fw-bold">Alumni Registration Form</h4>
+                                <hr>
+                            </div>
+
+                            <!-- Personal Information -->
+                            <div class="card mb-4" style="border: 1px solid #ccc;">
+                                <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                    <h6 class="mb-0">Personal Information</h6>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-center">
+
+                                        <!-- Info column -->
+                                        <div class="col-md-9">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label style="font-size:13px; font-weight:bold;">Full Name</label>
+                                                    <div>{{ newAlumniReg.FullName }}</div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label style="font-size: 13px; font-weight: bold;">DoB (Nepali YYYY/MM/DD)</label>
+                                                    <div>{{ newAlumniReg.DOB_BS }}</div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label style="font-size: 13px; font-weight: bold;">Original Address</label>
+                                                    <div>{{ newAlumniReg.OriginalAddress }}</div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label style="font-size: 13px; font-weight: bold;">Current Address</label>
+                                                    <div>{{ newAlumniReg.CurrentAddress }}</div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label style="font-size: 13px; font-weight: bold;">Contact Number (with code)</label>
+                                                    <div>{{ newAlumniReg.Contact }}</div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label style="font-size: 13px; font-weight: bold;">Email</label>
+                                                    <div>{{ newAlumniReg.Email }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Profile Photo column -->
+                                        <div class="col-md-3 text-center" ng-if="newAlumniReg.ProfilePhoto">
+                                            <div class="small mt-2 font-weight-bold text-secondary">Profile Photo</div>
+
+                                            <img ng-src="{{ newAlumniReg.ProfilePhoto }}"
+                                                 class="img-thumbnail mx-auto d-block"
+                                                 alt="Profile Photo"
+                                                 style="width: 80px; height: 100px; object-fit: cover;" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- Education Information -->
+                            <div class="card mb-3" style="border: 1px solid #ccc;">
+                                <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                    <h6 class="mb-0">Education Information</h6>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-start">
+
+                                        <!-- Education details column -->
+                                        <div class="col-md-9">
+                                            <div class="row g-3">
+
+                                                <div class="col-md-6">
+                                                    <label style="font-size: 13px; font-weight: bold;">Joined School in</label>
+                                                    <div>{{ newAlumniReg.JoinedYear }} BS</div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label style="font-size: 13px; font-weight: bold;">Studied up to</label>
+                                                    <div>{{ newAlumniReg.StudiedUpTo }} BS</div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="mt-4">
+                                                <label class="form-label" style="font-size: 13px; font-weight: bold;">Last exam attended from this school</label>
+                                                <div class="row g-3 mt-2">
+
+                                                    <div class="col-md-6">
+                                                        <label style="font-size: 13px; font-weight: bold;">S.L.C./S.E.E.</label>
+                                                        <div>{{ newAlumniReg.SEE }}</div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label style="font-size: 13px; font-weight: bold;">Grade 12</label>
+                                                        <div>{{ newAlumniReg.PlusTwo }}</div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Marksheet photo column -->
+                                        <!-- Marksheet -->
+                                        <div class="col-md-3 text-center" ng-if="newAlumniReg.MarksheetPath">
+                                            <img ng-src="{{ newAlumniReg.MarksheetPath }}"
+                                                 class="img-thumbnail mx-auto d-block"
+                                                 alt="Marksheet"
+                                                 style="width: 100px; height: 100px; object-fit: cover;" />
+                                            <div class="small mt-2 font-weight-bold text-secondary">Marksheet</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Photos -->
+                            <div class="card mb-3" style="border: 1px solid #ccc;">
+                                <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                    <h6 class="mb-0">Uploaded Photos</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+
+
+                                        <!-- Memory Photo 1 -->
+                                        <div class="col-md-3 mb-3 text-center" ng-if="newAlumniReg.MemoryPhoto1">
+                                            <div class="small mt-2 font-weight-bold text-secondary">Memory 1</div>
+
+                                            <img ng-src="{{ newAlumniReg.MemoryPhoto1 }}"
+                                                 class="img-thumbnail mx-auto d-block"
+                                                 alt="Memory 1"
+                                                 style="width: 100px; height: 100px; object-fit: cover;" />
+                                        </div>
+
+                                        <!-- Memory Photo 2 -->
+                                        <div class="col-md-3 mb-3 text-center" ng-if="newAlumniReg.MemoryPhoto2">
+                                            <div class="small mt-2 font-weight-bold text-secondary">Memory 2</div>
+
+                                            <img ng-src="{{ newAlumniReg.MemoryPhoto2 }}"
+                                                 class="img-thumbnail mx-auto d-block"
+                                                 alt="Memory 2"
+                                                 style="width: 100px; height: 100px; object-fit: cover;" />
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Academic & Career -->
+                            <div class="card mb-3" style="border: 1px solid #ccc;">
+                                <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                    <h6 class="mb-0">Academic & Professional Information</h6>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="row g-3">
+
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <div class="flex-grow-1 ml-1">
+                                                    <label style="font-size: 13px; font-weight: bold;">Degree Title</label>
+                                                    <div>{{ newAlumniReg.DegreeTitle }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <div class="flex-grow-1 ml-1">
+                                                    <label style="font-size: 13px; font-weight: bold;">University</label>
+                                                    <div>{{ newAlumniReg.University }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <div class="flex-grow-1 ml-1">
+                                                    <label style="font-size: 13px; font-weight: bold;">Current Position (if job holder)</label>
+                                                    <div>{{ newAlumniReg.CurPosition }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <div class="flex-grow-1 ml-1">
+                                                    <label style="font-size: 13px; font-weight: bold;">Current Company and Address</label>
+                                                    <div>{{ newAlumniReg.CurCompany }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="d-flex">
+                                                <div class="flex-grow-1 ml-1">
+                                                    <label style="font-size: 13px; font-weight: bold;">Current University and Address (for student)</label>
+                                                    <div>{{ newAlumniReg.CurUniversity }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-3" style="border: 1px solid #ccc;">
+                                <div class="card-header p-2" style="background-color: #f8f9fa;">
+                                    <h6 class="mb-0">Additional Information</h6>
+                                </div>
+
+                                <div class="card-body">
+                                    @*<div class="row g-3 align-items-start">
+                                        <div class="col-md-9">
+                                            <div class="mb-4">
+                                                <label style="font-size:13px; font-weight:600;">Achievements</label>
+                                                <p>{{ newAlumniReg.Achievements || 'N/A' }}</p>
+                                            </div>
+                                            <div class="mb-4">
+                                                <label style="font-size:13px; font-weight:600;">Biography</label>
+                                                <p>{{ newAlumniReg.Bio || 'N/A' }}</p>
+                                            </div>
+                                            <div>
+                                                <label style="font-size:13px; font-weight:600;">Remarks about the School</label>
+                                                <p>{{ newAlumniReg.Remarks || 'N/A' }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-3 mb-3 text-center" ng-if="newAlumniReg.Achievement_Doc">
+                                            <div class="small mt-2 font-weight-bold text-secondary">Achievement Photo</div>
+
+                                            <img ng-src="{{ newAlumniReg.Achievement_Doc }}"
+                                                 class="img-thumbnail mx-auto d-block"
+                                                 alt="Achievement Photo"
+                                                 style="width: 100px; height: 100px; object-fit: cover;" />
+                                        </div>
+                                    </div>*@
+
+                                    <div class="row">
+                                        <div class="mb-2">
+                                            <label style="font-size:13px; font-weight:600;">Achievements</label>
+                                            <p>{{ newAlumniReg.Achievements || 'N/A' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="mb-2">
+                                            <label style="font-size:13px; font-weight:600;">Biography</label>
+                                            <p>{{ newAlumniReg.Bio || 'N/A' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div>
+                                            <label style="font-size:13px; font-weight:600;">Remarks about the School</label>
+                                            <p>{{ newAlumniReg.Remarks || 'N/A' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3 mb-2 " ng-if="newAlumniReg.Achievement_Doc">
+                                            <div class="small mt-2 font-weight-bold text-secondary">Achievement Photo</div>
+
+                                            <img ng-src="{{ newAlumniReg.Achievement_Doc }}"
+                                                 class="img-thumbnail  d-block"
+                                                 alt="Achievement Photo"
+                                                 style="width: 100px; height: 100px; object-fit: cover;" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button class="btn btn-success" ng-click="printAlumniPreview()">Print</button>
+
+                    @*<button class="btn btn-success" ng-click="print()">Print</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

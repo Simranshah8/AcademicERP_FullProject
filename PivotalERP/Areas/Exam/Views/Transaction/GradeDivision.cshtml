@@ -1,0 +1,438 @@
+﻿<script src="/jslib/export/tableExport.js"></script>
+<script src="/jslib/export/jquery.base64.js"></script>
+
+<script src="/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="/jslib/export/jspdf/jspdf.js"></script>
+<script src="/jslib/export/jspdf/libs/base64.js"></script>
+<script src="~/jslib/Exam/Transaction/GradeDivision.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="GradeDivisionController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-12">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                   href="#home" role="tab" aria-controls="home"
+                                                   aria-selected="true">Division</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                   href="#profile" role="tab" aria-controls="profile"
+                                                   aria-selected="false">Grade</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Division Start -->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div id="division-section" class="card py-2">
+                                        <header class="row ">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Division">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Division">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Division">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'DivisionList'"><img src="/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-success" id="add-division" style="min-width: 90px;">
+                                                    <i class="fas fa-plus w-t"></i> Add
+                                                    Division
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+
+                                                            <th style="width:250px">Name</th>
+                                                            <th style="width:200px">Description</th>
+                                                            <th style="width:80px">Min Per.</th>
+                                                            <th style="width:80px">Max Per.</th>
+                                                            <th style="width:180px">Class</th>
+                                                            <th style="width:80px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="gd in DivisionList | filter:searchData.Division | itemsPerPage: perPage.Division" current-page="currentPages.Division" pagination-id="divisionPagination">
+
+                                                            <td>{{gd.Name}}</td>
+                                                            <td>{{gd.Description}}</td>
+                                                            <td>{{gd.MinPer}}</td>
+                                                            <td>{{gd.MaxPer}}</td>
+                                                            <td>{{gd.ClassName}}</td>
+                                                            <td>
+                                                                <a class="p-1" href="#" ng-click="GetDivisionById(gd)">
+                                                                    <i class="fas fa-edit text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#" ng-click="DelDivisionById(gd)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="divisionPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                    <div id="division-form" class="card">
+                                        <div class="card-body px-0">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <form action="">
+                                                        <div class="row">
+                                                            <div class="col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="">Class</label>
+                                                                    <select class="form-control form-control-sm select2" ng-model="newDivision.ClassId">
+                                                                        <option ng-value="0">**Select Class**</option>
+                                                                        <option ng-value="cl.id" ng-repeat="cl in ClassList" ng-selected="cl.id==newDivision.ClassId">{{cl.text}}</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="">Name <span class="text-danger">*</span></label>
+                                                                    <input type="text"
+                                                                           class="form-control form-control-sm" ng-model="newDivision.Name">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <div class="form-group">
+                                                                    <label>Description</label>
+                                                                    <textarea class="form-control form-control-sm" rows="1" ng-model="newDivision.Description"></textarea>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="">Minimum Percentage <span class="text-danger">*</span></label>
+                                                                    <input type="number"
+                                                                           class="form-control form-control-sm" ng-model="newDivision.MinPer">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="">Maximum Percentage <span class="text-danger">*</span></label>
+                                                                    <input type="number"
+                                                                           class="form-control form-control-sm" ng-model="newDivision.MaxPer">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-info" id="back-division" style="min-width: 90px;">Back to List</button>
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearDivision()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateDivision()">{{newDivision.Mode}}</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- division Ends -->
+                                <!-- Grade Start -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    <div id="grade-section" class="card py-2">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Grade">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Grade">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Grade">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table1'" sheet-name="'GradeList'"><img src="/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'csv',escape:'false'});"><img src="/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#main-table1'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-success" id="add-grade" style="min-width: 90px;">
+                                                    <i class="fas fa-plus w-t"></i> Add
+                                                    Grade
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div>
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table1" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:250px">Name</th>
+                                                            <th style="width:200px">Description</th>
+                                                            <th style="width:80px">Min Per.</th>
+                                                            <th style="width:80px">Max Per.</th>
+                                                            <th style="width:80px">Grade Point</th>
+                                                            <th style="width:180px">Class</th>
+                                                            <th style="width:80px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="gd in GradeList | filter:searchData.Grade | itemsPerPage: perPage.Grade" current-page="currentPages.Grade" pagination-id="gradePagination">
+
+                                                            <td>{{gd.Name}}</td>
+                                                            <td>{{gd.Description}}</td>
+                                                            <td>{{gd.MinPer}}</td>
+                                                            <td>{{gd.MaxPer}}</td>
+                                                            <td>{{gd.GradePoint}}</td>
+                                                            <td>{{gd.ClassName}}</td>
+                                                            <td>
+                                                                <a class="p-1" href="#" ng-click="GetGradeById(gd)">
+                                                                    <i class="fas fa-edit text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#" ng-click="DelGradeById(gd)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="gradePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                    <!--Grade form starts -->
+                                    <div id="grade-form" class="card">
+                                        <div class="card-body py-2 px-0">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <form action="">
+                                                        <div class="row">
+                                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="">Class</label>
+                                                                    <select class="form-control form-control-sm select2" ng-model="newGrade.ClassId">
+                                                                        <option ng-value="0">**Select Class**</option>
+                                                                        <option ng-value="cl.id" ng-repeat="cl in ClassList" ng-selected="cl.id==newGrade.ClassId">{{cl.text}}</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-2 col-lg-2 col-md-2">
+
+                                                                <div class="form-group">
+                                                                    <label for="">Name</label>
+                                                                    <input type="text"
+                                                                           class="form-control form-control-sm" ng-model="newGrade.Name">
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="col-sm-8 col-lg-8 col-md-8">
+                                                                <div class="form-group">
+                                                                    <label>Description</label>
+                                                                    <textarea class="form-control form-control-sm" rows="1" ng-model="newGrade.Description"></textarea>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-sm-4 col-lg-4 col-md-4">
+                                                                <div class="row">
+                                                                    <div class="col-sm-6 col-lg-6 col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="">Minimum Percentage</label>
+                                                                            <input type="number"
+                                                                                   class="form-control form-control-sm" ng-model="newGrade.MinPer">
+                                                                        </div>
+
+                                                                    </div>
+                                                                    <div class="col-sm-6 col-lg-6 col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="">Maximum Percentage</label>
+                                                                            <input type="number"
+                                                                                   class="form-control form-control-sm" ng-model="newGrade.MaxPer">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="">Grade Point</label>
+                                                                    <input type="number"
+                                                                           class="form-control form-control-sm" ng-model="newGrade.GradePoint">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-6 col-md-6">
+                                                                <label>Subject Type</label>
+                                                                <div class="form-group clearfix">
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" id="rboMajor" ng-value="1" ng-model="newGrade.SubjectType">
+                                                                        <label class="form-check-label" for="rboMajor">Major</label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input class="form-check-input" type="radio" id="rboMinor" ng-value="2" ng-model="newGrade.SubjectType">
+                                                                        <label class="form-check-label" for="rboMinor">Minor</label>
+                                                                    </div>
+
+                                                                </div>
+
+
+                                                                @*<div class="form-group">
+                                                                        <label>Subject Type</label>
+                                                                        <div class="icheck-primary d-inline ml-2">
+                                                                            <input type="radio" id="rboMajor" name="SubjectType" ng-value="1" ng-model="newGrade.SubjectType" class="mt-4">
+                                                                            <label for="radioisactiveYes1">
+                                                                                Major
+                                                                            </label>
+                                                                        </div>
+                                                                        <div class="icheck-primary d-inline ml-3">
+                                                                            <input type="radio" id="rboMinor" name="SubjectType" ng-value="2" ng-model="newGrade.SubjectType" class="mt-4">
+                                                                            <label for="radioisactiveNo1">
+                                                                                Minor
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>*@
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-info" id="back-grade" style="min-width: 90px;">Back to List</button>
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearGrade()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateGrade()">{{newGrade.Mode}}</button>
+
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- source form ends -->
+                                </div>
+                                <!-- Grade Ends -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+
+

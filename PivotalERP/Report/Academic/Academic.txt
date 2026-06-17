@@ -1,0 +1,136 @@
+
+create PROCEDURE usp_AddClass
+(   
+ @OrderNo          		int,  
+ @Name        			nvarchar(50),  
+ @Description           nvarchar(100)=Null,
+ @UserId   				int,  
+ @EntityId				int,
+ @ClassId  				int=0 output,      
+ @ResponseMSG 			NVARCHAR(250)='' OUTPUT,  
+ @IsSuccess 			bit=0 output,
+ @ErrorNumber			int=0 output 
+ )      
+ AS  
+ BEGIN  
+  SET NOCOUNT ON 
+  declare @TranName varchar(30)='Class'; 
+  BEGIN TRY  
+		
+		if exists(select * from tbl_Class(nolock) C where C.Name=@Name)
+		begin
+			set @IsSuccess=0;
+			set @ResponseMSG=' Class Name ( '+@Name+' )  was already exists.';
+		end
+		else
+		begin
+			begin transaction @TranName;     
+			insert into Tbl_Class (OrderNo,Name,[Description],CreateBy)  values(@OrderNo,@Name,@Description,@UserId);  
+			commit transaction @TranName;  
+			
+			set @ClassId=(select IDENT_CURRENT('Tbl_Class'));  
+			SET @ResponseMSG='Class Added Successfully';  
+			set @IsSuccess=1;  
+		end
+  END TRY  
+  BEGIN CATCH  	
+   rollback transaction @TranName;  
+   exec usp_ErrorLog @UserId;
+   set @ErrorNumber=(select IDENT_CURRENT('tbl_SQLErrorLog'));
+   SET @ResponseMSG=ERROR_MESSAGE()   
+  END CATCH  
+  
+ END ; 
+
+Go
+
+create PROCEDURE usp_UpdateClass
+(   
+ @OrderNo          		int,  
+ @Name        			nvarchar(50),  
+ @Description           nvarchar(100)=Null,
+ @UserId   				int,  
+ @EntityId				int,
+ @ClassId  				int,      
+ @ResponseMSG 			NVARCHAR(250)='' OUTPUT,  
+ @IsSuccess 			bit=0 output,
+ @ErrorNumber			int=0 output 
+ )      
+ AS  
+ BEGIN  
+  SET NOCOUNT ON 
+  declare @TranName varchar(30)='Class'; 
+  BEGIN TRY  		
+			begin transaction @TranName;     
+				update tbl_Class set Name=@Name,[Description]=@Description,OrderNo=@OrderNo,UpdateLogDateTime=getdate(),ModifyBy=@UserId where ClassId=@ClassId;			
+			commit transaction @TranName;  
+						
+			SET @ResponseMSG='Class Updated Successfully';  
+			set @IsSuccess=1;  
+  END TRY  
+  BEGIN CATCH  	
+   rollback transaction @TranName;  
+   exec usp_ErrorLog @UserId;
+   set @ErrorNumber=(select IDENT_CURRENT('tbl_SQLErrorLog'));
+   SET @ResponseMSG=ERROR_MESSAGE()   
+  END CATCH  
+  
+ END ; 
+
+Go
+
+create proc usp_GetAllClass
+(
+@UserId int,
+@EntityId int=null
+)
+as set nocount on;
+select C.ClassId,C.OrderNo,C.Name,C.Description from tbl_Class(nolock) C  order by C.Name
+go
+
+
+
+create proc usp_DelClassById
+(
+@ClassId			int,
+@UserId				int,
+@EntityId			int=null,
+@ResponseMSG 		NVARCHAR(250)='' OUTPUT,  
+@IsSuccess 			bit=0 output,
+@ErrorNumber		int=0 output 
+)
+as
+begin
+
+	set nocount on;
+	declare @TranName varchar(30)='Class'; 
+  BEGIN TRY  
+			begin transaction @TranName;     
+				delete from tbl_Class where ClassId=@ClassId;
+			commit transaction @TranName;  
+						
+			SET @ResponseMSG='Class Deleted Successfully';  
+			set @IsSuccess=1;  
+  END TRY  
+  BEGIN CATCH  	
+   rollback transaction @TranName;  
+   exec usp_ErrorLog @UserId;
+   set @ErrorNumber=(select IDENT_CURRENT('tbl_SQLErrorLog'));
+   SET @ResponseMSG=ERROR_MESSAGE()   
+  END CATCH  
+
+end
+
+go
+
+
+create proc [dbo].[usp_GetClassById]
+(
+@ClassId int,
+@UserId int,
+@EntityId int=null
+)
+as
+set nocount on;
+select top 1 C.ClassId,C.OrderNo,C.Name,C.Description from tbl_Class(nolock) C where C.ClassId=@ClassId;
+GO

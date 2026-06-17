@@ -1,0 +1,1159 @@
+﻿
+<style>
+    .card-header h3 {
+        font-size: 18px;
+        color: #025a58f0 !important;
+    }
+</style>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/infrastructure/BuildingDetails.js"></script>
+
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="BuildingDetailsController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" @*style="padding-top:50px!important"*@>
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="building-details-tab" data-toggle="tab"
+                                               href="#buildingDetails" role="tab" aria-controls="buildingDetails"
+                                               aria-selected="true">Building Details</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="floor-mapping-tab" data-toggle="tab"
+                                               href="#floorMapping" role="tab" aria-controls="floorMapping"
+                                               aria-selected="false">Floor Mapping</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+
+                        <div class="tab-content" id="myTabContent">
+
+                            <div class="tab-pane fade show active main-section" id="buildingDetails" role="tabpanel"
+                                 aria-labelledby="building-details-tab">
+
+                                <div class="card py-2" id="Buildingtbl">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.BuildingDetails">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.BuildingDetails">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar" type="search"
+                                                               placeholder="Search" aria-label="Search" ng-model="searchData.BuildingDetails">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'BuildingDetails'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+
+                                            <button type="button" class="btn btn-sm btn-success" id="add-Bulding" style="min-width: 90px">
+                                                <i class="fas fa-plus w-t"></i> Add Building Details
+                                            </button>
+
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 95px">Building no.</th>
+                                                        <th style="width: 210px">Building Name</th>
+                                                        <th style="width: 210px">Building Type</th>
+                                                        <th style="width: 95px">Total Floor</th>
+                                                        <th style="width: 95px">Total Classrooms</th>
+                                                        <th style="width: 95px">Total Other rooms</th>
+                                                        <th style="width: 105px">Construction Year</th>
+                                                        <th style="width: 115px">Budget</th>
+                                                        <th style="width: 160px">Structure Type</th>
+                                                        <th style="width: 130px">Roof Type</th>
+                                                        <th style="width: 112px">Damage Grade</th>
+                                                        <th style="width: 130px">No. of Boys Toilet</th>
+                                                        <th style="width: 130px">No. of Girls Toilet</th>
+                                                        <th class="cstm-sticky" style="width:110px;right:0;z-index:3">Action</th>
+                                                    </tr>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in BuildingDetailsList | filter:searchData.BuildingDetails | itemsPerPage: perPage.BuildingDetails"
+                                                        current-page="currentPages.BuildingDetails"
+                                                        pagination-id="buildingDetailsPagination">
+                                                        <td>{{cl.BuildingNo}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>
+                                                            {{cl.OtherBuildingType}}
+                                                            @*<span ng-repeat="buildingType in cl.BuildingTypeColl">
+            {{buildingType}}<span ng-if="!$last">, </span>
+        </span>*@
+                                                        </td>
+                                                        <td>{{cl.NoOfFloor}}</td>
+                                                        <td>{{cl.NoOfClassRooms}}</td>
+                                                        <td>{{cl.NoOfOtherRooms}}</td>
+                                                        <td>{{cl.ConstructionDate_BS}}</td>
+                                                        <td class="text-right">{{cl.Budget}}</td>
+                                                        <td>{{cl.StructureType}}</td>
+                                                        <td>{{cl.RoofType}}</td>
+                                                        <td>{{cl.DamageGrade}}</td>
+                                                        <td>{{cl.BoysToiletNo}}</td>
+                                                        <td>{{cl.GirlsToiletNo}}</td>
+                                                        <td class="cstm-sticky" style="width:80px;right:0;z-index:3; background-color:#fff">
+                                                            <button ng-click="PrintData(cl)" class="btn btn-link p-0"><i class="p-1 fas fa-print text-success"></i></button>
+                                                            <button ng-click="GetBuildingDetailsById(cl)" class="btn btn-link p-0"><i class="p-1 fas fa-edit text-info"></i></button>
+                                                            <button ng-click="DelBuildingDetailsById(cl)" class="btn btn-link p-0"><i class="p-1 fas fa-trash-alt text-danger"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- table end -->
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="buildingDetailsPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+
+
+                                <div id="building-form">
+                                    <div class="card card-default">
+                                        <div class="card-body py-2 px-0">
+
+                                            <div class="row">
+                                                <div class="col-md-9">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Building No. @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.BuildingNo">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Building Name @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.Name">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Address@*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.Location">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Building Type @*<span style="color: red;">*</span>*@</label>
+                                                                <select class="form-select form-control form-control-sm select2" ng-model="newBuildingDet.BuildingTypeColl" multiple="multiple">
+                                                                    <option ng-repeat="A in BuildingTypeList" ng-value="A.BuildingTypeId">{{A.Name}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        @*<div class="col-md-4" ng-show="newBuildingDet.BuildingTypeId == 8">
+            <label>Building Type (Other than list)</label>
+            <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.OtherBuildingType">
+        </div>*@
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>No. Of Floor @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newBuildingDet.NoOfFloor">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            @*<div class="form-group">
+                <label>Overall Condition <span style="color: red;">*</span></label>
+                <select class="form-select form-control form-control-sm select2" ng-model="newBuildingDet.OverallConditionId">
+                    <option ng-repeat="A in OverallConditionCOll" ng-value="A.id" ng-selected="A.id==newBuildingDet.OverallConditionId">{{A.text}}</option>
+                </select>
+            </div>*@
+                                                            <div class="form-group">
+                                                                <label>Overall Condition @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="newBuildingDet.OverallCondition" list="overallCondition">
+                                                                <datalist id="overallCondition">
+                                                                    <option data-ng-repeat="A in OverallConditionColl" value="{{A.text}}">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>No. Of Classrooms @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newBuildingDet.NoOfClassRooms">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>No. Of Other Rooms</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newBuildingDet.NoOfOtherRooms">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4" @*ng-show="newCompanyDet.Country == 'Nepal'"*@>
+                                                            <div class="form-group">
+                                                                <label for="">Construction Date(BS)</label>
+                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newBuildingDet.ConstructionDate_TMP" date-detail="newBuildingDet.ConstructedDateDet" confirm-action="ChangeDate('ConstructionDate',2)" ng-blur="ChangeDate('ConstructionDate',2)" @*title="{{beData.ConstructionDateBSDet.dateAD |dateFormat}}"*@ date-style="2">
+                                                            </div>
+                                                        </div>
+                                                        <!--<div class="col-md-2" ng-show="newCompanyDet.Country == 'Nepal'">
+    <div class="form-group">
+        <label for="">{{ newCompanyDet.Country == 'Nepal' ? 'Construction Date(AD)' : 'Construction Date'}}</label>
+        <input type="text" class="form-control form-control-sm" date-picker ng-model="newBuildingDet.ConstructionDateAD_TMP" date-detail="newBuildingDet.ConstructionDateADDet" confirm-action="ChangeDate('ConstructionDate',1)" ng-blur="ChangeDate('ConstructionDate',2)"-->
+                                                        @*title="{{beData.ConstructionDateADDet.dateBS}}"*@
+                                                        <!--date-style="1">
+        </div>
+    </div>-->
+                                                        <div class="col-md-4" ng-show="newCompanyDet.Country != 'Nepal'">
+                                                            <div class="form-group">
+                                                                <label>Construction Date@*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newBuildingDet.ConstructionDateAD_TMP" date-detail="newBuildingDet.ConstructionDateADDet" confirm-action="ChangeDate('ConstructionDate',1)" ng-blur="ChangeDate('ConstructionDate',2)" @*title="{{beData.ConstructionDateADDet.dateBS}}"*@ date-style="1">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            @*<div class="form-group">
+                <label>Structure Type <span style="color: red;">*</span></label>
+                <select class="form-select form-control form-control-sm select2" ng-model="newBuildingDet.StructureTypeId">
+                    <option ng-repeat="A in StructureTypeColl" ng-value="A.id" ng-selected="A.id==newBuildingDet.StructureTypeId">{{A.text}}</option>
+                </select>
+            </div>*@
+                                                            <div class="form-group">
+                                                                <label>Structure Type @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="newBuildingDet.StructureType" list="structureType">
+                                                                <datalist id="structureType">
+                                                                    <option data-ng-repeat="A in StructureTypeColl" value="{{A.text}}">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4" ng-show="newBuildingDet.StructureType == 'Others'">
+                                                            <label>Structure Type (Other than list)</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.OtherStructureType">
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            @*<div class="form-group">
+                <label>Roof Type <span style="color: red;">*</span></label>
+                <select class="form-select form-control  form-control-sm select2" ng-model="newBuildingDet.RoofTypeId">
+                    <option ng-repeat="A in RoofTypeColl" ng-value="A.id" ng-selected="A.id==newBuildingDet.RoofTypeId">{{A.text}}</option>
+                </select>
+            </div>*@
+                                                            <div class="form-group">
+                                                                <label>Roof Type @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="newBuildingDet.RoofType" list="roofType">
+                                                                <datalist id="roofType">
+                                                                    <option data-ng-repeat="A in RoofTypeColl" value="{{A.text}}">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4" ng-show="newBuildingDet.RoofType=='Others'">
+                                                            <label>Roof Type (Other than List)</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.OtherRoofType">
+
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            @*<div class="form-group">
+                <label>Damage Grade <span style="color: red;">*</span></label>
+                <select class="form-select form-control form-control-sm select2" ng-model="newBuildingDet.DamageGradeId">
+                    <option ng-repeat="A in DamageGradeColl" ng-value="A.id" ng-selected="A.id==newBuildingDet.DamageGradeId">{{A.text}}</option>
+                </select>
+            </div>*@
+                                                            <div class="form-group">
+                                                                <label>Damage Grade @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="newBuildingDet.DamageGrade" list="damageGrade">
+                                                                <datalist id="damageGrade">
+                                                                    <option data-ng-repeat="A in DamageGradeColl" value="{{A.text}}">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            @*<div class="form-group">
+                <label>Infrastructure/Resource Type <span style="color: red;">*</span></label>
+                <select class="form-select form-control form-control-sm select2" ng-model="newBuildingDet.InfrastructureTypeId">
+                    <option ng-repeat="A in InfrastructureTypeColl" ng-value="A.id" ng-selected="A.id==newBuildingDet.InfrastructureTypeId">{{A.text}}</option>
+                </select>
+            </div>*@
+                                                            <div class="form-group">
+                                                                <label>Infrastructure/Resource Type @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="newBuildingDet.InfrastructureType" list="infrastructureType">
+                                                                <datalist id="infrastructureType">
+                                                                    <option data-ng-repeat="A in InfrastructureTypeColl" value="{{A.text}}">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            @*<div class="form-group">
+                <label>Funding Sources <span style="color: red;">*</span></label>
+                <select class="form-select form-control form-control-sm select2" ng-model="newBuildingDet.FundingSourcesId">
+                    <option ng-repeat="A in FundingSourceColl" ng-value="A.id" ng-selected="A.id==newBuildingDet.FundingSourcesId">{{A.text}}</option>
+                </select>
+            </div>*@
+                                                            <div class="form-group">
+                                                                <label>Funding Sources @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="newBuildingDet.FundingSources" list="fundingSource">
+                                                                <datalist id="fundingSource">
+                                                                    <option data-ng-repeat="A in FundingSourceColl" value="{{A.text}}">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            @*<div class="form-group">
+                <label>Intervention Type <span style="color: red;">*</span></label>
+                <select class="form-select form-control form-control-sm select2" ng-model="newBuildingDet.InterventionTypeId">
+                    <option ng-repeat="A in InterventionTypeColl" ng-value="A.id" ng-selected="A.id==newBuildingDet.InterventionTypeId">{{A.text}}</option>
+                </select>
+            </div>*@
+                                                            <div class="form-group">
+                                                                <label>Intervention Type @*<span style="color: red;">*</span>*@</label>
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="newBuildingDet.InterventionType" list="interventionType">
+                                                                <datalist id="interventionType">
+                                                                    <option data-ng-repeat="A in InterventionTypeColl" value="{{A.text}}">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label>Approved/Design@*<span style="color: red;">*</span>*@</label>
+                                                            <div class="form-group clearfix">
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="rb-interest-calc-yes" name="r5" ng-value="1" ng-model="newBuildingDet.IsApprovedDesign">
+                                                                    <label class="form-check-label" for="rb-interest-calc-yes">Yes</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="rb-interest-cal-no" name="r5" ng-value="0" ng-model="newBuildingDet.IsApprovedDesign">
+                                                                    <label class="form-check-label" for="rb-interest-cal-no">No</label>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label>Completion Certificate@*<span style="color: red;">*</span>*@</label>
+                                                            <div class="form-group clearfix">
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="CompletionYes-yes" name="r6" ng-value="1" ng-model="newBuildingDet.IsCompletionCertificate">
+                                                                    <label class="form-check-label" for="CompletionYes-yes">Yes</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="CompletionYes-no" name="r6" ng-value="0" ng-model="newBuildingDet.IsCompletionCertificate">
+                                                                    <label class="form-check-label" for="CompletionYes-no">No</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4" ng-show="newBuildingDet.IsCompletionCertificate==0">
+                                                            <div class="form-group">
+                                                                <label>Completion Status</label>
+                                                                @*<select class="form-select form-control form-control-sm" ng-model="newBuildingDet.CompletionStatusId">
+                    <option ng-repeat="A in CompletionStatusColl" ng-value="A.id" ng-selected="A.id==newBuildingDet.CompletionStatusId">{{A.text}}</option>
+                </select>*@
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.CompletionStatus">
+
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4" ng-show="newBuildingDet.IsCompletionCertificate==1">
+                                                            <div class="form-group">
+                                                                <label for="formGroupExampleInput2" class="form-label">Completion Date</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.CompletionDate_TMP" date-picker date-detail="newBuildingDet.CompletionDateDet">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="formGroupExampleInput2" class="form-label">Remarks</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.Remarks">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="formGroupExampleInput2" class="form-label">Investment Amount/Budget</label>
+                                                                <input type="text" number-input class="form-control form-control-sm" ng-model="newBuildingDet.Budget">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="formGroupExampleInput2" class="form-label">No. Of Boys Toilet</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newBuildingDet.BoysToiletNo">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="formGroupExampleInput2" class="form-label">No. Of Girls Toilet</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newBuildingDet.GirlsToiletNo">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label>All Toilet Functional?@*<span style="color: red;">*</span>*@</label>
+
+                                                            <div class="form-group clearfix">
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="ToiletFunctional-yes" name="r7" ng-value="1" ng-model="newBuildingDet.IsToiletFunctional">
+                                                                    <label class="form-check-label" for="ToiletFunctional-yes">Yes</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="ToiletFunctional-no" name="r7" ng-value="0" ng-model="newBuildingDet.IsToiletFunctional">
+                                                                    <label class="form-check-label" for="ToiletFunctional-no">No</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4" ng-show="newBuildingDet.IsToiletFunctional===0">
+                                                            <div class="form-group">
+                                                                <label>What type of facility is not working? <span style="color: red;">*</span></label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.FacilityNotFunctioning">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="formGroupExampleInput2" class="form-label">Area Covered By Building</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.areaCoveredByBuilding">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="formGroupExampleInput2" class="form-label">Area Covered By All Rooms</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newBuildingDet.areaCoveredByAllRooms">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label>Ownership Of Building</label>
+                                                            <div class="form-group clearfix">
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="ownershipOfBuilding-yes" name="ow" ng-value="1" ng-model="newBuildingDet.ownershipOfBuilding">
+                                                                    <label class="form-check-label" for="ownershipOfBuilding-yes">Yes</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="ownershipOfBuilding-no" name="ow" ng-value="0" ng-model="newBuildingDet.ownershipOfBuilding">
+                                                                    <label class="form-check-label" for="ownershipOfBuilding-no">No</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label>Has Internet Connection</label>
+                                                            <div class="form-group clearfix">
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="hasInternetConnection-yes" name="inter" ng-value="1" ng-model="newBuildingDet.hasInternetConnection">
+                                                                    <label class="form-check-label" for="hasInternetConnection-yes">Yes</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" id="hasInternetConnection-no" name="inter" ng-value="0" ng-model="newBuildingDet.hasInternetConnection">
+                                                                    <label class="form-check-label" for="hasInternetConnection-no">No</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <label><b>Other Facilities</b></label>
+                                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                        <table id="main-table"
+                                                               class="main-table table table-sm table-bordered bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 70px" class="text-center">S.No.</th>
+                                                                    <th style="width: 550px"> Facilities</th>
+                                                                    <th style="width: 80px" class="text-center">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="Fac in newBuildingDet.BuildingFacilitiesColl">
+                                                                    <td>{{$index+1}}</td>
+                                                                    <td> <input type="text" class="form-control form-control-sm" ng-model="Fac.Name" /></td>
+                                                                    <td>
+                                                                        <a class="p-1" ng-click="AddFacilitiesDetails($index)">
+                                                                            <i class="fas fa-plus text-secondary"></i>
+                                                                        </a>
+                                                                        <a class="p-1" ng-click="delFacilitiesDetails($index)">
+                                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="" class="invisible">Photo</label>
+                                                    <div class="person-photo-attachment-wrap text-center">
+                                                        <div class="img-wrap mx-auto">
+                                                            <img ng-src="{{newBuildingDet.BuildingImage || newBuildingDet.ImagePath }}" class="img-fluid" alt="" id="imgAcadImage1" style="height:240px;">
+                                                        </div>
+                                                        <label for="choose-sfile" type="button" class="btn btn-outline-secondary btn-sm mt-1 mb-0"> <i class="fas fa-camera w-t"></i> Building Photo</label>
+                                                        <input id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newBuildingDet.BuildingImage_TMP" fileread="newBuildingDet.BuildingImage" />
+                                                        <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span class="d-block border-0 p-3 text-center">
+                                                    <button type="button" class="btn btn-sm btn-info" id="back-list-btn" style="min-width: 90px;">Back to List</button>
+                                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearBuildingDetails()">Reset</button>
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateBuildingDetails()">{{newBuildingDet.Mode}}</button>
+
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div id="preview-form">
+                                    <div id="printcard">
+                                        <div class="row ">
+                                            <div class="col-md-2 text-center">
+                                                <img ng-src="{{ Logo.LogoPath}}" class="img-fluid" style="height:120px; width:auto;" />
+                                            </div>
+
+                                            <div class="col-md-8 text-center">
+                                                <h3 class="mb-3 text-secondary" style="font-family: 'Cambria', serif; font-weight: bold; letter-spacing: 1px; font-size: 32px">
+                                                    {{newCompanyDet.Name}}
+                                                </h3>
+                                                <h6 style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+                                                    Affiliated to {{newCompanyDet.Affiliated}}
+                                                </h6>
+                                                <h6 style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+                                                    {{newCompanyDet.Address}}
+                                                </h6>
+
+                                                <p class="mb-0" style="font-family: 'Times New Roman', serif; font-size: 20px; font-weight: bold;">
+                                                    {{newCompanyDet.PhoneNo}}
+                                                </p>
+                                                <p style="font-family: 'Times New Roman', serif; font-size: 20px; font-weight: bold;">
+                                                    {{newCompanyDet.EmailId}}
+                                                </p>
+                                            </div>
+
+                                            <div class="col-md-2 text-center">
+                                                <img ng-src="{{ Logo.AffiliatedLogo}}" class="img-fluid" style="height:120px; width:auto;" />
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row mt-2">
+                                            <div class="card mb-2" style=" border: 1px solid #ececec;">
+                                                <div class="card-header p-2 text-center" style="background-color: #ececec;">
+                                                    <h3 class="card-title" style="float: none; color: #025A58 !important;">Building Information</h3>
+                                                </div>
+
+                                                <div class="card-body pb-2">
+                                                    <div class="col-md-9">
+
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="BuildingNo." style="width: 117px; ">Building No.</label>
+                                                                    <label><b> : {{Print.BuildingNo}}</b></label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="Name" style="width: 117px;">Name</label>
+                                                                    <label><b> : {{Print.Name}}</b></label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="Address" style="width: 117px; ">Address</label>
+                                                                    <label><b> : {{Print.Location}}</b></label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6 d-flex align-items-center">
+                                                                <label for="BuildingType" class="me-2" style="min-width: 117px;">BuildingType</label>
+                                                                <span>
+                                                                    <b>
+                                                                       : <span ng-repeat="buildingType in Print.BuildingTypeColl">
+                                                                            {{ buildingType }}<span ng-if="!$last">, </span>
+                                                                        </span>
+                                                                    </b>
+                                                                </span>
+                                                            </div>
+
+                                                            @*<div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="BuildingType" style="width: 117px; ">BuildingType</label>
+                                                                    <label>
+                                                                        <b>
+                                                                            :<span ng-repeat="buildingType in Print.BuildingTypeColl">
+                                                                                {{buildingType}}<span ng-if="!$last">, </span>
+                                                                            </span>
+                                                                        </b>
+                                                                    </label>
+
+                                                                </div>
+                                                            </div>*@
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="NoOfFloor" style="width: 117px;">No Of Floor</label>
+                                                                    <label><b> :  {{Print.NoOfFloor}} </b></label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="OverallCondition" style="width: 117px; ">Overall Condition</label>
+                                                                    <label><b> :  {{Print.OverallCondition}} </b></label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="NoOfClassrooms" style="width: 117px;">No Of Classrooms</label>
+                                                                    <label><b> :  {{Print.NoOfClassRooms}} </b></label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="NoOfOtherRooms" style="width: 117px; ">No Of Other Rooms</label>
+                                                                    <label><b> : {{Print.NoOfOtherRooms}} </b></label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ConstructionDate" style="width: 117px;">Construction Date</label>
+                                                                    <label><b> : {{Print.ConstructionDate_BS}} </b></label>
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="person-photo-attachment-wrap text-center">
+                                                            <div class="img-wrap mx-auto">
+                                                                <img ng-src="{{ (Print.PhotoData || Print.ImagePath) + '?t=' + timestamp }}" alt="Building Photo" class="img-fluid" id="imgAcadImage1" style="height:240px;">
+
+                                                                @*<img ng-src="{{ Print.PhotoData || Print.ImagePath }}"   class="img-fluid" alt="Building Photo" id="imgAcadImage1" style="height:240px;">*@
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @*Parents Detail Starts*@
+                                        <div class="card mb-2" style=" border: 1px solid #ececec;">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="card-header p-2 text-center" style="background-color: #ececec;">
+                                                        <h3 class="card-title" style="float: none; color: #025A58 !important;">Structural Detail</h3>
+                                                    </div>
+                                                    <div class="card-body pb-2">
+                                                        <div class="row mt-2">
+                                                            <div class="col-sm-12">
+                                                                <div class="form-group">
+                                                                    <label for="StructureType" style="width: 100px;">Structure Type</label>
+                                                                    <label>
+                                                                        <b>
+                                                                            : {{Print.StructureType}} <span ng-if="Print.OtherStructureType">-</span> {{Print.OtherStructureType}}
+                                                                        </b>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-5">
+                                                                <div class="form-group">
+                                                                    <label for="RoofType" style="width: 100px;">Roof Type</label>
+                                                                    <label>
+                                                                        <b>
+                                                                            : {{Print.RoofType}} <span ng-if="Print.OtherRoofType">-</span> {{Print.OtherRoofType}}
+                                                                        </b>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-3">
+                                                                <div class="form-group">
+                                                                    <label for="DamageGrade" style="width: 100px;">Damage Grade</label>
+                                                                    <label><b> : {{Print.DamageGrade}} </b></label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="form-group">
+                                                                    <label for="InfrastructureType" style="width: 120px; ">Infrastructure Type</label>
+                                                                    <label><b> : {{Print.InfrastructureType}} </b></label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- Previous School Details Starts -->
+                                        <div class="card mb-2" style=" border: 1px solid #ececec;">
+                                            <div class="card-header p-2 text-center" style="background-color: #ececec; ">
+                                                <h3 class="card-title" style="float: none; color: #025A58 !important;">Financial & Approval Information</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row mt-2">
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="FundingSources" style="width: 140px; ">Funding Sources</label>
+                                                            <label><b> : {{Print.FundingSources}} </b></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="InterventionType" style="width: 117px;">Intervention Type</label>
+                                                            <label><b> : {{Print.InterventionType}} </b></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label for="Approved/Design" style="width: 110px; ">Approved/Design</label>
+                                                        <label><b> : {{ Print["IsApprovedDesign"] ? 'Yes' : 'No' }}</b></label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="Completion Certificate" style="width: 140px; ">Completion Certificate</label>
+                                                            <label><b> : {{ Print["IsCompletionCertificate"] ? 'Yes' : 'No' }}</b></label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4" ng-if="Print.IsCompletionCertificate == false">
+                                                        <div class="form-group">
+                                                            <div>
+                                                                <label for="CompletionStatus" style="width: 117px;">Completion Status</label>
+                                                                <label><b> : {{ Print.CompletionStatus }}</b></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4" ng-if="Print.IsCompletionCertificate == true">
+                                                        <div class="form-group">
+                                                            <div>
+                                                                <label for="CompletionDate" style="width: 117px;">Completion Date</label>
+                                                                <label><b> : {{ Print.CompletionData_BS }}</b></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="InvestmentBudget" style="width: 177px;">Investment Amount/Budget</label>
+                                                            <label><b> : {{Print.Budget}} </b></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="Remarks" style="width: 140px; ">Remarks</label>
+                                                            <label><b> : {{Print.Remarks}} </b></label>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="card mb-2" style=" border: 1px solid #ececec;">
+                                            <div class="card-header p-2 text-center" style="background-color: #ececec;">
+                                                <h3 class="card-title" style="float: none; color: #025A58 !important;">Toilet & Facility Status</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row mt-2">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="NoofGirlsToilet" style="width: 116px;">No. of Girls Toilet</label>
+                                                            <label><b> : {{Print.GirlsToiletNo}} </b></label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="NoofBoysToilet" style="width: 116px;">No. of Boys Toilet</label>
+                                                            <label><b> : {{Print.BoysToiletNo}} </b></label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <div class="form-group clearfix">
+                                                            <label for="AllToiletsFunctional" style="width: 139px;">All Toilets Functional ?</label>
+                                                            <label><b> : {{ Print["IsToiletFunctional"] ? 'Yes' : 'No' }}</b></label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-3" ng-if="Print.IsToiletFunctional == false">
+                                                        <div class="form-group">
+                                                            <label for="FacilityNotFunctioning" style="width: 171px;">Type of facility not working</label>
+                                                            <label><b> : {{Print.FacilityNotFunctioning}} </b></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @*Contact Details Starts*@
+                                        <div class="card mb-2" style=" border: 1px solid #ececec;">
+                                            <div class="row mt-2">
+                                                <div class="col-md-12">
+                                                    <div class="card-header p-2 text-center" style="background-color: #ececec;">
+                                                        <h3 class="card-title" style="float: none; color: #025A58 !important;">Other Facilities</h3>
+                                                    </div>
+                                                    <div class="card-body p-2">
+                                                        <div class="table-scroll-x-y table-scroll">
+                                                            <table id="Class" class="main-table table table-sm table-bordered bg-white" style="height: auto;">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="font-size:small;  width: 45px;">S.N.</th>
+                                                                        <th style="font-size: small; width: 147px;">Facilities</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr ng-repeat="Fac in Print.BuildingFacilitiesColl">
+                                                                        <th>{{$index+1}}</th>
+                                                                        <td>{{Fac.Name}}</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="tab-pane fade main-section" id="floorMapping" role="tabpanel"
+                                 aria-labelledby="floor-mapping-tab">
+
+                                <div class="card py-2" id="floor-mapping-tbl">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="row">
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Building</label>
+                                                        <select class="form-select form-control form-control-sm select2" ng-model="newFloorMappingDet.BuildingId" ng-change="GetAllFloorMapping(newFloorMappingDet.BuildingId)">
+                                                            <option ng-value="">**Select the Building**</option>
+                                                            <option ng-repeat="A in BuildingDetailsList" ng-value="A.BuildingId" ng-selected="A.id==newFloorMappingDet.BuildingName">{{A.Name}} - {{A.BuildingId}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-5 mt-4">
+                                                    <form class="form-inline">
+
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search"
+                                                                   placeholder="Search" aria-label="Search" ng-model="searchData.FloorMapping">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right mt-4">
+                                            @*<div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image">
+                                                            Excel
+                                                        </a>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image">
+                                                            CSV
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                   data-placement="bottom" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>*@
+
+                                            <button type="button" class="btn btn-sm btn-success" id="add-Floor" style="min-width: 90px" ng-click="ClearFloorMapping()">
+                                                <i class="fas fa-plus w-t"></i> Add Floor Mapping
+                                            </button>
+
+                                        </div>
+                                    </header>
+                                    <div class="card">
+                                        <div class="class-detail" ng-repeat="buildingData in GroupedFloorMappings | filter:searchData.FloorMapping ">
+
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <label><b>Building : {{buildingData.BuildingName}} </b></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mb-2">
+                                                <table class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 35px;" class="text-center">S.No.</th>
+                                                            <th style="width: 130px;">Floor Name</th>
+                                                            <th style="width: 130px;">Floor Type</th>
+                                                            <th style="width: 70px;">Total Classrooms</th>
+                                                            <th style="width: 70px;">Total Other rooms</th>
+                                                            <th style="width: 175px;">Safety Measures</th>
+                                                        </tr>
+                                                    <tbody>
+                                                        <tr ng-repeat="cl in buildingData.Floors | filter:searchData.FloorMapping"
+                                                            @*dir-paginate="cl in FloorMappingList | filter:searchData.FloorMapping | itemsPerPage: perPage.FloorMapping"
+                                                            current-page="currentPages.FloorMapping"
+                                                            pagination-id="floorMappingPagination"*@>
+                                                            <td class="text-center">{{$index+1}}</td>
+                                                            <td>{{cl.FloorName}}</td>
+                                                            @*<td>
+                                                                <span ng-repeat="floorType in cl.FloorTypeNames">
+                                                                    {{floorType}}<span ng-if="!$last">, </span>
+                                                                </span>
+                                                            </td>*@
+
+                                                            <td>{{cl.FloorType}}</td>
+                                                            <td>{{cl.NoOfClassRooms}}</td>
+                                                            <td>{{cl.NoOfOtherRooms}}</td>
+                                                            <td>{{cl.SafetyMeasures}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+                                    @*<footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="floorMappingPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>*@
+                                </div>
+
+
+                                <div id="floor-mapping-form">
+                                    <div class="card card-default">
+                                        <div class="card-body py-2 px-0">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Building Name</label>
+                                                                <select class="form-select form-control form-control-sm select2" ng-model="newFloorMappingDet.BuildingId" ng-change="ChangeBuilding()">
+                                                                    <option ng-repeat="A in BuildingDetailsList" ng-value="A.BuildingId" ng-selected="A.id==newFloorMappingDet.BuildingName">{{A.Name}} - {{A.BuildingId}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-group">
+                                                                <label>Total Floor</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newFloorMappingDet.TotalFloor" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-group">
+                                                                <label>Total Classrooms</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newFloorMappingDet.TotalClassRooms" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-group">
+                                                                <label>Total Other Rooms</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newFloorMappingDet.TotalOtherRooms" readonly>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                        <table class="main-table table table-sm table-bordered bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 35px;" class="text-center">S.No.</th>
+                                                                    <th style="width: 155px;">Floor Name</th>
+                                                                    <th style="width: 155px;">Floor Type</th>
+                                                                    <th style="width: 110px;">No. Of Classrooms</th>
+                                                                    <th style="width: 110px;">No. Of Other rooms</th>
+                                                                    <th style="width: 175px;">Safety Measures</th>
+                                                                </tr>
+                                                            <tbody>
+                                                                <tr ng-repeat="cl in newFloorMappingDet.BuildingWiseFloorList">
+                                                                    <td>{{$index+1}}</td>
+                                                                    <td>
+                                                                        <select class="form-select form-control form-control-sm select2"
+                                                                                ng-model="cl.FloorId">
+                                                                            <option ng-value="">**Select the Floor**</option>
+                                                                            <option ng-repeat="A in FloorList"
+                                                                                    ng-value="A.FloorId"
+                                                                                    ng-selected="A.FloorId==cl.FloorId"
+                                                                                    ng-hide="isFloorDisabled(A.FloorId, cl.FloorId)">
+                                                                                {{A.Name}}
+                                                                            </option>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td>
+                                                                        <select class="form-select form-control form-control-sm" select ng-model="cl.FloorType" multiple="multiple">
+                                                                            <option ng-repeat="A in BuildingTypeList" ng-value="A.BuildingTypeId" ng-selected="A.BuildingTypeId==cl.FloorType">
+                                                                                {{A.Name}}
+                                                                            </option>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td><input type="text" class="form-control form-control-sm" ng-model="cl.NoOfClassRooms" ng-model-options="{ debounce: 700 }" ng-change="ValidateRooomCount()" /></td>
+                                                                    <td><input type="text" class="form-control form-control-sm" ng-model="cl.NoOfOtherRooms" ng-model-options="{ debounce: 700 }" ng-change="ValidateRooomCount()" /></td>
+                                                                    <td><input type="text" class="form-control form-control-sm" ng-model="cl.SafetyMeasures" /></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span class="d-block border-0 p-3 text-center">
+                                                    <button type="button" class="btn btn-sm btn-info" id="back-floor-list-btn" style="min-width: 90px;">Back to List</button>
+                                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearFloorMapping()">Reset</button>
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateFloorMapping()">Save</button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+
+
+        <div class="modal fade" id="AddRoom" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+             aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content" style="margin-top: 50px">
+                    <div class="modal-header p-2">
+                        <h5 class="modal-title" id="exampleModalLongTitle" style="font-size: 16px">
+                            Room Details
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                            <table id="#buildingblock" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 180px">Room Name</th>
+                                        <th style="width: 125px">Utilization</th>
+                                        <th style="width: 150px">Sub Utilization</th>
+                                        <th style="width: 95px">Length(M)</th>
+                                        <th style="width: 95px">Breadth(M)</th>
+                                        <th style="width: 110px">No. of users</th>
+                                        <th style="width: 145px">Remarks</th>
+                                        <th class="cstm-sticky" style="width:70px;right:0;z-index:3">Action</th>
+                                    </tr>
+                                <tbody>
+                                    <tr>
+                                        <td><input class="form-control form-control-sm" /></td>
+                                        <td>
+                                            <select class="form-select form-control form-control-sm">
+                                                <option value="2">Good</option>
+                                                <option value="3">Fair</option>
+                                                <option value="4">Poor</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-control form-control-sm">
+                                                <option value="2">Good</option>
+                                                <option value="3">Fair</option>
+                                                <option value="4">Poor</option>
+                                            </select>
+                                        </td>
+                                        <td><input class="form-control form-control-sm" /></td>
+                                        <td><input class="form-control form-control-sm" /></td>
+                                        <td><input class="form-control form-control-sm" /></td>
+                                        <td><textarea class="form-control form-control-sm" rows="1"></textarea></td>
+                                        <td class="cstm-sticky" style="right:0;background-color:#ffffff!important;z-index:2">
+                                            <a class="p-1" ng-click="AddRoomDetails($index)">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" ng-click="delRoomDetails($index)">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding: 6px">
+                        <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" style="min-width: 90px">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+
+

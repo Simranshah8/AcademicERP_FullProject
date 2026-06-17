@@ -1,0 +1,359 @@
+﻿
+@{ ViewBag.Title = "Notification";
+    Layout = "~/Views/Shared/_Layout.cshtml"; }
+<style>
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        color: #ffffff;
+        background-color: #035b59;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f8fcf7;
+    }
+</style>
+<script src="~/Jslib/Creation/Notification.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="NotificationController" ng-init="LoadData()">
+    <div class="content-wrapper">
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <section class="iframe-content-starts-here">
+                    <div id="notification-list">
+                        <div class="col-12">
+                            <!-- Custom Tabs -->
+                            <div class="card">
+                                <div class="card-header d-flex p-0" style="border: none;">
+                                    <h3 class="card-title p-3" id="personal-heading"><b>Notifications</b></h3>
+                                    <h3 class="card-title p-3" id="general heading"><b>Notifications</b></h3>
+                                    <ul class="nav nav-pills ml-auto p-2">
+                                        <li class="nav-item"><a class="mr-2 nav-link active btn-sm" href="#tab_1" data-toggle="tab" id="personal">Personal ({{PersonalColl.length}})</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="#tab_2" data-toggle="tab" id="general">General ({{GeneralColl.length}})</a></li>
+
+                                    </ul>
+                                </div><!-- /.card-header -->
+                                <div class="card-body">
+                                    <div class="tab-content">
+                                        <div class="tab-pane active" id="tab_1">
+                                            <header class="row mb-2">
+                                                <div class="col-md-7">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline">
+
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Show</span>
+                                                                </div>
+                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Personal">
+                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Personal">{{pp.text}}</option>
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                <input class="form-control form-control-navbar" type="search"
+                                                                       placeholder="Search" aria-label="Search" ng-model="searchData.Personal">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <!-- end col-md-8 -->
+                                                <div class="col-md-5 text-right">
+                                                    
+                                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option: sd</span>
+                                                            <a class="dropdown-item" ng-click="exportToExcel('#NewHomework')"><img src="~/StudentLoginFiles/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item" ng-click="ExportCSV('#NewHomework')"><img src="~/StudentLoginFiles/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                            <a class="dropdown-item" ng-click="Exportpdf('NewHomework')"><img src="~/StudentLoginFiles/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                            <a class="dropdown-item" ng-click="ExportWord('#NewHomework')"><img src="~/StudentLoginFiles/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                            <a class="dropdown-item" href="#"><img src="~/StudentLoginFiles/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                       data-placement="bottom" title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+
+                                                </div>
+                                            </header>
+                                            <div class="card-body p-0" style="border: 1px solid #d4dfda;">
+                                                <table class="table table-striped" id="NewHomework">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="background-color: #e9f2ee; width: 120px">Date <i class="fas fa-sort-alpha-down ml-4"></i></th>
+                                                            <th style="background-color: #e9f2ee; width: 180px">From <i class="fas fa-sort-alpha-down ml-4"></i></th>
+                                                            <th style="background-color: #e9f2ee; width: 350px">Message <i class="fas fa-sort-alpha-down ml-4"></i></th>
+                                                            <th style="background-color: #e9f2ee; width: 100px">Attachment <i class="fas fa-sort-alpha-down ml-4"></i></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="nl in PersonalColl | itemsPerPage: perPage.Personal" current-page="currentPages.Personal" pagination-id="personalPagination">
+                                                            <td>{{nl.LogDate_BS}}<br>{{nl.LogDate_AD |timeFormat}}</td>
+                                                            <td>
+                                                                <div class="row">
+                                                                    <div class="col-md-3">
+                                                                        <img class="img-circle" style="height: 50px;width: 50px;" ng-src="{{nl.SendByPhotoPath}}">
+                                                                    </div>
+                                                                    <div class="col-md-9">
+                                                                        <label><b>{{nl.SendUserBy}}</b></label><br>
+                                                                        <label><i>{{nl.ClassSection}}</i></label>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td id="notification">
+                                                                <label><b>{{nl.Subject}}</b></label><br>
+                                                                <label class="detail-msg">{{nl.Content}} </label>
+                                                            </td>
+                                                            <td class="text-center"><img ng-src="{{nl.ContentPath}}" data-target="#modalIMG-approved" data-toggle="modal" style="height: 70px; border: 1px solid #ccc;"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="personalPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html"></dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                        <!-- /.tab-pane -->
+                                        <div class="tab-pane" id="tab_2">
+                                            <header class="row mb-2">
+                                                <div class="col-md-7">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline">
+
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Show</span>
+                                                                </div>
+                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.General">
+                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.General">{{pp.text}}</option>
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                <input class="form-control form-control-navbar" type="search"
+                                                                       placeholder="Search" aria-label="Search" ng-model="searchData.General">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <!-- end col-md-8 -->
+                                                <div class="col-md-5 text-right">
+
+                                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option: sd</span>
+                                                            <a class="dropdown-item" ng-click="exportToExcel('#tblGeneral')"><img src="~/StudentLoginFiles/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item" ng-click="ExportCSV('#tblGeneral')"><img src="~/StudentLoginFiles/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                            <a class="dropdown-item" ng-click="Exportpdf('#tblGeneral')"><img src="~/StudentLoginFiles/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                            <a class="dropdown-item" ng-click="ExportWord('#tblGeneral')"><img src="~/StudentLoginFiles/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                            <a class="dropdown-item" href="#"><img src="~/StudentLoginFiles/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                       data-placement="bottom" title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+
+                                                </div>
+                                            </header>
+                                            <div class="card-body p-0" style="border: 1px solid #d4dfda;">
+                                                <table class="table table-striped" id="tblGeneral">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="background-color: #e9f2ee; width: 120px">Date <i class="fas fa-sort-alpha-down ml-4"></i></th>
+                                                            <th style="background-color: #e9f2ee; width: 180px">From <i class="fas fa-sort-alpha-down ml-4"></i></th>
+                                                            <th style="background-color: #e9f2ee; width: 350px">Message <i class="fas fa-sort-alpha-down ml-4"></i></th>
+                                                            <th style="background-color: #e9f2ee; width: 100px">Attachment <i class="fas fa-sort-alpha-down ml-4"></i></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="nl in GeneralColl | itemsPerPage: perPage.General" current-page="currentPages.General" pagination-id="generalPagination">
+                                                            <td>{{nl.LogDate_BS}}<br>{{nl.LogDate_AD |timeFormat}}</td>
+                                                            <td>
+                                                                <div class="row">
+                                                                    <div class="col-md-3">
+                                                                        <img class="img-circle" style="height: 50px;width: 50px;" ng-src="{{nl.SendByPhotoPath}}">
+                                                                    </div>
+                                                                    <div class="col-md-9">
+                                                                        <label><b>{{nl.SendUserBy}}</b></label><br>
+                                                                        <label><i>{{nl.ClassSection}}</i></label>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td id="notification">
+                                                                <label><b>{{nl.Subject}}</b></label><br>
+                                                                <label class="detail-msg">{{nl.Content}} </label>
+                                                            </td>
+                                                            <td class="text-center"><img ng-src="{{nl.ContentPath}}" data-target="#modalIMG-approved" data-toggle="modal" style="height: 70px; border: 1px solid #ccc;"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="generalPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html"></dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                        <!-- /.tab-pane -->
+                                        <!-- /.tab-pane -->
+                                    </div>
+                                    <!-- /.tab-content -->
+                                </div><!-- /.card-body -->
+                            </div>
+                            <!-- ./card -->
+                        </div>
+                        <!-- /.col -->
+                    </div>
+
+                    <!-- Notification detail Starts -->
+                    <div id="notification-details">
+                        <div class="card card-default" style="border: 1px Solid #ccc;">
+                            <div class="card-header" style="background-color: #e9f2ee;">
+                                <h3 class="card-title" style="font-weight: bold">Assignment Title: Multiplication Learning</h3><br>
+                                <p>Assignment Type: Reading</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="p-2" style="background-color: #f8fcf7;border: 1px solid #ccc;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <img src="dynamic/images/aryan-shrestha.png" alt="" class="rounded-circle" style="width: 50px;" />
+                                                <span style="font-weight: bold" class="ml-4">Ram Babu Prasad <br> <small>Mathematics Teacher</small> </span>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-6 mt-2">
+                                            <span class="float-right" style="font-weight: 500">01 April 2021 | 10:00pm</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="card homework-description p-2">
+                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet provident quo dolorem qui.
+
+                                </div>
+                                <div class="teacher-file-attach d-flex bg-white p-2" style="margin-top: -22px;">
+                                    <span style="font-size: 16px;"><i class="fas fa-folder-open text-success"></i> &nbsp; 1 File(s) Attachment </span>
+
+                                    <span style="font-size: 16px;" class="ml-auto">
+                                        <a href="dynamic/images/ans.jpg" download> <i class="fas fa-download text-success" title="Download All"></i></a>
+                                    </span>
+
+                                </div>
+
+                                <!-- teacher file preview -->
+                                <div class="container">
+                                    <div class="row">
+
+                                        <div class="col-md-4">
+                                            <a href="#" data-target="#modalIMG-file" data-toggle="modal" class="color-gray-darker c6 td-hover-none">
+                                                <div class="ba-0 ds-1">
+                                                    <img alt="Card image cap" class="img-fluid" src="dynamic/images/ans.jpg" style="width:25%;" />
+
+                                                </div>
+                                            </a>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalIMG-file" role="dialog" tabindex="-1">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-body mb-0 p-0">
+                                                <img src="dynamic/images/ans.jpg" alt="" style="width:100%; height: 70vh;">
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div><a href="dynamic/images/ans.jpg" target="_blank" download>Download</a></div>
+                                                <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- teacher file preview end -->
+
+                            </div>
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button" class="btn btn-sm btn-info" id="back-to-list" style="min-width: 90px;">Back to List</button>
+
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Notification Detail Ends -->
+                </section>
+            </div>
+            <!--/. container-fluid -->
+        </section>
+        <!-- /.content -->
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalIMG-approved" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img src="dynamic/images/ans.jpg" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="dynamic/images/ans.jpg" target="_blank" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+
+    const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
+        v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+    )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+    // do the work...
+    document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+        const table = th.closest('table');
+        Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
+            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+            .forEach(tr => table.appendChild(tr));
+    })));
+</script>

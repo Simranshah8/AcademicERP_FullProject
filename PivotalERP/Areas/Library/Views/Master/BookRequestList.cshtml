@@ -1,0 +1,468 @@
+﻿<script src="~/jslib/library/BookRequestList.js"></script>
+
+<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BookRequestListController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top: 44px !important;">
+                <div class="tab-content" id="table-section">
+                    <div class="row mb-2">
+                        <div class="col-sm-3">
+                            <label>Status</label>
+                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newDet.Status">
+                                <option ng-value="pg.id" ng-repeat="pg in StatusList" ng-selected="pg.id==newDet.Status">{{pg.text}}</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <label>Date From</label>
+                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.DateFrom_TMP" date-detail="newDet.DateFromDet">
+                        </div>
+                        <div class="col-sm-2">
+                            <label>Date To</label>
+                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.DateTo_TMP" date-detail="newDet.DateToDet">
+                        </div>
+                        <div class="col-sm-3">
+                            <label>Requested By</label>
+                            <select class="form-control form-control-sm select2 " style="width: 100%;" ng-model="newDet.RequestFor">
+                                <option ng-repeat="tdc in RequestList" ng-value="tdc.id" ng-selected="tdc.id==newDet.RequestFor">
+                                    {{tdc.text}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-sm btn-success mt-4 float-right" style="min-width:92px;" ng-click="GetBookRequestList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                        </div>
+                    </div>
+                    <div class="card ">
+                        <header class="row mt-2">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.BookRequestList">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.BookRequestList">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search" ng-model="searchData.BookRequestList"
+                                                   aria-label="Search">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </header>
+                        <div>
+
+                            @*Table*@
+                            <div class="table-scroll-x-y sales-main-table table-scroll" style="overflow-x: auto; width: 100%;">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white" style="min-width: 1300px;">
+                                    <thead class="text-nowrap">
+                                        <tr>
+                                            <th style="width:60px">S.N</th>
+                                            <th style="width:120px">Request Date</th>
+                                            <th style="width:150px">Name</th>
+                                            <th style="width:100px">Regd NO</th>
+
+                                            <th style="width:100px" ng-if="newDet.RequestFor == 2">Department</th>
+                                            <th style="width:100px" ng-if="newDet.RequestFor == 2">Designation</th>
+
+                                            <th style="width:100px" ng-if="newDet.RequestFor == 1">Class</th>
+                                            <th style="width:100px" ng-if="newDet.RequestFor == 1">Section</th>
+                                            <th style="width:100px" ng-if="newDet.RequestFor == 1">Batch</th>
+                                            <th style="width:100px" ng-if="newDet.RequestFor == 1">Semester</th>
+
+                                            <th style="width:100px">Class Year</th>
+                                            <th style="width:150px">Requested Book</th>
+                                            <th style="width:120px">Status</th>
+                                            <th style="width:150px">Verification Date</th>
+                                            <th style="width:150px">Verification By</th>
+                                            <th style="width:150px">Remarks</th>
+
+                                            <th class="cstm-sticky" style="width:100px;right:0;z-index:3;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr @*dir-paginate="cl in BookRequestList
+                                                        | filter:searchData.BookRequestList
+                                                        | filter:FilteredStatusList
+                                                        | itemsPerPage: perPage.BookRequestList"
+                                            current-page="currentPages.BookRequestList"
+                                            pagination-id="BookRequestPagination"*@>
+
+                                            <td>{{$index + 1}}</td>
+                                            <td>{{cl.RequestDate.substring(0, 10)}}</td>
+
+                                            <td>
+                                                {{newDet.RequestFor == 1 ? cl.StudentName : cl.EmployeeName}}
+                                            </td>
+
+                                            <td>{{cl.RegdNo}}</td>
+
+                                            <td ng-if="newDet.RequestFor == 2">{{cl.Department}}</td>
+                                            <td ng-if="newDet.RequestFor == 2">{{cl.Designation}}</td>
+
+                                            <td ng-if="newDet.RequestFor == 1">{{cl.Class}}</td>
+                                            <td ng-if="newDet.RequestFor == 1">{{cl.Section}}</td>
+                                            <td ng-if="newDet.RequestFor == 1">{{cl.Batch}}</td>
+                                            <td ng-if="newDet.RequestFor == 1">{{cl.Semester}}</td>
+
+                                            <td>{{cl.ClassYear}}</td>
+
+                                            <td ng-if="newDet.RequestFor == 1" class="space-between">
+                                                <span>{{cl.RequestedBook.length}}</span>
+                                                <i ng-click="ShowStdRequestedBook(cl)" class="fas fa-eye"></i>
+                                            </td>
+                                            <td ng-if="newDet.RequestFor == 2" class="space-between">
+                                                <span>{{cl.RequestedBook.length}}</span>
+                                                <i ng-click="ShowEmpRequestedBook(cl)" class="fas fa-eye"></i>
+                                            </td>
+
+
+                                            <td>
+                                                {{cl.Status == 1 ? "Pending" : cl.Status == 2 ? "Approved" : cl.Status == 3 ? "Rejected" : ""}}
+                                            </td>
+
+                                            <td>{{cl.VerificationDate.substring(0, 10)}}</td>
+                                            <td>{{cl.VerificationBy}}</td>
+                                            <td>{{cl.Remarks}}</td>
+
+                                            <td class="cstm-sticky" style="right:0;z-index:2;background-color:#fff !important;">
+                                                <button ng-if="newDet.RequestFor == 1" class="btn btn-success btn-sm" ata-toggle="modal" data-target="#StdAction" ng-click="ShowStdApprovedDialog(cl.StudentId)" style="padding:0.5px 7px;">
+                                                    Action
+                                                </button>
+                                                <button ng-if="newDet.RequestFor == 2" class="btn btn-success btn-sm" data-toggle="modal" data-target="#EmpAction" ng-click="ShowEmpApprovedDialog(cl.EmployeeId)" style="padding:0.5px 7px;">
+                                                    Action
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="BookRequestListPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                    <!--Action Student-->
+                    <div class="modal fade" id="StdAction">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header py-2">
+                                    <h6 class="modal-title">Action</h6>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="sales-main-table table-scroll" style="max-height: 400px; overflow-y: auto;">
+                                        <h5>Student Details</h5>
+                                        <table class="main-table table table-sm table-bordered bg-white mt-2">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Class</th>
+                                                    <th>Regd No</th>
+                                                    <th>Batch</th>
+                                                    <th>Semester</th>
+                                                    <th>Class Year</th>
+                                                    <th>Requested Book</th>
+                                                    <th>Request Date</th>
+                                                    <th>Status</th>
+                                                    <th>Remarks</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-if="selectedEmployee">
+                                                    <td>{{selectedEmployee.Name}}</td>
+                                                    <td>{{selectedEmployee.Class}}</td>
+                                                    <td>{{selectedEmployee.RegdNO}}</td>
+                                                    <td>{{selectedEmployee.Batch}}</td>
+                                                    <td>{{selectedEmployee.Semester}}</td>
+                                                    <td>{{selectedEmployee.ClassYear}}</td>
+                                                    <td>{{selectedEmployee.RequestedBook}}</td>
+                                                    <td>{{selectedEmployee.RequestDate | date:'yyyy-MM-dd'}}</td>
+                                                    <td>{{selectedEmployee.Status}}</td>
+                                                    <td>{{selectedEmployee.Remarks}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <h5>Requested Book Details</h5>
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 45px;">S.No.</th>
+                                                    <th style="width: 128px;">Accession No</th>
+                                                    <th style="width: 94px;">Book Title</th>
+                                                    <th style="width: 100px;">Category</th>
+                                                    <th style="width: 151px;">Author</th>
+                                                    <th style="width: 300px;">Edition</th>
+                                                    <th style="width: 200px;">Subject</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-if="selectedEmployee">
+
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{selectedEmployee.AccessionNumber}}</td>
+                                                    <td>{{selectedEmployee.BookTitle}}</td>
+                                                    <td>{{selectedEmployee.Category}}</td>
+                                                    <td>{{selectedEmployee.Author}}</td>
+                                                    <td>{{selectedEmployee.Edition}}</td>
+                                                    <td>{{selectedEmployee.Subject}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <h5>Action</h5>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4">
+                                            <label>Status</label>
+                                            <select class="form-control form-control-sm " style="width: 100%;" ng-model="newDet.StdAction">
+                                                <option value="" disabled>Select Action</option>
+
+
+                                                <option value="1">Approved</option>
+                                                <option value="2">Rejected</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label>Date</label>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.DateTo_TMP" date-detail="newDet.ValidFromDet">
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label>Remarks</label>
+                                            <textarea type="text" class="form-control form-control-sm" ng-model="newDet.Remarks" style="height:32px;resize:none;"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-center mt-3" style="gap:0.5rem; ">
+                                        <button class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="UpdateAction()">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Action Employee-->
+                    <div class="modal fade" id="EmpAction">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header py-2">
+                                    <h6 class="modal-title">Action</h6>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="sales-main-table table-scroll" style="max-height: 400px; overflow-y: auto;">
+                                        <h5>Employee Details</h5>
+
+                                        <table class="main-table table table-sm table-bordered bg-white mt-2">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Department</th>
+                                                    <th>Code </th>
+                                                    <th>Batch</th>
+                                                    <th>Semester</th>
+                                                    <th>Designation</th>
+                                                    <th>Requested Book</th>
+                                                    <th>Request Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-if="selectedEmployee">
+                                                    <td>{{selectedEmployee.Name}}</td>
+                                                    <td>{{selectedEmployee.Department}} </td>
+                                                    <td>{{selectedEmployee.Code}}</td>
+                                                    <td>{{selectedEmployee.Batch}}</td>
+                                                    <td>{{selectedEmployee.Semester}}</td>
+                                                    <td>{{selectedEmployee.Designation}}</td>
+                                                    <td>
+                                                        <span ng-repeat="book in selectedEmployee.RequestedBooks">
+                                                            {{book.BookName}}<span ng-if="!$last">, </span>
+                                                        </span>
+                                                    </td>
+                                                    <td>{{selectedEmployee.RequestDate | date:'yyyy-MM-dd'}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <h5>Requested Book Details</h5>
+
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 45px;">S.No.</th>
+                                                    <th style="width: 128px;">Accession No</th>
+                                                    <th style="width: 94px;">Book Title</th>
+                                                    <th style="width: 100px;">Category</th>
+                                                    <th style="width: 151px;">Author</th>
+                                                    <th style="width: 300px;">Edition</th>
+                                                    <th style="width: 200px;">Subject</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="h in BookRequestList">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{h.AccessionNumber}}</td>
+                                                    <td>{{h.BookTitle}}</td>
+                                                    <td>{{h.Category}}</td>
+                                                    <td>{{h.Author}}</td>
+                                                    <td>{{h.Edition}}</td>
+                                                    <td>{{h.Subject}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <h5>Action</h5>
+                                    <div class="row mb-2">
+
+                                        <div class="col-sm-4">
+                                            <label>Status</label>
+                                            <select class="form-control form-control-sm " style="width: 100%;" ng-model="newDet.EmpAction">
+                                                <option value="" disabled>Select Action</option>
+
+                                                <option ng-value="pg.id" ng-repeat="pg in ActionList" ng-selected="pg.id==newDet.Action">{{pg.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label>Date</label>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.DateFrom_TMP" date-detail="newDet.ValidFromDet">
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label>Remarks</label>
+                                            <textarea type="text" class="form-control form-control-sm" ng-model="newDet.Remarks"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-center mt-3" style="gap:0.5rem; ">
+                                        <button class="btn btn-sm btn-success" style="min-width: 90px;" data-dismiss="modal" ng-click="UpdateAction()">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Student Requested Book-->
+                <div class="modal fade" id="StdBookrequest">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header py-2">
+                                <h6 class="modal-title">Requested Books </h6>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="sales-main-table table-scroll" style="max-height: 400px; overflow-y: auto;">
+                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 45px;">S.No.</th>
+                                                <th style="width: 128px;">Accession No</th>
+                                                <th style="width: 94px;">Book Title</th>
+                                                <th style="width: 100px;">Category</th>
+                                                <th style="width: 151px;">Author</th>
+                                                <th style="width: 300px;">Edition</th>
+                                                <th style="width: 200px;">Subject</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-if="selectedEmployee">
+
+                                                <td>{{$index+1}}</td>
+                                                <td>{{selectedEmployee.AccessionNumber}}</td>
+                                                <td>{{selectedEmployee.BookTitle}}</td>
+                                                <td>{{selectedEmployee.Category}}</td>
+                                                <td>{{selectedEmployee.Author}}</td>
+                                                <td>{{selectedEmployee.Edition}}</td>
+                                                <td>{{selectedEmployee.Subject}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="EmpBookrequest">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header py-2">
+                                <h6 class="modal-title">Requested Books </h6>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="sales-main-table table-scroll" style="max-height: 400px; overflow-y: auto;">
+                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 45px;">S.No.</th>
+                                                <th style="width: 128px;">Accession No</th>
+                                                <th style="width: 94px;">Book Title</th>
+                                                <th style="width: 100px;">Category</th>
+                                                <th style="width: 151px;">Author</th>
+                                                <th style="width: 300px;">Edition</th>
+                                                <th style="width: 200px;">Subject</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="h in BookRequestList">
+                                                <td>{{$index+1}}</td>
+                                                <td>{{h.AccessionNumber}}</td>
+                                                <td>{{h.BookTitle}}</td>
+                                                <td>{{h.Category}}</td>
+                                                <td>{{h.Author}}</td>
+                                                <td>{{h.Edition}}</td>
+                                                <td>{{h.Subject}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

@@ -1,0 +1,444 @@
+﻿<style>
+    .tableedit tr td{
+        padding:0.2rem;
+    }
+</style>
+<script src="~/jslib/Hostel/bed-mapping.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BedMappingController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-12">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                   href="#home" role="tab" aria-controls="home"
+                                                   aria-selected="true">Student</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                   href="#profile" role="tab" aria-controls="profile"
+                                                   aria-selected="false">Employee</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Student Bed Mapping starts -->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div class="tab-content" id="table-listing">
+                                        <div class="row">
+                                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                <label for="">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudent.BatchId" ng-change="GetStudentLstForMapping()">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newStudent.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Class/Sec</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newStudent.SelectedClass" ng-change="GetStudentLstForMapping()">
+                                                        <option value="0">All</option>
+                                                        <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList">{{cs.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2" ng-show="newStudent.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group">
+                                                    <label for="">Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newStudent.ClassYearId" ng-change="GetStudentLstForMapping()">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newStudent.ClassYearId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-show="newStudent.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newStudent.SemesterId"  ng-change="GetStudentLstForMapping()">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newStudent.SemesterId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline mb-2">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0"
+                                                                    id="exampleFormControlSelect1" ng-model="perPage.Student">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Student">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Student">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file"
+                                                     data-toggle="tooltip"
+                                                     data-placement="top"
+                                                     title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                            type="button"
+                                                            id="dropdownMenuButton"
+                                                            data-toggle="dropdown"
+                                                            aria-haspopup="true"
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'BedMapping'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                       
+                                                    </div>
+                                                </div>
+                                               
+
+                                                <button type="button" class="btn btn-sm btn-default mx-2" style="min-width: 90px;" ng-click="ClearStudent()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateStudent()">{{newStudent.Mode}}</button>
+                                            </div>
+                                        </header>
+                                 
+                                        <div class="card p-0 mb-1">
+                                            <div>
+                                                <div class="table-scroll-x-y tableedit sales-main-table table-scroll" style="max-height: calc(100vh - 15rem);">
+                                                    <table id="main-table"
+                                                           class="main-table table table-sm table-bordered bg-white">
+                                                        <thead class="text-center">
+                                                            <tr>
+                                                                <th class="align-middle cstm-sticky"
+                                                                    style="width: 112px; left: 0; z-index: 3; background-color: #e9eaea" ng-click="sort('RegdNo')">
+                                                                    Admission No  <span ng-if="sortKey=='RegdNo'">  {{reverse ? '↓' : '↑'}} </span>
+                                                                </th>
+                                                                <th class="align-middle cstm-sticky"
+                                                                    style="width: 200px; left: 105px; z-index: 3; background-color: #e9eaea; background-color: #e9eaea" ng-click="sort('Name')">
+                                                                    Name <span ng-if="sortKey=='Name'">  {{reverse ? '↓' : '↑'}}</span>
+                                                                </th>
+                                                                <th class="align-middle cstm-sticky"
+                                                                    style="width: 76px; left: 310px; z-index: 3; background-color: #e9eaea" ng-click="sort('RollNo')">
+                                                                    Roll No <span ng-if="sortKey=='RollNo'"> {{reverse ? '↓' : '↑'}} </span>
+                                                                </th>
+                                                                <!--NEw Field Added by suresh on 27 jan-->
+                                                                <th style="width: 125px;" ng-click="sort('ClassId')">
+                                                                    Class  <span ng-if="sortKey=='ClassId'"> {{reverse ? '↓' : '↑'}} </span>
+                                                                </th>
+
+                                                                <!--Ends-->
+                                                                <th style="width: 76px;" ng-click="sort('Gender')">Gender  <span ng-if="sortKey=='Gender'">   {{reverse ? '↓' : '↑'}} </span></th>
+                                                                <th style="width: 180px;" ng-click="sort('FatherName')">Father Name <span ng-if="sortKey=='FatherName'">   {{reverse ? '↓' : '↑'}} </span></th>
+                                                                <th style="width: 120px;" ng-click="sort('AllotDate_TMP')">Allot Date <span ng-if="sortKey=='AllotDate_TMP'">   {{reverse ? '↓' : '↑'}} </span></th>
+                                                                <th style="width: 300px; z-index: 2; background-color: #e9eaea; background-color: #e9eaea" ng-click="sort('BedId')">
+                                                                    Room/Bed No
+                                                                    <span ng-if="sortKey=='BedId'">   {{reverse ? '↓' : '↑'}} </span>
+                                                                </th>
+                                                                <th style="width: 100px;" ng-click="sort('Rate')">Rate<span ng-if="sortKey=='Rate'">   {{reverse ? '↓' : '↑'}} </span></th>
+                                                                <th style="width: 90px;" ng-click="sort('DiscountPer')">Dis % <span ng-if="sortKey=='DiscountPer'">   {{reverse ? '↓' : '↑'}} </span></th>
+                                                                <th style="width: 90px;" ng-click="sort('DiscountAmt')">Dis. Amt. <span ng-if="sortKey=='DiscountAmt'">   {{reverse ? '↓' : '↑'}} </span></th>
+                                                                <th style="width: 110px;" ng-click="sort('PayableAmt')">Payable Amt. <span ng-if="sortKey=='PayableAmt'">   {{reverse ? '↓' : '↑'}} </span></th>
+                                                                <th style="width: 140px;z-index:2">Month </th>
+                                                                <th style="width: 60px;">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr dir-paginate="st in newStudent.StudentColl |orderBy:sortKey:reverse | filter:searchData.Student | itemsPerPage: perPage.Student" current-page="currentPages.Student" pagination-id="AdmissionReceiptPagination">
+                                                                <td class="align-middle cstm-sticky" style="width: 105px; left: 0; z-index: 1; background-color: #fff">
+                                                                    {{st.RegdNo}}
+                                                                </td>
+                                                                <td class="align-middle cstm-sticky" style="width: 200px; left: 105px; z-index: 1; background-color: #fff">
+                                                                    {{st.Name}}
+                                                                </td>
+                                                                <td class="align-middle cstm-sticky" style="width: 100px; left: 305px; z-index: 1; background-color: #fff">
+                                                                    {{st.RollNo}}
+                                                                </td>
+                                                                <!--NEw Field Added by suresh on 27 jan-->
+                                                                <td>
+                                                                    {{st.ClassName}}
+                                                                    <span ng-if="st.SectionName"> - </span>
+                                                                    {{st.SectionName}}
+                                                                    <span ng-if="st.Batch"> - </span>
+                                                                    {{st.Batch}}
+                                                                    <span ng-if="st.Semester"> - </span>
+                                                                    {{st.Semester}}
+                                                                    <span ng-if="st.ClassYear"> - </span>
+                                                                    {{st.ClassYear}}
+                                                                </td>
+
+                                                                <!--Ends-->
+                                                                <td>{{st.Gender}}</td>
+                                                                <td>{{st.FatherName}}</td>
+                                                                <td>
+                                                                    <input type="text"
+                                                                           class="form-control form-control-sm" date-picker ng-model="st.AllotDate_TMP" date-detail="st.AllotDate_ADDet">
+                                                                </td>
+                                                                <td>
+                                                                    <select class="form-control form-control-sm" active-select2 ng-model="st.BedId" ng-change="ChangeRoom(st,1)" data-placeholder="**Select Bed**">
+                                                                        <option ng-value="0">** Select Room**</option>
+                                                                        <!--<option ng-selected="st.BedId==r.BedId" ng-value="r.BedId" ng-repeat="r in RoomList">{{r.Name}}</option>
+                                                                            <option ng-selected="st.BedId==r.BedId" ng-value="r.BedId" ng-repeat="r in RoomList | filter: { IsVacant: true }:true">{{r.Name}}</option>-->
+                                                                        <option ng-repeat="r in RoomList" ng-if="!isBedTaken(r.BedId, st) || st.BedId == r.BedId" ng-value="r.BedId">{{r.Name}}</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td> <input type="number" ng-model="st.Rate" class="form-control form-control-sm" readonly ng-change="ChangeRoom(st,2)"></td>
+                                                                <td> <input type="number" ng-model="st.DiscountPer" class="form-control form-control-sm" ng-change="ChangeRoom(st,3)"></td>
+                                                                <td> <input type="number" ng-model="st.DiscountAmt" class="form-control form-control-sm" ng-change="ChangeRoom(st,4)"></td>
+                                                                <td> <input type="number" ng-model="st.PayableAmt" class="form-control form-control-sm" readonly></td>
+
+                                                                <td style="padding: 4px;">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox" id="customCheckbox1-{{$index}}" ng-model="st.ForAll" ng-change="CheckedAll(st)">
+                                                                        <label for="customCheckbox1-{{$index}}" class="custom-control-label">All</label>
+                                                                        <button type="button" class="btn btn-sm btn-info ml-2" style="font-size: 13px; padding:1px 10px;" ng-click="ShowMonthSelection(st)">Custom</button>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <a class="btn btn-sm btn-success" ng-click="SaveUpdateStudentWise(st)">
+                                                                        <i class="fas fa-save text-white"></i>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <!-- table end -->
+
+                                                </div>
+                                                <footer class="row align-items-center">
+                                                    <div class="col-md-12">
+                                                        <dir-pagination-controls pagination-id="AdmissionReceiptPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                        </dir-pagination-controls>
+                                                    </div>
+                                                </footer>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Student Bed Mapping Ends -->
+                                <!-- Employee Bed Mapping Start -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    <div class="tab-content" id="table-listing">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Department</label>
+                                                    <select class="form-control form-control-sm select2">
+                                                        <option value="1">Dept 1</option>
+                                                        <option value="2">Dept 2</option>
+                                                        <option value="3">Dept 3</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card py-2">
+                                            <header class="row">
+                                                <div class="col-md-7">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline">
+                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                <input class="form-control form-control-navbar"
+                                                                       type="search" placeholder="Search"
+                                                                       aria-label="Search" ng-model="searchData.Employee">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0"
+                                                                            type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-5 text-right">
+                                                   
+                                                    <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton"
+                                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                          
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="top" title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                </div>
+                                            </header>
+                                            <div>
+                                                <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                    <table id="main-table"
+                                                           class="main-table table tableedit table-sm table-bordered bg-white">
+                                                        <thead class="text-center">
+                                                            <tr>
+                                                                <th class="align-middle cstm-sticky" style="width: 120px; left: 0; z-index: 2; background-color: #e9eaea">
+                                                                    Employee Code
+                                                                </th>
+                                                                <th class="align-middle cstm-sticky"
+                                                                    style="width: 220px; left: 120px; z-index: 2; background-color: #e9eaea; background-color: #e9eaea">
+                                                                    Employee Name
+                                                                </th>
+                                                                <th style="width: 150px;">Designation</th>
+                                                                <th style="width: 100px;">Gender</th>
+                                                                <th style="width: 190px;">Allot Date</th>
+                                                                <th style="width: 200px;">Room/Bed No</th>
+                                                                <th style="width: 100px;">Rate</th>
+                                                                <th style="width: 90px;">Dis %</th>
+                                                                <th style="width: 90px;">Dis. Amt.</th>
+                                                                <th style="width: 110px;">Payable Amt.</th>
+                                                                <th style="width: 140px;">Month</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 1; background-color: #fff">
+                                                                    1
+                                                                </td>
+                                                                <td class="align-middle cstm-sticky" style="width: 250px; left: 120px; z-index: 1; background-color: #fff">
+                                                                    Suresh Paudel
+                                                                </td>
+                                                                <td></td>
+                                                                <td></td>
+                                                                <td><input type="date" class="form-control form-control-sm" value="0" /></td>
+                                                                <td>
+                                                                    <select class="form-control form-control-sm select2">
+                                                                        <option selected></option>
+                                                                        <option value="1">
+                                                                            Boys Hostel-101(A)
+                                                                        </option>
+                                                                        <option value="2">
+                                                                            Boys Hostel-101(B)
+                                                                        </option>
+                                                                        <option value="3">
+                                                                            Boys Hostel-101(C)
+                                                                        </option>
+                                                                    </select>
+                                                                </td>
+                                                                <td> <input type="number" class="form-control form-control-sm" value="0" /></td>
+                                                                <td> <input type="number" class="form-control form-control-sm" value="0" /></td>
+                                                                <td> <input type="number" class="form-control form-control-sm" value="0" /></td>
+                                                                <td> <input type="number" class="form-control form-control-sm" value="0" /></td>
+                                                                <td style="padding: 4px;">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox" id="customCheckbox1" value="option1">
+                                                                        <label for="customCheckbox1" class="custom-control-label">All</label>
+                                                                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                                                                                data-target="#modal-custom-month-fee" style="font-size: 13px; padding:1px 10px;">
+                                                                            Month
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <!-- table end -->
+                                                </div>
+                                                <div class="time-label">
+                                                    <span class="d-block border-0 p-3 text-center">
+                                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearEmployee()">Reset</button>
+                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateEmployee()">{{newEmployee.Mode}}</button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+    <!-- Month Modal Starts -->
+    <div class="modal fade" id="modal-custom-month-fee" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="overflow-y: hidden;margin-top:30px!important;">
+        <div class="modal-dialog modal-lg" role="document" style="max-width: 750px !important">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <label>Month Details</label>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <div aria-hidden="true">&times;</div>
+                    </button>
+                </div>
+                <div class="card p-2 mb-2">
+                    <div class="table-scroll-x-y sales-main-table tableedit table-scroll" style="max-height: calc(100vh - 11rem);">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px"> Month</th>
+                                    <th style="width: 100px"> Rate</th>
+                                    <th style="width: 100px">Dis %</th>
+                                    <th style="width: 110px">Dis.Amt.</th>
+                                    <th style="width: 120px">Payable Amt.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="md in CurMonthDetailsColl">
+                                    <td style="z-index: 1; background-color: #f5f5f9">{{md.text}}</td>
+                                    <td> <input type="number" class="form-control form-control-sm" ng-model="md.Rate" ng-change="ChangeDetRate(md,1)" /></td>
+                                    <td> <input type="number" class="form-control form-control-sm" ng-model="md.DiscountPer" ng-change="ChangeDetRate(md,2)" /></td>
+                                    <td> <input type="number" class="form-control form-control-sm" ng-model="md.DiscountAmt" ng-change="ChangeDetRate(md,3)" /></td>
+                                    <td> <input type="number" class="form-control form-control-sm" ng-model="md.PayableAmt" readonly /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 pb-2 text-center">
+                        @*<button type="button" class="btn btn-sm btn-default" style="min-width: 90px">
+                                Reset
+                            </button>*@
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 80px" data-dismiss="modal">
+                            Save
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

@@ -1,0 +1,1377 @@
+﻿app.controller('AddAssignmentController', function ($scope, $http, $timeout, $filter, GlobalServices) {
+	$scope.Title = 'AddAssignment';
+
+	OnClickDefault();
+	var glbS = GlobalServices;
+
+	$scope.LoadData = function () {
+
+		$scope.HomeWork_Files_TMP = null;
+		$scope.HomeWork_Files_Data = null;
+
+		$('.select2').select2();
+		$scope.confirmMSG = GlobalServices.getConfirmMSG();
+		$scope.perPageColl = GlobalServices.getPerPageList();
+
+		$scope.currentPages = {
+			AddAssignment: 1
+
+		};
+
+		$scope.searchData = {
+			AddAssignment: '',
+		};
+
+		$scope.perPage = {
+			AddAssignment: GlobalServices.getPerPageRow(),
+		};
+
+		$scope.Configuration = {};
+		$http({
+			method: 'POST',
+			url: base_url + "HomeWork/Transaction/GetHAConfiguration",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+
+
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.Configuration = res.data.Data;
+			}
+			else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+
+
+		$scope.AcademicConfig = {};
+		GlobalServices.getAcademicConfig().then(function (res1) {
+			$scope.AcademicConfig = res1.data.Data;
+
+			if ($scope.AcademicConfig.ActiveFaculty == true) {
+
+				$scope.FacultyList = [];
+				GlobalServices.getFacultyList().then(function (res) {
+					$scope.FacultyList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+
+			}
+
+
+			if ($scope.AcademicConfig.ActiveLevel == true) {
+
+				$scope.LevelList = [];
+				GlobalServices.getClassLevelList().then(function (res) {
+					$scope.LevelList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+
+			}
+
+			if ($scope.AcademicConfig.ActiveSemester == true) {
+
+				$scope.SelectedClassSemesterList = [];
+				$scope.SemesterList = [];
+				GlobalServices.getSemesterList().then(function (res) {
+					$scope.SemesterList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+
+			}
+
+			if ($scope.AcademicConfig.ActiveBatch == true) {
+
+				$scope.BatchList = [];
+				GlobalServices.getBatchList().then(function (res) {
+					$scope.BatchList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+
+			}
+
+			if ($scope.AcademicConfig.ActiveClassYear == true) {
+
+				$scope.ClassYearList = [];
+				/*$scope.SelectedClassClassYearList = [];*/
+				GlobalServices.getClassYearList().then(function (res) {
+					$scope.ClassYearList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+
+			}
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+
+		$scope.ClassSection = {};
+		glbS.getClassSectionList().then(function (res) {
+			$scope.ClassSection = res.data.Data;
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		//student list
+		$scope.ClassListsection = [];
+		glbS.getClassSectionList().then(function (res) {
+			$scope.ClassListsection = res.data.Data;
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		$scope.SubjectList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetAllSubjectList",
+			dataType: "json"
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.SubjectList = res.data.Data;
+
+			} else {
+
+				if (res.data.IsSuccess == false)
+					Swal.fire(res.data.ResponseMSG);
+			}
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		//class List
+		$scope.ClassList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetAllClassList",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.ClassList = res.data.Data;
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+
+
+		//section
+		$scope.SectionList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetAllSectionList",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.SectionList = res.data.Data;
+
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+		//subject
+		$scope.SubjectList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetAllSubjectList",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.SubjectList = res.data.Data;
+
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+		//AssignmentTypeList
+		$scope.AssignmentTypeList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "HomeWork/Transaction/GetAllAssignmentTypeList",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.AssignmentTypeList = res.data.Data;
+
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+		$scope.newFilter = {
+			FromDate_TMP: new Date(),
+			ToDate_TMP: new Date(),
+			StudentId: null
+		};
+
+		$scope.newAddAssignment = {
+			DeadlineDate_TMP: new Date(),
+			DeadlineforRedo_TMP: new Date(),
+			AssignmentId: null,
+			TeacherId: null,
+			ClassId: null,
+			SubjectId: null,
+			SubjectId: null,
+			Weblink: '',
+			Title: '',
+			AssignmentTypeId: null,
+			Description: '',
+			DeadlineDate: null,
+			DeadlineTime: null,
+			DeadlineforRedo: null,
+			DeadlineforRedoTime: null,
+			MarkScheme: null,
+			Marks: 0,
+			SubmissionsRequired: false,
+			IsAllowLateSibmission: false,
+			HomeWork_Files_TMP: '',
+			HomeWork_Files_Data: '',
+			AttachmentColl: [],
+			SectionIdColl: [],
+			Mode: 'Save'
+		};
+		$scope.GetTeacherNameList();
+		//$scope.GetAllAddHomework();
+	}
+
+	function OnClickDefault() {
+		document.getElementById('homework-add-form').style.display = "none";
+
+		document.getElementById('add-homework-add-btn').onclick = function () {
+			document.getElementById('homework-add-section').style.display = "none";
+			document.getElementById('homework-add-form').style.display = "block";
+		}
+
+		document.getElementById('back-homework-btn').onclick = function () {
+			document.getElementById('homework-add-section').style.display = "block";
+			document.getElementById('homework-add-form').style.display = "none";
+		}
+
+	}
+
+	$scope.ClearAddAssignment = function () {
+		$scope.SubjectColl = [];
+		$scope.Assignment_Files_TMP = null;
+		$scope.Assignment_Files_Data = null;
+
+		$('input[type=file]').val('');
+		if ($scope.previewAttachments) {
+			angular.forEach($scope.previewAttachments, function (file) {
+				if (!file.isExisting && file.previewUrl && file.previewUrl.startsWith('blob:')) {
+					URL.revokeObjectURL(file.previewUrl);
+				}
+			});
+		}
+		$scope.newAddAssignment = {
+			DeadlineDate_TMP: new Date(),
+			AssignmentId: null,
+			TeacherId: null,
+			ClassId: null,
+			SectionId: null,
+			SubjectId: null,
+			Weblink: '',
+			Title: '',
+			AssignmentTypeId: null,
+			Description: '',
+			DeadlineDate: null,
+			DeadlineTime: null,
+			DeadlineforRedo: null,
+			DeadlineforRedoTime: null,
+			MarkScheme: null,
+			Marks: 0,
+			SubmissionsRequired: false,
+			IsAllowLateSibmission: false,
+			AttachmentColl: [],
+			SectionIdColl: [],
+			Mode: 'Save'
+		};
+		$scope.SelectedFilesInfo = [];
+		$scope.HomeWork_Files_TMP = [];
+		$scope.HomeWork_Files_Data = [];
+		$scope.previewAttachments = [];
+		$scope.deletedAttachments = [];
+		$scope.attachmentCount = 0;
+
+		var fileInput = document.getElementById('flHomeWork');
+		if (fileInput) {
+			fileInput.value = '';
+		}
+		var label = document.querySelector('.custom-file-label');
+		if (label) {
+			label.textContent = 'Choose files';
+		}
+	}
+
+
+	//Teacher name
+
+	$scope.GetTeacherNameList = function () {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		$scope.TeacherNameList = [];
+		$http({
+			method: 'GET',
+			url: base_url + "HomeWork/Transaction/GetTeacherName",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.TeacherNameList = res.data.Data;
+
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+	}
+
+	//*********************class wise section name********************************
+
+	$scope.GetTeacherWiseClassList = function () {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		var para = {
+			EmployeeId: $scope.newAddAssignment.TeacherId
+		};
+		$scope.TeacherWiseClassList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "HomeWork/Transaction/GetTeacherWiseClass",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.TeacherWiseClassList = res.data.Data;
+
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+	}
+
+	//**********************************************************
+
+	$scope.GetClassWiseSubjectListForALP = function () {
+		$scope.SubjectListALP = [];
+		var para = {
+			ClassId: $scope.newAddAssignment.ClassId
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetSubjectListForLessonPlan",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+
+				$timeout(function () {
+					$scope.SubjectListALP = res.data.Data;
+				});
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
+
+	$scope.GetSubjectLessonWise = function () {
+		if ($scope.newAddAssignment.SubjectId) {
+			$scope.loadingstatus = "running";
+			showPleaseWait();
+			var para = {
+				ClassId: $scope.newAddAssignment.SelectedClass.ClassId,
+				SubjectId: $scope.newAddAssignment.SubjectId
+			};
+			$scope.SubjectLessonWiseList = [];
+
+			$http({
+				method: 'POST',
+				url: base_url + "Exam/Transaction/GetSubjectLessonWise",
+				dataType: "json",
+				data: JSON.stringify(para)
+			}).then(function (res) {
+				hidePleaseWait();
+				$scope.loadingstatus = "stop";
+				if (res.data.IsSuccess && res.data.Data) {
+					$scope.SubjectLessonWiseList = res.data.Data;
+
+				} else {
+					Swal.fire(res.data.ResponseMSG);
+				}
+			}, function (reason) {
+				Swal.fire('Failed' + reason);
+			});
+		}
+	}
+
+	$scope.GetLessonTopicDetailsWise = function (lessonName) {
+		if (lessonName) {
+			// Find the LessonId based on the selected LessonName
+			var selectedLesson = $scope.SubjectLessonWiseList.find(function (lesson) {
+				return lesson.LessonName === lessonName;
+			});
+
+			// If found, proceed with the LessonId
+			if (selectedLesson) {
+				var lessonId = selectedLesson.LessonId;
+
+				// Now you can send the LessonId
+				$scope.loadingstatus = "running";
+				showPleaseWait();
+				var para = {
+					LessonId: lessonId
+				};
+				$scope.LessonTopicDetailsWiseList = [];
+				$http({
+					method: 'POST',
+					url: base_url + "Exam/Transaction/GetLessonTopicDetailsWise",
+					dataType: "json",
+					data: JSON.stringify(para)
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingstatus = "stop";
+					if (res.data.IsSuccess && res.data.Data) {
+						$scope.LessonTopicDetailsWiseList = res.data.Data;
+					} else {
+						Swal.fire(res.data.ResponseMSG);
+					}
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		}
+	};
+
+
+	//$scope.GetLessonTopicDetailsWise = function () {
+	//	if ($scope.newAddAssignment.Lesson) {
+	//		$scope.loadingstatus = "running";
+	//		showPleaseWait();
+	//		var para = {
+	//			LessonId: $scope.newAddAssignment.Lesson
+	//		};
+	//		$scope.LessonTopicDetailsWiseList = [];
+	//		$http({
+	//			method: 'POST',
+	//			url: base_url + "Exam/Transaction/GetLessonTopicDetailsWise",
+	//			dataType: "json",
+	//			data: JSON.stringify(para)
+	//		}).then(function (res) {
+	//			hidePleaseWait();
+	//			$scope.loadingstatus = "stop";
+	//			if (res.data.IsSuccess && res.data.Data) {
+	//				$scope.LessonTopicDetailsWiseList = res.data.Data;
+	//			} else {
+	//				Swal.fire(res.data.ResponseMSG);
+	//			}
+	//		}, function (reason) {
+	//			Swal.fire('Failed' + reason);
+	//		});
+	//	}
+	//}
+
+	//************************* Add Homework *********************************
+	$scope.getExistingAttachmentsCount = function () {
+		if (!$scope.previewAttachments) return 0;
+		return $scope.previewAttachments.filter(function (file) {
+			return file.isExisting === true;
+		}).length;
+	};
+
+	$scope.getNewAttachmentsCount = function () {
+		if (!$scope.previewAttachments) return 0;
+		return $scope.previewAttachments.filter(function (file) {
+			return file.isExisting === false;
+		}).length;
+	};
+
+	$scope.hasExistingAttachments = function () {
+		return $scope.getExistingAttachmentsCount() > 0;
+	};
+
+	$scope.hasNewAttachments = function () {
+		return $scope.getNewAttachmentsCount() > 0;
+	};
+
+	$scope.IsValidAddAssignment = function () {
+		//if ($scope.newAddAssignment.Name.isEmpty()) {
+		//	Swal.fire('Please ! Enter  Name');
+		//	return false;
+		//}
+		return true;
+	}
+	$scope.SaveUpdateAddAssignment = function () {
+		if ($scope.IsValidAddAssignment() == true) {
+			if ($scope.confirmMSG.Accept == true) {
+				var saveModify = $scope.newAddAssignment.Mode;
+				Swal.fire({
+					title: 'Do you want to ' + saveModify + ' the current data?',
+					showCancelButton: true,
+					confirmButtonText: saveModify,
+				}).then((result) => {
+					if (result.isConfirmed) {
+						$scope.CallSaveUpdateAssignment();
+					}
+				});
+			} else
+				$scope.CallSaveUpdateAssignment();
+		}
+	};
+
+
+	//$scope.CallSaveUpdateAssignment = function () {
+	//	$scope.loadingstatus = "running";
+	//	showPleaseWait();
+
+	//	if ($scope.newAddAssignment.DeadlineDateDet) {
+	//		$scope.newAddAssignment.DeadlineDate = $filter('date')(new Date($scope.newAddAssignment.DeadlineDateDet.dateAD), 'yyyy-MM-dd');
+	//	} else
+	//		$scope.newAddAssignment.DeadlineDate = null;
+	//	if ($scope.newAddAssignment.DeadlineforRedoDet) {
+	//		$scope.newAddAssignment.DeadlineforRedo = $filter('date')(new Date($scope.newAddAssignment.DeadlineforRedoDet.dateAD), 'yyyy-MM-dd');
+	//	} else
+	//		$scope.newAddAssignment.DeadlineforRedo = null;
+
+	//	if ($scope.newAddAssignment.DeadlineTime_TMP) {
+	//		$scope.newAddAssignment.DeadlineTime = $filter('date')(new Date($scope.newAddAssignment.DeadlineTime_TMP), 'yyyy-MM-dd HH:mm:ss');
+	//	}
+	//	else
+	//		$scope.newAddAssignment.DeadlineTime = null;
+
+	//	if ($scope.newAddAssignment.DeadlineforRedoTime_TMP) {
+	//		$scope.newAddAssignment.DeadlineforRedoTime = $filter('date')(new Date($scope.newAddAssignment.DeadlineforRedoTime_TMP), 'yyyy-MM-dd HH:mm:ss');
+	//	}
+	//	else
+	//		$scope.newAddAssignment.DeadlineforRedoTime = null;
+
+
+
+	//	$scope.newAddAssignment.ClassId = $scope.newAddAssignment.SelectedClass.ClassId;
+	//	var assignmentFiles = $scope.Assignment_Files_Data;
+	//	$http({
+	//		method: 'POST',
+	//		url: base_url + "Homework/Transaction/SaveAddAssignment",
+	//		headers: { 'Content-Type': undefined },
+	//		transformRequest: function (data) {
+	//			var formData = new FormData();
+	//			formData.append("jsonData", angular.toJson(data.jsonData));
+	//			if (data.files && data.files.length > 0) {
+	//				for (var i = 0; i < data.files.length; i++) {
+	//					formData.append("file1" + i, data.files[i]);
+	//				}
+	//			}
+	//			return formData;
+	//		},
+	//		data: { jsonData: $scope.newAddAssignment, files: assignmentFiles}
+	//	}).then(function (res) {
+	//		$scope.loadingstatus = "stop";
+	//		hidePleaseWait();
+	//		Swal.fire(res.data.ResponseMSG);
+	//		if (res.data.IsSuccess == true) {
+	//			$scope.ClearAddAssignment();
+	//			//$scope.GetAllAddHomework();
+	//		}
+	//	}, function (errormessage) {
+	//		hidePleaseWait();
+	//		$scope.loadingstatus = "stop";
+	//	});
+	//}
+
+
+
+
+	$scope.CallSaveUpdateAssignment = function () {
+		if (!$scope.IsValidAddAssignment()) {
+			$scope.loadingstatus = "stop";
+			return;
+		}
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		if ($scope.newAddAssignment.DeadlineDateDet) {
+			$scope.newAddAssignment.DeadlineDate = $filter('date')(new Date($scope.newAddAssignment.DeadlineDateDet.dateAD), 'yyyy-MM-dd');
+		} else {
+			$scope.newAddAssignment.DeadlineDate = null;
+		}
+
+		if ($scope.newAddAssignment.DeadlineforRedoDet) {
+			$scope.newAddAssignment.DeadlineforRedo = $filter('date')(new Date($scope.newAddAssignment.DeadlineforRedoDet.dateAD), 'yyyy-MM-dd');
+		} else {
+			$scope.newAddAssignment.DeadlineforRedo = null;
+		}
+
+		if ($scope.newAddAssignment.DeadlineTime_TMP) {
+			$scope.newAddAssignment.DeadlineTime = $filter('date')(new Date($scope.newAddAssignment.DeadlineTime_TMP), 'yyyy-MM-dd HH:mm:ss');
+		}
+		else
+			$scope.newAddAssignment.DeadlineTime = null;
+
+		if ($scope.newAddAssignment.DeadlineforRedoTime_TMP) {
+			$scope.newAddAssignment.DeadlineforRedoTime = $filter('date')(new Date($scope.newAddAssignment.DeadlineforRedoTime_TMP), 'yyyy-MM-dd HH:mm:ss');
+		}
+		else
+			$scope.newAddAssignment.DeadlineforRedoTime = null;
+
+
+		$scope.newAddAssignment.ClassId = $scope.newAddAssignment.SelectedClass ?
+			$scope.newAddAssignment.SelectedClass.ClassId : null;
+
+		$scope.newAddAssignment.SectionIdColl =
+			($scope.newAddAssignment.SectionIdColl || []).toString();
+		// Collections for different types
+		var existingAttachments = [];  // Existing files (already on server)
+		var newAttachmentsMetadata = []; // New files metadata
+		var newFilesToUpload = []; // Actual new file objects for upload
+
+		// Process all attachments from previewAttachments
+		if ($scope.previewAttachments && $scope.previewAttachments.length > 0) {
+			angular.forEach($scope.previewAttachments, function (file) {
+				if (file.isExisting) {
+					// EXISTING FILE - Send only metadata with DocumentId
+					var existingFile = {
+						DocumentId: file.DocumentId,
+						DocumentTypeId: file.DocumentTypeId || 1,
+						Name: file.name,
+						Description: file.name,
+						Extension: file.extensionWithDot,
+						DocPath: file.DocPath,
+						Data: null,
+						IsExisting: true
+					};
+					existingAttachments.push(existingFile);
+
+				} else {
+					// NEW FILE - Send metadata and prepare for upload
+					var newFileMeta = {
+						DocumentTypeId: 1,
+						Name: file.name,
+						Description: file.name,
+						Extension: file.extensionWithDot,
+						Data: null,
+						DocPath: null,
+						IsNew: true,
+						FileName: file.name,
+						FileSize: file.size
+					};
+					newAttachmentsMetadata.push(newFileMeta);
+
+					// Add original file to upload queue
+					if (file.originalFile) {
+						newFilesToUpload.push(file.originalFile);
+					}
+				}
+			});
+		}
+
+		// COMBINE both existing and new attachments into one collection
+		var completeAttachmentColl = [];
+		// First add all existing attachments
+		if (existingAttachments.length > 0) {
+			completeAttachmentColl = completeAttachmentColl.concat(existingAttachments);
+		}
+		// Then add all new attachments metadata
+		if (newAttachmentsMetadata.length > 0) {
+			completeAttachmentColl = completeAttachmentColl.concat(newAttachmentsMetadata);
+		}
+		$scope.newAddAssignment.AttachmentColl = completeAttachmentColl;
+		$scope.newAddAssignment.DeletedAttachmentIds = $scope.deletedAttachments || [];
+		var homeworkData = angular.copy($scope.newAddAssignment);
+		$http({
+			method: 'POST',
+			url: base_url + "Homework/Transaction/SaveAddAssignment",
+			headers: { 'Content-Type': undefined },
+			transformRequest: function (data) {
+				var formData = new FormData();
+
+				var jsonString = angular.toJson(data.homeworkData);
+				formData.append("jsonData", jsonString);
+				if (data.newFiles && data.newFiles.length > 0) {
+					for (var i = 0; i < data.newFiles.length; i++) {
+						formData.append("file" + i, data.newFiles[i]);
+					}
+				}
+				return formData;
+			},
+			data: {
+				homeworkData: homeworkData,  // Complete data with ALL attachments
+				newFiles: newFilesToUpload    // Only new files for upload
+			}
+		}).then(function (res) {
+			$scope.loadingstatus = "stop";
+			hidePleaseWait();
+
+			Swal.fire({
+				icon: res.data.IsSuccess ? 'success' : 'error',
+				title: res.data.IsSuccess ? 'Success!' : 'Error!',
+				text: res.data.ResponseMSG,
+				timer: res.data.IsSuccess ? 1000 : undefined
+			});
+			if (res.data.IsSuccess == true) {
+				$scope.GetAllAddAssignment();
+				$scope.ClearAddAssignment();
+
+				document.getElementById('homework-add-section').style.display = "block";
+				document.getElementById('homework-add-form').style.display = "none";
+			}
+		}, function (errormessage) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			Swal.fire({
+				icon: 'error',
+				title: 'Error!',
+				text: "Error occurred while saving data: " + (errormessage.statusText || errormessage)
+			});
+		});
+	};
+
+	$scope.GetAllAddAssignment = function () {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		$scope.AddedAssignmentList = [];
+		var para = {
+			DateFrom: ($scope.newFilter.FromDateDet ? $filter('date')(new Date($scope.newFilter.FromDateDet.dateAD), 'yyyy-MM-dd') : null),
+			DateTo: ($scope.newFilter.ToDateDet ? $filter('date')(new Date($scope.newFilter.ToDateDet.dateAD), 'yyyy-MM-dd') : null),
+			StudentId: $scope.newFilter.StudentId,
+
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "HomeWork/Transaction/GetAllAddAssignment",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.AddedAssignmentList = res.data.Data;
+			}
+			else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
+
+
+	//$scope.GetAddedAssignmentById = function (refData) {
+	//	$scope.loadingstatus = "running";
+	//	showPleaseWait();
+	//	var para = {
+	//		AssignmentId: refData.AssignmentId
+	//	};
+	//	$http({
+	//		method: 'POST',
+	//		url: base_url + "HomeWork/Transaction/GetAddedAssignmentById",
+	//		dataType: "json",
+	//		data: JSON.stringify(para)
+	//	}).then(function (res) {
+	//		hidePleaseWait();
+	//		$scope.loadingstatus = "stop";
+	//		if (res.data.IsSuccess && res.data.Data) {
+	//			$scope.newAddAssignment = res.data.Data;
+
+	//			$scope.newAddAssignment.SelectedClass = $scope.ClassSection.ClassList.find(cs => cs.ClassId === res.data.Data.ClassId);
+
+	//			if ($scope.newAddAssignment.DeadlineDate)
+	//				$scope.newAddAssignment.DeadlineDate_TMP = new Date($scope.newAddAssignment.DeadlineDate);
+
+	//			if ($scope.newAddAssignment.DeadlineTime)
+	//				$scope.newAddAssignment.DeadlineTime_TMP = new Date($scope.newAddAssignment.DeadlineTime);
+
+	//			if ($scope.newAddAssignment.DeadlineforRedo)
+	//				$scope.newAddAssignment.DeadlineforRedo_TMP = new Date($scope.newAddAssignment.DeadlineforRedo);
+
+	//			if ($scope.newAddAssignment.DeadlineforRedoTime)
+	//				$scope.newAddAssignment.DeadlineforRedoTime_TMP = new Date($scope.newAddAssignment.DeadlineforRedoTime);
+
+	//			$scope.newAddAssignment.Mode = 'Modify';
+	//			document.getElementById('homework-add-section').style.display = "none";
+	//			document.getElementById('homework-add-form').style.display = "block";
+	//		} else {
+	//			Swal.fire(res.data.ResponseMSG);
+	//		}
+
+	//	}, function (reason) {
+	//		Swal.fire('Failed' + reason);
+	//	});
+	//};
+
+
+	$scope.DeleteAddedAssignment = function (refData) {
+
+		Swal.fire({
+			title: 'Do you want to delete Assignment Id ' + refData.AssignmentId,
+			showCancelButton: true,
+			confirmButtonText: 'Delete',
+		}).then((result) => {
+			/* Read more about isConfirmed, isDenied below */
+			if (result.isConfirmed) {
+				$scope.loadingstatus = "running";
+				showPleaseWait();
+
+				var para = {
+					AssignmentId: refData.AssignmentId
+				};
+
+				$http({
+					method: 'POST',
+					url: base_url + "HomeWork/Transaction/DeleteAddedAssignment",
+					dataType: "json",
+					data: JSON.stringify(para)
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingstatus = "stop";
+					if (res.data.IsSuccess) {
+						$scope.GetAllAddAssignment();
+					} else {
+						Swal.fire(res.data.ResponseMSG);
+					}
+
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		});
+	};
+
+
+	$scope.GetAddedAssignmentById = function (refData) {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		var para = {
+			AssignmentId: refData.AssignmentId
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "HomeWork/Transaction/GetAddedAssignmentById",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.newAddAssignment = res.data.Data;
+				if ($scope.previewAttachments) {
+					angular.forEach($scope.previewAttachments, function (file) {
+						if (!file.isExisting && file.previewUrl && file.previewUrl.startsWith('blob:')) {
+							URL.revokeObjectURL(file.previewUrl);
+						}
+					});
+				}
+				$scope.previewAttachments = [];
+				$scope.SelectedFilesInfo = [];
+				$scope.HomeWork_Files_TMP = [];
+				$scope.HomeWork_Files_Data = [];
+				$scope.deletedAttachments = [];
+				if ($scope.newAddAssignment.AttachmentColl && $scope.newAddAssignment.AttachmentColl.length > 0) {
+					angular.forEach($scope.newAddAssignment.AttachmentColl, function (doc) {
+						if (doc.DocPath) {
+							var cleanPath = doc.DocPath.replace(/\\/g, '/');
+							var fpath = cleanPath.startsWith('http') ? cleanPath : (WEBURLPATH.trim() + cleanPath).replace(/\\/g, '/');
+
+							var fileExt = doc.Extension ?
+								doc.Extension.toLowerCase().replace('.', '') :
+								fpath.split('.').pop().toLowerCase();
+
+
+							var fileInfo = {
+								DocumentId: doc.DocumentId,
+								name: doc.Name || 'Attachment',
+								fileNameWithoutExt: getFileNameWithoutExtension(doc.Name || 'Attachment'),
+								extension: fileExt,
+								extensionWithDot: doc.Extension || '.' + fileExt,
+								type: getMimeType(fileExt),
+								size: doc.FileSize || 0,
+								previewUrl: fpath,
+								fileType: getFileCategory(fileExt),
+								isExisting: true,
+								DocPath: doc.DocPath,
+								FullPath: fpath
+							};
+
+							$scope.previewAttachments.push(fileInfo);
+						}
+					});
+				}
+
+				// Calculate attachment count
+				$scope.attachmentCount = $scope.previewAttachments.length;
+				// Handle dates
+				if ($scope.newAddAssignment.DeadlineDate)
+					$scope.newAddAssignment.DeadlineDate_TMP = new Date($scope.newAddAssignment.DeadlineDate);
+
+				if ($scope.newAddAssignment.DeadlineTime)
+					$scope.newAddAssignment.DeadlineTime_TMP = new Date($scope.newAddAssignment.DeadlineTime);
+
+				if ($scope.newAddAssignment.DeadlineforRedo)
+					$scope.newAddAssignment.DeadlineforRedo_TMP = new Date($scope.newAddAssignment.DeadlineforRedo);
+
+				if ($scope.newAddAssignment.DeadlineforRedoTime)
+					$scope.newAddAssignment.DeadlineforRedoTime_TMP = new Date($scope.newAddAssignment.DeadlineforRedoTime);
+
+				// Set selected class
+				if ($scope.ClassSection && $scope.ClassSection.ClassList) {
+					$scope.newAddAssignment.SelectedClass = $scope.ClassSection.ClassList.find(
+						cl => cl.ClassId === res.data.Data.ClassId
+					);
+				}
+
+				$timeout(function () {
+					$('.select2').each(function () {
+						if ($(this).hasClass('select2-hidden-accessible')) {
+							$(this).select2('destroy');
+						}
+						$(this).select2({ width: '100%' });
+					});
+				}, 0);
+
+				$scope.newAddAssignment.Mode = 'Modify';
+				document.getElementById('homework-add-section').style.display = "none";
+				document.getElementById('homework-add-form').style.display = "block";
+
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	};
+
+	function getMimeType(extension) {
+		var mimeTypes = {
+			'jpg': 'image/jpeg',
+			'jpeg': 'image/jpeg',
+			'png': 'image/png',
+			'gif': 'image/gif',
+			'bmp': 'image/bmp',
+			'webp': 'image/webp',
+			'pdf': 'application/pdf',
+			'doc': 'application/msword',
+			'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			'xls': 'application/vnd.ms-excel',
+			'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			'ppt': 'application/vnd.ms-powerpoint',
+			'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+			'txt': 'text/plain'
+		};
+		return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+	}
+
+	$scope.previewAttachments = [];
+
+	$scope.removeFile = function (index, $event) {
+		if ($event) {
+			$event.preventDefault();
+			$event.stopPropagation();
+		}
+
+		if ($scope._removeInProgress) return;
+		$scope._removeInProgress = true;
+
+		const file = $scope.previewAttachments[index];
+		if (!file) {
+			console.warn("No file found at index:", index);
+			$scope._removeInProgress = false;
+			return;
+		}
+
+		const isExisting = !!file.isExisting;
+
+		Swal.fire({
+			title: 'Remove File',
+			text: `Are you sure you want to remove this ${isExisting ? 'existing' : ''} file?`,
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, remove it',
+			cancelButtonText: 'Cancel'
+		}).then((result) => {
+			$timeout(() => {
+				if (!result.isConfirmed) {
+					$scope._removeInProgress = false;
+					return;
+				}
+				if (!isExisting && file.previewUrl && file.previewUrl.startsWith('blob:')) {
+					try {
+						URL.revokeObjectURL(file.previewUrl);
+					} catch (err) {
+						console.warn("Failed to revoke blob URL:", err);
+					}
+				}
+				if (isExisting && file.DocumentId) {
+					if (!$scope.deletedAttachments) $scope.deletedAttachments = [];
+					$scope.deletedAttachments.push(file.DocumentId);
+					console.log("Marked for deletion → DocumentId:", file.DocumentId);
+				}
+
+				$scope.previewAttachments.splice(index, 1);
+				if (!isExisting) {
+					if ($scope.SelectedFilesInfo?.length) {
+						for (let i = 0; i < $scope.SelectedFilesInfo.length; i++) {
+							if ($scope.SelectedFilesInfo[i].name === file.name &&
+								$scope.SelectedFilesInfo[i].size === file.size) {
+								$scope.SelectedFilesInfo.splice(i, 1);
+								break;
+							}
+						}
+					}
+					if ($scope.HomeWork_Files_TMP?.length) {
+						for (let j = 0; j < $scope.HomeWork_Files_TMP.length; j++) {
+							if ($scope.HomeWork_Files_TMP[j].name === file.name &&
+								$scope.HomeWork_Files_TMP[j].size === file.size) {
+								$scope.HomeWork_Files_TMP.splice(j, 1);
+								if ($scope.HomeWork_Files_Data?.length > j) {
+									$scope.HomeWork_Files_Data.splice(j, 1);
+								}
+								break;
+							}
+						}
+					}
+				}
+				$scope.attachmentCount = $scope.previewAttachments.length;
+				if (!isExisting && $scope.previewAttachments.every(f => f.isExisting)) {
+					const fileInput = document.getElementById('flHomeWork');
+					if (fileInput) fileInput.value = '';
+
+					const label = document.querySelector('.custom-file-label');
+					if (label) label.textContent = 'Choose files';
+				}
+				Swal.fire({
+					title: 'Removed!',
+					text: `File has been ${isExisting ? 'marked for deletion' : 'removed'}.`,
+					icon: 'success',
+					timer: 2000,
+					showConfirmButton: false
+				});
+
+				$scope._removeInProgress = false;
+
+			}, 0);   // ← $timeout with 0 delay = next digest tick
+
+		}).catch(err => {
+			console.error("Swal error:", err);
+			$scope._removeInProgress = false;
+		});
+	};
+
+	// Function to view existing file
+	$scope.viewExistingFile = function (file) {
+		if (file.fileType === 'pdf' || file.fileType === 'image') {
+			window.open(file.FullPath, '_blank');
+		} else {
+			window.open(file.FullPath, '_blank');
+		}
+	};
+
+	$scope.viewAttachmentsOnly = function (homDet) {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		$scope.AttFilesViewOnly = [];
+		$scope.assignmentDetails = {};
+		var para = {
+			AssignmentId: homDet.AssignmentId
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "Homework/Transaction/GetAddedAssignmentById",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				var assignmentData = res.data.Data;
+				// Store homework details
+				$scope.assignmentDetails = {
+					AssignmentId: assignmentData.AssignmentId,
+
+					AssignmentTypeName: assignmentData.AssignmentTypeName,
+					ClassName: assignmentData.ClassName,
+					SectionName: assignmentData.SectionName,
+					SubjectName: assignmentData.SubjectName,
+					SectionListName: assignmentData.SectionListName,
+					BatchName: assignmentData.BatchName || '',
+					SemesterName: assignmentData.SemesterName || '',
+					Lesson: assignmentData.Lesson || 'N/A',
+					Topic: assignmentData.Topic || 'N/A',
+					Description: assignmentData.Description || '',
+					DeadlineDate: assignmentData.DeadlineDate ? new Date(assignmentData.DeadlineDate) : null,
+					DeadlineMiti: homDet.DeadlineDate_BS,
+					AsignDateTime_BS: homDet.AsignDateTime_BS,
+					DeadlineTime: assignmentData.DeadlineTime ? new Date(assignmentData.DeadlineTime) : null,
+					DeadlineforRedo: assignmentData.DeadlineforRedo ? new Date(assignmentData.DeadlineforRedo) : null,
+					DeadlineforRedoTime: assignmentData.DeadlineforRedoTime ? new Date(assignmentData.DeadlineforRedoTime) : null,
+					IsAllowLateSibmission: assignmentData.IsAllowLateSibmission || false,
+					SubmissionsRequired: assignmentData.SubmissionsRequired || false
+				};
+
+				// Process attachments
+				var attachments = assignmentData.AttachmentColl;
+
+
+				if (attachments && attachments.length > 0) {
+					angular.forEach(attachments, function (doc) {
+						if (doc.DocPath) {
+							// Clean the path
+							var cleanPath = doc.DocPath.replace(/\\/g, '/');
+							var fpath = cleanPath.startsWith('http') ? cleanPath : (WEBURLPATH.trim() + cleanPath).replace(/\\/g, '/');
+
+							// Get file extension
+							var fileExt = doc.Extension ?
+								doc.Extension.toLowerCase().replace('.', '') :
+								fpath.split('.').pop().toLowerCase();
+
+							// Determine file type
+							var fileType = 'image';
+							if (fileExt === 'pdf') {
+								fileType = 'pdf';
+							} else if (['doc', 'docx'].includes(fileExt)) {
+								fileType = 'word';
+							} else if (['xls', 'xlsx'].includes(fileExt)) {
+								fileType = 'excel';
+							} else if (['ppt', 'pptx'].includes(fileExt)) {
+								fileType = 'powerpoint';
+							} else if (['txt'].includes(fileExt)) {
+								fileType = 'text';
+							} else if (['mp4', 'avi', 'mov', 'wmv'].includes(fileExt)) {
+								fileType = 'video';
+							} else if (['mp3', 'wav'].includes(fileExt)) {
+								fileType = 'audio';
+							}
+
+							$scope.AttFilesViewOnly.push({
+								url: fpath,
+								type: fileType,
+								extension: fileExt,
+								name: doc.Name || doc.Description || 'Attachment',
+								description: doc.Description || doc.Name || '',
+								fullName: doc.Name + (doc.Extension ? '.' + doc.Extension.replace('.', '') : '')
+							});
+						}
+					});
+				}
+
+				// Show the modal
+				$('#attachmentModalOnly').modal('show');
+
+			} else {
+				Swal.fire(res.data.ResponseMSG || "Failed to load homework details.");
+			}
+
+		}, function (reason) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+
+			Swal.fire('Failed to load details: ' + (reason.statusText || reason));
+		});
+	};
+
+
+
+	$scope.previewFile = function (file) {
+		if (file.type === 'pdf') {
+			window.open(file.url, '_blank');
+		} else if (file.type === 'image') {
+			window.open(file.url, '_blank');
+		} else {
+			window.open(file.url, '_blank');
+		}
+	};
+
+	$('#previewModal').on('hidden.bs.modal', function () {
+		$scope.SelectedFilePreview = null;
+		$scope.$apply();
+	});
+
+	function getFileCategory(extension) {
+		var imageExt = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+		var pdfExt = ['pdf'];
+		var wordExt = ['doc', 'docx'];
+		var excelExt = ['xls', 'xlsx'];
+		var pptExt = ['ppt', 'pptx'];
+		var textExt = ['txt'];
+
+		extension = extension.toLowerCase();
+
+		if (imageExt.includes(extension)) return 'image';
+		if (pdfExt.includes(extension)) return 'pdf';
+		if (wordExt.includes(extension)) return 'word';
+		if (excelExt.includes(extension)) return 'excel';
+		if (pptExt.includes(extension)) return 'powerpoint';
+		if (textExt.includes(extension)) return 'text';
+		return 'other';
+	}
+	function getFileExtension(filename) {
+		if (!filename) return '';
+		return filename.split('.').pop().toLowerCase();
+	}
+
+	function getFileNameWithoutExtension(filename) {
+		if (!filename) return '';
+		return filename.substring(0, filename.lastIndexOf('.')) || filename;
+	}
+
+	$scope.onFileSelect = function () {
+		var fileInput = document.getElementById('flHomeWork');
+		if (!fileInput || !fileInput.files || fileInput.files.length === 0) return;
+
+		var files = fileInput.files;
+
+		angular.forEach(files, function (file) {
+			var duplicate = $scope.previewAttachments.some(function (f) {
+				return f.name === file.name && f.size === file.size;
+			});
+			if (duplicate) return;
+			var previewUrl = URL.createObjectURL(file);
+			var fileInfo = {
+				originalFile: file,
+				name: file.name,
+				fileNameWithoutExt: getFileNameWithoutExtension(file.name),
+				extension: getFileExtension(file.name),
+				extensionWithDot: '.' + getFileExtension(file.name),
+				type: file.type,
+				size: file.size,
+				previewUrl: previewUrl,
+				fileType: getFileCategory(getFileExtension(file.name)),
+				isExisting: false
+			};
+			$scope.previewAttachments.push(fileInfo);
+		});
+		// Reset file input
+		fileInput.value = '';
+		// Update label
+		var label = document.querySelector('.custom-file-label');
+		if (label) {
+			label.textContent = $scope.previewAttachments.length + ' file(s) selected';
+		}
+		$scope.$apply();
+	};
+
+
+	// Unified view function
+	$scope.viewFile = function (file) {
+		if (file.fileType === 'pdf' || file.fileType === 'image') {
+			window.open(file.previewUrl, '_blank');
+		} else {
+			window.open(file.previewUrl, '_blank');
+		}
+	};
+
+	$scope.validateDates1 = function (changedField) {
+		if (!$scope.newFilter.FromDateDet || !$scope.newFilter.ToDateDet ||
+			!$scope.newFilter.FromDateDet.dateAD || !$scope.newFilter.ToDateDet.dateAD) {
+			return true;
+		}
+		var fromDate = $filter('date')(new Date($scope.newFilter.FromDateDet.dateAD), 'yyyy-MM-dd')
+		var toDate = $filter('date')(new Date($scope.newFilter.ToDateDet.dateAD), 'yyyy-MM-dd')
+		if (!fromDate || !toDate) return true;
+		if (fromDate > toDate) {
+			if (changedField === 'fromDate') {
+				Swal.fire({
+					icon: 'warning',
+					text: 'From Date cannot be After To Date.',
+					confirmButtonText: 'OK'
+				}).then(function () {
+					$scope.$apply(function () {
+						$scope.newFilter.FromDate_TMP = new Date();
+						$scope.newFilter.FromDateDet = new Date();
+					});
+				});
+			} else if (changedField === 'toDate') {
+				Swal.fire({
+					icon: 'warning',
+					text: 'To Date cannot be Before From Date.',
+					confirmButtonText: 'OK'
+				}).then(function () {
+					$scope.$apply(function () {
+						$scope.newFilter.ToDate_TMP = new Date();
+						$scope.newFilter.ToDateDet = new Date();
+					});
+				});
+			}
+			return false;
+		}
+
+		return true;
+	};
+
+	$scope.validateDates2 = function (changedField) {
+		if (!$scope.newAddAssignment.DeadlineDateDet || !$scope.newAddAssignment.DeadlineforRedoDet ||
+			!$scope.newAddAssignment.DeadlineDateDet.dateAD || !$scope.newAddAssignment.DeadlineforRedoDet.dateAD) {
+			return true;
+		}
+		var fromDate = $filter('date')(new Date($scope.newAddAssignment.DeadlineDateDet.dateAD), 'yyyy-MM-dd')
+		var toDate = $filter('date')(new Date($scope.newAddAssignment.DeadlineforRedoDet.dateAD), 'yyyy-MM-dd')
+		if (!fromDate || !toDate) return true;
+		if (fromDate > toDate) {
+			if (changedField === 'DeadlineDate') {
+				Swal.fire({
+					icon: 'warning',
+					text: 'Deadline Date cannot be After Deadline for Redo Date.',
+					confirmButtonText: 'OK'
+				}).then(function () {
+					$scope.$apply(function () {
+						$scope.newAddAssignment.DeadlineDate_TMP = new Date();
+						$scope.newAddAssignment.DeadlineDateDet = new Date();
+					});
+				});
+			} else if (changedField === 'DeadlineforRedo') {
+				Swal.fire({
+					icon: 'warning',
+					text: 'Deadline for Redo Date cannot be Before Deadline Date.',
+					confirmButtonText: 'OK'
+				}).then(function () {
+					$scope.$apply(function () {
+						$scope.newAddAssignment.DeadlineforRedo_TMP = new Date();
+						$scope.newAddAssignment.DeadlineforRedoDet = new Date();
+					});
+				});
+			}
+			return false;
+		}
+
+		return true;
+	};
+});

@@ -1,0 +1,217 @@
+﻿
+@{ ViewBag.Title = "Tabulation";
+    Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<script src="~/AngularJs/Creation/Tabulation.js"></script>
+<div class="content-wrapper" ng-app="myApp" ng-controller="tabulationController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs">
+                                <div class="row upper-tab">
+                                    <div class="col-md-10">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                   href="#home" role="tab" aria-controls="home"
+                                                   aria-selected="true">Normal Tabulation</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                   href="#profile" role="tab" aria-controls="profile"
+                                                   aria-selected="false">Aggregate Tabulation</a>
+                                            </li>
+                                            @*<li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="contact-tab" data-toggle="tab"
+                                                   href="#contact" role="tab" aria-controls="contact"
+                                                   aria-selected="false">Parent Aggregate Tabulation</a>
+                                            </li>*@
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Normal Tabulation Starts -->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Class/Section</label>
+                                                        <select class="form-control form-control-sm select2" @*id="cboClassId"*@ ng-model="normalTabulation.SelectedClass" ng-change="PrintNormalTabulation()">
+                                                            <option ng-repeat="ct in SectionClassColl  track by $index" ng-value="{{ct}}">
+                                                                {{ct.text}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Exam Type</label>
+                                                    <select class="form-control form-control-sm select2" style="width:100%" ng-model="normalTabulation.ExamTypeId" ng-change="PrintNormalTabulation()">
+                                                        <option disabled selected>Select ExamName</option>
+                                                        <option ng-value="{{cl.ExamTypeId}}" ng-repeat="cl in ExamTypeColl">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-2 mt-4">
+
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="customCheckbox1" ng-model="normalTabulation.FilterSection">
+                                                        <label for="customCheckbox1"
+                                                               class="custom-control-label">Filter Section</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 mt-4">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="chkFromPublished" ng-model="normalTabulation.FromPublished">
+                                                        <label for="chkFromPublished"
+                                                               class="custom-control-label">From Published</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Select Report </label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintNormalTabulation()" ng-model="normalTabulation.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in normalTabulation.TemplatesColl">{{rt.ReportName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="card p-2 mt-2">
+                                                <iframe id="frmRptTabulation" style='width: 100%; height: calc(100vh - 15rem) !important; background-color: white; visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Normal Tabulation Ends -->
+                                <!-- Aggregate Tabulation Starts -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Class/Section</label>
+                                                        <select class="form-control form-control-sm select2"  ng-model="groupTabulation.SelectedClass" ng-change="PrintGroupTabulation()">
+                                                            <option disabled selected>Select Class</option>
+                                                            <option ng-repeat="ct in SectionClassColl  track by $index" ng-value="{{ct}}">
+                                                                {{ct.text}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>Current Exam</label>
+                                                    <select class="form-control form-control-sm select2" style="width:100%" ng-model="groupTabulation.CurExamTypeId" ng-change="PrintGroupTabulation()">
+                                                        <option disabled selected>Select ExamName</option>
+                                                        <option ng-value="{{cl.ExamTypeId}}" ng-repeat="cl in ExamTypeColl">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Exam Type Group</label>
+                                                    <select class="form-control form-control-sm select2" style="width:100%" ng-model="groupTabulation.ExamTypeGroupId" ng-change="PrintGroupTabulation()">
+                                                        <option disabled selected>Select ExamGroup</option>
+                                                        <option ng-value="{{cl.ExamTypeGroupId}}" ng-repeat="cl in ExamTypeGroupColl">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-3 mt-4 d-flex">
+
+                                                    <div class="custom-control custom-checkbox mr-2">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="customCheckbox1" ng-model="groupTabulation.FilterSection">
+                                                        <label for="customCheckbox1"
+                                                               class="custom-control-label">Filter Section</label>
+                                                    </div>
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="chkFromPublished" ng-model="groupTabulation.FromPublished">
+                                                        <label for="chkFromPublished"
+                                                               class="custom-control-label">From Published</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>Select Report </label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintGroupTabulation()" ng-model="groupTabulation.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in groupTabulation.TemplatesColl">{{rt.ReportName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            </div>
+                                            <div class="card p-2 mt-2">
+                                                <iframe id="frmRptGrpTabulation" style='width: 100%; height: calc(100vh - 15rem) !important; background-color: white; visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                <!-- Aggregate Tabulation Ends -->
+                                <!-- Parent Aggregate Tabulation Starts -->
+                                <div class="tab-pane fade main-section" id="contact" role="tabpanel"
+                                     aria-labelledby="contact-tab">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <!-- <label>Class</label> -->
+                                                        <select class="form-control form-control-sm select2" id="cboClassId" ng-model="markSheetGroup.SelectClassSection" ng-change="GetGroupMarkSheet()">
+                                                            <option disabled selected>Select Class</option>
+                                                            <option ng-repeat="ct in SectionClassColl  track by $index" ng-value="{{ct}}">
+                                                                {{ct.text}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <!-- <label>Parent Exam Type Group</label> -->
+                                                    <select class="form-control form-control-sm " style="width:100%" ng-model="markSheetGroup.ExamTypeGroupId" ng-change="GetGroupMarkSheet()">
+                                                        <option disabled selected>Select ExamGroup</option>
+                                                        <option ng-value="{{cl.ExamTypeGroupId}}" ng-repeat="cl in ExamTypeGroupColl">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                                <!--<div class="col-md-2">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="customCheckbox3" value="option">
+                                                        <label for="customCheckbox3"
+                                                               class="custom-control-label">Filter Selection</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">-->
+                                                <!-- <label>Select Report </label> -->
+                                                <!--<select name="comment-group" id="" form="" class="form-control form-control-sm select2">
+                                                        <option value="" selected disabled>Select Report</option>
+                                                        <option value="">Report 1</option>
+                                                    </select>
+                                                </div>-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Parent Aggregate Tabulation Ends -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

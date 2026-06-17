@@ -1,0 +1,348 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<script src="~/jslib/fee/reporting/IncomeRegister.js?v=20251115"></script>
+<script>
+    var entityClassWiseIncome = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.ClassWiseIncome)";
+    var entityStudentWiseIncome = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.StudentWiseIncome)";
+    var entityClassFee = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.ClassAndFeeWiseSummary)";
+    var entityFeePC= "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.FeeSummary_PC)";
+</script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="IncomeRegisterController" @*ng-init="LoadData()"*@>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active"
+                         id="pills-second"
+                         role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                        id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active"
+                                               id="home-tab"
+                                               data-toggle="tab"
+                                               href="#home"
+                                               role="tab"
+                                               aria-controls="home"
+                                               aria-selected="true">Income Statement</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="profile-tab"
+                                               data-toggle="tab"
+                                               href="#profile"
+                                               role="tab"
+                                               aria-controls="profile"
+                                               aria-selected="false">ClassWise Income</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="student-tab"
+                                               data-toggle="tab"
+                                               href="#student"
+                                               role="tab"
+                                               aria-controls="student"
+                                               aria-selected="false">StudentWise Income</a>
+                                        </li>
+                                        @*<li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="classfee-tab"
+                                                   data-toggle="tab"
+                                                   href="#classfee"
+                                                   role="tab"
+                                                   aria-controls="classfee"
+                                                   aria-selected="false">Class And FeeHeadWise</a>
+                                            </li>
+                                             <li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="feepc-tab"
+                                                   data-toggle="tab"
+                                                   href="#feepc"
+                                                   role="tab"
+                                                   aria-controls="feepc"
+                                                   aria-selected="false">Fee Previous&amp;Current</a>
+                                            </li>*@
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <!-- Income Statement Starts -->
+                            <div class="tab-pane fade show active main-section"
+                                 id="home"
+                                 role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div class="card">
+                                    <div class="card-body px-1">
+                                        <div class="row">
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>From Date</label>
+                                                <input type="text" ng-model="newIncomeStatement.FromDate_TMP" date-picker date-detail="newIncomeStatement.FromDateDet"
+                                                       class="form-control form-control-sm" confirm-action="validateDates('fromDate', newIncomeStatement)"/>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>To Date</label>
+                                                <input type="text" ng-model="newIncomeStatement.ToDate_TMP" date-picker date-detail="newIncomeStatement.ToDateDet"
+                                                       class="form-control form-control-sm" confirm-action="validateDates('toDate', newIncomeStatement)"/>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>From Rec No.</label>
+                                                <input type="text" ng-model="newIncomeStatement.fromReceiptNo" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>To Rec. No.</label>
+                                                <input type="text" ng-model="newIncomeStatement.toReceiptNo" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <label>Select Report</label>
+                                                <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintDateWiseIncomeStatement()" ng-model="newIncomeStatement.RptTranId">
+                                                    <option ng-value="0" ng-selected="true">Select Report</option>
+                                                    <option ng-value="rt.RptTranId" ng-repeat="rt in newIncomeStatement.TemplatesColl">{{rt.ReportName}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-1 col-sm-1 col-lg-1">
+                                                <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="PrintDateWiseIncomeStatement()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2" id="schedule-report-table">
+                                            <iframe id="frmRptIncomeStatement" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Income Statement Ends -->
+                            <!-- Income Summary Starts -->
+                            <div class="tab-pane fade main-section"
+                                 id="profile"
+                                 role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div class="card">
+                                    <div class="card-body px-1">
+                                        <div class="row">
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>FeeItem</label>
+                                                <select name="class-group" id="" form="" class="form-control form-control-sm select2" ng-model="newClassWise.FeeItemIdColl">
+                                                    <option ng-value="0">All</option>
+                                                    <option ng-value="cl.FeeItemId" ng-repeat="cl in FeeItemList">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>From Date</label>
+                                                <input type="text" ng-model="newClassWise.FromDate_TMP" date-picker date-detail="newClassWise.FromDateDet"
+                                                       class="form-control form-control-sm" confirm-action="validateDates('fromDate', newClassWise)"/>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>To Date</label>
+                                                <input type="text" ng-model="newClassWise.ToDate_TMP" date-picker date-detail="newClassWise.ToDateDet"
+                                                       class="form-control form-control-sm" confirm-action="validateDates('toDate', newClassWise)"/>
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <label>Select Report</label>
+                                                <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintClassWiseIncome()" ng-model="newClassWise.RptTranId">
+                                                    <option ng-value="0" ng-selected="true">Select Report</option>
+                                                    <option ng-value="rt.RptTranId" ng-repeat="rt in newClassWise.TemplatesColl">{{rt.ReportName}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-1 col-sm-1 col-lg-1">
+                                                <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="PrintClassWiseIncome()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2" id="schedule-report-table">
+                                            <iframe id="frmRptClassWiseIncome" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Income Summary Ends -->
+                            <!-- Income Statement Details Starts -->
+                            <div class="tab-pane fade main-section"
+                                 id="student"
+                                 role="tabpanel"
+                                 aria-labelledby="student-tab">
+                                <div class="card">
+                                    <div class="card-body px-1">
+                                        <div class="row">
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>FeeItem</label>
+                                                <select name="class-group" id="" form="" class="form-control form-control-sm select2" ng-model="newStudentWise.FeeItemIdColl">
+                                                    <option ng-value="0">All</option>
+                                                    <option ng-value="cl.FeeItemId" ng-repeat="cl in FeeItemList">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Class</label>
+                                                <select ng-model="newStudentWise.SelectedClass" class="form-control form-control-sm select2"
+                                                        ng-options="x.text for x in ClassList.SectionListWithClass"></select>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>From Date</label>
+                                                <input type="text" ng-model="newStudentWise.FromDate_TMP" date-picker date-detail="newStudentWise.FromDateDet"
+                                                       class="form-control form-control-sm" confirm-action="validateDates('fromDate', newStudentWise)"/>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>To Date</label>
+                                                <input type="text" ng-model="newStudentWise.ToDate_TMP" date-picker date-detail="newStudentWise.ToDateDet"
+                                                       class="form-control form-control-sm" confirm-action="validateDates('toDate', newStudentWise)"/>
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <label>Select Report</label>
+                                                <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintStudentWiseIncome()" ng-model="newStudentWise.RptTranId">
+                                                    <option ng-value="0" ng-selected="true">Select Report</option>
+                                                    <option ng-value="rt.RptTranId" ng-repeat="rt in newStudentWise.TemplatesColl">{{rt.ReportName}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-1 col-sm-1 col-lg-1">
+                                                <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="PrintStudentWiseIncome()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2" id="schedule-report-table">
+                                            <iframe id="frmRptStudentWiseIncome" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Income Statement Details Ends -->
+                            <!-- Class And FeeHeading Wise Statement Starts -->
+                            @*<div class="tab-pane fade  main-section"
+                                     id="classfee"
+                                     role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div class="card">
+                                        <div class="card-body px-1">
+                                            <div class="row">
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>From Month</label>
+                                                    <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="classFee.FromMonthId">
+                                                        <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>To Month</label>
+                                                    <select name="class-group" id="" form="" class="form-control form-control-sm " ng-model="classFee.ToMonthId">
+                                                        <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-1 col-lg-1 col-md-1">
+                                                    <label>ForStudent</label>
+                                                    <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="classFee.ForStudent">
+                                                        <option ng-value="1">All</option>
+                                                        <option ng-value="2">Continue</option>
+                                                        <option ng-value="3">Left</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-3 col-lg-3 col-md-3">
+                                                    <label>Select Report</label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintClassFeeStatement()" ng-model="classFee.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in classFee.TemplatesColl">{{rt.ReportName}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-1 col-sm-1 col-lg-1">
+                                                    <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="PrintClassFeeStatement()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2" id="schedule-report-table-class">
+                                                <iframe id="frmRptClassFee" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
+                            <!-- Income Statement Ends -->
+                            <!-- Class And FeeHeading Wise Statement Starts -->
+                            @*<div class="tab-pane fade  main-section"
+                                     id="feepc"
+                                     role="tabpanel"
+                                     aria-labelledby="feepc-tab">
+                                    <div class="card">
+                                        <div class="card-body px-1">
+                                            <div class="row">
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>From Month</label>
+                                                    <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="feepc.FromMonthId">
+                                                        <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>To Month</label>
+                                                    <select name="class-group" id="" form="" class="form-control form-control-sm " ng-model="feepc.ToMonthId">
+                                                        <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-1 col-lg-1 col-md-1">
+                                                    <label>ForStudent</label>
+                                                    <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="feepc.ForStudent">
+                                                        <option ng-value="0">All</option>
+                                                        <option ng-value="1">Continue</option>
+                                                        <option ng-value="2">Left</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-3 col-lg-3 col-md-3">
+                                                    <label>Select Report</label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintFeePC()" ng-model="feepc.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in feepc.TemplatesColl">{{rt.ReportName}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-1 col-sm-1 col-lg-1">
+                                                    <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="PrintFeePC()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2" id="feepc-report-table-class">
+                                                <iframe id="frmRptfeepc" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
+                            <!-- Income Statement Ends -->
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

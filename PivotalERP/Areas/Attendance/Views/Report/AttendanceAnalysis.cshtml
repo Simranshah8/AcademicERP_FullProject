@@ -1,0 +1,527 @@
+﻿
+<style>
+    #top-absent-employees-table thead th {
+        background-color: #bcd4cc;
+        color: #000; /* or white if needed */
+    }
+
+    .table thead th {
+        background-color: #bcd4cc;
+        color: #000;
+    }
+
+    .slider {
+        --slide-width: 46%;
+        --slide-min-width: 230px;
+        --slider-padding: 0.5rem;
+        --slider-column-gap: 1rem;
+        position: relative;
+        overflow: hidden;
+        background-color: #fff;
+    }
+
+    .slider__track {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        list-style: none;
+        margin: 0;
+        padding: var(--slider-padding) 0;
+        gap: var(--slider-column-gap);
+        white-space: nowrap;
+        width: 100%; /* Ensures full width fits into parent */
+        min-width: 100%; /* ✅ Fixes clipping of last card */
+    }
+
+
+        .slider__track > * {
+            flex: 0 0 var(--slide-width);
+            min-width: var(--slide-min-width);
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+        }
+
+        .slider__track::-webkit-scrollbar {
+            display: none;
+        }
+
+    .slider__button {
+        color: #000;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        margin: 0 0.25rem;
+        background-color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .slider__buttons [disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* CARD LOOK (scaled down) */
+    .bdaycard {
+        background-color: #F2FFEB;
+        border: 1px solid #077A5680;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        padding: 0.75rem;
+        height: 100%;
+    }
+
+        .bdaycard img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .bdaycard p {
+            margin: 0.25rem 0;
+            font-size: 13px;
+        }
+
+        .bdaycard b {
+            font-size: 15px;
+            color: #077A56;
+        }
+
+
+    .slider:before {
+        display: none;
+    }
+
+</style>
+<script src="~/jslib/attendance/AttendanceAnalysis.js?v=20251115"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="AttendanceAnalysisController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content teacher_dashboard admin_dashboard">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="container-fluid">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Weekly Attendance Overview</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="chart-container" style="position: relative; height: 100%; width: 100%;">
+                                        <canvas id="student-overview-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Monthly Attendance Overview</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="chart-container" style="position: relative; height: 100%; width: 100%;">
+                                        <canvas id="monthly-overview-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Class Wise Student Leave</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="chart-container" style="position: relative; height: 100%; width: 100%;">
+                                        <canvas id="classwise-leave-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Department Wise Employee Leave</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="chart-container" style="position: relative; height: 100%; width: 100%;">
+                                        <canvas id="department-leave-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title"> Departmentwise Absenteeism</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 100%; width: 100%;">
+                                        <canvas id="department-absenteeism-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Classwise Absenteeism</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 100%; width: 100%;">
+                                        <canvas id="classwise-absenteeism-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*//chart end here*@
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm" style="border:1px solid #ecececec; height: 357px;">
+                            <div class="card-header p-2">
+                                <h5 class="card-title">Top Absent Employees</h5>
+                            </div>
+                            <div class="card-body pt-2 p-0">
+                                <table id="top-absent-employees-table" class="table m-0" style="width: 100%;">
+                                    <thead>
+                                        <tr style="background-color: #bcd4cc;">
+                                            <th>S.No</th>
+                                            <th>Name</th>
+                                            <th>Gender</th>
+                                            <th>Department</th>
+                                            <th>Absent Days</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="employee in EmployeeData track by $index">
+                                            <td>{{$index + 1}}</td>
+                                            <td>
+                                                <img ng-src="{{employee.image}}" alt="Employee Image" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;">
+                                                {{employee.name}}
+                                            </td>
+                                            <td>{{employee.gender}}</td>
+                                            <td>Primary English Teacher</td>
+                                            <td>{{employee.absentDays}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                  
+
+                    <div class="col-md-6">
+                        <div class="card shadow-sm" style="border:1px solid #ecececec; height: 357px;">
+                            <div class="card-header pb-2">
+                                <h5 class="card-title">Top Absent Students</h5>
+                            </div>
+                            <div class="card-body pt-2 p-0 ">
+                                <table class="table m-0" style="width: 100%;">
+                                    <thead>
+                                        <tr style="background-color: #bcd4cc;">
+                                            <th>S.No</th>
+                                            <th>Name</th>
+                                            <th>Gender</th>
+                                            <th>Class</th>
+                                            <th>Section</th>
+                                            <th>Absent Days</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="Student in StudentData track by $index">
+                                            <td>{{ ('0' + ($index + 1)).slice(-2) }}</td>
+                                            <td>
+                                                <img ng-src="{{Student.image}}" alt="Student Image"
+                                                     style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;">
+                                                {{Student.name}}
+                                            </td>
+                                            <td>{{Student.gender}}</td>
+                                            <td>{{Student.class}}</td>
+                                            <td>"{{Student.section}}"</td>
+                                            <td>{{ ('0' + Student.absentDays).slice(-2) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="">
+                                    <div class="slider" data-slider>
+                                        <div class="slider__buttons text-right">
+                                            <div class="row card-header p-2">
+                                                <div class="col-md-8">
+                                                    <label class="card-title"> Employees with Longest Consecutive Absence</label>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button class="slider__button px-2 py-1" data-slider-prev disabled>
+                                                        <i class="fas fa-chevron-left"></i>
+                                                    </button>
+                                                    <button class="slider__button px-2 py-1" data-slider-next>
+                                                        <i class="fas fa-chevron-right"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="p-2" id="EmployeeWithLongestConsecutives">
+                                            <ul class="slider__track mb-0" data-slider-track>
+                                                <li ng-repeat="SB in EmployeeAbsenteeCards">
+                                                    <div class="slide text-center bdaycard">
+                                                        <img class="mt-2" style="height:179px; width:153px;" ng-src="{{SB.photo}}" />
+                                                        <div class="text-center">
+                                                            <p style="color: #077A56; font-size: 16px; margin: 0;"><b>{{SB.name}}</b></p>
+                                                            <p class="card-text" style="margin: 0;">DEPARTMENT: {{SB.department}}</p>
+                                                            <p class="card-text" style="margin: 0;">{{SB.tag}} Days</p>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="">
+                                    <div class="slider" data-slider>
+                                        <div class="slider__buttons text-right">
+                                            <div class="row card-header p-2">
+                                                <div class="col-md-8">
+                                                    <label class="card-title">Students with Longest Consecutive Absence</label>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button class="slider__button px-2 py-1" data-slider-prev disabled>
+                                                        <i class="fas fa-chevron-left"></i>
+                                                    </button>
+                                                    <button class="slider__button px-2 py-1" data-slider-next>
+                                                        <i class="fas fa-chevron-right"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="p-2" id="StudentWithLongestConsecutives">
+                                            <ul class="slider__track mb-0" data-slider-track>
+                                                <li ng-repeat="SB in StudentAbsenteeCards">
+                                                    <div class="slide text-center bdaycard">
+                                                        <img class="mt-2" style="height:179px; width:153px;" ng-src="{{SB.photo}}" />
+                                                        <div class="text-center">
+                                                            <p style="color: #077A56; font-size: 16px; margin: 0;"><b>{{SB.name}}</b></p>
+                                                            <p class="card-text" style="margin: 0;">Class: {{SB.department}}</p>
+                                                            <p class="card-text" style="margin: 0;">{{SB.tag}} Days</p>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Classwise Late Attendance</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 100%; width: 100%;">
+                                        <canvas id="classwise-minimum-attendance-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Departmentwise Late Attendance</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 285px; width: 100%;">
+                                        <canvas id="departmentwise-late-attendance-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec" ng-show="hasStudentFineData">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Absence Fine By Class</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                        <canvas id="absence-fine-by-class-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Meeting Minimum Attendance</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="chart-container" style="position: relative; height: 328PX; width: 100%;">
+                                        <canvas id="meeting-minimum-attendance-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Absence Fine By Department</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                        <canvas id="absence-fine-by-department-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Absenteeism Comparison</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                        <canvas id="absenteeism-comparison-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow-sm" ng-show="hasStudentCvsPData" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Student Current vs. Previous Absenteeism</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                        <canvas id="student-absenteeism-cvsp-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Employee Current vs. Previous Absenteeism</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                        <canvas id="employee-absenteeism-cvsp-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Higher Absenteeism</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                        <canvas id="higher-absenteeism-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Excessive Absences</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                        <canvas id="excessive-absences-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+        </div>
+    </section>
+</div>
+
+<script>
+    document.querySelectorAll("[data-slider]").forEach((slider) => {
+        const track = slider.querySelector("[data-slider-track]");
+        const prev = slider.querySelector("[data-slider-prev]");
+        const next = slider.querySelector("[data-slider-next]");
+
+        if (track) {
+            prev.addEventListener("click", () => {
+                next.removeAttribute("disabled");
+
+                track.scrollTo({
+                    left: track.scrollLeft - track.firstElementChild.offsetWidth,
+                    behavior: "smooth",
+                });
+            });
+
+            next.addEventListener("click", () => {
+                prev.removeAttribute("disabled");
+
+                track.scrollTo({
+                    left: track.scrollLeft + track.firstElementChild.offsetWidth,
+                    behavior: "smooth",
+                });
+            });
+
+            track.addEventListener("scroll", () => {
+                const trackScrollWidth = track.scrollWidth;
+                const trackOuterWidth = track.clientWidth;
+
+                prev.removeAttribute("disabled");
+                next.removeAttribute("disabled");
+
+                if (track.scrollLeft <= 0) {
+                    prev.setAttribute("disabled", "");
+                }
+
+                if (track.scrollLeft >= trackScrollWidth - trackOuterWidth) {
+                    next.setAttribute("disabled", "");
+                }
+            });
+        }
+    });
+
+
+</script>
+
+
+

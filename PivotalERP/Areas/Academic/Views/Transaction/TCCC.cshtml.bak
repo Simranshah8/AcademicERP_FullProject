@@ -1,0 +1,1222 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<script>
+    var tcEntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.TC)";
+    var ccEntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.CC)";
+</script>
+<script src="~/jslib/academic/tccc.js?v=20230208"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="tcccController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                                               aria-controls="home" aria-selected="true">Issue TC</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                                               aria-controls="profile" aria-selected="false">TC List</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="cc-tab" data-toggle="tab" href="#cc" role="tab" aria-controls="cc"
+                                               aria-selected="false">issue cc</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="cc-list-tab" data-toggle="tab" href="#cc-list" role="tab"
+                                               aria-controls="cc-list" aria-selected="false">cc list</a>
+                                        </li>
+
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="request-tab" data-toggle="tab" href="#request-list" role="tab"
+                                               aria-controls="request-list" aria-selected="false">Request List</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="issue-tc-section" class="mt-2">
+                                    <label class="sr-only" for="inlineFormInputGroup">Select Student</label>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0"
+                                                style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;" ng-model="newTC.SelectStudent">
+
+                                            <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newTC.SelectStudent">
+                                                {{ss.text}}
+                                            </option>
+
+                                        </select>
+                                        <select class="form-control select2 form-control-sm" all-student ng-model="newTC.StudentId" student-detail="newStudentLedger.StudentDetails" side-bar-data="newTC.SideBarData" search-by="newTC.SelectStudent" include-left="newTC.ShowLeftStudent" confirm-action="getStudentForTC()">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="timeline registration-form mt-2">
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">General Information</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="student-id">System Id<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.AutoNumber" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="Regd No.">Regd No.<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.RegdNo" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="admit-date">Admit Date</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newTC.AdmitDate" date-detail="newTC.AdmitDateDet" confirm-action="LoadDefaultMonth()" readonly />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="name">First Name<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newTC.FirstName" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="middle-name">Middle Name</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newTC.MiddleName" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="last-name">Last Name<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newTC.LastName" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="gender">Gender</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.Gender" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="caste">{{'CAST_LNG' | translate}}</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.Caste" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="dob">Date of Birth</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newTC.DOB_AD_TMP" date-detail="newTC.DOB_ADDet" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="medium">Blood Group</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.BloodGroup" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="">Moral</label>
+                                                        <textarea name="" id="" cols="30" rows="1"
+                                                                  class="form-control form-control-sm" ng-model="newTC.Moral"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Academic Details</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="class">Class/Sec<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.ClassSec" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="roll-no">Roll No<span style="color:red">*</span></label>
+                                                        <input type="number" class="form-control form-control-sm" disabled ng-model="newTC.RollNo" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="year">Academic Year</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.AcademicYear" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="medium">Medium</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.Medium" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="student-type">Student Type</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.StudentType" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="transport-point">Transport Point</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.TransportPoint" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="boarder-type">Boarders Type</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.BoarderType" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="house-name">House Name</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.HouseName" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="house-dress">House Dress</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newTC.HouseDress" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="board">Board</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newTC.Board" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="board-regd-no">Board Regd No.</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newTC.BoardRegNo" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Permanent Address</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Full Address</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.FullAddress" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Province</label>
+                                                                <input type="text" class="form-control form-control-sm" data-ng-model="newTC.Province" list="lstProvince" />
+                                                                <datalist id="lstProvince">
+                                                                    <option data-ng-repeat="ttl in ProvinceList" value="{{ttl.text}}">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">District</label>
+                                                                <input type="text" class="form-control form-control-sm" data-ng-model="newTC.District" list="lstProvince" />
+                                                                <datalist id="lstDistrict">
+                                                                    <option data-ng-repeat="ttl in DistrictList" value="{{ttl.text}}">
+                                                                </datalist>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Local Level</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.LocalLevel" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Ward No</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.WardNo" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Street Name</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.StreetName" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Parent Details</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Father Name</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.FatherName" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Contact</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.FatherContactNo" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Mother Name</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.MotherName" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Examination Details</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Previous Class</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.PreviousClass" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Symbol No.</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.SymbolNo" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Percentage</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.Percentage" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Division</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.Division" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Grade</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.Grade" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">GPA</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTC.GPA" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Other Information</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <div class="custom-control custom-checkbox checkbox-lg mt-4">
+                                                        <input type="checkbox" class="custom-control-input" id="checkbox-2" checked disabled ng-model="newTC.IsLeft" />
+                                                        <label class="custom-control-label" for="checkbox-2">
+                                                            Is Left
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group mt-4">
+                                                        <label for="">Left Date : {{newTC.LeftDate_BS}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group mt-4">
+                                                        <span style="color: #d1271b">
+                                                            Dues Amount : {{newTC.DuesAmt |number:2}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="issue-date">Issue date<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newTC.IssueDate_TMP" date-detail="newTC.IssueDateDet" confirm-action="LoadDefaultMonth()" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="">Remarks</label>
+                                                        <textarea name="" id="" cols="30" rows="1"
+                                                                  class="form-control form-control-sm" ng-model="newTC.Remarks"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">User Define Fields</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    @*String = 1,
+                WholeNumberOnly = 2,
+                DecimalNumber = 3,
+                Date = 4,
+                DateTime = 5,
+                YesNo = 6,
+                Memo = 7,
+                List = 8*@
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4" ng-repeat="uf in newTC.TCUDFFeildsColl">
+                                                            <div class="form-group">
+                                                                <label for="">{{uf.DisplayName}}</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="uf.UDFValue" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px" ng-click="ClearTC()">
+                                                Reset
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="SaveUpdateTC()">
+                                                Save
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <div id="tc-list-section">
+                                    <div class="card py-2 mt-2">
+                                        <header class="row">
+                                            <div class="col-md-5">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search" placeholder="Search"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-7 text-right">
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width:60px;" ng-click="getAllTCList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top"
+                                                     title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image"> Excel
+                                                        </a>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image"> CSV
+                                                        </a>
+                                                        
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                   data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                   data-placement="top" title="Send sms">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                   data-placement="top" title="Notification">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+
+                                        <div ui-grid="gridOptions"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-save-state style="height: calc(100vh - 150px); max-width: 100%;">
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--Issue CC starts-->
+                            <div class="tab-pane fade main-section" id="cc" role="tabpanel" aria-labelledby="cc-tab">
+                                <div id="issue-cc-section" class="mt-2">
+                                    <label class="sr-only" for="inlineFormInputGroup">Select Student</label>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0"
+                                                style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;" ng-model="newCC.SelectStudent">
+
+                                            <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newCC.SelectStudent">
+                                                {{ss.text}}
+                                            </option>
+
+                                        </select>
+                                        <select class="form-control select2 form-control-sm" all-student ng-model="newCC.StudentId" student-detail="newStudentLedger.StudentDetails" side-bar-data="newTC.SideBarData" search-by="newCC.SelectStudent" include-left="newCC.ShowLeftStudent" confirm-action="getStudentForCC()">
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="timeline registration-form mt-2">
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">General Information</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="student-id">System Id<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.AutoNumber" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="Regd No.">Regd No.<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.RegdNo" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="admit-date">Admit Date</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newCC.AdmitDate" date-detail="newCC.AdmitDateDet" confirm-action="LoadDefaultMonth()" readonly />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="name">First Name<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newCC.FirstName" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="middle-name">Middle Name</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newCC.MiddleName" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="last-name">Last Name<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newCC.LastName" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="gender">Gender</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.Gender" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="caste">{{'CAST_LNG' | translate}}</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.Caste" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="dob">Date of Birth</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newCC.DOB_AD_TMP" date-detail="newCC.DOB_ADDet" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="medium">Blood Group</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.BloodGroup" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="">Moral</label>
+                                                        <textarea name="" id="" cols="30" rows="1"
+                                                                  class="form-control form-control-sm" ng-model="newCC.Moral"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Academic Details</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="class">Class/Sec<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.ClassSec" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="roll-no">Roll No<span style="color:red">*</span></label>
+                                                        <input type="number" class="form-control form-control-sm" disabled ng-model="newCC.RollNo" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="year">Academic Year</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.AcademicYear" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="medium">Medium</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.Medium" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="student-type">Student Type</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.StudentType" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="transport-point">Transport Point</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.TransportPoint" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="boarder-type">Boarders Type</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.BoarderType" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="house-name">House Name</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.HouseName" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="house-dress">House Dress</label>
+                                                        <input type="text" class="form-control form-control-sm" disabled ng-model="newCC.HouseDress" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="board">Board</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newCC.Board" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="board-regd-no">Board Regd No.</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newCC.BoardRegNo" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Permanent Address</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Full Address</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.FullAddress" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Province</label>
+                                                                <input type="text" class="form-control form-control-sm" data-ng-model="newCC.Province" list="lstProvince" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">District</label>
+                                                                <input type="text" class="form-control form-control-sm" data-ng-model="newCC.District" list="lstProvince" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Local Level</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.LocalLevel" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Ward No</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.WardNo" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Street Name</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.StreetName" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Parent Details</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Father Name</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.FatherName" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Contact</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.FatherContactNo" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Mother Name</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.MotherName" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Examination Details</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Previous Class</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.PreviousClass" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Symbol No.</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.SymbolNo" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Percentage</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.Percentage" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Division</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.Division" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Grade</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.Grade" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">GPA</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newCC.GPA" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="">Other Information</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <div class="custom-control custom-checkbox checkbox-lg mt-4">
+                                                        <input type="checkbox" class="custom-control-input" id="checkbox-2" checked disabled ng-model="newCC.IsLeft" />
+                                                        <label class="custom-control-label" for="checkbox-2">
+                                                            Is Left
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group mt-4">
+                                                        <label for="">Left Date : {{newCC.LeftDate_BS}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group mt-4">
+                                                        <span style="color: #d1271b">
+                                                            Dues Amount : {{newCC.DuesAmt |number:2}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="issue-date">Issue date<span style="color:red">*</span></label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newCC.IssueDate_TMP" date-detail="newCC.IssueDateDet" confirm-action="LoadDefaultMonth()" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="">Remarks</label>
+                                                        <textarea name="" id="" cols="30" rows="1"
+                                                                  class="form-control form-control-sm" ng-model="newCC.Remarks"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+
+                                    <div class="time-label">
+                                        <span class="">User Define Fields</span>
+                                    </div>
+                                    <!-- /.timeline-label -->
+                                    <!-- timeline item -->
+                                    <div>
+                                        <div class="timeline-item">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4" ng-repeat="uf in newCC.CCUDFFeildsColl">
+                                                            <div class="form-group">
+                                                                <label for="udfC{$index}">{{uf.DisplayName}}<span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="uf.UDFValue" ng-maxlength="uf.Length" id="udfC{$index}" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END timeline item -->
+                                    <!-- timeline time label -->
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px" ng-click="ClearCC()">
+                                                Reset
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="SaveUpdateCC()">
+                                                Save
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="cc-list" role="tabpanel" aria-labelledby="cc-list-tab">
+                                <div id="cc-list-section">
+                                    <div class="card py-2 mt-2">
+                                        <header class="row">
+                                            <div class="col-md-5">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search" placeholder="Search"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-7 text-right">
+                                                <button class="btn btn-sm btn-success" style="min-width:60px;" ng-click="getAllCCList()"><i class="fas fa-sync-alt mr-2"></i> Load</button>
+
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top"
+                                                     title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image"> Excel
+                                                        </a>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image"> CSV
+                                                        </a>
+                                                       
+                                                    </div>
+                                                </div>
+
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                   data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                   data-placement="top" title="Send sms">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                   data-placement="top" title="Notification">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div ui-grid="gridOptionscc"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-save-state style="height: calc(100vh - 150px); max-width: 100%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!--Request List Tab Starts-->
+                            <div class="tab-pane fade main-section" id="request-list" role="tabpanel" aria-labelledby="request-tab">
+                                <div id="cc-list-section">
+                                    <div class="card py-2">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group d-flex">
+                                                    <label style="width:110px">Report Type</label>
+                                                    <select class="form-control form-control-sm" ng-model="newReq.ReportType">
+                                                        <option ng-repeat="R in ReportTypeList" ng-value="R.id" ng-selected="newReq.ReportType==R.id">{{R.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button class="btn btn-sm btn-success" style="min-width:60px;" ng-click="getTCRequestLst()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+
+                                            </div>
+                                        </div>
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Request">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Request">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Request">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top"
+                                                     title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#requestlist'" sheet-name="'requestlist'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#requestlist').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+
+                                                <a print-tbl table-id="'#requestlist'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table id="requestlist"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px">S.No.</th>
+                                                        <th style="width: 90px">RegdNo</th>
+                                                        <th style="width: 80px">RollNo</th>
+                                                        <th style="width: 90px">Class</th>
+                                                        <th style="width: 100px">Section</th>
+                                                        <th style="width: 100px">Batch</th>
+                                                        <th style="width: 120px">Faculty</th>
+                                                        <th style="width: 110px">Semester</th>
+                                                        <th style="width: 110px">ClassYear</th>
+                                                        <th style="width: 140px">Request Date Time</th>
+                                                        <th style="width: 120px">Request Miti</th>
+                                                        <th style="width: 130px">IP Address</th>
+                                                        <th style="width: 130px">Browser</th>
+                                                        <th style="width: 140px">User Agent</th>
+                                                        <th style="width: 120px">Is Issue TC</th>
+                                                        <th style="width: 120px">Is Issue CC</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="R in RequestList | filter:searchData.Request | itemsPerPage: perPage.Request" current-page="currentPages.Request" pagination-id="RequestPagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{R.RegNo}}</td>
+                                                        <td>{{R.RollNo}}</td>
+                                                        <td>{{R.Class}}</td>
+                                                        <td>{{R.Section}}</td>
+                                                        <td>{{R.Batch}}</td>
+                                                        <td>{{R.Faculty}}</td>
+                                                        <td>{{R.Semester}}</td>
+                                                        <td>{{R.ClassYear}}</td>
+                                                        <td>{{R.RequestDateTime}}</td>
+                                                        <td>{{R.RequestMiti}}</td>
+                                                        <td>{{R.IPAddress}}</td>
+                                                        <td>{{R.Browser}}</td>
+                                                        <td>{{R.UserAgent}}</td>
+                                                        <td>{{R.IsIssueTC}}</td>
+                                                        <td>{{R.IsIssueCC}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="RequestPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--REquest Tab Ends-->
+                        </div>
+
+                    </div>
+
+                    <!--CC list starts-->
+
+                </div>
+
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,741 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .upload-flex {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .upload-tile {
+        width: 80px;
+        height: 100px;
+        border: 1.5px dashed #b9c9c5;
+        border-radius: 4px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .upload-tile i {
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: #1f1f1f;
+    }
+
+    .upload-tile span {
+        font-size: 12px;
+        font-weight: 500;
+        color: #1f1f1f;
+    }
+
+    .upload-btn-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .upload-btn-wrapper input[type=file] {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+    }
+
+    .upload-panel {
+        min-height: 135px;
+    }
+
+    .upload-file-item {
+        width: 80px;
+        min-height: 125px;
+    }
+</style>
+<script src="~/jslib/ReadingMaterials/ReadingMaterials.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<script src="/jslib/export/tableExport.js"></script>
+<script src="/jslib/export/jquery.base64.js"></script>
+<script src="/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="/jslib/export/jspdf/jspdf.js"></script>
+<script src="/jslib/export/jspdf/libs/base64.js"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ReadingMaterialsController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid1">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div class="root">
+                        <div class="card-primary px-0 card-tabs ">
+                            <div class="tab-content" id="myTabContent">
+                                <div class="tab-pane fade main-section active show" role="tabpanel" aria-labelledby="FromDate-tab">
+                                    <div id="FormSection">
+                                        <div class="container-fluid px-2 py-3">
+                                            <div class="row">
+                                                <div class="col-md-3" ng-show="AcademicConfig.ActiveBatch==true">
+                                                    <div class="form-group d-flex">
+                                                        <label class="mt-1 mr-2">Batch</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newFilter.BatchId" ng-change="GetClassWiseSubjectList()" style="width:100%">
+                                                            <option value="">Select Batch</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newFilter.BatchId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group d-flex">
+                                                        <label class="mt-1 mr-2">Class</label>
+                                                        <select class="select2 form-control form-control-sm" ng-model="newFilter.SelectedClass" ng-change="GetClassWiseSubjectList()" style="width:100%">
+                                                            <option ng-value="se" ng-repeat="se in ClassSection.ClassList">{{se.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3" ng-show="newFilter.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                    <div class="form-group d-flex">
+                                                        <label style="width:100px">Class Year</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newFilter.ClassYearId" ng-change="GetClassWiseSubjectList()" style="width:100%">
+                                                            <option value="">Select Class Year</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newFilter.ClassYearId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3" ng-show="newFilter.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                    <div class="form-group d-flex">
+                                                        <label class="mt-1 mr-2">Semester</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newFilter.SemesterId" ng-change="GetClassWiseSubjectList()" style="width:100%">
+                                                            <option value="">Select Semester</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newFilter.SemesterId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group d-flex">
+                                                        <label class="mt-1 mr-2">Subject</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newFilter.SubjectId" ng-change="GetClassSubWiseData()" style="width:100%">
+                                                            <option ng-value="cl.id" ng-repeat="cl in SubjectList" ng-selected="cl.id==newFilter.SubjectId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card card-primary card-tabs mb-1">
+                                                <div class="card-header with-gradient-bg p-0 pt-2">
+                                                    <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+
+                                                        <li class="nav-item">
+                                                            <a class="nav-link active"
+                                                               id="custom-tabs-one-home-tab"
+                                                               data-toggle="pill"
+                                                               href="#custom-tabs-one-home"
+                                                               role="tab"
+                                                               aria-controls="custom-tabs-one-home"
+                                                               aria-selected="true"
+                                                               style="padding-left: 3rem; padding-right: 3rem;"
+                                                               ng-click="ShowContentList()">
+                                                                <i class="fas fa-file-alt mr-2"></i>
+                                                                Contents
+                                                            </a>
+                                                        </li>
+
+                                                        <li class="nav-item">
+                                                            <a class="nav-link"
+                                                               id="custom-tabs-one-profile-tab"
+                                                               data-toggle="pill"
+                                                               href="#custom-tabs-one-profile"
+                                                               role="tab"
+                                                               aria-controls="custom-tabs-one-profile"
+                                                               aria-selected="false"
+                                                               style="padding-left: 3rem; padding-right: 3rem;"
+                                                               ng-click="ShowVideoList()">
+                                                                <i class="fas fa-video mr-2"></i>
+                                                                Videos
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="card-body px-0">
+                                                    <div class="tab-content" id="custom-tabs-one-tabContent">
+                                                        <div class="tab-pane fade show active" id="custom-tabs-one-home" role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                                                            <div class="content-section" id="content-list" ng-show="isContentList">
+                                                                <header class="row">
+                                                                    <div class="col-md-7">
+                                                                        <div class="clearfix">
+                                                                            <form class="form-inline">
+
+                                                                                <div class="input-group input-group-sm mr-sm-2">
+                                                                                    <div class="input-group-prepend">
+                                                                                        <span class="input-group-text cstm">Show</span>
+                                                                                    </div>
+                                                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Content">
+                                                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Content">{{pp.text}}</option>
+                                                                                    </select>
+                                                                                    <div class="input-group-append">
+                                                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="input-group input-group-sm table-search-filed">
+                                                                                    <input class="form-control form-control-navbar"
+                                                                                           type="search" placeholder="Search"
+                                                                                           aria-label="Search" ng-model="searchData.Content">
+                                                                                    <div class="input-group-append">
+                                                                                        <button class="btn btn-default border-left-0"
+                                                                                                type="submit">
+                                                                                            <i class="fas fa-search"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </form>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-5 text-right">
+                                                                        <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                                             data-placement="top" title="Download File">
+                                                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                                                    aria-haspopup="true" aria-expanded="false">
+                                                                                <i class="fas fa-download"></i>
+                                                                            </button>
+                                                                            <div class="dropdown-menu dropdown-menu-right"
+                                                                                 aria-labelledby="dropdownMenuButton">
+                                                                                <span class="dropdown-item">Choose an option:</span>
+                                                                                <a class="dropdown-item wait" export-excel table-id="'#content-table'" sheet-name="'Reading Materials Content List'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                                                <a class="dropdown-item wait" onClick="$('#content-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                                            </div>
+                                                                        </div>
+                                                                        <a print-tbl table-id="'#content-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                                                           data-toggle="tooltip" data-placement="bottom"
+                                                                           title="Print">
+                                                                            <i class="fas fa-print"></i>
+                                                                        </a>
+                                                                        <button type="button"
+                                                                                class="btn btn-sm btn-success"
+                                                                                id="add-ReadMat"
+                                                                                style="min-width: 90px" ng-click="ShowAddContent();ClearContent();">
+                                                                            <i class="fas fa-plus w-t"></i> Add Content
+                                                                        </button>
+                                                                    </div>
+                                                                </header>
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="table-scroll-x-y table-scroll">
+                                                                            <table id="content-table" class="main-table table table-sm table-bordered bg-white">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th style="width: 60px;">S.No</th>
+                                                                                        <th style="width: 800px">Title</th>
+                                                                                        <th style="width: 90px;" class="no-print">Action</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    <tr dir-paginate="v in ContentList | filter:searchData.Content | itemsPerPage: perPage.Content" current-page="currentPages.Content" pagination-id="ContentPagination">
+                                                                                        <td>{{$index + 1}}</td>
+                                                                                        <td>{{v.Title}}</td>
+                                                                                        <td class="no-print">
+                                                                                            <a class="p-1" href="#" ng-click="GetContentById(v, 0);"><i class="fas fa-eye text-secondary"></i></a>
+                                                                                            <a class="p-1" href="#" ng-click="GetContentById(v, 1)"><i class="fas fa-edit text-info"></i></a>
+                                                                                            <a class="p-1" href="#" ng-click="DeleteContent(v)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        <footer class="row align-items-center">
+                                                                            <div class="col-md-12">
+                                                                                <dir-pagination-controls pagination-id="ContentPagination" boundary-links="true" template-url="/Scripts/dirPagination.tpl.html">
+                                                                                </dir-pagination-controls>
+                                                                            </div>
+                                                                        </footer>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div id="addVideo" ng-show="!isContentList">
+                                                                <div class="">
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <div class="form-group">
+                                                                                <label>Title<span class="text-danger">*</span></label>
+                                                                                <input type="text" class="form-control form-control-sm" ng-model="beData.Title">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="upload-panel">
+                                                                        <div class="upload-flex">
+                                                                            <div class="">
+                                                                                <div class="upload-btn-wrapper">
+                                                                                    <div class="upload-tile" ng-click="TriggerContentPicker()">
+                                                                                        <i class="fas fa-link"></i>
+                                                                                        <span>Upload</span>
+                                                                                    </div>
+                                                                                    <input id="contentPicker"
+                                                                                        type="file"
+                                                                                        multiple
+                                                                                        file-models
+                                                                                        ng-model="beData.TMPContentsColl"
+                                                                                        after-selected="onFileSelect()" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="text-center position-relative" ng-repeat="file in beData.ContentsColl track by $index">
+
+                                                                                <button type="button"
+                                                                                        class="btn btn-danger btn-sm position-absolute"
+                                                                                        style="top: -8px; right: -8px; border-radius: 50%; width: 25px; height: 25px; padding: 0; z-index: 10; line-height: 1;"
+                                                                                        ng-click="delContentFile($index)">
+                                                                                    <i class="fas fa-times"></i>
+                                                                                </button>
+
+                                                                                <div ng-click="ShowPersonalImg(file)" style="cursor: pointer;">
+
+                                                                                    <!-- Image Preview -->
+                                                                                    <div ng-if="file.fileType === 'image'"> 
+                                                                                        <div style="width:80px; height: 100px; border:1px solid #ddd; border-radius:4px; background: #f8f9fa;">
+                                                                                            <img ng-src="{{file.previewUrl}}"
+                                                                                                 alt="{{file.name}}"
+                                                                                                 style="height:100%; width:100%; object-fit: cover; border-radius: 3px;" />
+                                                                                            <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                                {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                                            </small>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <!-- PDF Preview -->
+                                                                                    <div ng-if="file.fileType === 'pdf'">
+                                                                                        <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                            <i class="fas fa-file-pdf fa-4x text-danger"></i>
+                                                                                        </div>
+                                                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                            {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                                        </small>
+                                                                                    </div>
+
+                                                                                    <!-- Word Preview -->
+                                                                                    <div ng-if="file.fileType === 'word'">
+                                                                                        <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                            <i class="fas fa-file-word fa-4x text-primary"></i>
+                                                                                        </div>
+                                                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                            {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                                        </small>
+                                                                                    </div>
+
+                                                                                    <!-- Excel Preview -->
+                                                                                    <div ng-if="file.fileType === 'excel'">
+                                                                                        <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                            <i class="fas fa-file-excel fa-4x text-success"></i>
+                                                                                        </div>
+                                                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                            {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                                        </small>
+                                                                                    </div>
+
+                                                                                    <!-- PowerPoint Preview -->
+                                                                                    <div ng-if="file.fileType === 'powerpoint'">
+                                                                                        <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                            <i class="fas fa-file-powerpoint fa-4x text-warning"></i>
+                                                                                        </div>
+                                                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                            {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                                        </small>
+                                                                                    </div>
+
+                                                                                    <!-- Text Preview -->
+                                                                                    <div ng-if="file.fileType === 'text'">
+                                                                                        <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                            <i class="fas fa-file-alt fa-4x text-secondary"></i>
+                                                                                        </div>
+                                                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                            {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                                        </small>
+                                                                                    </div>
+
+                                                                                    <!-- Other Files Preview -->
+                                                                                    <div ng-if="file.fileType === 'other'">
+                                                                                        <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                            <i class="fas fa-file fa-4x text-secondary"></i>
+                                                                                        </div>
+                                                                                        <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                            {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                                        </small>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="text-center pt-3">
+                                                                    <button type="button"
+                                                                            class="btn btn-sm btn-info text-center"
+                                                                            id="back-Details"
+                                                                            style="min-width: 90px"
+                                                                            ng-click="ShowContentList()">
+                                                                        Back To List
+                                                                    </button>
+                                                                    <button type="button"
+                                                                            class="btn btn-sm text-dark bg-white border"
+                                                                            style="min-width: 90px;"
+                                                                            ng-click="ClearContent()">
+                                                                        Reset
+                                                                    </button>
+
+                                                                    <button type="button"
+                                                                            class="btn btn-sm btn-info text-center bg-success"
+                                                                            style="min-width: 90px"
+                                                                            ng-click="CallSaveUpdateContent()">
+                                                                        {{beData.Mode}}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+                                                            <div class="video_section" id="videolist" ng-show="isVideoList">
+                                                                <header class="row">
+                                                                    <div class="col-md-7">
+                                                                        <div class="clearfix">
+                                                                            <form class="form-inline">
+                                                                                <div class="input-group input-group-sm mr-sm-2">
+                                                                                    <div class="input-group-prepend">
+                                                                                        <span class="input-group-text cstm">Show</span>
+                                                                                    </div>
+                                                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Video">
+                                                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Video">{{pp.text}}</option>
+                                                                                    </select>
+                                                                                    <div class="input-group-append">
+                                                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="input-group input-group-sm table-search-filed">
+                                                                                    <input class="form-control form-control-navbar"
+                                                                                           type="search" placeholder="Search"
+                                                                                           aria-label="Search" ng-model="searchData.Video">
+                                                                                    <div class="input-group-append">
+                                                                                        <button class="btn btn-default border-left-0"
+                                                                                                type="submit">
+                                                                                            <i class="fas fa-search"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </form>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-5 text-right">
+                                                                        <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                                             data-placement="top" title="Download File">
+                                                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                                                    aria-haspopup="true" aria-expanded="false">
+                                                                                <i class="fas fa-download"></i>
+                                                                            </button>
+                                                                            <div class="dropdown-menu dropdown-menu-right"
+                                                                                 aria-labelledby="dropdownMenuButton">
+                                                                                <span class="dropdown-item">Choose an option:</span>
+                                                                                <a class="dropdown-item wait" export-excel table-id="'#video-table'" sheet-name="'Reading Materials Video List'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                                                <a class="dropdown-item wait" onClick="$('#video-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                                            </div>
+                                                                        </div>
+                                                                        <a print-tbl table-id="'#video-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                                                           data-toggle="tooltip" data-placement="bottom"
+                                                                           title="Print">
+                                                                            <i class="fas fa-print"></i>
+                                                                        </a>
+                                                                        <button type="button"
+                                                                                class="btn btn-sm btn-success"
+                                                                                id="add-ReadMat"
+                                                                                style="min-width: 90px" ng-click="ShowAddVideo();ClearVideo();">
+                                                                            <i class="fas fa-plus w-t"></i> Add Video
+                                                                        </button>
+                                                                    </div>
+                                                                </header>
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="table-scroll-x-y table-scroll">
+                                                                            <table id="video-table" class="main-table table table-sm table-bordered bg-white">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th style="width: 60px;">S.No</th>
+                                                                                        <th style="width: 240px">Video Title</th>
+                                                                                        <th style="width: 200px">Video Link</th>
+                                                                                        <th style="width: 200px">Remarks</th>
+                                                                                        <th style="width: 60px;" class="no-print">Action</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    <tr dir-paginate="v in VideoList | filter:searchData.Video | itemsPerPage: perPage.Video" current-page="currentPages.Video" pagination-id="VideoPagination">
+                                                                                        <td>{{$index + 1}}</td>
+                                                                                        <td>{{v.VideoTitle}}</td>
+                                                                                        <td>
+                                                                                            <a href="{{v.VideoLink}}" target="_blank" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">{{v.VideoLink}}</a>
+                                                                                        </td>
+                                                                                        <td>{{v.Remarks}}</td>
+                                                                                        <td class="no-print">
+                                                                                            <a class="p-1" href="#" ng-click="GetVideoById(v)"><i class="fas fa-edit text-info"></i></a>
+                                                                                            <a class="p-1" href="#" ng-click="DeleteVideo(v)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        <footer class="row align-items-center">
+                                                                            <div class="col-md-12">
+                                                                                <dir-pagination-controls pagination-id="VideoPagination" boundary-links="true" template-url="/Scripts/dirPagination.tpl.html">
+                                                                                </dir-pagination-controls>
+                                                                            </div>
+                                                                        </footer>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div id="addVideo" ng-show="!isVideoList">
+                                                                <div class="col-md-12 p-0">
+                                                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width: 60px">S.No</th>
+                                                                                    <th style="width: 240px">Video Title</th>
+                                                                                    <th style="width: 220px">Video Link</th>
+                                                                                    <th style="width: 220px">Remarks</th>
+                                                                                    <th style="width: 60px" ng-if="beData.Mode == 'Save'">Action</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr ng-repeat="v in beData.VideoColl">
+                                                                                    <td>{{$index + 1}}</td>
+                                                                                    <td><input class="form-control form-control-sm" ng-model="v.VideoTitle" /></td>
+                                                                                    <td><input type="text" class="form-control form-control-sm" ng-model="v.VideoLink" /></td>
+                                                                                    <td><input class="form-control form-control-sm" ng-model="v.Remarks" /></td>
+                                                                                    <td ng-if="beData.Mode == 'Save'">
+                                                                                        <a href="#" class="p-1" ng-click="AddRow($index)">
+                                                                                            <i class="fas fa-plus text-secondary"></i>
+                                                                                        </a>
+                                                                                        <a href="#" class="p-1" ng-click="DeleteRow($index)">
+                                                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                    <div class="time-label text-center">
+                                                                        <span class="d-block border-0 pt-3">
+                                                                            <button type="button" class="btn btn-sm btn-info" id="backtoVideo" style="min-width: 90px;" ng-click="ShowVideoList()">Back to list</button>
+                                                                            <button type="button"
+                                                                                    class="btn btn-sm text-dark bg-white border"
+                                                                                    style="min-width: 90px;"
+                                                                                    ng-click="ClearVideo()">
+                                                                                Reset
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="CallSaveUpdateVideo()">{{beData.Mode}}</button>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade mt-5" id="PersonalImg" role="dialog" tabindex="-1">
+                                        <div class="modal-dialog modal-lg mt-0" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-body mb-0 p-2">
+                                                    <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%;  border: none;"></iframe>
+                                                    <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%;" id="imgPreviewAdd">
+                                                </div>
+                                                <div class="modal-footer pb-5">
+                                                    <div><a href="{{viewImg.ContentPath}}" download class="btn btn-primary btn-sm dynamic-uiux-sm-btn">Download</a></div>
+                                                    <button class="btn btn-secondary btn-sm dynamic-uiux-sm-btn" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade mt-5" id="ContentAttach" role="dialog" tabindex="-1">
+                                        <div class="modal-dialog modal-lg mt-0" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h6 class="modal-title text-secondary" id="attachmentModalOnlyLabel">
+                                                        Reading Materials
+                                                    </h6>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body mb-0 p-2">
+
+                                                    <div class="card mb-0" style="border: 1px solid #bac7b369">
+                                                        <div class="card-header p-2" style="background-color: #76be4e26">
+                                                            <h6 class="mb-0 ng-binding">Contents Information</h6>
+                                                        </div>
+                                                        <div class="card-body p-2">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <table class="table table-sm table-borderless">
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <th width="27%">Batch</th>
+                                                                                <td>: {{beData.BatchName || 'N/A'}}</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th>Class</th>
+                                                                                <td>: {{beData.ClassName}}</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th>Subject</th>
+                                                                                <td>: {{beData.SubjectName}}</td>
+                                                                            </tr>
+
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <table class="table table-sm table-borderless">
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <th width="27%">ClassYear</th>
+                                                                                <td>: {{beData.ClassYearName || 'N/A'}}</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th>Semester</th>
+                                                                                <td>: {{beData.SemesterName || 'N/A'}}</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card mb-0" style="border: 1px solid #bac7b369">
+                                                        <div class="card-header p-2" style="background-color: #76be4e26">
+                                                            <h6 class="mb-0 ng-binding">Title</h6>
+                                                        </div>
+                                                        <div class="card-body p-2">
+                                                            <div class="card-body p-2">
+                                                                <p class="mb-0">{{beData.Title}}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="card mb-0" style="border: 1px solid #bac7b369">
+                                                        <div class="card-header p-2" style="background-color: #76be4e26">
+                                                            <h6 class="mb-0 ng-binding"><i class="fas fa-paperclip"></i> Attachments</h6>
+                                                        </div>
+                                                        <div class="card-body p-2">
+                                                            <div class="image-set m-t-20 d-flex flex-wrap">
+                                                                <div class="m-2 text-center" ng-repeat="file in beData.ContentsColl">
+                                                                    <!-- Click to view -->
+                                                                    <div ng-click="previewFile(file)" style="cursor: pointer;">
+
+                                                                        <!-- Image Preview -->
+                                                                        <div ng-if="file.fileType === 'image'">
+                                                                            <div style="width:80px; height: 100px; border:1px solid #ddd; border-radius:4px; background: #f8f9fa;">
+                                                                                <img ng-src="{{file.previewUrl}}"
+                                                                                     alt="{{file.name}}"
+                                                                                     style="height:100%; width:100%; object-fit: cover; border-radius: 3px;" />
+                                                                            </div>
+                                                                            <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                            </small>
+                                                                        </div>
+
+                                                                        <!-- PDF Preview -->
+                                                                        <div ng-if="file.fileType === 'pdf'">
+                                                                            <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                <i class="fas fa-file-pdf fa-4x text-danger"></i>
+                                                                            </div>
+                                                                            <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                            </small>
+                                                                        </div>
+
+                                                                        <!-- Word Preview -->
+                                                                        <div ng-if="file.fileType === 'word'">
+                                                                            <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                <i class="fas fa-file-word fa-4x text-primary"></i>
+                                                                            </div>
+                                                                            <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                            </small>
+                                                                        </div>
+
+                                                                        <!-- Excel Preview -->
+                                                                        <div ng-if="file.fileType === 'excel'">
+                                                                            <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                <i class="fas fa-file-excel fa-4x text-success"></i>
+                                                                            </div>
+                                                                            <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                            </small>
+                                                                        </div>
+
+                                                                        <!-- PowerPoint Preview -->
+                                                                        <div ng-if="file.fileType === 'powerpoint'">
+                                                                            <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                <i class="fas fa-file-powerpoint fa-4x text-warning"></i>
+                                                                            </div>
+                                                                            <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                            </small>
+                                                                        </div>
+
+                                                                        <!-- Text Preview -->
+                                                                        <div ng-if="file.fileType === 'text'">
+                                                                            <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                <i class="fas fa-file-alt fa-4x text-secondary"></i>
+                                                                            </div>
+                                                                            <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                            </small>
+                                                                        </div>
+
+                                                                        <!-- Other Files Preview -->
+                                                                        <div ng-if="file.fileType === 'other'">
+                                                                            <div style="width:80px; height:100px; border:1px solid #ddd; border-radius:4px; display:flex; align-items:center; justify-content:center; padding:5px; background: #f8f9fa;">
+                                                                                <i class="fas fa-file fa-4x text-secondary"></i>
+                                                                            </div>
+                                                                            <small class="d-block text-truncate mt-1" title="{{file.name}}">
+                                                                                {{file.name | limitTo:10}}{{file.name.length > 10 ? '...' : ''}}
+                                                                            </small>
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+
+                                                            <div ng-if="!beData.ContentsColl.length" class="text-center p-4 text-muted">
+                                                                <i class="fas fa-paperclip fa-3x mb-2"></i>
+                                                                <p>No attachments found for this Content.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal">
+                                                        Close
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>
+
+
+
+
+
+
+

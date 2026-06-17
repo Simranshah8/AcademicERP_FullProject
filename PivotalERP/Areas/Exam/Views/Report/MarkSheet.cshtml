@@ -1,0 +1,571 @@
+﻿<script>
+    var entityReExamMarkSheet=@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.ReExamMarksheet);
+</script>
+<script src="~/jslib/exam/reporting/MarkSheet.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="marksheetRptController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-12">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                   href="#home" role="tab" aria-controls="home"
+                                                   aria-selected="true">Normal</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                   href="#profile" role="tab" aria-controls="profile"
+                                                   aria-selected="false">Aggregate</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="contact-tab" data-toggle="tab"
+                                                   href="#contact" role="tab" aria-controls="contact"
+                                                   aria-selected="false">Parent Aggregate</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="rehome-tab" data-toggle="tab"
+                                                   href="#rehome" role="tab" aria-controls="rehome"
+                                                   aria-selected="true">Re-Exam</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="result-tab" data-toggle="tab"
+                                                   href="#result" role="tab" aria-controls="result"
+                                                   aria-selected="true">Result Dispatch</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Normal Tabulation Starts -->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div class="card">
+                                        <div class="card-body px-0">
+                                            <div class="row">
+                                                <div class="col-md-3" ng-show="BranchColl.length>1">
+                                                    <div class="form-group">
+                                                        <label for="">School<span style="color:red">*</span></label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newNormalTabulation.BranchId" style="width:100%">
+                                                            <option ng-value="0">**Select School**</option>
+                                                            <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newNormalTabulation.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                                    <label>Batch</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newNormalTabulation.BatchId" style="width:100%">
+                                                            <option ng-value="0">**Select Batch**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label>Class</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newNormalTabulation.SelectedClass" ng-change="ChangeNormalClass()" multiple>
+                                                            <option ng-value="0">**Select Class**</option>
+                                                            <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==3">
+                                                    <label>Semester</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newNormalTabulation.SemesterId" ng-change="PrintNormalTabulation()" style="width:100%">
+                                                            <option ng-value="0">**Select Semester**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==2">
+                                                    <label>Year</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newNormalTabulation.ClassYearId" ng-change="PrintNormalTabulation()" style="width:100%">
+                                                            <option ng-value="0">**Select Year**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>Exam </label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newNormalTabulation.ExamTypeId" ng-change="PrintNormalTabulation(2)" style="width:100%">
+                                                        <option value="0" selected disabled>Select Exam</option>
+                                                        <option ng-value="cl.ExamTypeId" ng-repeat="cl in ExamTypeList |  filter: { BranchId:GetBranchId(newNormalTabulation.BranchId) }:true">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <!--<div class="col-md-3">
+    <label>Select Student(s)</label>
+    <select multiple class="form-control form-control-sm select2"-->
+                                                @*ng-change="PrintStudentAdmitCard()"*@
+                                                <!--ng-model="newNormalTabulation.StudentIdColl" data-placeholder="**select student**">
+            <option ng-value="0" ng-selected="true">** Select Student **</option>
+            <option ng-value="st.StudentId" ng-repeat="st in AllStudentColl |  filter: { ClassId: newNormalTabulation.SelectedClass[0].ClassId }:true">{{st.Name}}-{{st.RegNo}}-{{st.ClassName}}({{st.SectionName}})-{{st.RollNo}}</option>
+        </select>
+    </div>-->
+                                                <div class="col-md-3">
+                                                    <label>Report </label>
+                                                    <select ng-show="newNormalTabulation.ReportTemplateId>0" name="comment-group" id="" form="" class="form-control form-control-sm" ng-change="PrintNormalTabulation(3)" ng-model="newNormalTabulation.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in newNormalTabulation.TemplatesColl |  filter: { RptTranId: newNormalTabulation.ReportTemplateId }:true" ng-selected="rt.RptTranId==newNormalTabulation.ReportTemplateId">{{rt.ReportName}}</option>
+                                                    </select>
+                                                    <select ng-hide="newNormalTabulation.ReportTemplateId>0" name="comment-group" id="" form="" class="form-control form-control-sm" ng-change="PrintNormalTabulation(3)" ng-model="newNormalTabulation.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in newNormalTabulation.TemplatesColl" ng-selected="rt.RptTranId==newNormalTabulation.RptTranId">{{rt.ReportName}}</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-2 mt-4">
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="PublishExamResult()">Publish Result</button>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2" id="schedule-report-table">
+                                                <iframe id="frmRptTabulation" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Normal Tabulation Ends -->
+                                <!-- Aggregate Tabulation Starts -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    <div class="card">
+                                        <div class="card-body px-0">
+                                            <div class="row">
+                                                <div class="col-md-3" ng-show="BranchColl.length>1">
+                                                    <div class="form-group">
+                                                        <label for="">School<span style="color:red">*</span></label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newGroupTabulation.BranchId" style="width:100%">
+                                                            <option ng-value="0">**Select School**</option>
+                                                            <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newGroupTabulation.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                                    <label>Batch</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newGroupTabulation.BatchId" style="width:100%">
+                                                            <option ng-value="0">**Select Batch**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Class</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newGroupTabulation.SelectedClass" ng-change="PrintGroupTabulation()" style="width:100%">
+                                                            <option ng-value="0">**Select Class**</option>
+                                                            <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==3">
+                                                    <label>Semester</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newGroupTabulation.SemesterId" ng-change="PrintGroupTabulation()" style="width:100%">
+                                                            <option ng-value="0">**Select Semester**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==2">
+                                                    <label>Year</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newGroupTabulation.ClassYearId" ng-change="PrintGroupTabulation()" style="width:100%">
+                                                            <option ng-value="0">**Select Year**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>Current Exam </label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newGroupTabulation.CurExamTypeId" style="width:100%">
+                                                        <option value="0" selected disabled>Select Exam</option>
+                                                        <option ng-value="cl.ExamTypeId" ng-repeat="cl in ExamTypeList |  filter: { BranchId:GetBranchId(newGroupTabulation.BranchId) }:true">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>Exam Type Group</label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newGroupTabulation.ExamTypeGroupId" ng-change="PrintGroupTabulation(2)" style="width:100%">
+                                                        <option value="0" selected disabled>Select Exam</option>
+                                                        <option ng-value="cl.ExamTypeGroupId" ng-repeat="cl in ExamTypeGroupList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>Group2</label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newGroupTabulation.ExamTypeGroupId2" ng-change="PrintGroupTabulation(3)" style="width:100%">
+                                                        <option value="0" selected disabled>Select Exam Group</option>
+                                                        <option ng-value="cl.ExamTypeGroupId" ng-repeat="cl in ExamTypeGroupList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <!--<div class="col-md-3">
+    <label>Select Student(s)</label>
+    <select multiple class="form-control form-control-sm select2"-->
+                                                @*ng-change="PrintStudentAdmitCard()"*@
+                                                <!--ng-model="newGroupTabulation.StudentIdColl" data-placeholder="**select student**">
+            <option ng-value="0" ng-selected="true">** Select Student **</option>
+            <option ng-value="st.StudentId" ng-repeat="st in AllStudentColl |  filter: { ClassId: newGroupTabulation.SelectedClass.ClassId }:true">{{st.Name}}-{{st.RegNo}}-{{st.ClassName}}({{st.SectionName}})-{{st.RollNo}}</option>
+        </select>
+    </div>-->
+                                                <div class="col-md-2">
+                                                    <label>Select Report </label>
+                                                    @*<select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintGroupTabulation()" ng-model="newGroupTabulation.RptTranId">
+                <option ng-value="0" ng-selected="true">Select Report</option>
+                <option ng-value="rt.RptTranId" ng-repeat="rt in newGroupTabulation.TemplatesColl">{{rt.ReportName}}</option>
+            </select>*@
+
+                                                    <select ng-show="newGroupTabulation.ReportTemplateId>0" name="comment-group" id="" form="" class="form-control form-control-sm" ng-change="PrintGroupTabulation(4)" ng-model="newGroupTabulation.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in newGroupTabulation.TemplatesColl |  filter: { RptTranId: newGroupTabulation.ReportTemplateId }:true" ng-selected="rt.RptTranId==newGroupTabulation.ReportTemplateId">{{rt.ReportName}}</option>
+                                                    </select>
+                                                    <select ng-hide="newGroupTabulation.ReportTemplateId>0" name="comment-group" id="" form="" class="form-control form-control-sm" ng-change="PrintGroupTabulation(3)" ng-model="newGroupTabulation.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in newGroupTabulation.TemplatesColl" ng-selected="rt.RptTranId==newGroupTabulation.RptTranId">{{rt.ReportName}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="PublishGroupExamResult()">Publish Result</button>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <iframe id="frmRptGrpTabulation" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- Aggregate Tabulation Ends -->
+                                <!-- Parent Aggregate Tabulation Starts -->
+                                <div class="tab-pane fade main-section" id="contact" role="tabpanel"
+                                     aria-labelledby="contact-tab">
+                                    <div class="card">
+                                        <div class="card-body px-0">
+                                            <div class="row">
+                                                <div class="col-md-3" ng-show="BranchColl.length>1">
+                                                    <div class="form-group">
+                                                        <label for="">School<span style="color:red">*</span></label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newParentAggregate.BranchId">
+                                                            <option ng-value="0">**Select School**</option>
+                                                            <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newParentAggregate.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                                    <label>Batch</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newParentAggregate.BatchId">
+                                                            <option ng-value="0">**Select Batch**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Class</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newParentAggregate.SelectedClass">
+                                                            <option ng-value="0">**Select Class**</option>
+                                                            <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                                        </select>
+                                                        @*<select class="form-control form-control-sm select2" ng-model="newParentAggregate.ClassId">
+                    <option ng-value="0">**Select Class**</option>
+                    <option ng-value="cl.id" ng-repeat="cl in ClassList" ng-selected="cl.id==newParentAggregate.ClassId">{{cl.text}}</option>
+                </select>*@
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==3">
+                                                    <label>Semester</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newParentAggregate.SemesterId">
+                                                            <option ng-value="0">**Select Semester**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==2">
+                                                    <label>Year</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newParentAggregate.ClassYearId">
+                                                            <option ng-value="0">**Select Year**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Parent Exam Type Group</label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2">
+                                                        <option value="" selected disabled>Parent Exam Type Group</option>
+                                                        <option value="">Test</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 mt-4">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="customCheckbox3" value="option">
+                                                        <label for="customCheckbox3"
+                                                               class="custom-control-label">Filter Selection</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 mt-4">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="chkFromPublished2" ng-model="newGroupTabulation1.FromPublished">
+                                                        <label for="chkFromPublished2"
+                                                               class="custom-control-label">From Published</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Select Report </label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2">
+                                                        <option value="" selected>Select Report</option>
+                                                        <option value="">Report 1</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Parent Aggregate Tabulation Ends -->
+                                <!-- Normal Tabulation Starts -->
+                                <div class="tab-pane fade show  main-section" id="rehome" role="tabpanel"
+                                     aria-labelledby="rehome-tab">
+                                    <div class="card">
+                                        <div class="card-body px-0">
+                                            <div class="row">
+                                                <div class="col-md-3" ng-show="BranchColl.length>1">
+                                                    <div class="form-group">
+                                                        <label for="">School<span style="color:red">*</span></label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newReNormalTabulation.BranchId">
+                                                            <option ng-value="0">**Select School**</option>
+                                                            <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newReNormalTabulation.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                                    <label>Batch</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newReNormalTabulation.BatchId">
+                                                            <option ng-value="0">**Select Batch**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label>Class</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newReNormalTabulation.SelectedClass" ng-change="PrintReNormalTabulation()" multiple>
+                                                            <option ng-value="0">**Select Class**</option>
+                                                            <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==3">
+                                                    <label>Semester</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newReNormalTabulation.SemesterId" ng-change="PrintReNormalTabulation()">
+                                                            <option ng-value="0">**Select Semester**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==2">
+                                                    <label>Year</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newReNormalTabulation.ClassYearId" ng-change="PrintReNormalTabulation()">
+                                                            <option ng-value="0">**Select Year**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Exam </label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newReNormalTabulation.ExamTypeId" ng-change="PrintReNormalTabulation()">
+                                                        <option value="0" selected disabled>Select Exam</option>
+                                                        <option ng-value="cl.ExamTypeId" ng-repeat="cl in ExamTypeList  |  filter: { BranchId:GetBranchId(newReNormalTabulation.BranchId) }:true">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-3 col-lg-3 col-md-3">
+                                                    <div class="form-group">
+                                                        <label>Re-Exam</label>
+                                                        <div class="form-group">
+                                                            <select class="form-control form-control-sm select2" ng-model="newReNormalTabulation.ReExamTypeId" ng-change="PrintReNormalTabulation()">
+                                                                <option ng-value="cl.id" ng-repeat="cl in ReExamTypeList | filter: { ExamTypeId: newReNormalTabulation.ExamTypeId }:true" @*ng-selected="cl.id==newClassWise.ReExamTypeId"*@>{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Report </label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintReNormalTabulation()" ng-model="newReNormalTabulation.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in newReNormalTabulation.TemplatesColl">{{rt.ReportName}}</option>
+                                                    </select>
+                                                </div>
+
+                                            </div>
+                                            <div class="row mt-2" id="reschedule-report-table">
+                                                <iframe id="frmRptReTabulation" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Normal Tabulation Ends -->
+                                <!-- Exam Wise Symbol No TAb Starts -->
+                                <div class="tab-pane fade show  main-section" id="result" role="tabpanel"
+                                     aria-labelledby="result-tab">
+                                    <div id="examwise-result-section">
+                                        <div class="card mb-0">
+                                            <div class="card-body p-0">
+                                                <div class="row">
+                                                    <div class="col-md-3" ng-show="BranchColl.length>1">
+                                                        <div class="form-group">
+                                                            <label for="">School<span style="color:red">*</span></label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newResultDispatch.BranchId">
+                                                                <option ng-value="0">**Select School**</option>
+                                                                <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newResultDispatch.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch == true">
+                                                        <label>Batch</label>
+                                                        <div class="form-group">
+                                                            <select class="form-control form-control-sm select2" ng-model="newResultDispatch.BatchId">
+                                                                <option ng-value="0">**Select Batch**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Class</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newResultDispatch.SelectedClass" ng-change="GetClassWiseStudentForResult()">
+                                                                <option ng-value="0">**Select Class**</option>
+                                                                <option ng-value="cl" ng-repeat="cl in ClassList.SectionListWithClass">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==3">
+                                                        <label>Semester</label>
+                                                        <div class="form-group">
+                                                            <select class="form-control form-control-sm select2" ng-model="newResultDispatch.SemesterId" ng-change="GetClassWiseStudentForResult()">
+                                                                <option ng-value="0">**Select Semester**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SelectedClass.ClassType==2">
+                                                        <label>Year</label>
+                                                        <div class="form-group">
+                                                            <select class="form-control form-control-sm select2" ng-model="newResultDispatch.ClassYearId" ng-change="GetClassWiseStudentForResult()">
+                                                                <option ng-value="0">**Select Year**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-2">
+                                                        <label>Exam</label>
+                                                        <div class="form-group">
+                                                            <select class="form-control form-control-sm select2" ng-model="newResultDispatch.ExamTypeId" ng-change="GetClassWiseStudentForResult()">
+                                                                <option ng-value="0">**Select ExamType**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in ExamTypeList |  filter: { BranchId:GetBranchId(newResultDispatch.BranchId) }:true">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2 text-right mt-4">
+                                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearResultDispatch()">Reset</button>
+                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateResultDispatch()">{{newResultDispatch.Mode}}</button>
+                                                    </div>
+
+                                                </div>
+                                                <div class="table-scroll-x-y sales-main-table table-scroll" style="height: calc(100vh - 12rem)">
+                                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white  table-head-fixed">
+                                                        <thead class="text-center">
+                                                            <tr>
+                                                                <th style="width:90px" ng-click="sort('SectionName')">Section</th>
+                                                                <th style="width: 100px" ng-click="sort('RegdNo')">Regd No.</th>
+                                                                <th style="width: 90px" ng-click="sort('RollNo')">Roll No.</th>
+                                                                <th style="width: 250px" ng-click="sort('Name')">Name</th>
+                                                                <th style="width: 110px" ng-click="sort('IsDispatch')">
+
+                                                                    <label>
+                                                                        Is Dispatch
+                                                                        <input type="checkbox"
+                                                                               class="custom-control-input"
+                                                                               id="checkbox-isleft-all"
+                                                                               ng-model="newResultDispatch.IsDispatch" ng-change="CheckUnCheckAllDispatch(newResultDispatch.IsDispatch)" />
+                                                                    </label>
+                                                                </th>
+                                                                <th style="width: 150px" ng-click="sort('DispatchDate')">
+                                                                    Date
+                                                                    <input type="text"
+                                                                           class="form-control form-control-sm"
+                                                                           placeholder="" ng-model="newResultDispatch.DispatchDate_TMP" date-picker date-detail="newResultDispatch.DispatchDateDet" confirm-action="ChangeAllDispatchDate()" />
+
+                                                                </th>
+                                                                <th style="width: 250px" ng-click="sort('Remarks')">
+                                                                    Remarks
+                                                                    <input type="text"
+                                                                           class="form-control form-control-sm"
+                                                                           placeholder="" ng-model="newResultDispatch.Remarks" ng-change="ChangeDispatchRemarks()" />
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="sn in newResultDispatch.StudentList">
+                                                                <td>{{sn.SectionName}}</td>
+                                                                <td>{{sn.RegdNo}}</td>
+                                                                <td>{{sn.RollNo}}</td>
+                                                                <td>{{sn.Name}}</td>
+                                                                <td>
+                                                                    <input type="checkbox"
+                                                                           class="form-control form-control-sm" ng-model="sn.IsDispatch" />
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text"
+                                                                           class="form-control form-control-sm" ng-model="sn.DispatchDate_TMP" date-picker date-detail="sn.DispatchDateDet" />
+                                                                </td>
+                                                                <td><input type="text" class="form-control form-control-sm" ng-model="sn.Remarks"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                @*<div class="time-label mt-2">
+                                                    <span class="d-block border-0 text-center">
+                                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearResultDispatch()">Reset</button>
+                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateResultDispatch()">{{newResultDispatch.Mode}}</button>
+
+                                                    </span>
+                                                </div>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Exam Wise Symbol No  Tab Ends  -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+

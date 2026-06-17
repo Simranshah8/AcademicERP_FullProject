@@ -1,0 +1,467 @@
+﻿<style>
+    .iframe-content-starts-here {
+        padding-top: 50px !important;
+    }
+
+    .avatar {
+        width: 5em;
+        height: 5em;
+        font-family: sans-serif;
+        background: #f0f0f0;
+        border: 1px dashed #76be4e;
+        position: relative;
+    }
+
+        .avatar input {
+            width: 100%;
+            height: 100%;
+            opacity: 0; /* Hide the button */
+            cursor: pointer;
+        }
+
+    .cross-btn {
+        position: absolute;
+        right: 0;
+        top: -29px;
+        background: #76be4e;
+        border: 2px solid #fff;
+        color: #fff;
+        border-radius: 100px;
+        width: 19px;
+        height: 19px;
+        transition: all .5s;
+        cursor: pointer;
+        outline: none;
+    }
+
+        .cross-btn:hover {
+            background: #dc3545;
+        }
+
+    .previewimg {
+        width: 100px;
+        height: 80px;
+    }
+
+    .user-img-box {
+        position: relative;
+        width: 100px;
+        height: 80px;
+        transition: all .5s;
+    }
+
+    div.attachpreview {
+        margin: 5px;
+        border-radius: 10px;
+        float: left;
+    }
+
+    .crossicon {
+        margin-left: 4px !important;
+        margin-top: 0px;
+        position: absolute;
+        font-size: 12px;
+    }
+
+    .person-photo-attachment-wrap .img-wrap {
+        height: 180px;
+        width: 180px;
+    }
+</style>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/Hostel/Gatepass.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="GatepassController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div class="card" id="Gatepass-section">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline mb-2">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0"
+                                                    id="exampleFormControlSelect1" ng-model="perPage.Gatepass">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Gatepass">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search"
+                                                   placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.Gatepass" />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file"
+                                     data-toggle="tooltip"
+                                     data-placement="top"
+                                     title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                            type="button"
+                                            id="dropdownMenuButton"
+                                            data-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                   data-toggle="tooltip" data-placement="bottom"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+
+                                <button type="button" class="btn btn-sm btn-success" id="add-Gatepass" style="min-width: 90px">
+                                    <i class="fas fa-plus w-t"></i> Add Gate Pass
+                                </button>
+                            </div>
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px">S.No.</th>
+                                            <th style="width: 100px">Gate Pass No</th>
+                                            <th style="width: 80px">Adm No</th>
+                                            <th style="width: 180px">Student Name</th>
+                                            <th style="width: 110px">Class/Section</th>
+                                            <th style="width: 150px">Room Details</th>
+                                            <th style="width: 180px">Purpose</th>
+                                            <th style="width: 100px">Out Date Time</th>
+                                            <th style="width: 100px">Expected In Date Time</th>
+                                            <th style="width: 100px">Arrival Date Time</th>
+                                            <th style="width: 90px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in GatepassList | filter:searchData.Gatepass | itemsPerPage: perPage.Gatepass" current-page="currentPages.Gatepass" pagination-id="GatepassNamePagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.GatePassNo}}</td>
+                                            <td>{{cl.AdmNo}}</td>
+                                            <td>{{cl.StudentName}}</td>
+                                            <td>{{cl.ClassSection}}</td>
+                                            <td>{{cl.RoomDetail}}</td>
+                                            <td>{{cl.Purpose}}</td>
+                                            <td>{{cl.OutDateMiti}} {{cl.OutDateTime | timeFormat}}</td>
+                                            <td>{{cl.ExpectedDateMiti}} {{cl.ExpectedDateTime | timeFormat}}</td>
+                                            <td>{{cl.ArrivalDateMiti}} {{cl.ArrivalDateTime | timeFormat}}</td>
+                                            <td class="">
+                                                <a class="p-1" ng-click="ShowArrivalDateTime(cl)">
+                                                    <i class="fas fa-save text-success"></i>
+                                                </a>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                @*<a class="p-1" href="#" ng-click="GetGatepassById(cl)">
+                                                        <i class="fas fa-edit text-info"></i>
+                                                    </a>*@
+                                                <a class="p-1" ng-click="DelGatepassById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <!-- table end -->
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="GatepassNamePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+
+                    <!-- form area starts -->
+                    <div id="Gatepass-form">
+                        <div class="card card-default">
+                            <div class="card-body p-1">
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Gate Pass No</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newGatepass.GatePassNo" disabled />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-9 col-lg-9 col-md-9" id="meet-student">
+                                                <label for="inlineFormInputGroup">Select Student</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newGatepass.StudentId" ng-change="GetGuardianByStd()">
+                                                    <option ng-repeat="h in HostelStudentList" ng-value="h.StudentId" ng-selected="newGuardian.StudentId==h.StudentId">{{h.StudentName}} - {{h.ClassSection}} - {{h.RollNo}} - {{h.RegNo}} - {{h.FatherName}}  - {{h.P_ContactNo}} - {{h.Address}}</option>
+                                                </select>
+                                                @*<div class="input-group-prepend">
+                                                        <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset; margin-right: -3px; z-index: 1;" ng-model="newGatepass.SelectStudent">
+                                                            <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newGatepass.SelectStudent">
+                                                                {{ss.text}}
+                                                            </option>
+                                                        </select>
+                                                        <select class="form-control select2 form-control-sm" all-student ng-model="newGatepass.StudentId" student-detail="newGatepass.StudentDetails" side-bar-data="newGatepass.SideBarData" search-by="newGatepass.SelectStudent">
+                                                        </select>
+                                                    </div>*@
+                                            </div>
+
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label for="">Purpose</label>
+                                                    <textarea class="form-control form-control-sm" rows="1" ng-model="newGatepass.Purpose"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Out Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newGatepass.OutDate_TMP" date-detail="newGatepass.OutDateDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Out Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newGatepass.OutTime_TMP" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Expected In Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newGatepass.ExpectedInDate_TMP" date-detail="newGatepass.ExpectedInDateDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Expected In Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newGatepass.ExpectedTime_TMP" />
+                                                </div>
+                                            </div>
+                                            @*<div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Arrival Date </label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newGatepass.ArrivalDate_TMP" date-detail="newGatepass.ArrivalDateDet">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Arrival Time</label>
+                                                        <input type="time" class="form-control form-control-sm"  ng-model="newGatepass.ArrivalTime_TMP"/>
+                                                    </div>
+                                                </div>*@
+                                            <div class="col-md-3">
+                                                <div>
+                                                    <label>Accompanied By</label>
+                                                </div>
+                                                <div class="form-group clearfix">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" id="rb-interest-calc-yes" name="r5" ng-value="1" ng-model="newGatepass.AccompaniedBy" ng-change="onAccompaniedByChange()">
+                                                        <label class="form-check-label" for="rb-interest-calc-yes">Guardian</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" id="rb-interest-cal-no" name="r5" ng-value="2" ng-model="newGatepass.AccompaniedBy" ng-change="onAccompaniedByChange()">
+                                                        <label class="form-check-label" for="rb-interest-cal-no">Others</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="newGatepass.AccompaniedBy=='1'">
+                                                <div class="form-group">
+                                                    <label for="">Guardian</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newGatepass.GuardianId" ng-change="onGuardianChange()">
+                                                        <option ng-repeat="h in GuardianListByStd" ng-value="h.HostelGuardianId" ng-selected="newGatepass.GuardianId==h.HostelGuardianId">{{h.GuardianName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="newGatepass.AccompaniedBy=='2'">
+                                                <div class="form-group">
+                                                    <label for="">Other</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-modal="newGatepass.GuardianName" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Relation</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newGatepass.G_Relation" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Contact No</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newGatepass.G_ContactNo" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Permitted By</label>
+                                                    <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newGatepass.PermittedBy" employee-detail="newGatepass.EmployeeDetails" side-bar-data="newGatepass.EmpSideBarData" search-by="newGatepass.EmployeeSearchBy">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Remarks</label>
+                                                    <textarea class="form-control form-control-sm" rows="1" ng-model="newGatepass.Remarks"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label for="" class="invisible">Photo</label>
+                                        <div class="person-photo-attachment-wrap text-center">
+                                            <div class="img-wrap mx-auto">
+                                                <img id="studentPhotoPreview" ng-src="{{newGatepass.StudentPhoto}}" class="img-fluid" alt="Student Photo" />
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="m-0" />
+                                <div class="card-body p-0">
+                                    <div class="col-12">
+                                        <label><b>Attach Documents</b></label>
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <div class="form-group">
+                                                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newGatepass.AttachmentPath_TMP" fileread="newGatepass.AttachmentPathData" />
+                                                    <img ng-src="{{newGatepass.AttachmentPath ||newGatepass.AttachmentPathData}}" id="choose-Att" class="img-fluid mt-2" style="max-height:100px; max-width:100px;">
+                                                </div>
+                                            </div>
+                                            @*<div class="col-md-1">
+                                                    <form class="avatar mt-2">
+                                                        <p style=" text-align: center; color: #76be4e; font-size: 30px; position: absolute; top: 30%; left: 31%;"><i class="fas fa-plus w-t"></i></p>
+                                                        <input type="file" name="avatar" />
+                                                    </form>
+                                                </div>
+                                                <div class="col-md-11">
+                                                    <div class="attachpreview">
+                                                        <a class="user-img-box">
+                                                            <img class="previewimg" src="~/wwwroot/dynamic/images/attach-img.png" alt="Cinque Terre" width="600" height="400">
+                                                            <span class="cross-btn"><span class="crossicon">&#935;</span></span>
+                                                        </a>
+                                                    </div>
+                                                </div>*@
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- timeline time label -->
+                        <div class="time-label pb-3 " style="margin-top: -10px ">
+                            <span class="d-block border-0 p-1 text-center ">
+                                <button type="button"
+                                        class="btn btn-sm btn-info"
+                                        id="back-to-list-Gatepass"
+                                        style="min-width: 90px ">
+                                    Back To List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px" ng-click="ClearGatepass()">
+                                    Reset
+                                </button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="SaveUpdateGatepass()">
+                                    {{newGatepass.Mode}}
+                                </button>
+                            </span>
+                        </div>
+                        <!-- /.timeline-label -->
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Update Arrival Date Time</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px;">Name</th>
+                                    <th style="width: 100px;">Class/Section</th>
+                                    <th style="width: 100px;">Room Detail</th>
+                                    <th style="width: 180px;">Purpose</th>
+                                    <th style="width: 100px">Out Date Time</th>
+                                    <th style="width: 100px">Expected In Date Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{CurGatePass.StudentName}}</td>
+                                    <td>{{CurGatePass.ClassSection}}</td>
+                                    <td>{{CurGatePass.RoomDetail}}</td>
+                                    <td>{{CurGatePass.Purpose}}</td>
+                                    <td>{{CurGatePass.OutDateMiti}} {{CurGatePass.OutDateTime | timeFormat}}</td>
+                                    <td>{{CurGatePass.ExpectedDateMiti}} {{CurGatePass.ExpectedDateTime | timeFormat}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="">Arrival Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="CurGatePass.ArrivalDate_TMP" date-detail="CurGatePass.ArrivalDateDet">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="">Arrival Time</label>
+                                <input type="time" class="form-control form-control-sm" ng-model="CurGatePass.ArrivalTime_TMP" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" ng-click="UpdateArrivalDateTime()" style="min-width: 90px;">Update Arrival Date Time</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

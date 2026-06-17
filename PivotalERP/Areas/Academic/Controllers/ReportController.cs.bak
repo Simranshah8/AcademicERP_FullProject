@@ -1,0 +1,682 @@
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Threading.Tasks;
+//using System.Web;
+//using System.Web.Mvc;
+//using Dynamic.BusinessEntity.Global;
+//using Newtonsoft.Json;
+//using PivotalERP.Models;
+//using AcademicLib.BE.Global;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Configuration;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using Dynamic.BusinessEntity.Global;
+using Newtonsoft.Json;
+using System.Data.OleDb;
+using System.Reflection;
+using System.IO.Compression;
+using AcademicLib.BE.Global;
+using Microsoft.SqlServer.Management.Common;
+using System.IO;
+using System.Security.AccessControl;
+using System.Security.Principal;
+
+namespace PivotalERP.Areas.Academic.Controllers
+{
+    public class ReportController : PivotalERP.Controllers.BaseController
+    {
+
+        public ActionResult StudentDetails()
+        {
+            return View();
+        }
+
+        [PermissionsAttribute(Actions.View, (int)ENTITIES.OnlineClass, false)]
+        public ActionResult OnlineClass()
+        {
+            return View();
+        }
+        [HttpPost]
+        public JsonNetResult GetOnlieClassData(DateTime? forDate)
+        {
+            var dataColl = new AcademicLib.BL.Academic.Reporting.OnlineClass(User.UserId, User.HostName, User.DBName).getClassList(forDate);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        [HttpPost, ValidateInput(false)]
+        public JsonNetResult SendNoticeToMissedClass(string title,string notice,string userIdColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                if (string.IsNullOrEmpty(title))
+                {
+                    resVal.ResponseMSG = "Please ! Enter Title";
+                }else if (string.IsNullOrEmpty(notice))
+                {
+                    resVal.ResponseMSG = "Please ! Enter Notice";
+                }else if (string.IsNullOrEmpty(userIdColl))
+                {
+                    resVal.ResponseMSG = "No Data Found For Notice";
+                }
+                else                
+                {
+                    
+                    Dynamic.BusinessEntity.Global.NotificationLog notification = new Dynamic.BusinessEntity.Global.NotificationLog();
+                    notification.Content = notice;
+                    notification.EntityId = Convert.ToInt32(AcademicLib.BE.Global.NOTIFICATION_ENTITY.NOTICE);
+                    notification.EntityName = AcademicLib.BE.Global.NOTIFICATION_ENTITY.NOTICE.ToString();
+                    notification.Heading = "Missed Class";
+                    notification.Subject = title;
+                    notification.UserId = User.UserId;
+                    notification.UserName = User.Identity.Name;
+                    notification.UserIdColl = userIdColl;
+                    resVal = new PivotalERP.Global.GlobalFunction(User.UserId, User.HostName, User.DBName).SendNotification(User.UserId, notification, false);
+
+                    resVal.IsSuccess = true;
+                    resVal.ResponseMSG = GLOBALMSG.SUCCESS;
+                }
+                
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetOnlineClassAttById(int tranId)
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Employee(User.UserId, User.HostName, User.DBName).getOnlineClassAttendanceById(tranId);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult EndOnlineClass(int tranId)
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Employee(User.UserId, User.HostName, User.DBName).EndOnlineClass(tranId);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        // GET: Academic/Report
+        [PermissionsAttribute(Actions.View, (int)ENTITIES.StudentReport, false)]
+        public ActionResult StudentReport()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonNetResult ST_BirthDayEmail()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new AcademicERP.Controllers.SENController().SendStudentBirthday(User.UserId, User.HostName, User.DBName);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetStudentSummary(string ClassIdColl = "",string SectionIdColl="", string StudentTypeIdColl="", string HouseNameIdColl = "", string CasteIdColl = "", int flag=1, List<int> AgeRange = null,string MediumIdColl="")
+        {
+            
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Student(User.UserId, User.HostName, User.DBName).getStudentSummaryList(this.AcademicYearId, ClassIdColl, SectionIdColl,StudentTypeIdColl,HouseNameIdColl,CasteIdColl,flag,AgeRange,MediumIdColl);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+         
+
+        [HttpPost]
+        public JsonNetResult GetSiblingList()
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Student(User.UserId, User.HostName, User.DBName).getSiblintStudentList(this.AcademicYearId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+         [HttpPost]
+        public JsonNetResult GetStudentBirthDay(DateTime? dateFrom=null,DateTime? dateTo=null)
+        {
+
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Student(User.UserId, User.HostName, User.DBName).getStudentBirthDayList(this.AcademicYearId, dateFrom,dateTo);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetEmployeeBirthDay(DateTime? dateFrom = null, DateTime? dateTo = null)
+        {
+
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Employee(User.UserId, User.HostName, User.DBName).getEmpBirthDayList(dateFrom, dateTo);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult PrintStudentBirthday()
+        {
+            var jsonData = Request["jsonData"];
+            List<AcademicLib.RE.Academic.StudentBirthDay> paraData = DeserializeObject<List<AcademicLib.RE.Academic.StudentBirthDay>>(jsonData);
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var key = Guid.NewGuid().ToString().Replace("-", "");
+                Session.Add(key, paraData);
+                resVal.ResponseId = key;
+                resVal.IsSuccess = true;
+                return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        public ActionResult RdlStudentBirthday()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonNetResult PrintEmployeeBirthday()
+        {
+            var jsonData = Request["jsonData"];
+            List<AcademicLib.RE.Academic.EmployeeBirthDay> paraData = DeserializeObject<List<AcademicLib.RE.Academic.EmployeeBirthDay>>(jsonData);
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var key = Guid.NewGuid().ToString().Replace("-", "");
+                Session.Add(key, paraData);
+                resVal.ResponseId = key;
+                resVal.IsSuccess = true;
+                return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        public ActionResult RdlEmployeeBirthday()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonNetResult PrintStudentSummary()
+        {   
+            var jsonData=Request["jsonData"];
+            List<AcademicLib.RE.Academic.StudentSummary> paraData = DeserializeObject<List<AcademicLib.RE.Academic.StudentSummary>>(jsonData);
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var key = Guid.NewGuid().ToString().Replace("-", "");
+                Session.Add(key, paraData);
+                resVal.ResponseId = key;
+                resVal.IsSuccess = true;
+                return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        
+        [HttpPost]
+        public JsonNetResult SendSMSToStudent(AcademicLib.RE.Academic.StudentSummaryList dataColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+               
+                foreach (var v in dataColl)
+                {
+                    if (!string.IsNullOrEmpty(v.F_ContactNo) && !string.IsNullOrEmpty(v.SMSText))
+                    {
+                        resVal = new Global.GlobalFunction(User.UserId, User.HostName, User.DBName).SendSMS(v.F_ContactNo, v.SMSText,true);
+                    }
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        [HttpPost, ValidateInput(false)]
+        public JsonNetResult SendNoticeToStudent()
+        {
+            string photoLocation = "/Attachments/academic/employee";
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                JsonSerializerSettings microsoftDateFormatSettings = new JsonSerializerSettings
+                {
+                    DateFormatHandling = DateFormatHandling.MicrosoftDateFormat
+                };
+                var beData = DeserializeObject<AcademicLib.API.Teacher.StudentNotice>(Request["jsonData"]);
+                if (beData != null)
+                {                    
+                    var AttachmentColl = new Dynamic.BusinessEntity.GeneralDocumentCollections();
+                    if (Request.Files.Count > 0)
+                    {                       
+                        var filesColl = Request.Files;
+                                               
+                        for(int fInd=0;fInd<filesColl.Count;fInd++)
+                        {
+                            HttpPostedFileBase file = filesColl["file" + fInd];
+                            if (file != null)
+                            {
+                                var att = GetAttachmentDocuments(photoLocation, file);
+                                AttachmentColl.Add
+                                    (
+                                     new Dynamic.BusinessEntity.GeneralDocument()
+                                     {
+                                         Data = att.Data,
+                                         DocPath = att.DocPath,
+                                         DocumentTypeId = null,
+                                         Extension = att.Extension,
+                                         Name = att.Name,
+                                         Description = att.Description
+                                     }
+                                    );
+                            }
+                            fInd++;
+                        }
+                    }
+
+                    Dynamic.BusinessEntity.Global.NotificationLog notification = new Dynamic.BusinessEntity.Global.NotificationLog();
+                    notification.Content = beData.description;
+                    notification.EntityId = Convert.ToInt32(AcademicLib.BE.Global.NOTIFICATION_ENTITY.NOTICE);
+                    notification.EntityName = AcademicLib.BE.Global.NOTIFICATION_ENTITY.NOTICE.ToString();
+                    notification.Heading = beData.title;
+                    notification.Subject = beData.title;
+                    notification.UserId = User.UserId;
+                    notification.UserName = User.Identity.Name;
+                    notification.UserIdColl = beData.studentIdColl;
+                    
+                    if (AttachmentColl != null && AttachmentColl.Count > 0)
+                    {
+                        notification.ContentPath = AttachmentColl[0].DocPath;
+                    }
+                    resVal = new PivotalERP.Global.GlobalFunction(User.UserId, User.HostName, User.DBName).SendNotification(User.UserId, notification, false);
+
+                    resVal.IsSuccess = true;
+                    resVal.ResponseMSG = GLOBALMSG.SUCCESS;
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [PermissionsAttribute(Actions.View, (int)ENTITIES.IdentityCard, false)]
+        public ActionResult IdentityCard()
+        {
+            return View();
+        }
+        public ActionResult DownloadQrImage(int classId,int? sectionId,int? batchId=null,int? semesterId=null,int? classYearId=null)
+        {
+            var filePath = Server.MapPath("~") + "print-tran-log//";
+            var user = User;
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Student(user.UserId, user.HostName, user.DBName).getStudentListForIdCard(this.AcademicYearId, classId, sectionId, "", null, null, 0, 0, 0, 0, null, semesterId,classYearId,batchId) ;
+            System.Collections.Generic.List<FileInfo> filesColl = new List<FileInfo>();
+            foreach (var v in dataColl)
+            {
+                if (!string.IsNullOrEmpty(v.QrCodeStr))
+                {
+                    QRCoder.QRCodeGenerator qRCodeGenerator = new QRCoder.QRCodeGenerator();
+                    QRCoder.QRCodeData qRCodeData = qRCodeGenerator.CreateQrCode(v.QrCodeStr, QRCoder.QRCodeGenerator.ECCLevel.Q);
+                    QRCoder.QRCode qRCode = new QRCoder.QRCode(qRCodeData);
+                    System.Drawing.Bitmap bitmap = qRCode.GetGraphic(7);
+                    FileInfo fi = new FileInfo();
+                    fi.FileId = v.StudentId;
+                    fi.FileName = v.RollNo.ToString() + ".png";
+                    fi.FilePath = filePath + fi.FileName;
+                    bitmap.Save(fi.FilePath, System.Drawing.Imaging.ImageFormat.Png);
+                    bitmap.Dispose();
+                    filesColl.Add(fi);
+                }
+            }
+            using (var memoryStream = new System.IO.MemoryStream())
+            {
+                using (var ziparchive = new System.IO.Compression.ZipArchive(memoryStream,  ZipArchiveMode.Create, true))
+                {
+                    for (int i = 0; i < filesColl.Count; i++)
+                    {                        
+                       ziparchive.CreateEntryFromFile(filesColl[i].FilePath, filesColl[i].FileName);
+                    }
+                }
+
+                return File(memoryStream.ToArray(), "application/zip");
+
+                //return File(memoryStream.ToArray(), "application/zip", "Attachments.zip");
+            }
+
+        }
+        private class FileInfo
+        {
+            public int FileId { get; set; }
+            public string FileName { get; set; }
+            public string FilePath { get; set; }
+        }
+        public ActionResult RdlIdentityCard()
+        {
+            return View();
+        }
+
+        [PermissionsAttribute(Actions.View, (int)ENTITIES.Analysis, false)]
+        public ActionResult Analysis()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonNetResult GetAnalysis(List<int> rangeColl)
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Student(User.UserId, User.HostName, User.DBName).getAnalysis(this.AcademicYearId, rangeColl);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [PermissionsAttribute(Actions.View, (int)ENTITIES.EmployeeReport, false)]
+        public ActionResult EmployeeReport()
+        {
+            return View();
+        }
+
+        public ActionResult RdlEmployeeIdCard()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonNetResult GetEmpSummary(string DepartmentIdColl="")
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Employee(User.UserId, User.HostName, User.DBName).getEmployeeSummaryList(DepartmentIdColl);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        [HttpPost]
+        public JsonNetResult GetEmpLeftSummary(string DepartmentIdColl = "")
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Employee(User.UserId, User.HostName, User.DBName).getEmployeeLeftSummaryList(DepartmentIdColl);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        public ActionResult DownloadEmpQrImage(int? DepartmentId= null,int ? DesignationId = null)
+        {
+            var filePath = Server.MapPath("~") + "print-tran-log//";
+            var user = User;
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Employee(user.UserId, user.HostName, user.DBName).getEmpListForIdCard("", null, null, DepartmentId,DesignationId);
+            System.Collections.Generic.List<FileInfo> filesColl = new List<FileInfo>();
+            foreach (var v in dataColl)
+            {
+                if (!string.IsNullOrEmpty(v.QrCode))
+                {
+                    QRCoder.QRCodeGenerator qRCodeGenerator = new QRCoder.QRCodeGenerator();
+                    QRCoder.QRCodeData qRCodeData = qRCodeGenerator.CreateQrCode(v.QrCode, QRCoder.QRCodeGenerator.ECCLevel.Q);
+                    QRCoder.QRCode qRCode = new QRCoder.QRCode(qRCodeData);
+                    System.Drawing.Bitmap bitmap = qRCode.GetGraphic(7);
+                    FileInfo fi = new FileInfo();
+                    fi.FileId = v.EmployeeId;
+                    fi.FileName = v.EmployeeCode.ToString() + ".png";
+                    fi.FilePath = filePath + fi.FileName;
+                    bitmap.Save(fi.FilePath, System.Drawing.Imaging.ImageFormat.Png);
+                    bitmap.Dispose();
+                    filesColl.Add(fi);
+                }
+            }
+            using (var memoryStream = new System.IO.MemoryStream())
+            {
+                using (var ziparchive = new System.IO.Compression.ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                {
+                    for (int i = 0; i < filesColl.Count; i++)
+                    {
+                        ziparchive.CreateEntryFromFile(filesColl[i].FilePath, filesColl[i].FileName);
+                    }
+                }
+
+                return File(memoryStream.ToArray(), "application/zip");
+
+                //return File(memoryStream.ToArray(), "application/zip", "Attachments.zip");
+            }
+
+        }
+        [HttpPost]
+        public JsonNetResult PrintEmployeeSummary()
+        {
+            var jsonData = Request["jsonData"];
+            List<AcademicLib.RE.Academic.EmployeeSummary> paraData = DeserializeObject<List<AcademicLib.RE.Academic.EmployeeSummary>>(jsonData);
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var key = Guid.NewGuid().ToString().Replace("-", "");
+                Session.Add(key, paraData);
+                resVal.ResponseId = key;
+                resVal.IsSuccess = true;
+                return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult SendSMSToEmployee(AcademicLib.RE.Academic.EmployeeSummaryCollections dataColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                foreach (var v in dataColl)
+                {
+                    if (!string.IsNullOrEmpty(v.ContactNo) && !string.IsNullOrEmpty(v.SMSText))
+                    {
+                        resVal = new Global.GlobalFunction(User.UserId, User.HostName, User.DBName).SendSMS(v.ContactNo, v.SMSText,true);
+                    }
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        [HttpPost, ValidateInput(false)]
+        public JsonNetResult SendNoticeToEmployee()
+        {
+            string photoLocation = "/Attachments/academic/employee";
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                JsonSerializerSettings microsoftDateFormatSettings = new JsonSerializerSettings
+                {
+                    DateFormatHandling = DateFormatHandling.MicrosoftDateFormat
+                };
+                var beData = DeserializeObject<AcademicLib.API.Teacher.StudentNotice>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    var AttachmentColl = new Dynamic.BusinessEntity.GeneralDocumentCollections();
+                    if (Request.Files.Count > 0)
+                    {
+                        var filesColl = Request.Files;
+
+                        for (int fInd = 0; fInd < filesColl.Count; fInd++)
+                        {
+                            HttpPostedFileBase file = filesColl["file" + fInd];
+                            if (file != null)
+                            {
+                                var att = GetAttachmentDocuments(photoLocation, file);
+                                AttachmentColl.Add
+                                    (
+                                     new Dynamic.BusinessEntity.GeneralDocument()
+                                     {
+                                         Data = att.Data,
+                                         DocPath = att.DocPath,
+                                         DocumentTypeId = null,
+                                         Extension = att.Extension,
+                                         Name = att.Name,
+                                         Description = att.Description
+                                     }
+                                    );
+                            }
+                            fInd++;
+                        }
+                    }
+
+                    Dynamic.BusinessEntity.Global.NotificationLog notification = new Dynamic.BusinessEntity.Global.NotificationLog();
+                    notification.Content = beData.description;
+                    notification.EntityId = Convert.ToInt32(AcademicLib.BE.Global.NOTIFICATION_ENTITY.NOTICE);
+                    notification.EntityName = AcademicLib.BE.Global.NOTIFICATION_ENTITY.NOTICE.ToString();
+                    notification.Heading = beData.title;
+                    notification.Subject = beData.title;
+                    notification.UserId = User.UserId;
+                    notification.UserName = User.Identity.Name;
+                    notification.UserIdColl = beData.studentIdColl;
+
+                    if (AttachmentColl != null && AttachmentColl.Count > 0)
+                    {
+                        notification.ContentPath = AttachmentColl[0].DocPath;
+                    }
+                    resVal = new PivotalERP.Global.GlobalFunction(User.UserId, User.HostName, User.DBName).SendNotification(User.UserId, notification, false);
+
+                    resVal.IsSuccess = true;
+                    resVal.ResponseMSG = GLOBALMSG.SUCCESS;
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [PermissionsAttribute(Actions.View, (int)ENTITIES.Birthday, false)]
+        public ActionResult Birthday()
+        {
+            return View();
+        }
+
+        
+        public ActionResult SheduleReport()
+        {
+            return View();
+        }
+
+
+        public ActionResult QuickAccess()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonNetResult GetStudentProfile(int StudentId)
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Student(User.UserId, User.HostName,User.DBName).getStudentForApp(this.AcademicYearId, StudentId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetStudentRemarks(int StudentId)
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.StudentRemarks(User.UserId, User.HostName, User.DBName).getRemarksList(this.AcademicYearId, DateTime.Today, DateTime.Today, null, StudentId);            
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+
+        [HttpPost]
+        public JsonNetResult GetStudentResult(int StudentId)
+        {
+            var dataColl = new AcademicLib.BL.Exam.Transaction.MarksEntry(User.UserId, User.HostName, User.DBName).getStudentResult(StudentId, this.AcademicYearId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetStudentGroupResult(int StudentId)
+        {
+            var dataColl = new AcademicLib.BL.Exam.Transaction.MarksEntry(User.UserId, User.HostName, User.DBName).getStudentGroupResult(StudentId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        [HttpPost]
+        public JsonNetResult GetStudentHomeWorks(int StudentId)
+        {
+            var dataColl = new AcademicLib.BL.HomeWork.HomeWork(User.UserId, User.HostName, User.DBName).GetAllHomeWork(0, null, null, false, StudentId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        [HttpPost]
+        public JsonNetResult GetStudentAssignmentWorks(int StudentId)
+        {
+            var dataColl = new AcademicLib.BL.HomeWork.Assignment(User.UserId, User.HostName, User.DBName).GetAllAssignment(0, null, null, StudentId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetStudentBookLedger(int StudentId)
+        {
+            var dataColl = new AcademicLib.BL.Library.Transaction.BookEntry(User.UserId, User.HostName, User.DBName).getStudentLedger(this.AcademicYearId, StudentId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+
+        [HttpPost]
+        public JsonNetResult GetStudentNotificationLog(int StudentId)
+        {
+            var dataColl = new AcademicLib.BL.Global(User.UserId, User.HostName, User.DBName).GetNotificationLogForQuickAccess(StudentId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+
+    }
+}

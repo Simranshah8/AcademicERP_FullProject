@@ -1,0 +1,1225 @@
+﻿
+<link href="~/Scripts/nepalidate/nepali.datepicker.v3.5.min.css" rel="stylesheet" />
+<script src="~/Scripts/nepalidate/nepali.datepicker.v3.5.min.js"></script>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+@*<script src="~/jslib/export/html2canvas.js"></script>*@
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script>
+    var EntityId =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.StudentProfile);
+    var AdmissionEnquiryId =@ViewBag.AdmissionEnquiryId;
+    var RegistrationId=@ViewBag.RegistrationId;
+</script>
+<script src="~/jslib/academic/transaction/Student.js?v=20251115"></script>
+<style>
+    .timeline.registration-form > .time-label > span {
+        border: 1px solid #dee2e6;
+    }
+</style>
+<div ng-cloak class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="StudentController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:50px!important">
+
+                <div class="tab-pane fade show active" id="admission-enquiry" role="tabpanel"
+                     aria-labelledby="admission-enquiry-tab">
+                    <!-- The time line -->
+                    <div class="timeline registration-form">
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Student Information</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">SystemId</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.AutoNumber" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">{{'REGDNO_LNG' | translate}}<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.RegNo" ng-disabled="StudentConfig.RegdNumberingMethod==1" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Admit Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newStudent.AdmitDate_TMP" date-detail="newStudent.AdmitDateDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">First Name<span style="color:red">*</span></label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.FirstName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Middle Name</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.MiddleName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Last Name<span style="color:red">*</span></label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.LastName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Gender<span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newStudent.Gender">
+                                                        <option ng-value="gen.id" ng-repeat="gen in GenderColl" ng-selected="gen.id==newStudent.Gender">{{gen.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-show="CompanyConfig.Country == 'Nepal'">
+                                                <div class="form-group">
+                                                    <label for="">DOB </label><span class="text-info" style="font-size:12px;"> (Age: {{newStudent.DOBBSDet.age}})</span>
+                                                    <input type="text" id="dtDOBBS"
+                                                           class="form-control form-control-sm" date-picker ng-model="newStudent.DOBBS_TMP" date-detail="newStudent.DOBBSDet" confirm-action="updateDOB(2)" date-style="2" ng-focus="OnDOBFocus(2)" ng-blur="updateDOB(2)">
+                                                </div>
+                                            </div>
+                                            <div ng-class="CompanyConfig.Country == 'Nepal' ? 'col-md-2' : 'col-md-4'">
+                                                <div class="form-group">
+                                                    <label for="">DOB(AD) </label><span class="text-info" style="font-size:12px;"> (Age: {{newStudent.DOBBSDet.age}})</span>
+                                                    <input type="text" id="dtDOBAD"
+                                                           class="form-control form-control-sm" date-picker ng-model="newStudent.DOBAD_TMP" date-detail="newStudent.DOBADDet" confirm-action="updateDOB(1)" date-style="1" ng-focus="OnDOBFocus(1)" ng-blur="updateDOB(1)">
+                                                </div>
+                                            </div>
+
+                                            @*<div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Date of Birth</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newStudent.DOB_TMP" date-detail="newStudent.DOB_ADDet">
+                                                </div>
+                                            </div>*@
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Religion</label>
+                                                    <input type="text" class="form-control-sm form-control" data-ng-model="newStudent.Religion" list="lstReligion">
+                                                    <datalist id="lstReligion">
+                                                        <option data-ng-repeat="ttl in ReligionList" value="{{ttl}}">
+                                                    </datalist>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">{{'CAST_LNG' | translate}}</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newStudent.CasteId">
+                                                        <option ng-value="c.CasteId" ng-repeat="c in CasteList" ng-selected="c.CasteId==newStudent.CasteId">{{c.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Nationality</label>
+                                                    <input type="text" class="form-control-sm form-control" data-ng-model="newStudent.Nationality" list="lstNationality">
+                                                    <datalist id="lstNationality">
+                                                        <option data-ng-repeat="ttl in CountryList" value="{{ttl}}">
+                                                    </datalist>
+                                                </div>
+                                            </div>
+
+
+                                            <!--updated forms  -->
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Blood Group</label>
+                                                    <input type="text" class="form-control-sm form-control" data-ng-model="newStudent.BloodGroup" list="lstBloodGroup">
+                                                    <datalist id="lstBloodGroup">
+                                                        <option data-ng-repeat="ttl in BloodGroupList" value="{{ttl}}">
+                                                    </datalist>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Contact No.</label>
+                                                    <input type="text" contact-number
+                                                           class="form-control form-control-sm" ng-model="newStudent.ContactNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Email</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.Email">
+                                                </div>
+                                            </div>
+                                            <!-- /. updated forms -->
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Mother Tongue</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.MotherTongue">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Height(Feet/Inch)</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.Height" placeholder="5’10”">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Weight(Kg)</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.Weigth">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="checkbox-wrap">
+                                                    Is Physical Disability ?
+                                                    <input type="checkbox" id="disabilityCheckbox" ng-model="newStudent.IsPhysicalDisability" />
+                                                    <span class="checkmark"></span>
+                                                </label>
+                                                <div id="disabilityCheckboxdiv" ng-hide="newStudent.IsPhysicalDisability==false">
+                                                    <input type="text" class="form-control-sm form-control" data-ng-model="newStudent.PhysicalDisability" list="lstPhysicalDisability">
+                                                    <datalist id="lstPhysicalDisability">
+                                                        <option data-ng-repeat="ttl in DisablityList" value="{{ttl}}">
+                                                    </datalist>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Aim</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.Aim">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Birth Certificate No.</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.BirthCertificateNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">{{'CITIZENSHIP_LNG' | translate}}</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.CitizenshipNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label for="">Remarks</label>
+                                                    <textarea name="" id="" cols="30" rows="1" class="form-control form-control-sm" ng-model="newStudent.Remarks"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Enquiry/Registration No.</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.EnquiryNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Referral Code</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newStudent.ReferralCode">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- col-md-9 -->
+                                    <div class="col-md-3">
+                                        <label for="" class="invisible">Photo</label>
+                                        <div class="person-photo-attachment-wrap text-center">
+                                            <div class="img-wrap mx-auto">
+                                                <img ng-hide="webCam.Start==true" ng-src="{{newStudent.PhotoData || newStudent.PhotoPath}}" class="img-fluid" alt="" id="imgPhoto1">
+                                                <video ng-show="webCam.Start==true" id="video" class="img-fluid" autoplay></video>
+                                            </div>
+                                            <!-- Button trigger modal -->
+                                            <button ng-hide="webCam.Start==true" type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#updatePhoto">
+                                                <i class="fas fa-camera w-t"></i> Upload Photo
+                                            </button>
+                                            <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" ng-click="takePhotoFromCamera()" id="start-camera">
+                                                <i class="fas fa-camera w-t"></i> {{webCam.Start==true ? 'Take Photo' :'Start Camera'  }}
+                                            </button>
+                                        </div>
+                                        <div class="signature-img-wrap text-center">
+                                            <div class="img-wrap">
+                                                <img ng-src="{{newStudent.SignatureData  || newStudent.SignaturePath}}" class="img-fluid" alt="" id="imgSignature1">
+                                            </div>
+                                            <button class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#uploadsignature"><i class="ti-cloud-up"></i> Upload Signature</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <!-- timeline Acacemic Details label -->
+                        <div class="time-label">
+                            <span class="">Academic Details</span>
+                        </div>
+                        <!-- /.timeline-Acacemic Details-label -->
+                        <!-- timeline Acacemic Details item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Class<span style="color:red">*</span></label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.ClassId" ng-change="GetAutoRollNo()">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassList" ng-selected="cl.id==newStudent.ClassId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3" ng-show="AcademicConfig.ActiveFaculty==true">
+                                        <div class="form-group">
+                                            <label for="">Faculty </label>
+                                            <label class="form-control form-control-sm" for="">{{SelectedClass.FacultyName}}</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3" ng-show="AcademicConfig.ActiveLevel==true">
+                                        <div class="form-group">
+                                            <label for="">Level </label>
+                                            <label class="form-control form-control-sm" for="">{{SelectedClass.LevelName}}</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3" ng-show="SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label for="">Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.SemesterId">
+                                                <option ng-value="0">**Select Semester**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList" ng-selected="cl.id==newStudent.SemesterId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3" ng-show="SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group">
+                                            <label for="">Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.ClassYearId">
+                                                <option ng-value="0">**Select Year**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList" ng-selected="cl.id==newStudent.ClassYearId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3" ng-show="AcademicConfig.ActiveBatch==true">
+                                        <div class="form-group">
+                                            <label for="">Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.BatchId">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newStudent.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Section</label>
+                                            <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newStudent.SectionId" ng-change="GetAutoRollNo()">
+                                                <option ng-value="0">**Select Section**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in SectionList" ng-selected="cl.id==newStudent.SectionId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Roll No.</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="newStudent.RollNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Academic Year<span style="color:red">*</span></label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.AcademicYear">
+                                                <option ng-value="0">**Select AcademicYear**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in AcademicYearList" ng-selected="cl.id==newStudent.AcademicYear">{{cl.Description}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div>
+
+                                            <label class="checkbox-wrap mt-3">
+                                                Is New Student?
+                                                <input type="checkbox"
+                                                       name="istrasnportation"
+                                                       id="istrasnportation" ng-value="true" ng-model="newStudent.IsNewStudent" />
+                                                <span class="checkmark"></span>
+                                            </label>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Student Type</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.StudentTypeId">
+                                                <option ng-value="0">**Select StudentType**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in StudentTypeList" ng-selected="cl.id==newStudent.StudentTypeId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Medium</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.MediumId">
+                                                <option ng-value="0">**Select Medium**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in MediumList" ng-selected="cl.id==newStudent.MediumId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">House Name</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.HouseNameId" data-placeholder="** select HouseName **">
+                                                <option ng-value="cl.id" ng-repeat="cl in HouseNameList" ng-selected="cl.id==newStudent.HouseNameId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">House Dress</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.HouseDressId" data-placeholder="** select HouseDress **">
+                                                <option ng-value="cl.id" ng-repeat="cl in HouseDressList" ng-selected="cl.id==newStudent.HouseDressId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Transport Point</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.TransportPointId">
+                                                <option ng-value="0">**Select TransportPoint**</option>
+                                                <option ng-selected="newStudent.TransportPointId==tp.PointId" ng-value="tp.PointId" ng-repeat="tp in TransportPointList">{{tp.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Boarders Type</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.BoardersTypeId">
+                                                <option ng-value="0">**Select BoardersType**</option>
+                                                <option ng-selected="newStudent.BoardersTypeId==r.BedId" ng-value="r.BedId" ng-repeat="r in RoomList">{{r.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Select Board</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.BoardId">
+                                                <option ng-value="0">**Select Board**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BoardList" ng-selected="cl.id==newStudent.BoardId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Board Regd. No.</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newStudent.BoardRegNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Enroll No.</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="newStudent.EnrollNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">RFID Card No.</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newStudent.CardNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3" ng-show="LANG=='np'">
+                                        <div class="form-group">
+                                            <label for="">EMS Id</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newStudent.EMSId">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Ledger Pana No.</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newStudent.LedgerPanaNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Class Of 1st Admission</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.ClassId_First">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassList" ng-selected="cl.id==newStudent.ClassId_First">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END Acacemic Details item -->
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Parent Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="">Father Name<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.FatherName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="">Professsion</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.F_Profession">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Contact<span style="color:red">*</span></label>
+                                                    <input type="text" contact-number class="form-control form-control-sm" ng-model="newStudent.F_ContactNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Email</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.F_Email">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Annual Income</label>
+                                                    <input type="text" number-input class="form-control form-control-sm" ng-model="newStudent.F_AnnualIncome">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="">Mother Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.MotherName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="">Professsion</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.M_Profession">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Contact</label>
+                                                    <input type="text" contact-number class="form-control form-control-sm" ng-model="newStudent.M_Contact">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Email</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.M_Email">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Annual Income</label>
+                                                    <input type="text" number-input class="form-control form-control-sm" ng-model="newStudent.M_AnnualIncome">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label>Family Type</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                   name="exampleRadios" id="exampleRadios1"
+                                                                   value="option1" checked>
+                                                            <label class="form-check-label"
+                                                                   for="exampleRadios1">
+                                                                Nuclear Family
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                   name="exampleRadios" id="exampleRadios2"
+                                                                   value="option2">
+                                                            <label class="form-check-label"
+                                                                   for="exampleRadios2">
+                                                                Joint Family
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--Father Image Starts-->
+                                    <div class="col-md-2">
+                                        <div class="text-center">
+                                            <label>Father Photo</label>
+                                        </div>
+                                        <div class="person-photo-attachment-wrap text-center">
+                                            <div class="img-wrap mx-auto">
+                                                <img ng-src="{{ (newStudent.FatherPhotoData ? newStudent.FatherPhotoData : (newStudent.FatherPhotoPath && newStudent.FatherPhotoPath.length>0 ? newStudent.FatherPhotoPath : DefaultPhoto))}}" class="img-fluid" alt="" id="imgFatherPhoto">
+                                            </div>
+                                            <label for="choose-file-father" type="button" class="btn btn-outline-secondary btn-sm"><i class="fas fa-camera w-t"></i> Upload Photo</label>
+                                            <input id="choose-file-father" type="file" accept=".jpg,.jpeg,.png" style="display: none;" file-model ng-model="newStudent.FatherPhoto_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newStudent.FatherPhotoData" />
+
+                                        </div>
+
+                                    </div>
+                                    <!--Mother Image Starts-->
+                                    <div class="col-md-2">
+                                        <div class="text-center">
+
+                                            <label>Mother Photo</label>
+                                        </div>
+                                        <div class="person-photo-attachment-wrap text-center">
+                                            <div class="img-wrap mx-auto">
+                                                <img ng-src="{{ (newStudent.MotherPhotoData ? newStudent.MotherPhotoData : (newStudent.MotherPhotoPath && newStudent.MotherPhotoPath.length>0 ? newStudent.MotherPhotoPath : DefaultPhoto))}}" class="img-fluid" alt="" id="imgMotherPhoto">
+
+                                            </div>
+                                            <label for="choose-file-mother" type="button" class="btn btn-outline-secondary btn-sm"><i class="fas fa-camera w-t"></i> Upload Photo</label>
+                                            <input id="choose-file-mother" type="file" accept=".jpg,.jpeg,.png" style="display: none;" file-model ng-model="newStudent.MotherPhoto_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newStudent.MotherPhotoData" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <div class="time-label">
+                            <span class="">Guardian Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <label>If Guradian Is</label>
+                                            </div>
+                                            <div class="col-md-6 ml-2">
+                                                <div class="form-group clearfix">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" id="rb-interest-calc-yes" name="r5" ng-value="1" ng-model="newStudent.IfGurandianIs" ng-change="LoadGuradianDet()">
+                                                        <label class="form-check-label" for="rb-interest-calc-yes">Father</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" id="rb-interest-cal-no" name="r5" ng-value="2" ng-model="newStudent.IfGurandianIs" ng-change="LoadGuradianDet()">
+                                                        <label class="form-check-label" for="rb-interest-cal-no">Mother</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" id="radio-third-option" name="r5" ng-value="3" ng-model="newStudent.IfGurandianIs" ng-change="LoadGuradianDet()">
+                                                        <label class="form-check-label" for="radio-third-option">Other</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Guardian Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.GuardianName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Relation</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.G_Relation">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Professsion</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.G_Profesion">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Contact</label>
+                                                    <input type="text" contact-number class="form-control form-control-sm" ng-model="newStudent.G_ContactNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Email</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.G_Email">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Address</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.G_Address">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="text-center">
+                                            <label>Guardian Photo</label>
+                                        </div>
+                                        <div class="person-photo-attachment-wrap text-center">
+                                            <div class="img-wrap mx-auto">
+                                                <img ng-src="{{ (newStudent.GuardianPhotoData ? newStudent.GuardianPhotoData : (newStudent.GuardianPhotoPath && newStudent.GuardianPhotoPath.length>0 ? newStudent.GuardianPhotoPath : DefaultPhoto))}}" class="img-fluid" alt="" id="imgGuardian">
+                                            </div>
+                                            <label for="choose-file-guardian" type="button" class="btn btn-outline-secondary btn-sm"><i class="fas fa-camera w-t"></i> Upload Photo</label>
+                                            <input id="choose-file-guardian" type="file" accept=".jpg,.jpeg,.png" style="display: none;" file-model ng-model="newStudent.GuardianPhoto_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newStudent.GuardianPhotoData" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Permanent Address time label -->
+                        <div class="time-label">
+                            <span class="">Permanent Address</span>
+                        </div>
+                        <!-- /.Permanent Address-label -->
+                        <!-- Permanent Address item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Full Address<span style="color:red">*</span></label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newStudent.PA_FullAddress">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">{{'PROVINCE_LNG' | translate}}</label>
+                                            @*<input type="text" class="form-control form-control-sm" ng-model="newStudent.PA_Province">*@
+                                            <select class="form-control form-control-sm select2" id="cboProvincePA"
+                                                    style="width: 100%;" ng-model="newStudent.PA_ProvinceId" data-placeholder="** select province **">
+                                                <option ng-repeat="cl in ProvinceColl" ng-value="cl.id" ng-selected="cl.id==newStudent.PA_ProvinceId">
+                                                    {{cl.text}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">District</label>
+                                            @*<input type="text" class="form-control form-control-sm" ng-model="newStudent.PA_District">*@
+                                            <select class="form-control form-control-sm select2" id="cboDistrictPA"
+                                                    style="width: 100%;" ng-model="newStudent.PA_DistrictId" data-placeholder="** select district **">
+                                                <option ng-repeat="tdc in DistrictColl | filter: { stateId: newStudent.PA_ProvinceId }:true" ng-value="tdc.id" ng-selected="tdc.id==newStudent.PA_DistrictId">
+                                                    {{tdc.text}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">{{'LOCAL_LEVEL_LNG' | translate}}</label>
+                                            @*<input type="text" class="form-control form-control-sm" ng-model="newStudent.PA_LocalLevel">*@
+                                            <select class="form-control form-control-sm select2" id="cboAreaPA"
+                                                    style="width: 100%;" ng-model="newStudent.PA_LocalLevelId" data-placeholder="** select area **">
+                                                <option ng-repeat="tdc in VDCColl| filter: { districtId: newStudent.PA_DistrictId }:true" ng-value="tdc.id" ng-selected="tdc.id==newStudent.PA_LocalLevelId">
+                                                    {{tdc.text}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">{{'WARDNO_LNG' | translate}}</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="newStudent.PA_WardNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Street /House No.</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newStudent.PA_Village">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END Permanent Address item -->
+                        <!-- Current Address time label -->
+                        <div class="time-label">
+                            <span class="">Current Address</span>
+                        </div>
+                        <!-- /.Current Address-label -->
+                        <!-- Current Address item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="checkbox-wrap">
+                                                Same as Permanent Address
+                                                <input type="checkbox" ng-value="true" ng-model="newStudent.IsSameAsPermanentAddress" ng-change="SamePAddress()">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Full Address</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newStudent.CA_FullAddress">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">{{'PROVINCE_LNG' | translate}}</label>
+                                            @*<input type="text" class="form-control form-control-sm" ng-model="newStudent.CA_Province">*@
+                                            <select class="form-control form-control-sm select2" id="cboProvinceCA"
+                                                    style="width: 100%;" ng-model="newStudent.CA_ProvinceId" data-placeholder="** select province **">
+                                                <option ng-repeat="cl in ProvinceColl" ng-value="cl.id" ng-selected="cl.id==newStudent.CA_ProvinceId">
+                                                    {{cl.text}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">District</label>
+                                            @*<input type="text" class="form-control form-control-sm" ng-model="newStudent.CA_District">*@
+                                            <select class="form-control form-control-sm select2" id="cboDistrictCA"
+                                                    style="width: 100%;" ng-model="newStudent.CA_DistrictId" data-placeholder="** select district **">
+                                                <option ng-repeat="tdc in DistrictColl | filter: { stateId: newStudent.CA_ProvinceId }:true" ng-value="tdc.id" ng-selected="tdc.id==newStudent.CA_DistrictId">
+                                                    {{tdc.text}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">{{'LOCAL_LEVEL_LNG' | translate}}</label>
+                                            @*<input type="text" class="form-control form-control-sm" ng-model="newStudent.CA_LocalLevel">*@
+                                            <select class="form-control form-control-sm select2" id="cboAreaCA"
+                                                    style="width: 100%;" ng-model="newStudent.CA_LocalLevelId" data-placeholder="** select area **">
+                                                <option ng-repeat="tdc in VDCColl| filter: { districtId: newStudent.CA_DistrictId }:true" ng-value="tdc.id" ng-selected="tdc.id==newStudent.CA_LocalLevelId">
+                                                    {{tdc.text}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">{{'WARDNO_LNG' | translate}}</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="newStudent.CA_WardNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Street /House No.</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newStudent.StreetName">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- END Current Address item -->
+                        <!-- Sibling Details Starts added by suresh on 8 mangsir starts-->
+                        <div class="time-label">
+                            <span class="">Sibling Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="table-responsive">
+                                    <div class="">
+                                        <table id="" class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 150px">Class/Sec</th>
+                                                    <th style="width: 200px">Student Name</th>
+                                                    <th style="width: 120px">Relation</th>
+                                                    <th style="width: 200px">Remarks</th>
+                                                    <th style="width: 80px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="sDet in newStudent.SiblingDetailColl_TMP">
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="sDet.SelectedClassSection" ng-change="GetStudentForSibling(sDet,$index)">
+                                                            <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList" ng-selected="cs.ClassId==sDet.ClassId && cs.SectionId==sDet.SectionId">{{cs.text}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="sDet.ForStudentId" style="width:100%" id="cboStudent{{$index}}">
+                                                            <option ng-value="st.StudentId" ng-repeat="st in sDet.StudentList">{{st.Name}}-{{st.RollNo}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control-sm form-control" data-ng-model="sDet.Relation" list="lstSRelation{{$index}}">
+                                                        <datalist id="lstSRelation{{$index}}">
+                                                            <option data-ng-repeat="ttl in SiblingRelationList" value="{{ttl}}">
+                                                        </datalist>
+                                                    </td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="sDet.Remarks"></td>
+                                                    <td>
+                                                        <a class="p-1" ng-click="AddSiblingDetails($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delSiblingDetails($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Sibling timeline  Ends -->
+                        <!-- END Current Address item -->
+                        <div class="time-label">
+                            <span class="">Previous Academic Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="table-responsive">
+                                    <div class="">
+                                        <table id="" class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 90px">Class</th>
+                                                    <th style="width: 150px">Exam</th>
+                                                    <th style="width: 120px">Passout Year</th>
+                                                    <th style="width: 90px">Symbol No.</th>
+                                                    <th style="width: 120px">Obtained Marks</th>
+                                                    <th style="width: 120px">Obtained(%)</th>
+                                                    <th style="width: 110px">Division</th>
+                                                    <th style="width: 100px">GPA</th>
+                                                    <th style="width: 150px">School/College</th>
+                                                    <th style="width: 100px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="acDet in newStudent.AcademicDetailsColl">
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.ClassName"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.Exam"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.PassoutYear"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.SymbolNo"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm" ng-model="acDet.ObtainMarks"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm" ng-model="acDet.ObtainPer"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.Division"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm" ng-model="acDet.GPA"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.SchoolColledge"></td>
+                                                    <td>
+                                                        <a class="p-1" ng-click="AddAcademicDetails($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delAcademicDetails($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Attach  Document(s)</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="pb-1 add-more-than-one-form-block">
+                                    <form class="mb-0">
+                                        <article>
+                                            <div class="row">
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>Type Of Document</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="docType">
+                                                            <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-10">
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <div class="form-group">
+                                                                <label>Attach Document</label>
+                                                                <div class="form-group">
+                                                                    <input type="file" id="flMoreFiles" class="form-control-file border p-0 bg-white" file-model accept="image/png, image/gif, image/jpeg, image/jpg, application/pdf, application/msword" ng-model="attachFile">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Description</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                       ng-model="docDescription"
+                                                                       placeholder="">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div class="d-flex">
+                                                                <div>
+                                                                    <label class="invisible d-block">for height</label>
+                                                                    <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFiles(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </form>
+                                </div>
+                                <div class="pb-3">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover border bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" style="width: 20px">SN.</th>
+                                                    <th scope="col" style="width: 40%">Document Type</th>
+                                                    <th scope="col">File Name</th>
+                                                    <th scope="col">Description</th>
+                                                    <th scope="col" style="width: 130px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="ac in newStudent.AttachmentColl">
+                                                    <th scope="row">{{$index+1}}</th>
+                                                    <td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>
+                                                    <td>{{ac.Name}}</td>
+                                                    <td>{{ac.Description}}</td>
+                                                    <td>
+                                                        <div>
+                                                            <a class="p-1" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                <i class="fas fa-eye text-secondary"></i>
+                                                            </a>
+                                                            @*<a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+                                                <i class="fas fa-download  text-info"></i>
+                                            </a>*@
+                                                            <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <!-- END Current Address item -->
+                        <div class="time-label" ng-show="StudentConfig.ShowBillingInAdmission==true">
+                            <span class="">Billing Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div ng-show="StudentConfig.ShowBillingInAdmission==true">
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="">Bill Generate Upto Month</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudent.PaidUpToMonth" data-placeholder="** Select Month**">
+                                                <option ng-value="0">**Select Month**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newStudent.PaidUpToMonth">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- timeline time label new paste -->
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearStudent()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateStudent()">{{newStudent.Mode}}</button>
+                            </span>
+                        </div>
+                        <!-- /.timeline-label -->
+                    </div>
+                </div>
+
+            </section>
+
+            <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <i class="flaticon-close"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                             data-max-file-size="3" ng-model="newStudent.Photo_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newStudent.PhotoData">
+                            <div class="photo-upload-wrap">
+                                <span class="static-content">
+                                    <img ng-src="{{newStudent.PhotoData}}" class="img-fluid" id="imgPhoto">
+                                    <span>Drag & Drop your<br>image here</span>
+                                </span>
+                            </div>
+                            <div class="text-muted pb-3">or</div>
+                            <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                            <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newStudent.Photo_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newStudent.PhotoData" />
+                            <a ng-click="ClearStudentPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                            @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAuthorImage()">Save</button>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="uploadsignature" tabindex="-1" aria-labelledby="updateSignatureLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="updateSignatureLabel">Upload Signature</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <i class="flaticon-close"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                             data-max-file-size="3" ng-model="newStudent.Signature_TMP" @*after-selected="AddStudentSignature()"*@ fileread="newStudent.SignatureData">
+                            <div class="photo-upload-wrap">
+                                <span class="static-content">
+                                    <img ng-src="{{newStudent.SignatureData}}" class="img-fluid" id="imgSignature">
+                                    <span>Drag & Drop your<br>image here</span>
+                                </span>
+                            </div>
+                            <div class="text-muted pb-3">or</div>
+                            <label for="choose-signature" type="button" class="btn btn-secondary btn-light btn-sm">Upload Signature</label>
+                            <input id="choose-signature" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newStudent.Signature_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newStudent.SignatureData" />
+                            <a ng-click="ClearSignaturePhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                            @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAuthorImage()">Save</button>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top: 26px;">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <p class="modal-title" id="exampleModalCenterTitle">Report Viewer</p>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <iframe ng-hide="viewImg.File" src="{{viewImg.ContentPath}}" style="width:100%; height: 70vh;">
+                    </iframe>
+                    <img ng-show="viewImg.File" ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;" id="imgPreviewAdd">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sibling Modal starts-->
+    <div class="modal fade" id="modal-sibling-info">
+        <div class="modal-dialog modal-xl" style="margin-left:250px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Sibling Student List Of :: {{CurParentStudent.RegdNo}}-{{CurParentStudent.Name}}-{{CurParentStudent.ClassName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- /.card-header -->
+
+                    <div class="table-scroll-x-y sales-main-table table-scroll" style="height: 320px;">
+                        <table id="main-tablebb" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr class="text-nowrap">
+                                    <th ng-click="sort('RegdNo')" class="align-middle cstm-sticky" style="width: 90px; left: 0; z-index: 2; background-color: #fff">{{'REGDNO_LNG' | translate}}</th>
+                                    <th ng-click="sort('Name')" class="align-middle cstm-sticky" style="width: 150px; left: 90px; z-index: 2; background-color: #fff; background-color: #fff">Name</th>
+                                    <th ng-click="sort('RollNo')" class="align-middle cstm-sticky" style="width: 100px; left: 240px; z-index: 2; background-color: #fff">Roll No</th>
+                                    <th ng-click="sort('ClassName')" style="width: 150px;">Class/Sec</th>
+                                    <th ng-click="sort('Relation')" style="width: 100px;">Relation</th>
+                                    <th ng-click="sort('Remarks')" style="width: 150px;">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody ng-repeat="sg in CurSiblingDetailsColl">
+                                <tr>
+                                    <td>
+                                        {{sg.RegdNo}}
+                                    </td>
+                                    <td>{{sg.Name}}</td>
+                                    <td>{{sg.RollNo}}</td>
+                                    <td>{{sg.ClassName}} {{sg.SectionName}}</td>
+                                    <td>{{sg.Relation}}</td>
+                                    <td>{{sg.Remarks}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Close</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Info modal-dialog -->
+</div>

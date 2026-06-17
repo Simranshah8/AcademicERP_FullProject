@@ -1,0 +1,346 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/jslib/exam/transaction/Objective.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ObjectiveController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div class="root">
+                        <div class="card-primary px-0 card-tabs ">
+                            <div class="tab-content" id="myTabContent" @*style="margin-top:-25px;"*@>
+                                <header class="if-page-have-nav-tabs px-2">
+                                    <div class="row upper-tab">
+                                        <div class="col-md-10">
+                                            <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                                role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                       href="#home" role="tab" aria-controls="home"
+                                                       aria-selected="true">Objective</a>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                       href="#profile" role="tab" aria-controls="profile"
+                                                       aria-selected="false" ng-click="GetObjectiveTransferDetails()">Objective Transfer</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                </header>
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+
+                                    <div id="Objective-section" class="card py-2 mb-0" style="margin-top:50px;">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <form class="form-inline clearfix">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Objective">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Objective">{{pp.text}}</option>
+                                                        </select>
+
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm table-search-filed ml-2">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search"
+                                                                   placeholder="Search"
+                                                                   aria-label="Search"
+                                                                   ng-model="searchData.Objective" />
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="col-md-5 text-right">
+                                                <button type="button"
+                                                        id="add-Details"
+                                                        class="btn btn-sm btn-success"
+                                                        style="min-width: 90px;"
+                                                        ng-click="ClearDetails()">
+                                                    <i class="fas fa-plus w-t"></i> Add Details
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="PayHeading"
+                                                       class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 20px">S.N</th>
+                                                            <th style="width: 80px">Class</th>
+                                                            <th style="width: 100px">Exam Type</th>
+                                                            <th style="width: 100px">Subject</th>
+                                                            <th style="width: 60px">Full Marks</th>
+                                                            <th style="width: 20px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="O in ObjectiveList| filter:searchData.Objective | itemsPerPage: perPage.Objective" current-page="currentPages.Objective" pagination-id="ObjectivePagination">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{O.ClassName}}-{{O.SectionName}}</td>
+                                                            <td>{{O.ExamName}}</td>
+                                                            <td>{{O.SubjectName}}</td>
+                                                            <td>{{O.FullMark}}</td>
+                                                            <td style="text-align:center;">
+                                                                <a class="p-1" href="#" ng-click="DelObjectiveById(O,$index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="ObjectivePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                    <div id="Objective-form" class="card p-0 mb-0" style="margin-top:50px;">
+                                        <div class="card-body px-0 py-2">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Class<spna class="text-danger">*</spna></label>
+                                                        <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newDet.SelectedClass" ng-change="GetClassSummaryClassWiseSubject()">
+                                                            <option ng-value="C" ng-repeat="C  in ClassSectionList.SectionList">{{C.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Exam Type<spna class="text-danger">*</spna></label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newDet.ExamTypeId">
+                                                            <option ng-value="E.id" ng-repeat="E in ExamTypeList" ng-selected="E.id==newDet.ExamTypeId">{{E.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Subject<spna class="text-danger">*</spna></label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newDet.SubjectId" ng-change="GetObjectiveDetails()">
+                                                            <option ng-value="cs.SubjectId" ng-repeat="cs in SubjectList" ng-selected="cs.SubjectId==newDet.SubjectId">{{cs.SubjectName}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Full Mark<spna class="text-danger">*</spna></label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newDet.FullMark" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;margin-top:-15px;">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 20px; background-color: #e9ecef !important;">S.No</th>
+                                                        <th style="width: 110px; background-color: #e9ecef !important;">Name<spna class="text-danger">*</spna></th>
+                                                        <th style="width: 200px; background-color: #e9ecef !important;">Description</th>
+                                                        <th style="width: 22px; background-color: #e9ecef !important;">IsActive</th>
+                                                        <th style="width: 35px; background-color: #e9ecef !important;">Mark</th>
+                                                        <th style="width: 25px; background-color: #e9ecef !important;">Action</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    <tr ng-repeat="I in newDet.ObjectiveDetailsColl">
+                                                        <td class="text-center">{{$index+1}}</td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="I.Name" /></td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="I.Description" /></td>
+                                                        <!--<td><input type="checkbox" class="form-control form-control-sm"--> @*style="transform: scale(0.65);*@<!--" ng-model="I.IsActive" /></td>-->
+                                                        <td style="text-align:center;"><input type="checkbox" @*class="custom-control-input"*@ ng-model="I.IsActive"></td>
+                                                        <td><input type="number" class="form-control form-control-sm" ng-model="I.Marks" /></td>
+                                                        <td>
+                                                            <a class="p-1" ng-click="AddPHDDetails($index)">
+                                                                <i class="fas fa-plus text-secondary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delPHDDetails($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div class="text-center mt-2">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info text-center"
+                                                    id="back-Details"
+                                                    style="min-width: 90px">
+                                                Back To List
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-sm text-dark bg-white border"
+                                                    style="min-width: 90px;"
+                                                    ng-click="ClearDetails()">
+                                                Reset
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info text-center bg-success"
+                                                    style="min-width: 90px"
+                                                    ng-click="SaveUpdateObjective()">
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab" style="margin-top:20px;">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">From Exam Type</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newTransfer.FromExamTypeId" >
+                                                    <option ng-value="E.id" ng-repeat="E in ExamTypeList" ng-selected="E.id==newTransfer.FromExamTypeId">{{E.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">To Exam Type</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newTransfer.ToExamTypeId"  >
+                                                    <option ng-value="E.id" ng-repeat="E in ExamTypeList| filter:excludeSelectedExamType" ng-selected="E.id==newTransfer.ToExamTypeId">{{E.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">From Class</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newTransfer.SelectedClass" ng-disabled="!newTransfer.IsClassWise">
+                                                    <option ng-value="C" ng-repeat="C in ClassSectionList.SectionList">{{C.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">To Class</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newTransfer.SelectedClass2" ng-disabled="!newTransfer.IsClassWise" ng-change="GetObjectiveTransferDetails()">
+                                                    <option ng-value="C" ng-repeat="C in ClassSectionList.SectionList| filter:excludeSelectedClass">{{C.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1 mt-4">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input"
+                                                       id="exampleCheck1" ng-model="newTransfer.IsClassWise">
+                                                <label class="custom-control-label"
+                                                       for="exampleCheck1">IsClasswie</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1 mt-4">
+                                            <div class="time-label">
+                                                <span class="d-block border-0">
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="TransferObjective()">Transfer</button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <form class="form-inline clearfix">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ObjectiveTransfer">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ObjectiveTransfer">{{pp.text}}</option>
+                                                        </select>
+
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm table-search-filed ml-2">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search"
+                                                                   placeholder="Search"
+                                                                   aria-label="Search"
+                                                                   ng-model="searchData.ObjectiveTransfer" />
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 20px; background-color: #e9ecef !important;">S.No</th>
+                                                        <th style="width: 100px; background-color: #e9ecef !important;">From Exam Type</th>
+                                                        <th style="width: 100px; background-color: #e9ecef !important;">To Exam Type</th>
+                                                        <th style="width: 100px; background-color: #e9ecef !important;">From Class</th>
+                                                        <th style="width: 100px; background-color: #e9ecef !important;">To Class</th>
+                                                        <th style="width: 100px; background-color: #e9ecef !important;">Transfer Date</th>
+                                                        <th style="width: 80px; background-color: #e9ecef !important;">Transfer By</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    <tr dir-paginate="T in TransferList| filter:searchData.ObjectiveTransfer | itemsPerPage: perPage.ObjectiveTransfer" current-page="currentPages.ObjectiveTransfer" pagination-id="ObjectiveTransferPagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{T.FromExamTypeName}}</td>
+                                                        <td>{{T.ToExamTypeName}}</td>
+                                                        <td>{{T.FromClassName}}-{{T.FromSectionName}}</td>
+                                                        <td>{{T.ToClassName}}-{{T.ToSectionName}}</td>
+                                                        <td>{{T.TransferDate}}</td>
+                                                        <td>{{T.TransferCreateBy}}</td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="ObjectiveTransferPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </section>
+        </div>
+
+    </section>
+</div>

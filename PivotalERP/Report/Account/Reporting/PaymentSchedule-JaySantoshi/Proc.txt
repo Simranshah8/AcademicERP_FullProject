@@ -1,0 +1,96 @@
+
+
+go
+
+alter proc sp_GetPaymentScheduleDetails
+(
+@DateFrom date,
+@DateTo date
+)
+as
+
+declare @tblLedger table(LedgerId int);
+
+with Tbl_LG 
+as 
+(
+  select LedgerGroupId,ParentGroupId,0 as [Level]
+  from TBL_LEDGERGROUP b 
+  where b.ParentGroupId=26
+    union all
+  select b.LedgerGroupId,b.ParentGroupId,[Level]+1
+  from TBL_LEDGERGROUP b join Tbl_LG on b.ParentGroupId= Tbl_LG.LedgerGroupId
+)       
+insert into @tblLedger  select LedgerId from tbl_LG LG inner join TBL_LEDGER Led on LG.LedgerGroupId=Led.LedgerGroupId   ;
+insert into @tblLedger  select LedgerId from TBL_LEDGER Led  inner join tbl_LedgerGroup LG on Led.LedgerGroupId=LG.LedgerGroupId where Led.LedgerGroupId=26;
+
+declare @tblLedgerContact  table(LedgerId int,MobileNo varchar(254),TelNo varchar(254));
+insert into @tblLedgerContact select  distinct LC.LedgerId,LC.MobileNo1,LC.TelNo1 from tbl_LedgerContactDetails LC inner join @tblLedger Led on Led.LedgerId=LC.LedgerId;
+
+select TR.VoucherDate,TR.NY,TR.NM,TR.ND,TR.EntryDate,TR.EDNY,TR.EDNM,TR.[EDND],Led.Name,AM.Name as Area,LAR.CrAmount,LC.MobileNo from tbl_TransactionReceipt TR
+inner join tbl_LedgerAllocationReceipt LAR on TR.TranId=LAR.TranId
+inner join @tblLedger L on L.LedgerId=LAR.LedgerId
+inner join tbl_Ledger Led on Led.LedgerId=L.LedgerId
+left join @tblLedgerContact LC on LC.LedgerId=L.LedgerId
+left join tbl_AreaMaster AM on AM.AreaId=Led.AreaId
+where TR.VoucherDate between @DateFrom and @DateTo and TR.IsCancel=0 and TR.IsPost=1 and TR.VoucherDate<>TR.EntryDate
+
+go
+
+alter proc sp_PaymentSchedule
+(
+@DateFrom date,
+@DateTo date,
+@AreaId int
+)
+as
+
+
+
+declare @tblLedger table(LedgerId int,Amount float);
+
+with Tbl_LG 
+as 
+(
+  select LedgerGroupId,ParentGroupId,0 as [Level]
+  from TBL_LEDGERGROUP b 
+  where b.ParentGroupId=26 or B.ParentGroupId=12
+    union all
+  select b.LedgerGroupId,b.ParentGroupId,[Level]+1
+  from TBL_LEDGERGROUP b join Tbl_LG on b.ParentGroupId= Tbl_LG.LedgerGroupId
+)       
+insert into @tblLedger  select LedgerId,(case when Led.DrCr=1 then OpeningAmount else -OpeningAmount end)  from tbl_LG LG inner join TBL_LEDGER Led on LG.LedgerGroupId=Led.LedgerGroupId  where Led.AreaId=@AreaId ;
+insert into @tblLedger  select LedgerId,(case when Led.DrCr=1 then OpeningAmount else -OpeningAmount end) from TBL_LEDGER Led  inner join tbl_LedgerGroup LG on Led.LedgerGroupId=LG.LedgerGroupId where Led.LedgerGroupId in (12,26) and Led.AreaId=@AreaId;
+
+declare @tblLedgerContact  table(LedgerId int,MobileNo varchar(254),TelNo varchar(254));
+insert into @tblLedgerContact select  distinct LC.LedgerId,LC.MobileNo1,LC.TelNo1 from tbl_LedgerContactDetails LC inner join @tblLedger Led on Led.LedgerId=LC.LedgerId;
+
+
+declare @tblTran table(LedgerId int,Amount float);
+insert into @tblTran  select LV.LedgerId,Sum(LV.DrAmount-LV.CrAmount) as Amt from tbl_LedgerVoucher LV inner join @tblLedger L on L.LedgerId=LV.LedgerId  where  LV.IsCancel=0 and LV.IsPost=1 and LV.IsOpening=0 group by LV.LedgerId;
+insert into @tblTran select LedgerId,Amount from @tblLedger;
+
+declare @tblReceipt table(LedgerId int,Amount float);
+insert into @tblReceipt select LAR.LedgerId,Sum(LAR.CrAmount) from tbl_TransactionReceipt TR
+inner join tbl_LedgerAllocationReceipt LAR on LAR.TranId=TR.TranId
+inner join @tblLedger Led on Led.LedgerId=LAR.LedgerId
+where TR.EntryDate between @DateFrom and @DateTo and TR.IsPost=1 and TR.IsCancel=0
+group by LAR.LedgerId;
+
+
+
+with tbl_T
+as
+(
+select T.LedgerId,Sum(T.Amount) as Amount from @tblTran T group by T.LedgerId
+)
+select T.LedgerId,Led.Name as PartyName,Led.[Address],LC.MobileNo,LC.TelNo,T.Amount as ClosingBalance,R.Amount as DuesAmount from tbl_T T 
+inner join tbl_Ledger Led on Led.LedgerId=T.LedgerId
+left join @tblReceipt R on T.LedgerId=R.LedgerId
+left join @tblLedgerContact LC on LC.LedgerId=T.LedgerId
+where R.Amount<>0 and T.Amount<>0
+order by Led.Name
+
+go
+
+

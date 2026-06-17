@@ -1,0 +1,677 @@
+﻿<style>
+    .info {
+        background-color: #4e8b89;
+        color: #fff;
+        padding: 8px;
+    }
+
+    .table-scroll-x-y table thead th, .table.table-head-fixed thead tr th {
+        background-color: #0b605f !important;
+        color: aliceblue !important;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #e5f2ff;
+        font-weight: 500;
+    }
+
+    .table-striped tbody tr:nth-of-type(even) {
+        background-color: #eef9f4;
+        font-weight: 500;
+    }
+
+    .statustable {
+        background-color: #76be4e3b;
+        color: #51623f;
+        border-radius: 5px;
+    }
+</style>
+<link href="~/wwwroot/dynamic/css/lessonplan.css" rel="stylesheet" />
+<script src="~/jslib/academic/creation/SyllabusStatus.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="SyllabusStatusController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Classwise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">Teacherwise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="contact-tab" data-toggle="tab"
+                                               href="#contact" role="tab" aria-controls="contact"
+                                               aria-selected="false">Subjectwise</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="classwiseList">
+                                    
+                                    <div class="row mt-2">
+                                        <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newClasswise.BatchId" ng-change="GetClassWiseLessonPlan(1)" style="width:100%">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newClasswise.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mr-2">Class/Sec</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newClasswise.SelectedClass" ng-change="GetClassWiseLessonPlan(1)" style="width:100%">
+                                                    <option ng-value="cl" ng-repeat="cl in ClassSection.SectionList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4" ng-show="newClasswise.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Class Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newClasswise.ClassYearId" ng-change="GetClassWiseLessonPlan(1)" style="width:100%">
+                                                    <option ng-value="cl.ClassYearId" ng-repeat="cl in ClassYearList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4" ng-show="newClasswise.SelectedClass.ClassType==3  &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newClasswise.SemesterId" ng-change="GetClassWiseLessonPlan(1)" style="width:100%">
+                                                    <option ng-value="cl.SemesterId" ng-repeat="cl in SemesterList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>                                  
+                                    <div class="card p-0">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search" ng-model="searchData.Classwise"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#ClasswiseTbl'" sheet-name="'ClasswiseList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#ClasswiseTbl').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#ClasswiseTbl'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered table-striped">
+                                                    <thead class=" text-nowrap">
+                                                        <tr>
+                                                            <th style="width: 300px;">Subject Name</th>
+                                                            <th style="width: 300px;">Teacher Name</th>
+                                                            <th style="width: 150px;">Status</th>
+                                                            <th style="width: 150px;">View Details</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="cl in DataList1">
+                                                            <td>{{cl.SubjectName}}</td>
+                                                            <td>{{cl.EmpName}}</td>
+                                                            <td> <label class="statustable px-2 py-1 mt-1"><strong>{{cl.CompletedPer}}% Completed</strong></label></td>
+                                                            <td><button class="btn btn-sm btn-info" ng-click="ClassWiseDetails(cl)" style="padding:1px 7px;">Detail</button></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div id="classwisestatus-form">
+                                    <div class="info mt-2">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <h6><b>Class : {{CurCW.ClassName}} {{CurCW.SectionName}}</b></h6>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h6><b>Subject : {{CurCW.SubjectName}}</b></h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <h6><b>Teacher Name: {{CurCW.EmpName}}</b></h6>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="text-center">
+                                                    <button class="btn btn-sm statusblue px-3 statusbtn" style="padding:2px 10px">{{CurCW.CompletedPer}}% Completed</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="tree">
+                                        <ul class="card p-0" style="padding-left: 0px;margin-bottom: 6px;">
+                                            <!--First Lesson Starts-->
+                                            <li ng-repeat="ld in CurCW.DetailsColl">
+                                                <span data-toggle="collapse" style=" background-color: #ccecc4;">
+                                                    <div style="color:#000; text-decoration:none;" data-toggle="collapse"
+                                                         href="#topic-{{ld.SNo}}-{{tc.SNo}}" aria-expanded="true" aria-controls="topic1">
+                                                        <i class="collapsed"><i class="fas fa-folder"></i></i>
+                                                        <i class="expanded"><i class="far fa-folder-open"></i></i>
+                                                        {{ld.SNo}}. {{ld.LessonName}}<label class="updateDate"><b>&rarr;</b><i> ({{ld.PlanStartDate_BS}} - {{ld.PlanEndDate_BS}})</i> - <b>4 Days</b></label>
+                                                        <label class="float-right px-2 statusgreen"><b>{{ld.CompletedPer}}% complete</b></label>
+                                                    </div>
+                                                </span>
+                                                <div id="topic-{{ld.SNo}}-{{tc.SNo}}" class="collapse show">
+                                                    <ul class="pb-3">
+                                                        <li ng-repeat="tc in ld.TopicColl">
+                                                            <span data-toggle="collapse" style=" background-color: #e7f0e6;">
+                                                                <div style="color:#000; text-decoration:none;" data-toggle="collapse"
+                                                                     href="#subtopic-{{ld.SNo}}-{{tc.SNo}}" aria-expanded="false"
+                                                                     aria-controls="subtopic-{{ld.SNo}}-{{tc.SNo}}">
+                                                                    <i class="collapsed"><i class="fas fa-folder"></i></i>
+                                                                    <i class="expanded"><i class="far fa-folder-open"></i></i>
+                                                                    {{ld.SNo}}.{{tc.SNo}} {{tc.TopicName}}
+                                                                <div class="p-1 mt-2" style="background-color: #ffffffd9; border: 1px solid #ccecc4 ">
+                                                                    <label class="ml-4 text-col">
+                                                                        <i class="far fa-calendar-alt"></i>{{tc.PlanStartDate_BS}} - {{tc.PlanEndDate_BS}}
+                                                                    </label>
+                                                                    <label class="ml-3" ng-class="{
+           'text-warning': tc.Status === 'In Progress',
+           'text-danger': tc.Status === 'Pending',
+           'text-success': tc.Status === 'Completed'
+       }"><i class="fas fa-circle"></i>{{tc.Status}}</label>
+                                                                    <label class="ml-3">{{tc.StatusDays}}</label>
+                                                                    <label class="ml-3" ng-if="tc.EmpName"><i><i class="fas fa-user"></i>: {{tc.EmpName}}</i></label>
+                                                                    <label class="ml-3" ng-if="tc.EndDate_BS" title="End Date"><i>On {{tc.EndDate_BS}}</i> </label>
+                                                                    <label class="ml-3" ng-if="tc.StartRemarks">
+                                                                        <i class="fas fa-play-circle text-info" title="Start Remarks"></i> {{tc.StartRemarks}}
+                                                                    </label>
+
+                                                                    <label class="ml-3" ng-if="tc.EndRemarks">
+                                                                        <i class="fas fa-stop-circle text-success" title="End Remarks"></i> {{tc.EndRemarks}}
+                                                                    </label>
+                                                                </div>
+                                                                </div>
+                                                            </span>
+
+                                                            <div id="subtopic-{{ld.SNo}}-{{tc.SNo}}" class="collapse">
+                                                                <ul class="pb-3">
+                                                                    <li ng-repeat="CTTL in tc.ContentsColl">
+                                                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td style="width: 100px;">
+                                                                                            <div>
+                                                                                                {{CTTL.ForDateBS}}                                                                                                
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <div class="card-body" ng-bind-html="CTTL.Contents | unsafe">                                                                                                
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <label class="ml-3" ng-class="{'text-warning': CTTL.Status === 'In Progress','text-danger': CTTL.Status === 'Pending','text-success': CTTL.Status === 'Completed'}"><i class="fas fa-circle"></i>{{CTTL.Status}}</label>
+                                                                                                <label class="ml-3">{{CTTL.StatusDays}}</label>
+                                                                                                <label class="ml-3" ng-if="CTTL.EmpName"><i><i class="fas fa-user"></i>: {{CTTL.EmpName}}</i></label>
+                                                                                                <label class="ml-3" title="End Date" ng-if="CTTL.EndDate_BS"><i>On {{CTTL.EndDate_BS}}</i> </label>
+                                                                                                <label class="ml-3" ng-if="CTTL.StartRemarks"><i class="fas fa-play-circle text-info" title="Start Remarks"></i> {{CTTL.StartRemarks}}  <i class="fas fa-stop-circle text-success" title="End Remarks"></i> {{CTTL.EndRemarks}}</label>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </li>                                                            
+                                                                </ul>
+                                                            </div>
+                                                        </li>
+                                                       
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                           
+                                        </ul>
+                                    </div>
+
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" id="backclasswiselist" class="btn btn-sm btn-info" style="min-width: 90px">
+                                                Back to List
+                                            </button>
+
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!--Classwise Syllabus Status Ends-->
+                            <!--Teacherwise Syllabus Status Starts-->
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="teacherwiselist">
+                                    <div class="row mt-2">
+                                        <div class="col-sm-8 col-lg-8 col-md-8">
+                                            <div class="d-flex">
+                                                <label class="mr-2 mt-1">Select Teacher</label>
+                                                <div class="input-group-prepend" style="width:85%">
+                                                    <select class="input-group-text dropdown-toggle p-0"
+                                                            style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newTeacherwise.SelectEmployee">
+
+                                                        <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newTeacherwise.EmployeeSearchBy">
+                                                            {{ss.text}}
+                                                        </option>
+
+                                                    </select>
+                                                    <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newClasswise.EmployeeId" student-detail="newClasswise.EmployeeDetails" side-bar-data="newClasswise.EmpSideBarData" search-by="newClasswise.EmployeeSearchBy" confirm-action="GetClassWiseLessonPlan(2)">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card py-2">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search" ng-model="searchData.Teacherwise"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#TeacherwiseTbl'" sheet-name="'TeacherwiseList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#TeacherwiseTbl').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                       
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#TeacherwiseTbl'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="TeacherwiseTbl" class="main-table table table-sm table-bordered table-striped">
+                                                    <thead class=" text-nowrap">
+                                                        <tr>
+                                                            <th style="width: 300px;">Class/Sec</th>
+                                                            <th style="width: 300px;">Subject Name</th>
+                                                            <th style="width: 150px;">Status</th>
+                                                            <th style="width: 150px;">View Details</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="cl in DataList2">
+                                                            <td>{{cl.ClassName}} ({{cl.SectionName}})</td>
+                                                            <td>{{cl.SubjectName}}</td>
+                                                            <td> <label class="statustable px-2 py-1 mt-1"><strong>{{cl.CompletedPer}}% Completed</strong></label></td>
+                                                            <td><button class="btn btn-sm btn-info"  ng-click="ClassWiseDetails1(cl)" style="padding:1px 7px;">Detail</button></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="teacherwisestatus-form">
+                                    <div class="info mt-2">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <h6><b>Class : {{CurCW1.ClassName}} {{CurCW1.SectionName}}</b></h6>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h6><b>Subject : {{CurCW1.SubjectName}}</b></h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <h6><b>Teacher Name: {{CurCW1.EmpName}}</b></h6>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="text-center">
+                                                    <button class="btn btn-sm statusblue px-3 statusbtn" style="padding:2px 10px">{{CurCW1.CompletedPer}}% Completed</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="tree">
+                                        <ul class="card p-0" style="padding-left: 0px;margin-bottom: 6px;">
+                                            <!--First Lesson Starts-->
+                                            <li ng-repeat="ld in CurCW1.DetailsColl">
+                                                <span data-toggle="collapse" style=" background-color: #ccecc4;">
+                                                    <div style="color:#000; text-decoration:none;" data-toggle="collapse"
+                                                         href="#topic-{{ld.SNo}}-{{tc.SNo}}" aria-expanded="true" aria-controls="topic1">
+                                                        <i class="collapsed"><i class="fas fa-folder"></i></i>
+                                                        <i class="expanded"><i class="far fa-folder-open"></i></i>
+                                                        {{ld.SNo}}. {{ld.LessonName}}<label class="updateDate"><b>&rarr;</b><i> ({{ld.PlanStartDate_BS}} - {{ld.PlanEndDate_BS}})</i> - <b>4 Days</b></label>
+                                                        <label class="float-right px-2 statusgreen"><b>{{ld.CompletedPer}}% complete</b></label>
+                                                    </div>
+                                                </span>
+                                                <div id="topic-{{ld.SNo}}-{{tc.SNo}}" class="collapse show">
+                                                    <ul class="pb-3">
+                                                        <li ng-repeat="tc in ld.TopicColl">
+                                                            <span data-toggle="collapse" style=" background-color: #e7f0e6;">
+                                                                <div style="color:#000; text-decoration:none;" data-toggle="collapse"
+                                                                     href="#subtopic-{{ld.SNo}}-{{tc.SNo}}" aria-expanded="false"
+                                                                     aria-controls="subtopic-{{ld.SNo}}-{{tc.SNo}}">
+                                                                    <i class="collapsed"><i class="fas fa-folder"></i></i>
+                                                                    <i class="expanded"><i class="far fa-folder-open"></i></i>
+                                                                    {{ld.SNo}}.{{tc.SNo}} {{tc.TopicName}}
+                                                                <div class="p-1 mt-2" style="background-color: #ffffffd9; border: 1px solid #ccecc4 ">
+                                                                    <label class="ml-4 text-col">
+                                                                        <i class="far fa-calendar-alt"></i>{{tc.PlanStartDate_BS}} - {{tc.PlanEndDate_BS}}
+                                                                    </label>
+                                                                    <label class="ml-3 text-success"><i class="fas fa-circle"></i>{{tc.Status}}</label>
+                                                                    <label class="ml-3">{{tc.StatusDays}}</label>
+                                                                    <label class="ml-3"><i><i class="fas fa-user"></i>: {{tc.EmpName}}</i></label>
+                                                                    <label class="ml-3" title="End Date"><i>On {{tc.EndDate_BS}}</i> </label>
+                                                                    <label class="ml-3" ng-if="tc.StartRemarks">
+                                                                        <i class="fas fa-play-circle text-info" title="Start Remarks"></i> {{tc.StartRemarks}}
+                                                                    </label>
+
+                                                                    <label class="ml-3" ng-if="tc.EndRemarks">
+                                                                        <i class="fas fa-stop-circle text-success" title="End Remarks"></i> {{tc.EndRemarks}}
+                                                                    </label>
+                                                                </div>
+                                                                </div>
+                                                            </span>
+
+                                                            <div id="subtopic-{{ld.SNo}}-{{tc.SNo}}" class="collapse">
+                                                                <ul class="pb-3">
+                                                                    <li ng-repeat="CTTL in tc.ContentsColl">
+                                                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td style="width: 100px;">{{CTTL.ForDateBS}}</td>
+                                                                                        <td>
+                                                                                            <div class="card-body" ng-bind-html="CTTL.Contents | unsafe">
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <label class="ml-3" ng-class="{'text-warning': CTTL.Status === 'In Progress','text-danger': CTTL.Status === 'Pending','text-success': CTTL.Status === 'Completed'}"><i class="fas fa-circle"></i>{{CTTL.Status}}</label>
+                                                                                                <label class="ml-3">{{CTTL.StatusDays}}</label>
+                                                                                                <label class="ml-3" ng-if="CTTL.EmpName"><i><i class="fas fa-user"></i>: {{CTTL.EmpName}}</i></label>
+                                                                                                <label class="ml-3" ng-if="CTTL.EndDate_BS" title="End Date"><i>On {{CTTL.EndDate_BS}}</i> </label>
+                                                                                                <label class="ml-3" ng-if="CTTL.StartRemarks"><i class="fas fa-play-circle text-info" title="Start Remarks"></i> {{CTTL.StartRemarks}}  <i class="fas fa-stop-circle text-success" title="End Remarks"></i> {{CTTL.EndRemarks}}</label>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </li>
+
+                                                    </ul>
+                                                </div>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" id="backteacherwiselist" class="btn btn-sm btn-info" style="min-width: 90px">
+                                                Back to List
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Teacherwise Syllabus Status Ends-->
+                            <!--Subjectwise Syllabus Status Starts-->
+                            <div class="tab-pane fade main-section" id="contact" role="tabpanel"
+                                 aria-labelledby="contact-tab">
+                                <div id="subjectlist">
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mr-2">Subject</label>                                               
+                                                <select class="form-control form-control-sm select2" ng-model="newClasswise.SubjectId" style="width:85%" ng-change="GetClassWiseLessonPlan(3)">
+                                                    <option ng-value="cl.SubjectId" ng-repeat="cl in SubjectList" ng-selected="cl.id==newClasswise.SubjectId">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search" ng-model="searchData.Subjectwise"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#SubjectwiseTbl'" sheet-name="'SubjectwiseList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#SubjectwiseTbl').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                      
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#SubjectwiseTbl'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="SubjectwiseTbl" class="main-table table table-sm table-bordered table-striped">
+                                                    <thead class=" text-nowrap">
+                                                        <tr>
+                                                            <th style="width: 300px;">Class/Sec</th>
+                                                            <th style="width: 300px;">Teacher</th>
+                                                            <th style="width: 150px;">Status</th>
+                                                            <th style="width: 150px;">View Details</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="cl in DataList3">
+                                                            <td>{{cl.ClassName}}-{{cl.SectionName}}</td>
+                                                            <td>{{cl.EmpName}}</td>
+                                                            <td> <label class="statustable px-2 py-1 mt-1"><strong>{{cl.CompletedPer}}% Completed</strong></label></td>
+                                                            <td><button class="btn btn-sm btn-info" ng-click="ClassWiseDetails2(cl)" style="padding:1px 7px;">Detail</button></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div id="subjectstatus-form">
+                                    <div class="info mt-2">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <h6><b>Class : {{CurCW2.ClassName}} {{CurCW2.SectionName}}</b></h6>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <h6><b>Subject : {{CurCW2.SubjectName}}</b></h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <h6><b>Teacher Name: {{CurCW2.EmpName}}</b></h6>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="text-center">
+                                                    <button class="btn btn-sm statusblue px-3 statusbtn" style="padding:2px 10px">{{CurCW2.CompletedPer}}% Completed</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="tree">
+                                        <ul class="card p-0" style="padding-left: 0px;margin-bottom: 6px;">
+                                            <!--First Lesson Starts-->
+                                            <li ng-repeat="ld in CurCW2.DetailsColl">
+                                                <span data-toggle="collapse" style=" background-color: #ccecc4;">
+                                                    <div style="color:#000; text-decoration:none;" data-toggle="collapse"
+                                                         href="#topic-{{ld.SNo}}-{{tc.SNo}}" aria-expanded="true" aria-controls="topic1">
+                                                        <i class="collapsed"><i class="fas fa-folder"></i></i>
+                                                        <i class="expanded"><i class="far fa-folder-open"></i></i>
+                                                        {{ld.SNo}}. {{ld.LessonName}}<label class="updateDate"><b>&rarr;</b><i> ({{ld.PlanStartDate_BS}} - {{ld.PlanEndDate_BS}})</i> - <b>4 Days</b></label>
+                                                        <label class="float-right px-2 statusgreen"><b>{{ld.CompletedPer}}% complete</b></label>
+                                                    </div>
+                                                </span>
+                                                <div id="topic-{{ld.SNo}}-{{tc.SNo}}" class="collapse show">
+                                                    <ul class="pb-3">
+                                                        <li ng-repeat="tc in ld.TopicColl">
+                                                            <span data-toggle="collapse" style=" background-color: #e7f0e6;">
+                                                                <div style="color:#000; text-decoration:none;" data-toggle="collapse"
+                                                                     href="#subtopic-{{ld.SNo}}-{{tc.SNo}}" aria-expanded="false"
+                                                                     aria-controls="subtopic-{{ld.SNo}}-{{tc.SNo}}">
+                                                                    <i class="collapsed"><i class="fas fa-folder"></i></i>
+                                                                    <i class="expanded"><i class="far fa-folder-open"></i></i>
+                                                                    {{ld.SNo}}.{{tc.SNo}} {{tc.TopicName}}
+                                                                <div class="p-1 mt-2" style="background-color: #ffffffd9; border: 1px solid #ccecc4 ">
+                                                                    <label class="ml-4 text-col">
+                                                                        <i class="far fa-calendar-alt"></i>{{tc.PlanStartDate_BS}} - {{tc.PlanEndDate_BS}}
+                                                                    </label>
+                                                                    <label ng-class="{'text-warning': tc.Status === 'In Progress','text-danger': tc.Status === 'Pending','text-success': tc.Status === 'Completed'
+                                                                            }"><i class="fas fa-circle"></i>{{tc.Status}}</label>
+                                                                    <label class="ml-3">{{tc.StatusDays}}</label>
+                                                                    <label class="ml-3"><i><i class="fas fa-user"></i>: {{tc.EmpName}}</i></label>
+                                                                    <label class="ml-3"><i>On {{tc.EndDate_BS}}</i> </label>
+                                                                    <label class="ml-3" ng-if="tc.StartRemarks">
+                                                                        <i class="fas fa-play-circle text-info" title="Start Remarks"></i> {{tc.StartRemarks}}
+                                                                    </label>
+
+                                                                    <label class="ml-3" ng-if="tc.EndRemarks">
+                                                                        <i class="fas fa-stop-circle text-success" title="End Remarks"></i> {{tc.EndRemarks}}
+                                                                    </label>
+                                                                </div>
+                                                                </div>
+                                                            </span>
+
+                                                            <div id="subtopic-{{ld.SNo}}-{{tc.SNo}}" class="collapse">
+                                                                <ul class="pb-3">
+                                                                    <li ng-repeat="CTTL in tc.ContentsColl">
+                                                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td style="width: 100px;">{{CTTL.ForDateBS}}</td>
+                                                                                        <td>
+                                                                                            <div class="card-body" ng-bind-html="CTTL.Contents | unsafe">
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <label class="ml-3" ng-class="{'text-warning': CTTL.Status === 'In Progress','text-danger': CTTL.Status === 'Pending','text-success': CTTL.Status === 'Completed'}"><i class="fas fa-circle"></i>{{CTTL.Status}}</label>
+                                                                                                <label class="ml-3">{{CTTL.StatusDays}}</label>
+                                                                                                <label class="ml-3" ng-if="CTTL.EmpName"><i><i class="fas fa-user"></i>: {{CTTL.EmpName}}</i></label>
+                                                                                                <label class="ml-3" ng-if="CTTL.EndDate_BS"><i>On {{CTTL.EndDate_BS}}</i> </label>
+                                                                                                <label class="ml-3" ng-if="CTTL.StartRemarks"><i class="fas fa-play-circle text-info" title="Start Remarks"></i> {{CTTL.StartRemarks}}  <i class="fas fa-stop-circle text-success" title="End Remarks"></i> {{CTTL.EndRemarks}}</label>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </li>
+
+                                                    </ul>
+                                                </div>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" id="backsubjectwiselist" class="btn btn-sm btn-info" style="min-width: 90px">
+                                                Back to List
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>

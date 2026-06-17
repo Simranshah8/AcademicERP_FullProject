@@ -1,0 +1,225 @@
+﻿<script src="~/jslib/infrastructure/RoomsDetails.js"></script>
+
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="RoomsDetailsController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:50px!important">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="card py-2" id="room-details-tbl">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="row">
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Building</label>
+                                            <select class="form-select form-control form-control-sm select2" ng-model="Filter.BuildingId" ng-change="GetFloorWiseRoomDetails()">
+                                                <option ng-repeat="A in BuildingList" ng-value="A.BuildingId" ng-selected="A.id==Filter.BuildingId">{{A.Name}} - {{A.BuildingNo}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Floor</label>
+                                            <select class="form-select form-control form-control-sm select2" ng-model="Filter.FloorId" ng-change="GetFloorWiseRoomDetails()">
+                                                <option ng-repeat="A in FloorList" ng-value="A.FloorId" ng-selected="A.FloorId==Filter.FloorId">{{A.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5 mt-4">
+                                        <form class="form-inline">
+
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.RoomsDetails">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right mt-4">
+                                @*<div class="dropdown dnld-file" data-toggle="tooltip"
+                     data-placement="top" title="Download File">
+                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                            id="dropdownMenuButton" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right"
+                         aria-labelledby="dropdownMenuButton">
+                        <span class="dropdown-item">Choose an option:</span>
+                        <a class="dropdown-item" href="#">
+                            <img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image">
+                            Excel
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image">
+                            CSV
+                        </a>
+                    </div>
+                </div>*@
+                                @*<a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                   data-placement="bottom" title="Print">
+                    <i class="fas fa-print"></i>
+                </a>*@
+
+                                <button type="button" class="btn btn-sm btn-success" id="add-room-details" style="min-width: 90px" ng-click="ClearFloorMapping()">
+                                    <i class="fas fa-plus w-t"></i> Add Room Details
+                                </button>
+
+                            </div>
+                        </header>
+                        <div class="card">
+                            <div class="class-detail" ng-repeat="roomData in GroupedRoomMappings | filter:searchData.RoomsDetails">
+
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label><b>Building : {{roomData.BuildingName}} </b></label>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label><b>Floor : {{roomData.FloorName}} </b></label>
+                                    </div>
+                                </div>
+
+                                <div class="table-scroll-x-y sales-main-table table-scroll mb-2">
+                                    <table class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 35px;" class="text-center">S.No.</th>
+                                                <th style="width: 130px;">Name</th>
+                                                <th style="width: 130px;">Utility</th>
+                                                <th style="width: 130px;">SubUtility</th>
+                                                <th style="width: 70px;">Length</th>
+                                                <th style="width: 70px;">Breadth</th>
+                                                <th style="width: 70px;">Capacity</th>
+                                                <th style="width: 175px;">Resources</th>
+                                            </tr>
+                                        <tbody>
+                                            <tr ng-repeat="cl in roomData.Rooms">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{cl.Name}}</td>
+                                                <td>{{cl.Utilities}}</td>
+                                                <td>{{cl.SubUtility}}</td>
+                                                <td>{{cl.Length}}</td>
+                                                <td>{{cl.Breadth}}</td>
+                                                <td>{{cl.Capacity}}</td>
+                                                <td>{{cl.Resources}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <div id="room-details-form">
+                        <div class="card card-default">
+                            <div class="card-body py-2 px-0">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Building</label>
+                                                    <select class="form-select form-control form-control-sm" ng-model="newDet.BuildingId" ng-change="ChangeBuilding()">
+                                                        <option ng-repeat="A in BuildingList" ng-value="A.BuildingId" ng-selected="A.BuildingId==newDet.BuildingId">{{A.Name}} - {{A.BuildingNo}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Floor</label>
+                                                    <select class="form-select form-control form-control-sm" ng-model="newDet.FloorId" ng-change="DetailsByBuildingFloor()">
+                                                        <option ng-repeat="A in FloorMappingList" ng-value="A.FloorId" ng-selected="A.FloorId==newDet.FloorId">{{A.FloorName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <div class="form-group">
+                                                    <label>Class Room</label>
+                                                    <label class="form-control form-control-sm" style="background-color: #f5f5f9;"> {{FloorDet.NoOfClassRooms}}</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <div class="form-group">
+                                                    <label>Other Room</label>
+                                                    <label class="form-control form-control-sm" style="background-color: #f5f5f9;">{{FloorDet.NoOfOtherRooms}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 60px;" class="text-center">S.No.</th>
+                                                        <th style="width: 155px;">Name<span class="text-danger">*</span></th>
+                                                        <th style="width: 175px;">Utility</th>
+                                                        <th style="width: 175px;">Sub Utility</th>
+                                                        <th style="width: 110px;">Length(M)</th>
+                                                        <th style="width: 110px;">Breadth(M)</th>
+                                                        <th style="width: 110px;">Capacity</th>
+                                                        <th style="width: 155px;">Resources</th>
+                                                        <th style="width: 155px;">Room Type</th>
+                                                    </tr>
+                                                <tbody>
+                                                    <tr ng-repeat="cl in newDet.subFloorWiseRoomDetailsColl">
+                                                        <td>{{$index+1}}</td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="cl.Name" /></td>
+                                                        <td>
+                                                            <select class="form-select form-control form-control-sm select2" ng-model="cl.UtilitiesId" ng-change="SubUtilitiesById(cl.UtilitiesId)">
+                                                                <option ng-repeat="A in UtilitiesList" ng-value="A.UtilitiesId" ng-selected="A.UtilitiesId==cl.UtilitiesId">
+                                                                    {{A.Name}}
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-select form-control form-control-sm select2"
+                                                                    ng-model="cl.SubUtility">
+                                                                <option ng-repeat="A in cl.SubUtilitiesList"
+                                                                        ng-value="A.Name" ng-selected="A.Name==cl.SubUtility">
+                                                                    {{A.Name}}
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="cl.Length" /></td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="cl.Breadth" /></td>
+                                                        <td><input type="number" class="form-control form-control-sm" ng-model="cl.Capacity" /></td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="cl.Resources" /></td>
+                                                        <td>
+                                                            <select class="form-select form-control form-control-sm" ng-model="cl.RoomTypeId" disabled>
+                                                                <option ng-repeat="A in RoomTypeColl" ng-value="A.id" ng-selected="A.id==cl.RoomTypeId">{{A.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="d-block border-0 p-3 text-center">
+                                        <button type="button" class="btn btn-sm btn-info" id="back-room-details-list-btn" style="min-width: 90px;">Back to List</button>
+                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearRoomDetails()">Reset</button>
+                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateRoomDetails()">{{newDet.Mode}}</button>
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+    </section>
+</div>

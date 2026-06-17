@@ -1,0 +1,231 @@
+﻿
+@*@{
+    ViewBag.Title = "QuestionList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}*@
+<style>
+    .custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+        background-color: #025a58;
+        border-radius: 4px;
+    }
+    .iframe-content-starts-here {
+        padding-top: 50px !important;
+    }
+    audio {
+        width: 180px;
+        height: 30px;
+    }
+</style>
+<script>
+    var WEBURLPATH = "@ViewBag.WEBURLPATH";
+</script>
+<script src="~/jslib/ELearning/QuestionList.js"></script> 
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="QuestionListController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="table-listing">
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <div class="form-group mb-0">
+                                <label>Exam Type</label>
+                                <select class="form-control form-control-sm select2" style="width:100%" ng-model="newQuestionList.ExamTypeId" id="cboExamTypeId" ng-change="GetAllQuestionList()">
+                                    <option ng-repeat="ct in ExamTypeColl track by $index" value="{{ ct.ExamTypeId }}" ng-selected="ct.ExamTypeId==newQuestionList.ExamTypeId">
+                                        {{ct.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group mb-0">
+                                <label>Class</label>
+                                <select class="form-control form-control-sm select2" style="width:100%"   ng-model="newQuestionList.ClassId" ng-change="GetClassWiseSubMap()">
+                                    <option ng-repeat="ct in ClassColl  track by $index" value="{{ ct.ClassId }}" ng-selected="ct.ClassId==newQuestionList.ClassId">
+                                        {{ct.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-0">
+                                <label>Section</label>
+                              
+                                <select ng-model="newQuestionList.SectionId" class="form-control form-control-sm input-sm select2" multiple="multiple"    ng-change="GetClassWiseSubMap()">
+                                    <option ng-repeat="cl in SectionClassColl | filter: { ClassId: newQuestionList.ClassId }:true" value="{{cl.SectionId}}">
+                                        {{cl.SectionName}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-0">
+                                <label>Subject</label>
+                                <select class="form-control form-control-sm " ng-model="newQuestionList.SubjectId" ng-change="GetAllQuestionList()">
+                                    <option ng-repeat="ct in newQuestionList.SubjectList" ng-value="ct.SubjectId" ng-selected="ct.SubjectId==newQuestionList.SubjectId">
+                                        {{ct.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Second Tab Content -->
+                    <div class="card p-0">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.QuestionList">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.QuestionList">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.QuestionList">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+
+                                <a href="#"
+                                   class="btn btn-secondary btn-light btn-sm"
+                                   data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                            </div>
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y sales-main-table table-scroll" @*style="height: calc(100vh - 10rem) ;overflow-x:auto"*@>
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white table-head-fixed">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 60px" ng-click="sort('QNo')">S.No.</th>
+                                            <th style="width: 140px" ng-click="sort('ExamModal')">Model</th>
+                                            <th style="width: 150px" ng-click="sort('CategoryName')">Category</th>
+                                            <th style="width: 350px" ng-click="sort('Question')">Question</th>
+                                            <th style="width: 200px;">Options</th>
+                                            <th style="width: 80px" ng-click="sort('Marks')">Marks</th>
+                                            <th style="width: 200px" ng-click="sort('FileCount')">File</th>
+                                            <th style="width: 100px" ng-click="sort('TeacherName')">Teacher</th>
+                                            <th style="width: 80px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in QuestionList |orderBy:sortKey:reverse| filter:searchData.QuestionList | itemsPerPage: perPage.QuestionList" current-page="currentPages.QuestionList" pagination-id="QuestionListPagination">
+                                            <td>{{cl.SNo}}</td>
+                                            <td>
+                                                <f ng-show="cl.ExamModal==1">
+                                                    Subjective
+                                                </f>
+                                                <f ng-show="cl.ExamModal==2">
+                                                    Objective
+                                                </f>
+                                            </td>
+                                            <td>{{cl.CategoryName}}</td>
+                                            <td>
+                                                <div compile class="card-body" ng-bind-html="cl.Question | unsafe">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div ng-repeat="qd in cl.DetailsColl">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input disabled class="custom-control-input" type="checkbox" name="type" ng-model="qd.IsRightAnswer" />
+                                                        <label for="customCheckbox1" class="custom-control-label">
+                                                            {{qd.SNo_Str}}. {{qd.Answer}}
+                                                            <a ng-show="qd.FileCount>0 && qd.FileType=='jpg'" class="card-title float-right" href="#" ng-click="DocumentAtt_Toggle(qd.FilePath)" data-toggle="modal" style="font-size:25px;">
+                                                                <img src="{{qd.FilePath}}" class="img-fluid  ml-4" ng-click="DocumentAtt_Toggle(qd.FilePath)" data-toggle="modal" style="height:70px; width:140px;" />
+                                                            </a>
+                                                            <a ng-show="qd.FileCount>0 && qd.FileType=='pdf'" href="#" ng-click="DocumentAtt_Toggle(qd.FilePath)" data-toggle="modal" class="color-gray-darker c6 td-hover-none">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/pdf.png" style="max-height:50px;" />
+                                                            </a>
+                                                            <audio ng-show="qd.FileCount>0 && qd.FileType=='mp3'" controls preload="none">
+                                                                <source src="{{qd.FilePath}}" type="audio/mp3">
+                                                                <source src="{{qd.FilePath}}" type="audio/x-ms-wma">
+                                                                <source src="{{qd.FilePath}}" type="audio/mp4">
+                                                            </audio>
+                                                        </label>
+
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{cl.Marks}}</td>
+                                            <td>
+                                                <a ng-show="cl.FileCount>0 && cl.FileType=='jpg'" class="card-title" href="#" ng-click="DocumentAtt_Toggle(cl.QuestionPath)" data-toggle="modal" style="font-size:25px;">
+                                                    <img src="{{cl.QuestionPath}}" class="img-fluid" ng-click="DocumentAtt_Toggle(cl.QuestionPath)" data-toggle="modal" style="height:70px; width:140px;" />
+                                                </a>
+                                                <a ng-show="cl.FileCount>0 && cl.FileType=='pdf'" href="#" ng-click="DocumentAtt_Toggle(cl.QuestionPath)" data-toggle="modal" class="color-gray-darker c6 td-hover-none">
+                                                    <div class="ba-0 ds-1">
+                                                        <img src="~/teacherloginFiles/dynamic/images/flaticons/pdf.png" style="max-height:50px;" />
+                                                    </div>
+                                                </a>
+                                                <audio ng-show="cl.FileCount>0 && cl.FileType=='mp3'" controls preload="none">
+                                                    <source src="{{cl.QuestionPath}}" type="audio/mp3">
+                                                    <source src="{{cl.QuestionPath}}" type="audio/x-ms-wma">
+                                                    <source src="{{cl.QuestionPath}}" type="audio/mp4">
+                                                </audio>
+                                            </td>
+                                            <td>{{cl.TeacherName}}</td>
+                                            <td>
+                                                <a class="p-1" href="#" ng-click="DelQuestionListById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="QuestionListPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+
+
+            </section>
+            <!-- /.row -->
+        </div>
+    </section>
+        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalIMG" role="dialog" tabindex="-1" style="margin-top:30px;">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-body mb-0 p-0">
+                        <iframe id="DocumentAtt_Iframe" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+
+                        <!-- <img src="~/teacherloginFiles/dynamic/images/attach-img.png" alt="" style="width:100%; height: 70vh;">-->
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <div><a href="{{downFilePath}}" target="_blank" download>Download</a></div>
+                        <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>

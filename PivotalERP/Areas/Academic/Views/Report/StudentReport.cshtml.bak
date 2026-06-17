@@ -1,0 +1,818 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<script>
+    var entityStudentBirthday = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.StudentBirthDay)";
+    var entityStudentSummary = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.StudentSummaryList)";
+
+    var entityNewStudentSummary = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.NewAdmissionList)";
+    var entityLeftStudentSummary = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.LeftStudentList)";
+    var entitySiblingStudentSummary = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.SiblingStudentList)";
+
+    var entityStudentSummaryForSMS = @Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.StudentReport);
+    var entityStudentBirthdayForSMS = @Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.STUDENT_BIRTHDAY);
+</script>
+
+<link rel="stylesheet" href="~/wwwroot/dynamic/css/dropzone.css" />
+<script src="~/wwwroot/dynamic/js/dropzone.js"></script>
+<script src="~/jslib/Academic/StudentReport.js?v=20221022"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="StudentReportController" ng-init="LoadData()" ng-class="{waiting: loadingstatus=='running'}">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="margin-top:5px;">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Student Summary List</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">New admission list</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="student-tab" data-toggle="tab"
+                                               href="#student" role="tab" aria-controls="student"
+                                               aria-selected="false">left student list</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="student-birthday-tab" data-toggle="tab"
+                                               href="#student-birthday" role="tab" aria-controls="student-birthday"
+                                               aria-selected="false">Birthday List</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="student-sibling-tab" data-toggle="tab"
+                                               href="#student-sibling" role="tab" aria-controls="student-sibling"
+                                               aria-selected="false">Sibling List</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="student-summery-section">
+                                    <form action="">
+                                        <div class="row">
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentSummaryList.ClassId" ng-change="GetStudentSummaryList()">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-1 col-lg-1 col-md-1">
+                                                <label>Section</label>
+                                                <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newStudentSummaryList.SectionId" ng-change="GetStudentSummaryList()">
+                                                    <option ng-value="se.SectionId" ng-repeat="se in ClassSection.SectionList |  filter: { ClassId: newStudentSummaryList.ClassId }:true">{{se.SectionName}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-1 col-lg-1 col-md-1">
+                                                <label>{{'CAST_LNG' | translate}}</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentSummaryList.CasteId" ng-change="GetStudentSummaryList()">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.CasteId" ng-repeat="cl in CasteList">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>House</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentSummaryList.HouseNameId" ng-change="GetStudentSummaryList()">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.HouseNameId" ng-repeat="cl in HouseNameList">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>StudentType</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentSummaryList.StudentTypeId" ng-change="GetStudentSummaryList()">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.StudentTypeId" ng-repeat="cl in StudentTypeList">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-1 col-lg-1 col-md-1">
+                                                <label>Medium</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentSummaryList.MediumId" ng-change="GetStudentSummaryList()">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.MediumId" ng-repeat="cl in MediumList">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 text-left mt-4">
+                                                <div class="float-right">
+                                                    <a class="btn btn-secondary btn-light btn-sm wait"
+                                                       data-toggle="tooltip" data-placement="bottom"
+                                                       title="Print" ng-click="PrintStudentSummary()">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                    <a class="btn btn-secondary btn-light btn-sm"
+                                                       data-placement="top" title="Send SMS" @*data-toggle="modal" data-target="#modal-sms"*@ ng-click="SendSMSToStudent()">
+                                                        <i class="fas fa-sms"></i>
+                                                    </a>
+                                                    <a class="btn btn-secondary btn-light btn-sm"
+                                                       data-placement="top" title="Send Email" ng-click="ShowEmailDialog()">
+                                                        <i class="fas fa-envelope"></i>
+                                                    </a>
+                                                    <a class="btn btn-secondary btn-light btn-sm"
+                                                       data-placement="top" title="Send Notification" @*data-toggle="modal" data-target="#modal-xl"*@ ng-click="SendNoticeToStudent()">
+                                                        <i class="fas fa-bell"></i>
+                                                    </a>
+                                                    <a class="btn btn-secondary btn-light btn-sm"
+                                                       data-placement="top" title="Save Report State" ng-click="saveRptListState()">
+                                                        <i class="fas fa-save"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-agerange">
+                                                        <i class="fas fa-plus"></i> Age Range
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            @*<div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>Student Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newStudentSummaryList.StudentTypeId">
+                                                        <option ng-value="0">**Select StudentType**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in StudentTypeList" ng-selected="cl.id==newStudentSummaryList.StudentTypeId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>House</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newStudentSummaryList.HouseNameId">
+                                                            <option ng-value="0">**Select HouseName**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in HouseNameList" ng-selected="cl.id==newStudentSummaryList.HouseNameId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Caste</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newStudentSummaryList.CasteId">
+                                                            <option ng-value="c.CasteId" ng-repeat="c in CasteList" ng-selected="c.CasteId==newStudentSummaryList.CasteId">{{c.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                                                    <div class="col-md-2 mt-3">
+                                                                                        <div class="custom-control custom-checkbox checkbox-sm text-left mt-2">
+                                                                                            <input type="checkbox"
+                                                                                                   class="custom-control-input"
+                                                                                                   id="class-all"
+                                                                                                   checked="" ng-model="newStudentSummaryList.ShowPhoto" />
+                                                                                            <label class="custom-control-label"
+                                                                                                   for="class-all">Show Photo</label>
+                                                                                        </div>
+
+                                                                                    </div>*@
+                                        </div>
+
+                                    </form>
+                                    <div class="card p-2">
+
+                                        <div id="stSummaryDiv" ui-grid="gridOptions"
+                                             @*ui-grid-pagination*@
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-auto-resize
+                                             ui-grid-save-state style="height: calc(100vh - 200px);">
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="new-admission-section">
+                                    <form action="">
+                                        <div class="row">
+                                            <div class="col-sm-4 col-lg-4 col-md-4">
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newAdmissionList.ClassId" ng-change="GetNewAdmissionList()">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-4 col-lg-4 col-md-4">
+                                                <label>Section</label>
+                                                <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newAdmissionList.SectionId" ng-change="GetNewAdmissionList()">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SectionList">{{cl.text}}</option>
+                                                </select>
+
+                                            </div>
+                                            <div class="col-md-2 text-left mt-4">
+                                                <a class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print" ng-click="PrintNewStudent()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send SMS" ng-click="SendSMSToNewStudent()">
+                                                    <i class="fas fa-sms"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send Notification" ng-click="SendNoticeToNewStudent()">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+
+                                            </div>
+                                            @*<div class="col-md-4 mt-3">
+                                                    <div class="custom-control custom-checkbox checkbox-sm text-left mt-2">
+                                                        <input type="checkbox"
+                                                               class="custom-control-input"
+                                                               id="class-2"
+                                                               checked="" ng-click="newAdmissionList.ShowPhoto" />
+                                                        <label class="custom-control-label"
+                                                               for="class-2">Show Photo</label>
+                                                    </div>
+                                                </div>*@
+                                        </div>
+
+                                    </form>
+                                    <div class="card p-2" style="min-width:800px">
+                                        <div ui-grid="gridOptions2" id="stNewStudentDiv"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-auto-resize
+                                             ui-grid-save-state style="height: calc(100vh - 200px); ">
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="student" role="tabpanel"
+                                 aria-labelledby="student-tab">
+                                <div id="left-student-list-section">
+                                    <form action="">
+                                        <div class="row">
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newLeftStudentList.ClassId" ng-change="GetLeftStudentList()">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <label>Section</label>
+                                                <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newLeftStudentList.SectionId" ng-change="GetLeftStudentList()">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SectionList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 text-left mt-4">
+                                                <a class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print" ng-click="PrintLeftStudent()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send SMS" ng-click="SendSMSToLeftStudent()">
+                                                    <i class="fas fa-sms"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send Notification" ng-click="SendNoticeToLeftStudent()">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+
+                                            </div>
+                                            @*<div class="col-md-2 mt-3">
+                                                    <span class=""> No. of Students: 2,000 </span>
+                                                </div>
+                                                <div class="col-md-2 mt-3">
+                                                    <span class=""> Left: 1,000</span>
+                                                </div>
+                                                <div class="col-md-2 mt-3">
+                                                    <span class=""> Current: 1,000 </span>
+                                                </div>*@
+                                        </div>
+
+                                    </form>
+
+                                    <div class="card p-2" style="min-width:800px">
+
+                                        <div ui-grid="gridOptions3" id="stLeftDiv"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-auto-resize
+                                             ui-grid-save-state style="height: calc(100vh - 200px); ">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="student-birthday" role="tabpanel"
+                                 aria-labelledby="student-birthday-tab">
+                                <div id="left-student-birthday-list-section">
+                                    <form action="">
+                                        <div class="row">
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <label>From Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newBirthday.DateFrom_TMP" date-detail="newBirthday.DateFromDet" confirm-action="LoadDOB()">
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <label>To Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newBirthday.DateTo_TMP" date-detail="newBirthday.DateToDet" confirm-action="LoadDOB()">
+                                            </div>
+                                            <div class="col-md-2 text-left mt-4">
+                                                <a class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print" ng-click="PrintStudentBirthday()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send SMS" ng-click="SendSMSToStudentBirthday()">
+                                                    <i class="fas fa-sms"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send Notification" ng-click="SendNoticeToStudentBirthday()">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+
+                                            </div>
+                                            <div class="col-sm-1 col-lg-1 col-md-1">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm  mt-4" ng-click="SendEmailDOB()" id="start-camera">
+                                                    <i class="fas fa-envelope"></i>Email
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                    </form>
+
+                                    <div class="card p-2" style="min-width:800px">
+
+                                        <div ui-grid="gridOptions4" id="stLeftDiv"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-auto-resize
+                                             ui-grid-save-state style="height: calc(100vh - 200px); ">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="student-sibling" role="tabpanel"
+                                 aria-labelledby="student-sibling-tab">
+                                <div id="left-student-birthday-list-section">
+                                    <form action="">
+                                        <div class="row">
+                                            <div class="col-md-2 text-left mt-4">
+                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" ng-click="LoadSibling()">
+                                                    <i class="fas fa-plus"></i> Load Data
+                                                </button>
+                                            </div>
+                                            @*<a class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print" ng-click="PrintSibling()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>*@
+                                        </div>
+                                    </form>
+
+                                    <div class="card p-2" style="min-width:800px">
+
+                                        <div ui-grid="gridOptions5" id="stSiblingDiv"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-auto-resize
+                                             ui-grid-save-state style="height: calc(100vh - 200px); ">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+            <!-- /.row -->
+
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+    <div class="modal fade" id="modal-xl" style="margin-top: 0px;">
+        <div class="modal-dialog modal-md" style="width:70%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm" placeholder="Title" ng-model="newNotice.Title" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="5" ng-model="newNotice.Description" placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Attach File</label>
+                        <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newNotice.AttachmentColl" />
+                    </div>
+
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="SendManualNoticeToStudent()" style="min-width: 90px;" ng-disabled="loadingstatus=='running'">Send</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+    <div class="modal fade" id="modal-birthday-xl" style="margin-top: 0px;">
+        <div class="modal-dialog modal-md" style="width:70%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm" placeholder="Title" ng-model="newNotice.Title" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="5" ng-model="newNotice.Description" placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Attach File</label>
+                        <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newNotice.AttachmentColl" />
+                    </div>
+
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="SendManualNoticeToStudentBirthday()" style="min-width: 90px;" ng-disabled="loadingstatus=='running'">Send</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+    <div class="modal fade" id="modal-sms" style="margin-top: 0px;">
+        <div class="modal-dialog modal-md" style="width:70%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send SMS</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="5" ng-model="newSMS.Description" placeholder="Description"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="SendSMSToStudent1()" style="min-width: 90px;">Send</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+    <div class="modal fade" id="modal-xl2" style="margin-top: 0px;">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Remarks</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="">Remarks Type</label>
+                        <select class="form-control form-control-sm select2" ng-model="newRemarks.RemarksTypeId">
+                            <option ng-repeat="ct in RemarkTypeColl" value="{{ ct.RemarksTypeId }}" ng-selected="ct.ClassId==newRemarks.RemarksTypeId">
+                                {{ct.Name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="text"
+                               class="form-control form-control-sm" date-picker ng-model="newRemarks.forDate" date-detail="newRemarks.forDateDet">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="2" ng-model="newRemarks.description" placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Attach File</label>
+                        <input type="file" onchange="angular.element(this).scope().uploadFiles(this)"
+                               class="form-control form-control-sm"
+                               ng-model="newRemarks.File"
+                               style="padding: 1px" />
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="SaveRemarksToStudent()" style="min-width: 90px;">Send</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.content -->
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Age Range Modal Starts-->
+    <div class="modal fade" id="modal-agerange">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Age Range</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class=" sales-main-table table-scroll">
+                        <table id="age-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">Action</th>
+                                    <th style="width: 80px;" ng-repeat="cl in AgeList">
+                                        <a class="p-1" href="#" ng-click="AddAgeList($index)">
+                                            <i class="fas fa-plus text-info"></i>
+                                        </a>
+                                        <a class="p-1" href="#" ng-click="DelAgeList($index)">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </a>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Age</td>
+                                    <td ng-repeat="cl in AgeList">
+                                        <input type="number"
+                                               class="form-control form-control-sm"
+                                               placeholder="" ng-model="cl.Age" />
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Close</button>
+
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="GetStudentSummaryList()">Ok</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+
+    <!--Email modal Starts-->
+    <div class="modal fade" id="sendemail" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title">Send Email</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="form-group d-flex">
+                                    <label class="mr-2 mt-1" style="min-width:98px;">SMS Template: </label>
+                                    <select class="form-control form-control-sm select2" style="width: 100%" ng-model="CurEmailSend.Template" ng-change="EmailTemplateChanged(CurEmailSend.Template)">
+                                        <option ng-repeat="st in EmailTemplatesColl" ng-value="st">
+                                            {{st.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-7">
+                                <div class="form-group d-flex">
+                                    <label class="mr-2 mt-1" style="min-width:90px;">Email Send To</label>
+                                    <div class="checkbox-wrapper  d-flex">
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox211" ng-model="CurEmailSend.Primary">
+                                            <label for="customCheckbox211"
+                                                   class="custom-control-label">Primary No.</label>
+                                        </div>
+
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox311" ng-model="CurEmailSend.Father">
+                                            <label for="customCheckbox311"
+                                                   class="custom-control-label">Father No.</label>
+                                        </div>
+
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox411" ng-model="CurEmailSend.Mother">
+                                            <label for="customCheckbox411"
+                                                   class="custom-control-label">Mother No.</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox511" ng-model="CurEmailSend.Guardian">
+                                            <label for="customCheckbox511"
+                                                   class="custom-control-label">Mother No.</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="min-width:90px;">CC Employee </label>
+                                <select class="form-control form-control-sm select2" multiple ng-model="CurEmailSend.EmployeeColl" style="width:99%">
+                                    <option ng-value="st" ng-repeat="st in AllEmployeeColl">{{st.Name}}-{{st.EmployeeCode}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="min-width:90px;">Subject <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" ng-model="CurEmailSend.Subject" />
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group mb-0">
+                                <label for="" class="mr-2">Message <span class="text-danger">*</span> </label>
+                                <textarea class="textarea" placeholder="Place some text here" style="
+                                                                          width: 100%;
+                                                                          height: 130px!important;
+                                                                          font-size: 14px;
+                                                                          line-height: 18px;
+                                                                          border: 1px solid #dddddd;
+                                                                          padding: 10px;
+                                                                        " ng-model="CurEmailSend.Description" html-editor></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card-body mt-0" id="add-file-area" style="background-color: #eff0ef;">
+                                <label><b>Attach File</b></label>
+                                <div id="actions" class="row">
+                                    <div class="col-md-1 mt-4">
+                                        <div class="btn-group">
+                                            <span class="btn-add-file col fileinput-button">
+                                                <span><i class="fas fa-plus-circle"></i></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-11">
+                                        <div class="d-flex p-2" id="previews" style="overflow-x: auto;">
+                                            <div id="template">
+                                                <a data-dz-remove class="cancel float-right">
+                                                    <i class="fas fa-times-circle" style="  color:#28a745;font-size: 14px;"></i>
+                                                </a>
+                                                <span class="preview p-2 ml-2"><img style="height:150px;width:auto" src="data:," alt="" data-dz-thumbnail /></span>
+                                                <div class="align-items-center" style="width: 100%;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <div class="form-group">
+                                <label>Total numbers of selected student: {{CurEmailSend.DataColl.length}}</label>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="text-center mb-3">
+                        <button type="button" class="btn btn-success  btn-sm" style="width:80px" ng-click="SendEmail()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+    // DropzoneJS Demo Code Start
+    Dropzone.autoDiscover = false
+    // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+    var previewNode = document.querySelector("#template")
+    previewNode.id = ""
+    var previewTemplate = previewNode.parentNode.innerHTML
+    previewNode.parentNode.removeChild(previewNode)
+
+    var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+        url: "/target-url", // Set the url
+        thumbnailWidth: 130,
+        thumbnailHeight: 130,
+        parallelUploads: 20,
+        previewTemplate: previewTemplate,
+        autoQueue: false, // Make sure the files aren't queued until manually added
+        previewsContainer: "#previews", // Define the container to display the previews
+        clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+    })
+    document.querySelector("#actions .cancel").onclick = function () {
+        myDropzone.removeAllFiles(true)
+    }
+    // DropzoneJS Demo Code End
+</script>

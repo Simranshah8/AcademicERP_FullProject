@@ -1,0 +1,574 @@
+﻿﻿
+<script src="~/jslib/Academic/UploadSignature.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="UploadPhotoSignatureController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">upload student photo</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">upload employee photo</a>
+                                        </li>
+                                        @*<li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="signature-tab" data-toggle="tab"
+                                               href="#signature" role="tab" aria-controls="signature"
+                                               aria-selected="false">signature</a>
+                                        </li>*@
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="signature-tab" data-toggle="tab"
+                                               href="#photostatus" role="tab" aria-controls="photostatus"
+                                               aria-selected="false">Photo Status</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content pt-4" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="student-photo-section " class="card">
+                                    <div class="py-2">
+                                        <form action="">
+                                            <div class="row">
+                                                <div class="col-sm-4 col-lg-4 col-md-4">
+                                                    <label>Photo Uploaded By</label>
+                                                    <select class="form-control form-control-sm" ng-model="newStudentPhoto.PhotoUploadedBy" ng-change="ChangeUploadBy()">
+                                                        <option ng-value="u.id" ng-repeat="u in UploadStudentPhotoOptions">{{u.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-4 col-lg-4 col-md-4" ng-show="newStudentPhoto.PhotoUploadedBy==8">
+                                                    <label>Class/Section</label>
+                                                    <select class="form-control form-control-sm" ng-model="newStudentPhoto.SelectedClassSec">
+                                                        <option ng-value="u" ng-repeat="u in ClassList.SectionList">{{u.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-4 col-lg-4 col-md-4">
+                                                    <label>Select Photo &nbsp;<span>(jpg/jpeg/png)</span> </label>
+                                                    <input type="file" multiple class="form-control form-control-sm" style="padding: 1px;" file-model ng-model="newStudentPhoto.Files_TMP" @*after-selected="UploadStudentPhotoToSrv()"*@ after-selected="showConfirmation()" id="StudentPhotoInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                                                </div>
+                                            </div>
+                                        </form>
+                                        @*<div class="time-label">
+                                                <span class="d-block border-0 p-3 text-center">
+                                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearStudentPhoto()">Reset</button>
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateStudentPhoto()">{{newStudentPhoto.Mode}}</button>
+                                                </span>
+                                            </div>*@
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="employee-photo-section " class="card">
+                                    <div class="py-2">
+                                        <form action="">
+                                            <div class="row">
+                                                <div class="col-sm-4 col-lg-4 col-md-4">
+                                                    <label>Photo Uploaded By</label>
+                                                    <select class="form-control form-control-sm" ng-model="newEmployeePhoto.PhotoUploadedBy">
+                                                        <option ng-value="u.id" ng-repeat="u in UploadEmployeePhotoOptions">{{u.text}}</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-sm-4 col-lg-4 col-md-4">
+                                                    <label>Select Photo &nbsp; <span>(jpg/jpeg/png)</span></label>
+                                                    <input type="file" multiple class="form-control form-control-sm" style="padding: 1px;" file-model ng-model="newEmployeePhoto.Files_TMP" after-selected="showConfirmationForEmployee()" id="EmployeePhotoInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                                                </div>
+
+                                            </div>
+                                        </form>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="signature" role="tabpanel"
+                                 aria-labelledby="signature-tab">
+                                <div id="signature-section " class="card pt-2">
+                                    <div class="d-inline-flex flex-wrap flex-row">
+                                        <!-- <label for="">Photo</label> -->
+                                        <div class="person-photo-attachment-wrap text-center mx-2" ng-repeat="S in SignatureTypeList">
+                                            <div class="person-photo-attachment-wrap text-center mb-2">
+                                                <div class="img-wrap1 mx-auto">
+                                                    <img ng-src="{{S.ImageData || S.ImagePath}}" class="img-fluid" alt="" style="width: 130px; height: 100px;">
+                                                </div>
+                                                <label for="choosesfile{{$index}}" type="button" class="btn btn-outline-secondary btn-sm mt-3 mb-0">
+                                                    <i class="fas fa-camera w-t"></i> {{S.text}}
+                                                </label>
+                                                <input id="choosesfile{{$index}}"
+                                                       type="file"
+                                                       accept=".jpg,.jpeg,.pdf,.doc,.docx,application/msword,.png"
+                                                       style="display: none;"
+                                                       file-model
+                                                       fileread="S.ImageData"
+                                                       ng-model="S.Image_TMP" />
+                                                <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class=" p-1 bg-white">
+                                            <span><b>Class Teacher</b></span>
+                                        </div>
+                                        <div class="sales-main-table table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-nowrap">
+                                                        <th scope="col" style="width: 50px;">S.No.</th>
+                                                        <th scope="col" style="width: 80px;">Class</th>
+                                                        <th scope="col" style="width: 80px;">Section</th>
+                                                        <th scope="col" style="width: 100px;">Class Teacher Name</th>
+                                                        <th scope="col" style="width: 80px;">Signature</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cl in ClassTeacherList">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.ClassName}}</td>
+                                                        <td>{{cl.SectionName}}</td>
+                                                        <td>{{cl.EmployeeName}}</td>
+                                                        <td class="text-center">
+                                                            <img ng-src="{{cl.PhotoData || cl.PhotoPath}}" style="max-height:45px;max-width:40px;" id="imglogo1111" />
+                                                            <label for="choose-file{{$index}}"> <i class="fas fa-camera tablecamera text-info"></i></label>
+                                                            <input id="choose-file{{$index}}" type="file" accept=".jpg,.jpeg,.png" style="display: none;" file-model ng-model="cl.Photo_TMP" fileread="cl.PhotoData" />
+
+
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class=" p-1 bg-white">
+                                            <span><b>System Users</b></span>
+                                        </div>
+                                        <div class="sales-main-table table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 50px">S.No.</th>
+                                                        <th style="width: 100px">
+                                                            User Name
+                                                        </th>
+                                                        <th style="width: 100px">
+                                                            Designation
+                                                        </th>
+                                                        <th style="width: 100px">
+                                                            Signature
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cl in UserList">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.UserName}}</td>
+                                                        <td>{{cl.Designation}}</td>
+                                                        <td class="text-center">
+                                                            <img ng-src="{{cl.PhotoData || cl.PhotoPath}}" style="max-height:45px;max-width:40px;" />
+                                                            <label for="choose-files{{$index}}"> <i class="fas fa-camera tablecamera text-info"></i></label>
+                                                            <input id="choose-files{{$index}}" type="file" accept=".jpg,.jpeg,.png" style="display: none;" file-model ng-model="cl.Photo_TMP" fileread="cl.PhotoData" />
+
+
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="time-label">
+                                    <span class="d-block border-0 p-3 text-center">
+
+                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearUploadSignature()">Reset</button>
+                                        <button type="button" class="btn btn-sm btn-danger" style="min-width: 90px;" ng-click="DelUploadSignature()">Delete</button>
+                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateCTSignature()">Save</button>
+
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="photostatus" role="tabpanel"
+                                 aria-labelledby="photostatus-tab">
+                                @*<h4 class="text-info">Contents to be finalized!...</h4>*@
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-md-6">
+                                        <div class=" p-1 bg-white">
+                                            <span><b>Student Photo Status</b></span>
+                                        </div>
+                                        <header class="row">
+                                            <div class="col-md-12">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.StudentPhotoPhoto">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.StudentPhotoPhoto">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search" ng-model="searchData.StudentPhotoPhoto"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </header>
+                                        <div class="sales-main-table table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-nowrap">
+                                                        <th scope="col" style="width: 100px;">Class</th>
+                                                        <th scope="col" style="width: 75px;">Total Students</th>
+                                                        <th scope="col" style="width: 75px;">Photo Uploaded</th>
+                                                        <th scope="col" style="width: 75px;">Remaining</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in StudentPhotoStatus | filter:searchData.StudentPhotoPhoto | itemsPerPage: perPage.StudentPhotoPhoto" current-page="currentPages.StudentPhotoPhoto" pagination-id="StudentPhotoPhotoPagination">
+
+                                                        <td>{{cl.ClassDetails}}</td>
+                                                        <td>{{cl.TotalStudent}}</td>
+                                                        <td>{{cl.StdPhotoUploaded}}</td>
+                                                        <td>{{cl.StdRemaining}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="StudentPhotoPhotoPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class=" p-1 bg-white">
+                                            <span><b>Employee Photo Status</b></span>
+                                        </div>
+                                        <header class="row">
+                                            <div class="col-md-12">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.EmployeePhotoPhoto">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.EmployeePhotoPhoto">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search" ng-model="searchData.EmployeePhotoPhoto"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </header>
+
+                                        <div class="sales-main-table table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 100px">Department</th>
+                                                        <th style="width: 75px">Total Employee</th>
+                                                        <th style="width: 75px">Photo Uploaded</th>
+                                                        <th style="width: 75px">Remaining</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in EmployeePhotoStatus | filter:searchData.EmployeePhotoPhoto | itemsPerPage: perPage.EmployeePhotoPhoto" current-page="currentPages.EmployeePhotoPhoto" pagination-id="EmployeePhotoPhotoPagination">
+
+                                                        <td>{{cl.Department}}</td>
+                                                        <td>{{cl.TotalEmployee}}</td>
+                                                        <td>{{cl.EmpPhotoUploaded}}</td>
+                                                        <td>{{cl.EmpRemaining}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="EmployeePhotoPhotoPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+            <!-- /.row -->
+
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    @*Principle Signature Starts*@
+    <div class="modal fade" id="updateLogo" tabindex="-1" aria-labelledby="updateLogoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateLogoLabel">Upload Logo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newUploadSignature.Principle_TMP" @*after-selected="AddUploadSignaturePhoto()"*@ fileread="newUploadSignature.Principle">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newUploadSignature.Principle}}" class="img-fluid" id="imgPrinciple">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-fileLogo" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-fileLogo" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newUploadSignature.Principle_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newUploadSignature.Principle" />
+                    <a ng-click="ClearUploadSignaturePrinciple()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddUploadSignatureImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    @*Vice Principle*@
+    <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newUploadSignature.VicePrinciple_TMP" @*after-selected="AddUploadSignaturePhoto()"*@ fileread="newUploadSignature.VicePrinciple">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newUploadSignature.VicePrinciple}}" class="img-fluid" id="imgVicePrinciple">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newUploadSignature.VicePrinciple_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newUploadSignature.VicePrinciple" />
+                    <a ng-click="ClearUploadSignatureVicePrinciple()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddUploadSignatureImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*Accountant*@
+    <div class="modal fade" id="updateBanner" tabindex="-1" aria-labelledby="updateBannerLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateBannerLabel">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newUploadSignature.Accountant_TMP" @*after-selected="AddUploadSignaturePhoto()"*@ fileread="newUploadSignature.Accountant">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newUploadSignature.Accountant}}" class="img-fluid" id="imgAccountant">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-fileBanner" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-fileBanner" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newUploadSignature.Accountant_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newUploadSignature.Accountant" />
+                    <a ng-click="ClearUploadSignatureAccountant()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddUploadSignatureImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    @*AcademicCoordinator*@
+    <div class="modal fade" id="AcademicCoordinator" tabindex="-1" aria-labelledby="updateAcademicCoordinator" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateAcademicCoordinator">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newUploadSignature.AcademicC_TMP" @*after-selected="AddUploadSignaturePhoto()"*@ fileread="newUploadSignature.AcademicC">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newUploadSignature.AcademicC}}" class="img-fluid" id="imgAcademicC">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-fileAcademicC" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-fileAcademicC" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newUploadSignature.AcademicC_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newUploadSignature.AcademicC" />
+                    <a ng-click="ClearUploadSignatureAcademicC()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddUploadSignatureImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*ExamCoordinator*@
+    <div class="modal fade" id="ExamCoordinator" tabindex="-1" aria-labelledby="updateExamCoordinator" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateExamCoordinator">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newUploadSignature.ExamC_TMP" @*after-selected="AddUploadSignaturePhoto()"*@ fileread="newUploadSignature.ExamC">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newUploadSignature.ExamC}}" class="img-fluid" id="imgExamC">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-fileExamC" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-fileExamC" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newUploadSignature.ExamC_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newUploadSignature.ExamC" />
+                    <a ng-click="ClearUploadSignatureExamC()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddUploadSignatureImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*Warden*@
+    <div class="modal fade" id="Wardenoordinator" tabindex="-1" aria-labelledby="updateWardenoordinator" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateWardenoordinator">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newUploadSignature.Warden_TMP" @*after-selected="AddUploadSignaturePhoto()"*@ fileread="newUploadSignature.Warden">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newUploadSignature.Warden}}" class="img-fluid" id="imgWarden">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-fileWarden" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-fileWarden" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newUploadSignature.Warden_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newUploadSignature.Warden" />
+                    <a ng-click="ClearUploadSignatureWarden()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddUploadSignatureImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*Librarian*@
+    <div class="modal fade" id="Librarianoordinator" tabindex="-1" aria-labelledby="updateLibrarianoordinator" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateLibrarianoordinator">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newUploadSignature.Librarian_TMP" @*after-selected="AddUploadSignaturePhoto()"*@ fileread="newUploadSignature.Librarian">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newUploadSignature.Librarian}}" class="img-fluid" id="imgLibrarian">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-fileLibrarian" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-fileLibrarian" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newUploadSignature.Librarian_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newUploadSignature.Librarian" />
+                    <a ng-click="ClearUploadSignatureLibrarian()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddUploadSignatureImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

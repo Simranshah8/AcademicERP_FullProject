@@ -1,0 +1,268 @@
+﻿
+@*@{
+    ViewBag.Title = "QuestionSetup";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}*@
+<!-- include summernote css/js-->
+ 
+
+<script src="~/jslib/ELearning/QuestionSetup.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="QuestionSetupController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="margin-top:-20px;">
+                <div class="tab-content" id="table-listing">
+                    <div class="card p-2">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label>Exam</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newQuestionSetup.ExamTypeId" ng-change="GetExamSetupDetails()">
+                                        <option ng-repeat="ct in ExamTypeColl track by $index" ng-value="{{ ct.ExamTypeId }}" ng-selected="ct.ExamTypeId==newQuestionSetup.ExamTypeId">
+                                            {{ct.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label>Class</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newQuestionSetup.ClassId" ng-change="GetClassWiseSubMap()">
+                                        <option ng-repeat="ct in ClassColl  track by $index" ng-value="{{ ct.ClassId }}" ng-selected="ct.ClassId==newQuestionSetup.ClassId">
+                                            {{ct.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label> Section</label>
+                                    <select ng-model="newQuestionSetup.SectionId" class="form-control form-control-sm select2" multiple="multiple" id="cboSection" name="cboSection" ng-change="GetClassWiseSubMap()">
+                                        <option ng-repeat="cl in SectionClassColl | filter: { ClassId: newQuestionSetup.ClassId }:true" value="{{cl.SectionId}}" ng-selected="{{newQuestionSetup.SectionIdColl_TMP.containt(cl.SectionId)}}">
+                                            {{cl.SectionName}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="">Subject</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newQuestionSetup.SubjectId" ng-change="OnSubjectChange()">
+                                        <option ng-repeat="ct in newQuestionSetup.SubjectList" value="{{ ct.SubjectId }}" ng-selected="ct.SubjectId==newQuestionSetup.SubjectId">
+                                            {{ct.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label>Category</label>
+                                    <select ng-model="SelectedCategory" class="form-control form-control-sm" ng-options="x.CategoryName for x in CategoryList" id="cboCategoryId" name="cboCategory" ng-change="GetCategoryData()"></select>
+
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label>Model</label>
+                                    <input class="form-control form-control-sm" ng-model="newQuestionSetup.ExamModal" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-md-row">
+                                        <h6>Question No : {{SelectedQuestion.QNo}} </h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6"></div>
+                            <div class="col-md-2">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1">Marks</label>
+                                    <input type="number"
+                                           class="form-control form-control-sm ml-2" style="width:89%;" disabled ng-model="newQuestionSetup.Marks"
+                                           placeholder="" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="row">
+                                </div>
+                                <div class="select-button">
+                                    <b>Question Title:</b>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               name="inlineRadio1"
+                                               ng-value="1" ng-model="SelectedQuestion.QuestionTitle" />
+                                        <span class="form-check-label" for="inlineRadio1">Text</span>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               name="inlineRadio2"
+                                               ng-value="2" ng-model="SelectedQuestion.QuestionTitle" />
+                                        <span class="form-check-label" for="inlineRadio2">Image</span>
+                                    </div>
+
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               name="inlineRadio3"
+                                               ng-value="3" ng-model="SelectedQuestion.QuestionTitle" />
+                                        <span class="form-check-label" for="inlineRadio3">Audio</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6" ng-show="SelectedQuestion.QuestionTitle==2">
+                                <img id="imgQuestion" ng-src="{{SelectedQuestion.ImageData || SelectedQuestion.QuestionPath}}" style="width: 50%; height: 130px;" @*alt="Img"*@>
+                            </div>
+                            <div class="col-md-6" ng-show="SelectedQuestion.QuestionTitle==3">
+                                @*<p>Listen  <a href="{{SelectedQuestion.ImageData || SelectedQuestion.QuestionPath}}" target="_blank">Audio</a>.</p>
+                                    <p>Listen  <a href="{{SelectedQuestion.ImageData || SelectedQuestion.TestPath}}" target="_blank">Audio</a>.</p>*@
+                                <iframe ng-src=" " name="iframe_a" style="height:70px; width:auto " title="Iframe Example"></iframe>
+                                <div class="row">
+                                    <p><a ng-href="{{SelectedQuestion.ImageData || SelectedQuestion.QuestionPath}}" target="iframe_a">Play Audio</a></p> @*&nbsp;&nbsp;&nbsp; <p ng-click="ClearImg()" style="color:red;cursor:pointer">Clear</p>*@
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-5">
+                            <div>
+                                <div class="form-group">
+                                    <div ng-show="SelectedQuestion.QuestionTitle==2">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <input id="flQuestion" class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="SelectedQuestion.Files_TMP" fileread="SelectedQuestion.ImageData" />
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div ng-show="SelectedQuestion.QuestionTitle==3">
+                                        <input class="form-control form-control-sm p-0" type="file" style="padding: 1px;width: 50%;" accept="audio/mp3" file-model ng-model="SelectedQuestion.Files_TMP" fileread="SelectedQuestion.ImageData" />
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <textarea class="textarea" placeholder="Place some text here" style="width: 100%; height: 200px; font-size: 14px;  line-height: 18px; border: 1px solid #dddddd;" html-editor ng-model="SelectedQuestion.Question"></textarea>
+
+
+                        <div ng-show="SelectedCategory.ExamModal==2">
+                            <div class="select-button">
+                                <b>Answer Title:</b>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="inlineRadio1_A"
+                                           ng-value="1" ng-model="SelectedQuestion.AnswerTitle" />
+                                    <span class="form-check-label" for="inlineRadio1_A">Text</span>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="inlineRadio2_A"
+                                           ng-value="2" ng-model="SelectedQuestion.AnswerTitle" />
+                                    <span class="form-check-label" for="inlineRadio2_A">Image</span>
+                                </div>
+
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="inlineRadio3_A"
+                                           ng-value="3" ng-model="SelectedQuestion.AnswerTitle" />
+                                    <span class="form-check-label" for="inlineRadio3_A">Audio</span>
+                                </div>
+                            </div>
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 70px">S.No.</th>
+                                            <th style="width: 300px">Answer</th>
+                                            <th style="width: 250px">Preview</th>
+                                            <th style="width: 100px">Right Answer</th>
+                                            <th style="width: 90px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="acDet in SelectedQuestion.DetailsColl">
+                                            <td>
+                                                {{getLetter($index)}}
+                                            </td>
+                                            <td>
+                                                <div ng-show="SelectedQuestion.AnswerTitle==1">
+                                                    <input type="text" class="form-control form-control-sm" ng-model="acDet.Answer">
+                                                </div>
+                                                <div ng-show="SelectedQuestion.AnswerTitle==2">
+                                                    <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="acDet.Files_TMP" fileread="acDet.ImageData" />
+                                                </div>
+                                                <div ng-show="SelectedQuestion.AnswerTitle==3">
+                                                    <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept="audio/mp3" file-model ng-model="acDet.Files_TMP" fileread="acDet.ImageData" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div ng-show="SelectedQuestion.AnswerTitle==1">
+                                                    {{acDet.Answer}}
+                                                </div>
+                                                <div ng-show="SelectedQuestion.AnswerTitle==2">
+                                                    <img ng-src="{{acDet.ImageData || acDet.FilePath}}" style="height: 50px;" alt="">
+                                                </div>
+                                                <div ng-show="SelectedQuestion.AnswerTitle==3">
+                                                    <iframe ng-src=" " name="iframe_a{{$index}}" style="height: 70px; width: auto " title="Iframe Example{{$index}}"></iframe>
+                                                    <p><a ng-href="{{acDet.ImageData || acDet.FilePath}}" target="iframe_a{{$index}}">Play Audio</a></p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="type" id="text-input-ans" ng-value="true" ng-model="acDet.IsRightAnswer" ng-click="ChangeAnswerSelection($index)" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a class="p-1" ng-click="AddQuestionMode($index,acDet)">
+                                                    <i class="fas fa-plus text-info"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="delQuestionMode($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+                        <div class="row">
+                            <ul class="pagination pagination-sm m-0 float-right mt-2">
+                                <li class="page-item" ng-repeat="qa in QuestionColl" ng-class="{ active : qa.QNo == SelectedQuestion.QNo}">
+                                    <a class="page-link" href="" ng-click="ChangeQuestion(qa)">{{qa.QNo}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-success" ng-click="CallSaveUpdateQuestionSetup(SelectedQuestion,true)" style="min-width: 90px;">Accept</button>
+                                <button type="button" class="btn btn-sm btn-default" ng-click="ClearQuestionSetup()" style="min-width: 90px;">Reset</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </section>
+    <!-- /.content -->
+</div>
+

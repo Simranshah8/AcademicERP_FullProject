@@ -1,0 +1,913 @@
+﻿
+@{
+    ViewBag.Title = "Evaluate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script>
+    var WEBURLPATH = "@ViewBag.WEBURLPATH";
+</script>
+<link type="text/css"
+      href="https://uicdn.toast.com/tui-color-picker/v2.2.6/tui-color-picker.css"
+      rel="stylesheet" />
+<link href="~/image-editor/tui-image-editor.css" rel="stylesheet" />
+
+<script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
+<link href="~/Scripts/jquery.magnify.css" rel="stylesheet" />
+<script src="~/Scripts/jquery.magnify.js"></script>
+
+
+@*<style>
+
+        .tui-image-editor-header {
+            display: none !important;
+        }
+
+        .tui-image-editor-menu {
+            background: #e7e7e7;
+        }
+
+        .magnify-modal {
+            margin-top: -470px;
+            max-height: 500px;
+        }
+    </style>*@
+
+
+<style>
+
+    .tui-image-editor-header {
+        display: none !important;
+    }
+
+    .tui-image-editor-menu {
+        background: #e7e7e7;
+    }
+    /*new added css on bhadra-2 by suresh starts*/
+    hr {
+        border: 2px solid #126563;
+        border-bottom: none;
+    }
+
+    .lower-canvas {
+        max-height: 550px !important;
+        width: auto !important;
+    }
+
+    .tui-image-editor-container .tui-image-editor-wrap {
+        overflow: hidden;
+    }
+    /*new added css on bhadra-2 by suresh ends*/
+    /*.magnify-modal {
+        margin-top: -340px !important;
+        max-height: 630px;
+    }*/
+    .magnify-modal {
+        margin-top: -470px;
+        max-height: 500px;
+    }
+    /*New style added by suresh on shrawan 28*/
+    .custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+        background-color: #025a58;
+        border-radius: 4px;
+    }
+
+    input[type="checkbox"] {
+        -webkit-appearance: initial;
+        appearance: initial;
+        background: rgb(199, 13, 13);
+        width: 15px;
+        height: 15px;
+        border: none;
+        border-radius: 4px;
+        position: relative;
+    }
+
+        input[type="checkbox"]:checked:before {
+            content: "✖	";
+            color: #fff;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            -webkit-transform: translate(-50%,-50%);
+            -moz-transform: translate(-50%,-50%);
+            -ms-transform: translate(-50%,-50%);
+            transform: translate(-50%,-50%);
+        }
+</style>
+
+@*<script src="~/AngularJs/Creation/Evaluate.js?dt=@(DateTime.Now.Ticks)"></script>*@
+<script src="~/AngularJs/Creation/Evaluate.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="EvaluateController" ng-init="LoadData()">
+    <div class="content-wrapper">
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <section class="iframe-content-starts-here">
+                    <div class="tab-content" id="table-listing">
+                        <form action="" style="margin-top: -10px">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label>From Date</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newEvaluate.DateFrom_TMP" date-detail="newEvaluate.DateFromDet">
+                                </div>
+                                <div class="col-md-2">
+                                    <label>To Date</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newEvaluate.DateTo_TMP" date-detail="newEvaluate.DateToDet">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label>Exam Type</label>
+                                        <select class="form-control form-control-sm select2" style="width:100%" ng-model="newEvaluate.ExamTypeId">
+                                            <option ng-repeat="ct in ExamTypeColl track by $index" value="{{ ct.ExamTypeId }}" ng-selected="ct.ExamTypeId==newEvaluate.ExamTypeId">
+                                                {{ct.Name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label>Class</label>
+                                        <select class="form-control form-control-sm select2" style="width:100%" ng-model="newEvaluate.ClassId" ng-change="GetSubjectList()">
+                                            <option ng-repeat="ct in ClassColl  track by $index" ng-value="{{ct.ClassId}}">
+                                                {{ct.Name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label>Subject</label>
+                                        <select class="form-control form-control-sm select2" style="width:100%" ng-model="newEvaluate.SubjectId" id="cboSubjectId" ng-change="GetAllExamList()">
+                                            <option ng-repeat="ct in SubjectColl track by $index" value="{{ ct.SubjectId }}" ng-selected="ct.SubjectId==newEvaluate.SubjectId">
+                                                {{ct.Name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:60px;" ng-click="GetAllExamList()">Load</button>
+                                </div>
+                            </div>
+                        </form>
+                        <!-- Second Tab Content -->
+                        <div class="card p-2">
+                            <header class="row">
+                                <div class="col-md-7">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ExamList">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ExamList">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search"
+                                                       placeholder="Search"
+                                                       aria-label="Search" ng-model="searchData.ExamList" />
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0"
+                                                            type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <!-- end col-md-8 -->
+                                <div class="col-md-5 text-right">
+
+                                    <div class="dropdown dnld-file"
+                                         data-toggle="tooltip"
+                                         data-placement="top"
+                                         title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                type="button"
+                                                id="dropdownMenuButton"
+                                                data-toggle="dropdown"
+                                                aria-haspopup="true"
+                                                aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#">
+                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/excel.png"
+                                                     class="img-fluid exports-icon"
+                                                     alt="Excel image" />
+                                                Excel
+                                            </a>
+                                            <a class="dropdown-item" href="#">
+                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/csv.png"
+                                                     class="img-fluid exports-icon"
+                                                     alt="Excel image" />
+                                                CSV
+                                            </a>
+                                            <a class="dropdown-item" href="#">
+                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/pdf.png"
+                                                     class="img-fluid exports-icon"
+                                                     alt="Excel image" />
+                                                PDF
+                                            </a>
+                                            <a class="dropdown-item" href="#">
+                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/word.png"
+                                                     class="img-fluid exports-icon"
+                                                     alt="Excel image" />
+                                                Word
+                                            </a>
+                                            <a class="dropdown-item" href="#">
+                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/gmail.png"
+                                                     class="img-fluid exports-icon"
+                                                     alt="Excel image" />
+                                                Mail
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <a href="#"
+                                       class="btn btn-secondary btn-light btn-sm"
+                                       data-toggle="tooltip"
+                                       data-placement="top"
+                                       title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+
+                                </div>
+                            </header>
+                            <div>
+                                <div class="table-scroll-x-y sales-main-table table-scroll">
+                                    <table id="main-table"
+                                           class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px">S.No.</th>
+                                                <th style="width: 120px">Exam Date</th>
+                                                <th style="width: 120px">Exam Type</th>
+                                                <th style="width: 130px">Class/Sec</th>
+                                                <th style="width: 140px">Subject</th>
+                                                <th style="width: 200px">Lesson</th>
+                                                <th style="width: 100px">Start Time</th>
+                                                <th style="width: 140px">Duration (Minutes)</th>
+                                                <th style="width: 100px">Status</th>
+                                                <th style="width: 110px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="el in ExamList | filter:searchData.ExamList | itemsPerPage: perPage.ExamList" current-page="currentPages.ExamList" pagination-id="examListPagination">
+                                                <td>{{$index+1}}</td>
+                                                <td>{{el.ExamDate_BS}}</td>
+                                                <td>{{el.ExamTypeName}}</td>
+                                                <td>{{el.ClassName}}-{{el.SectionName}}</td>
+                                                <td>{{el.SubjectName}}</td>
+                                                <td>{{el.Lession}}</td>
+                                                <td>{{el.StartTime}}</td>
+                                                <td>{{el.Duration}}</td>
+                                                <td>{{el.NoOfPresent}}/{{el.NoOfStudent}}</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-success" ng-click="GetStudentList(el)">
+                                                        View Detail
+                                                    </button>
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="examListPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                    </div>
+
+                    <!-- Present Absent Detail starts -->
+                    <div id="detail">
+                        <div class="p-2 mb-2" style="border-bottom: 1px solid #ccc; background-color: #76be4e47;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Total Students : {{CurExamSetup.TotalStudent}}</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Present :  {{CurExamSetup.TotalPresent}}</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Absent :  {{CurExamSetup.TotalAbsent}}</label>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="card card-primary card-tabs">
+                            <div class="card-header with-gradient-bg p-0 pt-2">
+                                <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="custom-tabs-one-home-tab"
+                                           data-toggle="pill" href="#custom-tabs-one-home" role="tab"
+                                           aria-controls="custom-tabs-one-home" aria-selected="true" style="padding-left: 3rem;
+                                    padding-right: 3rem;">Present({{CurExamSetup.TotalPresent}})</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                           href="#custom-tabs-one-profile" role="tab"
+                                           aria-controls="custom-tabs-one-profile"
+                                           aria-selected="false" style="padding-left: 3rem;
+                                    padding-right: 3rem;">Absent({{CurExamSetup.TotalAbsent}})</a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <header class="row">
+                                    <div class="col-md-7">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Evaluate">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Evaluate">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search"
+                                                           placeholder="Search"
+                                                           aria-label="Search" ng-model="searchData.Evaluate" />
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </header>
+                                <div class="tab-content" id="custom-tabs-one-tabContent">
+                                    <div class="tab-pane fade show active" id="custom-tabs-one-home"
+                                         role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <label>Class/Sec : {{CurExamSetup.ClassName}}-{{CurExamSetup.SectionName}}</label>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>Subject : {{CurExamSetup.SubjectName}}</label>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>Full Marks : {{CurExamSetup.FullMark}}</label>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>Pass Marks : {{CurExamSetup.PassMarks}}</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="">
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-2 mb-2">
+                                                <table class="table table-bordered table-head-fixed text-nowrap">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px;">S.N.</th>
+                                                            <th style="width:150px" ng-click="sortEv('UserName')">User Name</th>
+                                                            <th style="width:250px" ng-click="sortEv('Name')">Student Name</th>
+                                                            <th style="width:100px" ng-click="sortEv('RollNo')">Roll No.</th>
+                                                            <th style="width:100px" ng-click="sortEv('RegNo')">Regd No.</th>
+                                                            <th style="width: 150px;">Objective Marks</th>
+                                                            <th style="width: 150px;">Subjective Marks</th>
+                                                            <th style="width: 100px;">Total Marks</th>
+                                                            <th style="width: 100px;">File(s)</th>
+                                                            <th style="width: 140px;">Duration</th>
+                                                            <th style="width: 100px;">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="st in PresentStudentList | filter:searchData.Evaluate|orderBy:sortData.Evaluate:ascDscData.Evaluate | itemsPerPage: perPage.Evaluate" current-page="currentPages.Evaluate" pagination-id="presentListPagination">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{st.UserName}}</td>
+                                                            <td>{{st.Name}}</td>
+                                                            <td>{{st.RollNo}}</td>
+                                                            <td>{{st.RegNo}}</td>
+                                                            <td>{{st.Objective_OM}}</td>
+                                                            <td>{{st.Subjective_OM}}</td>
+                                                            <td>{{st.Total_OM}}</td>
+                                                            <td>{{st.NoOfFiles}}</td>
+                                                            <td>{{st.StartDateTime |timeFormat}} To {{st.LastSumitDateTime |timeFormat}}</td>
+                                                            <td>
+                                                                <button type="button" class="btn btn-sm btn-success" ng-click="GetStudentAnswerList(st)">
+                                                                    Check
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="presentListPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel"
+                                         aria-labelledby="custom-tabs-one-profile-tab">
+                                        <div class="">
+                                            <div class="row">
+                                                <div class="col-md-9">
+                                                    <label>Notification Message</label>
+                                                    <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="CurExamSetup.Notification"></textarea>
+                                                </div>
+                                                <div class="col-md-3 mt-4">
+                                                    @*<a class="btn btn-success btn-sm" href="#">
+                                                            <i class="fas fa-envelope w-t">
+                                                            </i>
+                                                            SMS
+                                                        </a>*@
+                                                    <a class="btn btn-success btn-sm" href="#" ng-click="SendNotificationToAbsentStudent()">
+                                                        <i class="fas fa-bell w-t">
+                                                        </i>
+                                                        Notification
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-2 mb-2">
+                                                <table id="dt-basic-example" class="table table-hover table-bordered table-sm bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:80px">S.No.</th>
+                                                            <th style="width:150px" ng-click="sortEv('UserName')">User Name</th>
+                                                            <th style="width:250px" ng-click="sortEv('Name')">Student Name</th>
+                                                            <th style="width:100px" ng-click="sortEv('RollNo')">Roll No.</th>
+                                                            <th style="width:100px" ng-click="sortEv('RegNo')">Regd No.</th>
+                                                            <th style="width:250px">Father Name</th>
+                                                            <th style="width:120px">Contact No.</th>
+                                                            @*<th class="text-center" style="width: 100px;">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" class="custom-control-input" id="customCheckbox1" onclick="toggle(this);" />
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">All </label>
+                                                                    </div>
+                                                                </th>*@
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="st in AbsentStudentList | filter:searchData.Evaluate|orderBy:sortData.Evaluate:ascDscData.Evaluate | itemsPerPage: perPage.Evaluate" current-page="currentPages.Evaluate" pagination-id="absentListPagination">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{st.UserName}}</td>
+                                                            <td>{{st.Name}}</td>
+                                                            <td>{{st.RollNo}}</td>
+                                                            <td>{{st.RegNo}}</td>
+                                                            <td>{{st.FatherName}}</td>
+                                                            <td>{{st.ContactNo}}</td>
+                                                            @*<td class="text-center">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox-a-{{$index}}">
+                                                                        <label for="customCheckbox-a-{{$index}}"
+                                                                               class="custom-control-label"></label>
+                                                                    </div>
+                                                                </td>*@
+
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="absentListPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-info" id="back-btn" style="min-width: 90px;">
+                                    Back to
+                                    List
+                                </button>
+
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="check">
+                        <!--The below section is edited by suresh on 3 Bhadra starts-->
+                        <div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label><b>Regd. No. :</b> {{CurStudent.RegNo}}</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label><b>Student's Name : </b>{{CurStudent.Name}}</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label><b>Roll No. :</b>{{CurStudent.RollNo}}</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label><b>Class/Sec : </b> {{CurExamSetup.ClassName}}-{{CurExamSetup.SectionName}}</label><br>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label><b>Exam Type : </b> {{CurExamSetup.ExamTypeName}}</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label><b>Subject : </b> {{CurExamSetup.SubjectName}}</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label><b>Lesson :</b>{{CurExamSetup.Lession}}</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label><b>Submitted Time :</b>{{CurStudent.StartDateTime |timeFormat}} To {{CurStudent.LastSumitDateTime |timeFormat}}</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3"><label><b>Marks Obtained</b></label></div>
+                                <div class="col-md-3"><label><b>Objective :</b> {{CurStudent.Objective_OM}}</label></div>
+                                <div class="col-md-3"><label><b>Subjective :</b> {{CurStudent.Subjective_OM}}</label></div>
+                                <div class="col-md-3"><label><b>Total :</b> {{CurStudent.Total_OM}}</label></div>
+                            </div>
+                        </div>
+                        <!--The below section is edited by suresh on 3 Bhadra ends-->
+
+                        <div class="card card-primary card-tabs mt-2">
+                            <div class="card-header with-gradient-bg p-0 pt-2">
+                                <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="custom-tabs-one-detail-tab"
+                                           data-toggle="pill" href="#custom-tabs-one-detail" role="tab"
+                                           aria-controls="custom-tabs-one-detail" aria-selected="true" style="padding-left: 3rem;
+                                  padding-right: 3rem;">Objective Questions({{CurStudent.ObjectiveList.length}})</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-one-subjective-tab" data-toggle="pill"
+                                           href="#custom-tabs-one-subjective" role="tab"
+                                           aria-controls="custom-tabs-one-subjective"
+                                           aria-selected="false" style="padding-left: 3rem;
+                                  padding-right: 3rem;">Subjective Questions({{CurStudent.SubjectiveList.length}})</a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <div class="tab-content" id="custom-tabs-one-tabContent">
+                                    <div class="tab-pane fade show active" id="custom-tabs-one-detail"
+                                         role="tabpanel" aria-labelledby="custom-tabs-one-detail-tab">
+                                        <div class="pt-2">
+                                            <div class="p-2 mb-2" style="border-bottom: 1px solid #ccc; background-color: #76be4e47;">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <label>Total Questions : {{CurStudent.TotalObjetiveQ}}</label>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label>Answered :  {{CurStudent.TotalObjetiveA}} </label>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label>Correct :  {{CurStudent.TotalObjetiveC}}</label>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label>Wrong : {{CurStudent.TotalObjetiveW}} </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card" style="border: 1px solid #ccc;" ng-repeat="cw in CurStudent.CategoryWiseObjectiveList">
+                                                <div class="p-2" style="border-bottom: 1px solid #ccc; background-color: #f1f1f1;">
+                                                    <label>{{cw.CategoryName}}</label>
+                                                </div>
+                                                <div class="question-obj" ng-repeat="qd in cw.ObjectiveList">
+                                                    <div class="row">
+                                                        <div class="col-md-10">
+                                                            <h3 class="ml-2" style="font-size: 14px;">
+                                                                Q.{{qd.QNo}}
+                                                                <span ng-style="qd.StudentAnswerNo==0 && {'color':'red'}" compile class="card-body" ng-bind-html="qd.Question | unsafe">
+                                                                </span>
+                                                                <a ng-show="qd.FileCount>0" class="card-title float-right" href="#" ng-click="DocumentAtt_Toggle(qd.QuestionPath)" data-toggle="modal" style="font-size:25px;">
+                                                                    <i class="fas fa-file-alt text-secondary"></i>
+                                                                </a>
+                                                            </h3>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <h3 style="font-size: 14px;">
+                                                                O.M.-{{qd.ObtainMark}}/Marks-{{qd.Marks}}
+                                                            </h3>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body ">
+                                                        <div class="custom-control custom-checkbox" ng-style="opt.CorrectAnswer!=2 && {'margin-left': '5px'}" ng-repeat="opt in qd.DetailsColl">
+                                                            <input ng-class="opt.CorrectAnswer==2 ? 'ml-0' : 'custom-control-input'" type="checkbox" id="customCheckbox-{{qd.QNo}}-{{$index}}" disabled ng-checked="opt.SNo==qd.StudentAnswerNo || opt.IsRightAnswer==true">
+                                                            <label for="customCheckbox-{{qd.QNo}}-{{$index}}" ng-class="opt.CorrectAnswer==2 ? 'ml-2': 'custom-control-label'" ng-style="opt.CorrectAnswer==1 && {'background-color':'#d9edce'} || opt.CorrectAnswer==2 && {'background-color':'#b00e0e47'} || opt.IsRightAnswer==1 && {'background-color':'#d9edce'} ">
+                                                                {{opt.SNo}}. {{opt.Answer}}
+                                                            </label>
+                                                            <img ng-show="opt.ShowFile==1" src="{{opt.FilePath}}" class="img-fluid  ml-4 mb-2" style="height: 100px; width: 150px;" />
+                                                            <audio ng-show="opt.ShowFile==3" controls preload="none">
+                                                                <source src="{{opt.FilePath}}" type="audio/mp3">
+                                                                <source src="{{opt.FilePath}}" type="audio/x-ms-wma">
+                                                                <source src="{{opt.FilePath}}" type="audio/mp4">
+                                                            </audio>
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                                <hr>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-one-subjective" role="tabpanel"
+                                         aria-labelledby="custom-tabs-one-subjective-tab">
+                                        <div class="" id="Show-Check-File">
+                                            <div class="p-2 mb-2" style="border-bottom: 1px solid #ccc; background-color: #76be4e47;">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <label>Total Questions : {{CurStudent.SubjectiveList.length}}</label>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label>Attempted : {{CurStudent.TotalSubjectiveA}} </label>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label>Left :  {{CurStudent.TotalSubjectiveL}} </label>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="question-obj" ng-repeat="qd in CurStudent.SubjectiveList">
+
+                                                <div class="row">
+                                                    <div class="col-md-10">
+                                                        <h3 class="ml-2" style="font-size: 14px;">
+                                                            Q.{{qd.QNo}}
+                                                            <span compile class="card-body" ng-bind-html="qd.Question | unsafe">
+                                                            </span>
+                                                        </h3>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <h3 style="font-size: 14px;" class="text-right">
+                                                            Marks-{{qd.Marks}}
+                                                        </h3>
+
+                                                        <!--The section below is added here from row below of previous file which is commented below now by suresh on shrawan 32-->
+                                                        <div class="col-md-2" ng-show="qd.FileType=='jpg'">
+                                                            <a href="#" ng-click="DocumentAtt_Toggle(qd.QuestionPath)" data-toggle="modal" class="color-gray-darker c6 td-hover-none">
+                                                                <div class="ba-0 ds-1">
+                                                                    <img alt="Card image cap" class="img-fluid" src="~/teacherloginFiles/dynamic/images/ans.jpg" style="max-height:50px;" />
+
+                                                                </div>
+                                                            </a>
+                                                        </div>
+                                                        <div class="col-md-2" ng-show="qd.FileType=='pdf'">
+                                                            <a href="#" ng-click="DocumentAtt_Toggle(qd.QuestionPath)" data-toggle="modal" class="color-gray-darker c6 td-hover-none">
+                                                                <div class="ba-0 ds-1">
+                                                                    <img src="~/teacherloginFiles/dynamic/images/flaticons/pdf.png" style="max-height:50px;" />
+                                                                </div>
+                                                            </a>
+                                                        </div>
+
+                                                    </div>
+
+
+                                                </div>
+
+                                                <div class="card-body " ng-show="qd.AnswerText && qd.AnswerText.length>0">
+                                                    <div class="col-md-11">
+                                                        <span compile class="card-body" ng-bind-html="qd.AnswerText | unsafe">
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <!--The card below was removed and replaced with new div. this is attachment div-->
+                                                <div id="photo-section" ng-show="qd.AnswerFiles.length>0">
+                                                    <div class="card p-2" style="border: 1px solid #ccc;">
+                                                        <div class="p-2" style="border-bottom: 1px solid #ccc; background-color: #f1f1f1;">
+                                                            <Label><b>Attachments</b> </Label>
+                                                            <a class="btn btn-sm ml-4 btn-success" href="~/teacherloginFiles/dynamic/images/check1.jpeg"><i class="fas fa-download"></i> Download All </a>
+                                                            <button class="float-right btn-success btn btn-sm" ng-click="checkCopy(qd)" id="checkBtn"><i class="fas fa-check"></i> Check Copy</button>
+                                                        </div>
+                                                        <div id="playground">
+                                                            <div class="image-set m-t-20">
+                                                                <a ng-repeat="FileImg in qd.AnswerFiles" data-magnify="gallery" data-src="" data-caption="Page :{{$index+1}}" data-group="a" href="{{ FileImg.AnswerFiles}}">
+                                                                    <img ng-src="{{ FileImg.AnswerFiles}}" alt="" style="height:130px;" class="m-2">
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--Ends-->
+                                                <div class="row mt-3 mb-2" ng-show="!qd.AnswerFiles || qd.AnswerFiles.length==0">
+                                                    <div class="col-md-2">
+                                                        <label for="">Full Mark : {{qd.Marks}}</label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-inline">
+                                                            <label for="marks">Marks Obtained:</label>
+                                                            <input type="number" class="ml-2" ng-model="qd.ObtainMark">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <div class="form-inline">
+                                                            <label for="remark">Remarks:</label>
+                                                            <textarea class="form-control form-control-sm ml-2" style="width:80%;" rows="1" placeholder="" ng-model="qd.Remarks"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <button id="save-to-status-tab" type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="ExamCopyMark(qd)" ng-hide="qd.IsChecked==true">Save</button>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                            </div>
+
+                                        </div>
+
+                                        <!--After Clicking Check Start-->
+                                        <div id="attachment-check-section" style="display:none;">
+                                            <div class="card p-2">
+                                                <div class="row">
+                                                    <div class="col-md-10">
+                                                        <div>
+                                                            <a class="btn btn-sm btn-default float-left" ng-click="NextPreviewImage(-1)"><i class="fas fa-arrow-left"></i> Previous</a>
+                                                            <a class="btn btn-sm btn-info text-white ml-2"> Page : {{CurrentQuestionForCheck.SelectedIndex+1}} / {{CurrentQuestionForCheck.AnswerFiles.length}}</a>
+                                                            <a class="btn btn-sm btn-default float-Right" ng-click="NextPreviewImage(1)"><i class="fas fa-arrow-right"></i> Next</a>
+                                                        </div>
+                                                        <div id="tui-image-editor-container" class="tui-image-editor-container right" style="width:100%;height:100%; min-height:650px"></div>
+                                                    </div>
+                                                    <div class="col-md-2" style="max-height:650px;overflow-y:auto;">
+                                                        <div class="row" ng-repeat="hfd in CurrentQuestionForCheck.AnswerFiles">
+                                                            <label class="mr-1 mt-4">{{$index+1}}.</label>
+                                                            <div class="person-photo-attachment-wrap text-center">
+                                                                <div class="img-wrap mx-auto">
+                                                                    <img ng-src="{{hfd.AnswerFiles}}" class="img-fluid" alt="" style="max-height:160px;max-width:180px" ng-click="ChangeImage(hfd)">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row" style="margin-top:60px;">
+                                                    <div class="col-md-2">
+                                                        <label for="">Full Mark : {{CurrentQuestionForCheck.Marks}}</label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-inline">
+                                                            <label for="marks">Marks Obtained:</label>
+                                                            <input type="number" style="width: 50%;" class="ml-2" ng-model="CurrentQuestionForCheck.ObtainMark">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <div class="form-inline">
+                                                            <label for="remark">Remarks:</label>
+                                                            <textarea class="form-control form-control-sm ml-2" rows="1" placeholder="" style="width: 80%;" ng-model="CurrentQuestionForCheck.Remarks"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="time-label mt-4">
+                                                    <span class="d-block border-0 p-3 text-center">
+                                                        <button type="button" class="btn btn-sm btn-info " ng-click="photoBack()" id="photoBack" style="min-width: 100px">
+                                                            Back to list
+                                                        </button>
+                                                        <button id="save-to-status-tab" type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="ExamCopyCheck()" ng-hide="CurrentQuestionForCheck.IsChecked==true">Save</button>
+                                                    </span>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--After Clicking Check  End-->
+
+
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-info" id="back-detail-btn" style="min-width: 90px;">
+                                                Back to
+                                                List
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.card -->
+                        </div>
+
+                    </div>
+                    <!-- Present Absent Detail Ends -->
+                </section>
+                <!-- /.row -->
+            </div>
+            <!--/. container-fluid -->
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- Attachment preview modal starts -->
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalIMG" role="dialog" tabindex="-1" style="margin-top:30px;">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <iframe id="DocumentAtt_Iframe" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{downloadFilePath}}" target="_blank" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript"
+        src="https://api-storage.cloud.toast.com/v1/AUTH_e18353c4ea5746c097143946d0644e61/toast-ui-cdn/tui-image-editor/v3.11.0/example/fabric-v4.2.0.js"></script>
+
+<script type="text/javascript"
+        src="https://uicdn.toast.com/tui.code-snippet/v1.5.0/tui-code-snippet.min.js"></script>
+<script type="text/javascript"
+        src="https://uicdn.toast.com/tui-color-picker/v2.2.6/tui-color-picker.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
+<script type="text/javascript" src="~/image-editor/tui-image-editor.js"></script>
+<script type="text/javascript" src="~/image-editor/theme/black-theme.js"></script>
+<script type="text/javascript" src="~/image-editor/theme/white-theme.js"></script>
+
+<script>
+    window.prettyPrint && prettyPrint();
+
+    var defaultOpts = {
+        draggable: true,
+        resizable: true,
+        movable: true,
+        keyboard: true,
+        title: true,
+        modalWidth: 320,
+        modalHeight: 320,
+        fixedContent: true,
+        fixedModalSize: false,
+        initMaximized: false,
+        gapThreshold: 0.02,
+        ratioThreshold: 0.1,
+        minRatio: 0.05,
+        maxRatio: 16,
+        headToolbar: ['maximize', 'close'],
+        footToolbar: ['zoomIn', 'zoomOut', 'prev', 'fullscreen', 'next', 'actualSize', 'rotateRight'],
+        multiInstances: true,
+        initEvent: 'click',
+        initAnimation: true,
+        fixedModalPos: false,
+        zIndex: 1090,
+        dragHandle: '.magnify-modal',
+        progressiveLoading: true
+    };
+
+    var vm = new Vue({
+        el: '#playground',
+        data: {
+            options: defaultOpts
+        },
+        methods: {
+            changeTheme: function (e) {
+                if (e.target.value === '0') {
+                    $('.magnify-theme').remove();
+                } else if (e.target.value === '1') {
+                    $('.magnify-theme').remove();
+                    $('head').append('<link class="magnify-theme" href="css/magnify-bezelless-theme.css" rel="stylesheet">');
+                } else if (e.target.value === '2') {
+                    $('.magnify-theme').remove();
+                    $('head').append('<link class="magnify-theme" href="css/magnify-white-theme.css" rel="stylesheet">');
+                }
+            }
+        },
+        updated: function () {
+            $('[data-magnify]').magnify(this.options);
+        }
+    });
+
+</script>

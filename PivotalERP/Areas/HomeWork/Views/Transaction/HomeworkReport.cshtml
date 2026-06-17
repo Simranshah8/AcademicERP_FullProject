@@ -1,0 +1,1820 @@
+﻿<link href="~/wwwroot/dynamic/css/homework.css" rel="stylesheet" />
+<script src="https://cdn2.hubspot.net/hubfs/476360/Chart.js"></script>
+<script src="https://cdn2.hubspot.net/hubfs/476360/utils.js"></script>
+<script src="~/jslib/homework/homework-report.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<style>
+    #canvas {
+        height: 400px !important;
+        width: 100% !important; /* This ensures the chart scales horizontally */
+    }
+
+    .numericAlignment {
+        text-align: right;
+    }
+
+    .headerAligment {
+        text-align: center;
+    }
+
+    .dateAlignment {
+        text-align: center;
+    }
+
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+
+    .modal {
+        margin-top: 30px !important;
+    }
+
+    .modal-dialog {
+        margin-bottom: 40px !important;
+    }
+
+    .description-hover {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 270px;
+        cursor: default;
+    }
+</style>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="HomeworkRptController" ng-init="LoadData()">
+
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Datewise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">Classwise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="student-tab" data-toggle="tab"
+                                               href="#student" role="tab" aria-controls="student"
+                                               aria-selected="false">Subjectwise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="medium-tab" data-toggle="tab" href="#medium"
+                                               role="tab" aria-controls="medium"
+                                               aria-selected="false">Teacherwise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="shift-tab" data-toggle="tab" href="#shift"
+                                               role="tab" aria-controls="shift"
+                                               aria-selected="false">Homework Analysis</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <!--Datewise Tab Starts-->
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="datewiselist">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">From Date</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newDatewise.FromDate_TMP" date-detail="newDatewise.FromDateDet" confirm-action="validateDates('fromDate', newDatewise)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">To Date</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newDatewise.ToDate_TMP" date-detail="newDatewise.ToDateDet" confirm-action="validateDates('toDate', newDatewise)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">Report Type</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDatewise.ReportTypeId" ng-change="ConfigFunction()">
+                                                    <option ng-value="0">**Select Report Type**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ReportTypeColl" ng-selected="cl.id==newDatewise.ReportTypeId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <label><b>Total Homework : {{newDatewise.TotalHomeWork}} </b></label>
+                                        </div>
+                                        <div class="col-md-3 text-right mt-4">
+                                            @*<div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File"  ng-if="newDatewise.ReportTypeId === 2">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#Date-Wise'" sheet-name="'AddAssignmentList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#Date-Wise').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>*@
+                                            <a print-tbl table-id="'#Date-Wise'" class="btn btn-secondary btn-light btn-sm wait" ng-if="newDatewise.ReportTypeId === 1"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <button type="button" ng-if="newDatewise.ReportTypeId === 1"
+                                                    class="btn btn-sm btn-success"
+                                                    style="min-width: 80px;font-size: 13px;" ng-click="OnDateWiseDateChange()">
+                                                <i class="fas fa-sync-alt mr-2"></i>Load
+                                            </button>
+                                            <button type="button" ng-if="newDatewise.ReportTypeId === 2"
+                                                    class="btn btn-sm btn-success"
+                                                    style="min-width: 80px;font-size: 13px;" ng-click="OnDateWiseDateChangeUI()">
+                                                <i class="fas fa-sync-alt mr-2"></i>Load
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="p-0 card" id="Date-Wise" ng-if="newDatewise.ReportTypeId === 1">
+                                        <div class="class-detail" ng-repeat="dhw in DateWiseHomeWorkList">
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <label><b>Class : {{dhw.ClassName}} {{dhw.SectionName}}</b></label>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label><b>Total Homework : {{dhw.TotalCount}}</b></label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Table Starts-->
+                                            <div class="table-responsive mb-4">
+                                                <table id="CombinedExportTable{{$index+1}}" class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 50px;z-index: 2;">S.No.</th>
+                                                            <th style="width: 150px;z-index: 2;">Subject</th>
+                                                            <th style="width: 150px;z-index: 2;">Teacher Name</th>
+                                                            <th style="width: 180px;z-index: 2;">Lesson/Topic</th>
+                                                            <th style="width: 250px;z-index: 2;">Description</th>
+                                                            <th style="width: 115px;z-index: 2;">Homework Date</th>
+                                                            <th style="width: 140px;z-index: 2;"> Deadline</th>
+                                                            <th style="width: 60px;z-index: 2;"> Submit</th>
+                                                            <th style="width: 70px;z-index: 2;"> Checked</th>
+                                                            <th class="align-middle" style="width: 70px;">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="ddc in dhw.DataColl">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{ddc.SubjectName}}</td>
+                                                            <td>{{ddc.TeacherName}}</td>
+                                                            <td>{{ddc.Lession}} / {{cd.Topic}}</td>
+                                                            <td>
+                                                                <div ng-bind-html="ddc.Description | unsafe">
+                                                                </div>
+                                                            </td>
+                                                            <td>{{ddc.AsignDateTime_BS}}</td>
+                                                            <td> {{ddc.DeadlineDate_BS}} {{ddc.DeadlineTime}}</td>
+                                                            <td>
+                                                                <a data-toggle="tooltip"
+                                                                   title="Submitted/Total Student">
+                                                                    {{ddc.NoOfSubmit}}/{{ddc.TotalStudent}}
+                                                                </a>
+                                                            </td>
+                                                            <td>
+                                                                <a data-toggle="tooltip"
+                                                                   title="Completed/Pending"> {{ddc.TotalChecked}}/{{ddc.TotalStudent}}</a>
+                                                            </td>
+                                                            <td class="align-middle" style="width: 100px; background-color: #fff">
+                                                                <button type="button"
+                                                                        class="btn btn-sm btn-success"
+                                                                        style="font-size: 13px;padding: 2px 5px;" ng-click="GetHomeworkById(ddc)">
+                                                                    Details
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="Date-Wise-UI-Grid" ng-if="newDatewise.ReportTypeId === 2">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div ui-grid="gridOptions" id="grdEmp"
+                                                     ui-grid-resize-columns
+                                                     ui-grid-move-columns
+                                                     ui-grid-selection
+                                                     ui-grid-exporter
+                                                     ui-grid-pinning
+                                                     ui-grid-filtering
+                                                     ui-grid-auto-resize
+                                                     ui-grid-save-state style="height: calc(100vh - 12rem) !important;"></div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                                <div id="datewisedetail-form">
+                                    <div id="status-tab">
+                                        <div class="row mt-2">
+                                            <div class="col-md-12">
+                                                <div class="card p-2 mb-0" style="background-color: #86c5661f ">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Assigned By</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.TeacherName}}  </b></label>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Class</label>
+                                                            <label for="">
+                                                                <b>
+                                                                    :  {{HomeWorkDetails.FData.ClassName}} {{HomeWorkDetails.FData.SectionName}}
+                                                                    <span ng-if="HomeWorkDetails.FData.Batch">
+                                                                        - {{HomeWorkDetails.FData.Batch}}
+                                                                    </span>
+                                                                    <span ng-if="HomeWorkDetails.FData.Semester">
+                                                                        - {{HomeWorkDetails.FData.Semester}}
+                                                                    </span>
+
+                                                                    <span ng-if="HomeWorkDetails.FData.ClassYear">
+                                                                        - {{HomeWorkDetails.FData.ClassYear}}
+                                                                    </span>
+                                                                </b>
+                                                            </label>
+
+
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Subject</label>
+                                                            <label><b>: {{HomeWorkDetails.FData.SubjectName}}  </b></label>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Lesson</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.Lession}}  </b></label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Topic</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.Topic}}  </b></label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Homework Type</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.HomeWorkType}}  </b></label>
+                                                        </div>
+
+
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Homework Date</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.AssignDate_BS}} </b></label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">DeadLine</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.DeadlineDate_BS}} </b></label>
+                                                        </div>
+
+
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Total Student</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.TotalStudent}} </b></label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Submitted</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.NoOfSubmit}} </b></label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Checked</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.TotalChecked}} </b></label>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label style="width:107px">Pending</label>
+                                                            <label for=""><b>: {{HomeWorkDetails.FData.NoOfSubmit-HomeWorkDetails.FData.TotalChecked}}</b></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <label style="width:107px">Description</label>
+                                                            <label>
+                                                                <b>
+                                                                    : <span @*compile*@ ng-bind-html="HomeWorkDetails.FData.Description | unsafe">
+                                                                    </span>
+                                                                </b>
+                                                            </label>
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <!-- Submitted and not sublitted tab starts -->
+                                        <div class="card card-primary card-tabs mt-2 mb-1">
+                                            <div class="card-header with-gradient-bg p-0 pt-2">
+                                                <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link active" id="custom-tabs-one-home-tab"
+                                                           data-toggle="pill" href="#custom-tabs-one-home" role="tab"
+                                                           aria-controls="custom-tabs-one-home" aria-selected="true" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Submitted(@*{{HomeWorkDetails.FData.NoOfSubmit}}*@{{HomeWorkDetails.SubmitHomeWorksCOll.length}})</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                           href="#custom-tabs-one-profile" role="tab"
+                                           aria-controls="custom-tabs-one-profile"
+                                           aria-selected="false" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Pending(@*{{HomeWorkDetails.FData.TotalStudent-HomeWorkDetails.FData.NoOfSubmit}}*@{{HomeWorkDetails.PendingHomeWorksCOll.length}})</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="tab-content" id="custom-tabs-one-tabContent">
+                                    <div class="tab-pane fade show active" id="custom-tabs-one-home"
+                                         role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                                        <div class="">
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-1">
+                                                <table class="table table-bordered table-head-fixed text-nowrap">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px;">S.N.</th>
+                                                            <th style="width: 150px;" ng-click="sortdatewiseSub('RegNo')">Adm No.</th>
+                                                            <th style="width: 200px;" ng-click="sortdatewiseSub('Name')">Name</th>
+                                                            <th style="width: 110px;" ng-click="sortdatewiseSub('RollNo')">Roll No.</th>
+                                                            <th style="width: 80px;">Section</th>
+                                                            <th style="width: 160px;">Submitted Date</th>
+                                                            <th style="width: 180px;">Status</th>
+                                                            <th style="width: 120px">Action </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="hdc in HomeWorkDetails.SubmitHomeWorksCOll||orderBy:sortKeydatewiseSub:reversedateWiseSub">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{hdc.RegNo}}</td>
+                                                            <td>{{hdc.Name}}</td>
+                                                            <td>{{hdc.RollNo}}</td>
+                                                            <td>{{hdc.Sectionname}}</td>
+                                                            <td>{{hdc.SubmitDate_BS}} {{hdc.SubmitDateTime_AD |timeFormat}}</td>
+
+                                                            <td class="text-warning"><i class="far fa-hourglass"></i> {{hdc.CheckStatus}}</td>
+                                                            <td>
+                                                                <a class="p-1 wait" ng-click="GetAddHomeworkChecksById(hdc)" ng-show="hdc.IsCheck==true">
+                                                                    <i class="fas fa-eye text-primary"></i>
+                                                                </a>
+
+                                                                <button ng-hide="hdc.IsCheck==true" type="button" class="btn btn-sm btn-success" ng-click="GetAddHomeworkChecksById(hdc)" id="hw-correction-btn" style="font-size: 11px; padding:1px 10px;">
+                                                                    Check
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel"
+                                         aria-labelledby="custom-tabs-one-profile-tab">
+                                        <div class="row">
+                                            <div class="col-md-12 text-right">
+                                                <a class="btn btn-success btn-sm" data-toggle="modal" ng-click="NotificationToggle(HomeWorkDetails.PendingHomeWorksCOll)" @*data-target="#modal-notice"*@ style="color:#fff;">
+                                                    <i class="fas fa-bell w-t">
+                                                    </i>
+                                                    Send Notice
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-scroll-x-y sales-main-table table-scroll mt-1" style="max-height: calc(100vh - 22rem) ;overflow-x:auto">
+                                            <table class="table table-bordered table-head-fixed text-nowrap table-head-fixed">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px;">S.N.</th>
+                                                        <th style="width: 150px;" ng-click="sortdatewisePen('RegNo')">Adm. No.</th>
+                                                        <th style="width: 200px;" ng-click="sortdatewisePen('Name')">Name</th>
+                                                        <th style="width: 110px;" ng-click="sortdatewisePen('RollNo')">Roll No.</th>
+                                                        <th style="width: 80px;">Section</th>
+                                                        <th style="width: 240px;">Father's Name</th>
+                                                        <th style="width: 150px;">Contact</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="hdc in HomeWorkDetails.PendingHomeWorksCOll | orderBy:sortKeydatewisePen:reversedateWisePen">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{hdc.RegNo}}</td>
+                                                        <td>{{hdc.Name}}</td>
+                                                        <td>{{hdc.RollNo}}</td>
+                                                        <td>{{hdc.Sectionname}}</td>
+                                                        <td>{{hdc.FatherName}}</td>
+                                                        <td>{{hdc.F_ContactNo}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center">
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-2 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info"
+                                                    id="back-homework-list-btn"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Datewise Tab Ends-->
+            <!--Classwise Tab Starts-->
+            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                 aria-labelledby="profile-tab">
+                <div id="classwiselist">
+                    <div class="row">
+                        <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                            <label for="">Batch</label>
+                            <select class="form-control form-control-sm select2" ng-model="newClasswise.BatchId">
+                                <option ng-value="0">**Select Batch**</option>
+                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newClasswise.BatchId">{{cl.text}}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="">Class/Sec</label>
+                                <select class="form-control form-control-sm select2" ng-model="newClasswise.SelectedClass">
+                                    <option ng-value="cl" ng-repeat="cl in ClassList.SectionListWithClass">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2" ng-show="newClasswise.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                            <div class="form-group">
+                                <label for="">Class Year</label>
+                                <select class="form-control form-control-sm select2" ng-model="newClasswise.ClassYearId">
+                                    <option ng-value="0">**Select Year**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newClasswise.ClassYearId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2" ng-show="newClasswise.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                            <div class="form-group">
+                                <label for="">Semester</label>
+                                <select class="form-control form-control-sm select2" ng-model="newClasswise.SemesterId">
+                                    <option ng-value="0">**Select Semester**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newClasswise.SemesterId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">From Date</label>
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newClasswise.FromDate_TMP" date-detail="newClasswise.FromDateDet" confirm-action="validateDates('fromDate', newClasswise)">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">To Date</label>
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newClasswise.ToDate_TMP" date-detail="newClasswise.ToDateDet" confirm-action="validateDates('toDate', newClasswise)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-2 mt-4">
+                            <label><b>Total Homework : {{newClasswise.TotalHomeWork}} </b></label>
+                        </div>
+
+                        <div class="col-md-3 text-right mt-4">
+                            <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item wait" export-excel table-id="'#Class-Wise'" sheet-name="'AddAssignmentList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                    <a class="dropdown-item wait" onClick="$('#Class-Wise').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                </div>
+                            </div>
+                            <a print-tbl table-id="'#Class-Wise'" class="btn btn-secondary btn-light btn-sm wait"
+                               data-toggle="tooltip" data-placement="bottom"
+                               title="Print">
+                                <i class="fas fa-print"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn btn-sm btn-success"
+                                    style="min-width: 80px;font-size: 13px;" ng-click="GetClassWiseHomeWorkList()">
+                                <i class="fas fa-sync-alt mr-2"></i>Load
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card" id="Class-Wise">
+                        <div class="class-detail" ng-repeat="dhw in ClassWiseHomeWorkList">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label><b>Class : {{dhw.ClassName}} {{dhw.SectionName}}</b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label><b>Total Homework : {{dhw.TotalCount}}</b></label>
+                                </div>
+                            </div>
+
+                            <!-- Table Starts-->
+                            <div class="table-responsive mb-3">
+                                <table class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;z-index: 2;">S.No.</th>
+                                            <th style="width: 150px;z-index: 2;">Subject</th>
+                                            <th style="width: 150px;z-index: 2;">Teacher Name</th>
+                                            <th style="width: 180px;z-index: 2;">Lesson/Topic</th>
+                                            <th style="width: 250px;z-index: 2;">Description</th>
+                                            <th style="width: 120px;z-index: 2;">Homework Date</th>
+                                            <th style="width: 150px;z-index: 2;"> Deadline</th>
+                                            <th style="width: 60px;z-index: 2;"> Submit</th>
+                                            <th style="width: 80px;z-index: 2;"> Checked</th>
+                                            <th class="align-middle" style="width: 80px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ddc in dhw.DataColl">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{ddc.SubjectName}}</td>
+                                            <td>{{ddc.TeacherName}}</td>
+                                            <td>{{ddc.Lession}} / {{cd.Topic}}</td>
+                                            <td>
+                                                <div ng-bind-html="ddc.Description | unsafe">
+                                                </div>
+                                            </td>
+                                            <td>{{ddc.AsignDateTime_BS}}</td>
+                                            <td> {{ddc.DeadlineDate_BS}} {{ddc.DeadlineTime}}</td>
+                                            <td>
+                                                <a data-toggle="tooltip"
+                                                   title="Submitted/Total Student">
+                                                    {{ddc.NoOfSubmit}}/{{ddc.TotalStudent}}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a data-toggle="tooltip"
+                                                   title="Completed/Pending"> {{ddc.TotalChecked}}/{{ddc.TotalStudent}}</a>
+                                            </td>
+                                            <td class="align-middle  cstm-sticky" style="width: 100px; right: 0; z-index: 1; background-color: #fff">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        style="min-width: 60px;font-size: 13px;padding: 2px 5px;" ng-click="GetHMByIdForClassWise(ddc)">
+                                                    Details
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="classwisedetail-form">
+                    <div id="classwise-status-tab">
+                        <div class="card mb-0 p-2" style="background-color: #86c5661f">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Assigned By</label>
+                                            <label><b>: {{classWiseHWDet.FData.TeacherName}}  </b></label>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Class</label>
+                                            <label for="">
+                                                <b>
+                                                    :  {{classWiseHWDet.FData.ClassName}} {{classWiseHWDet.FData.SectionName}}
+                                                    <span ng-if="classWiseHWDet.FData.Batch">
+                                                        - {{classWiseHWDet.FData.Batch}}
+                                                    </span>
+                                                    <span ng-if="classWiseHWDet.FData.Semester">
+                                                        - {{classWiseHWDet.FData.Semester}}
+                                                    </span>
+
+                                                    <span ng-if="classWiseHWDet.FData.ClassYear">
+                                                        - {{classWiseHWDet.FData.ClassYear}}
+                                                    </span>
+                                                </b>
+                                            </label>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Subject</label>
+                                            <label><b>: {{classWiseHWDet.FData.SubjectName}}  </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Lesson</label>
+                                            <label><b>: {{classWiseHWDet.FData.Lession}}  </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Topic</label>
+                                            <label><b>: {{classWiseHWDet.FData.Topic}}  </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Homework Type</label>
+                                            <label for=""><b>: {{classWiseHWDet.FData.HomeWorkType}}  </b></label>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Homework Date</label>
+                                            <label><b>: {{classWiseHWDet.FData.AssignDate_BS}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">DeadLine</label>
+                                            <label><b>: {{classWiseHWDet.FData.DeadlineDate_BS}} </b></label>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Total Student</label>
+                                            <label><b>: {{classWiseHWDet.FData.TotalStudent}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Submitted</label>
+                                            <label><b>: {{classWiseHWDet.FData.NoOfSubmit}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Checked</label>
+                                            <label><b>: {{classWiseHWDet.FData.TotalChecked}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Pending</label>
+                                            <label><b>: {{classWiseHWDet.FData.NoOfSubmit-classWiseHWDet.FData.TotalChecked}}</b></label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label style="width:107px">Description</label>
+                                            <label>
+                                                <b>
+                                                    : <span @*compile*@ ng-bind-html="classWiseHWDet.FData.Description | unsafe">
+                                                    </span>
+                                                </b>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Submitted and not sublitted tab starts -->
+                        <div class="card card-primary card-tabs ">
+                            <div class="card-header with-gradient-bg p-0 pt-2">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active"
+                                           data-toggle="pill" href="#custom-tabs-one-classwise" role="tab"
+                                           aria-controls="custom-tabs-one-classwise" aria-selected="true" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Submitted(@*{{classWiseHWDet.FData.NoOfSubmit}}*@{{classWiseHWDet.SubmitHomeWorksCOll.length}} )</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="pill"
+                                           href="#custom-tabs-one-classwise1" role="tab"
+                                           aria-controls="custom-tabs-one-classwise1"
+                                           aria-selected="false" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Pending(@*{{classWiseHWDet.FData.TotalStudent-classWiseHWDet.FData.NoOfSubmit}}*@ {{classWiseHWDet.PendingHomeWorksCOll.length}})</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="custom-tabs-one-classwise"
+                                         role="tabpanel" aria-labelledby="custom-tabs-one-classwise-tab">
+                                        <div class="pt-3">
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-1">
+                                                <table class="table table-bordered table-head-fixed text-nowrap">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px;">S.N.</th>
+                                                            <th style="width: 150px;" ng-click="sortclasswiseSub('RegNo')">Adm. No.</th>
+                                                            <th style="width: 200px;" ng-click="sortclasswiseSub('Name')">Name</th>
+                                                            <th style="width: 110px;" ng-click="sortclasswiseSub('RollNo')">Roll No.</th>
+                                                            <th style="width: 80px;">Section</th>
+                                                            <th style="width: 160px;">Submitted Date</th>
+                                                            <th style="width: 180px;">Status</th>
+                                                            <th style="width: 120px">Action </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="hdc in classWiseHWDet.SubmitHomeWorksCOll | orderBy:sortKeyclasswiseSub:reverseclassWiseSub">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{hdc.RegNo}}</td>
+                                                            <td>{{hdc.Name}}</td>
+                                                            <td>{{hdc.RollNo}}</td>
+                                                            <td>{{hdc.Sectionname}}</td>
+                                                            <td>{{hdc.SubmitDate_BS}} {{hdc.SubmitDateTime_AD |timeFormat}}</td>
+
+                                                            <td class="text-warning"><i class="far fa-hourglass"></i> {{hdc.CheckStatus}}</td>
+                                                            <td>
+                                                                <a class="p-1 wait" ng-click="GetAddHomeworkChecksById(hdc)" ng-show="hdc.IsCheck==true">
+                                                                    <i class="fas fa-eye text-primary"></i>
+                                                                </a>
+
+                                                                <button ng-hide="hdc.IsCheck==true" type="button" class="btn btn-sm btn-success" ng-click="GetAddHomeworkChecksById(hdc)" id="hw-correction-btn" style="font-size: 11px; padding:1px 10px;">
+                                                                    Check
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-one-classwise1" role="tabpanel"
+                                         aria-labelledby="custom-tabs-one-profile-tab">
+                                        <div class="row">
+                                            <div class="col-md-12 text-right">
+                                                <a class="btn btn-success btn-sm" data-toggle="modal" ng-click="NotificationToggle(classWiseHWDet.PendingHomeWorksCOll)" @*data-target="#modal-notice"*@ style="color:#fff;">
+                                                    <i class="fas fa-bell w-t">
+                                                    </i>
+                                                    Send Notice
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-scroll-x-y sales-main-table table-scroll mt-1" style="height: calc(100vh - 22rem) ;overflow-x:auto">
+                                            <table class="table table-bordered table-head-fixed text-nowrap table-head-fixed">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px;">S.N.</th>
+                                                        <th style="width: 150px;" ng-click="sortclasswisePen('RegNo')">Adm. No.</th>
+                                                        <th style="width: 200px;" ng-click="sortclasswisePen('Name')">Name</th>
+                                                        <th style="width: 110px;" ng-click="sortclasswisePen('RollNo')">Roll No.</th>
+                                                        <th style="width: 80px;">Section</th>
+                                                        <th style="width: 240px;">Father's Name</th>
+                                                        <th style="width: 150px;">Contact</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="hdc in classWiseHWDet.PendingHomeWorksCOll | orderBy:sortKeyclasswisePen:reverseclassWisePen">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{hdc.RegNo}}</td>
+                                                        <td>{{hdc.Name}}</td>
+                                                        <td>{{hdc.RollNo}}</td>
+                                                        <td>{{hdc.Sectionname}}</td>
+                                                        <td>{{hdc.FatherName}}</td>
+                                                        <td>{{hdc.F_ContactNo}}</td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center">
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info"
+                                                    id="back-homework-classwise-btn"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <!-- /.card -->
+
+                    </div>
+                </div>
+            </div>
+            <!--Classwise Tab Ends-->
+            <!--Subjectwise Tab Starts-->
+            <div class="tab-pane fade main-section" id="student" role="tabpanel"
+                 aria-labelledby="student-tab">
+                <div id="subjectwiselist">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="Subject">Subject</label>
+                                <select class="form-control form-control-sm select2" ng-model="newSubjectwise.SubjectId">
+                                    <option ng-value="cl.SubjectId" ng-repeat="cl in SubjectList">{{cl.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="">From Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newSubjectwise.FromDate_TMP" date-detail="newSubjectwise.FromDateDet" confirm-action="validateDates('fromDate', newSubjectwise)">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="">To Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newSubjectwise.ToDate_TMP" date-detail="newSubjectwise.ToDateDet" confirm-action="validateDates('toDate', newSubjectwise)">
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mt-4">
+                            <label><b>Total Homework : {{newSubjectwise.TotalHomeWork}} </b></label>
+                        </div>
+                        <div class="col-md-2 mt-4">
+                            <button type="button"
+                                    class="btn btn-sm btn-success"
+                                    style="min-width: 80px;font-size: 13px;" ng-click="GetSubjectWiseHomeWorkList()">
+                                <i class="fas fa-sync-alt mr-2"></i> Load
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-0 card">
+                        <div class="class-detail" ng-repeat="dhw in SubjectWiseHomeWorkList">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label><b>Class : {{dhw.ClassName}} {{dhw.SectionName}}</b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label><b>Total Homework : {{dhw.TotalCount}}</b></label>
+                                </div>
+                            </div>
+
+                            <!-- Table Starts-->
+                            <div class="table-responsive mb-3 table-scroll-x-y">
+                                <table class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;z-index: 2;">S.No.</th>
+                                            <th style="width: 150px;z-index: 2;">Subject</th>
+                                            <th style="width: 150px;z-index: 2;">Teacher Name</th>
+                                            <th style="width: 180px;z-index: 2;">Lesson/Topic</th>
+                                            <th style="width: 250px;z-index: 2;">Description</th>
+                                            <th style="width: 115px;z-index: 2;">Homework Date</th>
+                                            <th style="width: 150px;z-index: 2;"> Deadline</th>
+                                            <th style="width: 70px;z-index: 2;"> Submit</th>
+                                            <th style="width: 70px;z-index: 2;"> Checked</th>
+                                            <th class="align-middle cstm-sticky" style="width: 70px; right:0; z-index: 3; background-color: #fff">Actions </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ddc in dhw.DataColl">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{ddc.SubjectName}}</td>
+                                            <td>{{ddc.TeacherName}}</td>
+                                            <td>{{ddc.Lession}} / {{cd.Topic}}</td>
+                                            <td>
+                                                <div ng-bind-html="ddc.Description | unsafe">
+                                                </div>
+                                            </td>
+                                            <td>{{ddc.AsignDateTime_BS}}</td>
+                                            <td> {{ddc.DeadlineDate_BS}} {{ddc.DeadlineTime}}</td>
+                                            <td>
+                                                <a data-toggle="tooltip"
+                                                   title="Submitted/Total Student">
+                                                    {{ddc.NoOfSubmit}}/{{ddc.TotalStudent}}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a data-toggle="tooltip"
+                                                   title="Completed/Pending"> {{ddc.TotalChecked}}/{{ddc.TotalStudent}}</a>
+                                            </td>
+                                            <td class="align-middle  cstm-sticky" style="width: 70px; right: 0; z-index: 1; background-color: #fff">
+
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        style="font-size: 13px;padding: 2px 5px;" ng-click="GetHMByIdForSubjectWise(ddc)">
+                                                    Details
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="subjectwisedetail-form">
+                    <div id="status-tab">
+
+                        <div class="card mb-0 p-2" style="background-color: #86c5661f">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Assigned By</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.TeacherName}}  </b></label>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Class</label>
+                                            <label for="">
+                                                <b>
+                                                    :  {{subjectWiseHWDet.FData.ClassName}} {{subjectWiseHWDet.FData.SectionName}}
+                                                    <span ng-if="subjectWiseHWDet.FData.Batch">
+                                                        - {{subjectWiseHWDet.FData.Batch}}
+                                                    </span>
+                                                    <span ng-if="subjectWiseHWDet.FData.Semester">
+                                                        - {{subjectWiseHWDet.FData.Semester}}
+                                                    </span>
+
+                                                    <span ng-if="subjectWiseHWDet.FData.ClassYear">
+                                                        - {{subjectWiseHWDet.FData.ClassYear}}
+                                                    </span>
+                                                </b>
+                                            </label>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Subject</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.SubjectName}}  </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Lesson</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.Lession}}  </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Topic</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.Topic}}  </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Homework Type</label>
+                                            <label for=""><b>: {{subjectWiseHWDet.FData.HomeWorkType}}  </b></label>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Homework Date</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.AssignDate_BS}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">DeadLine</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.DeadlineDate_BS}} </b></label>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Total Student</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.TotalStudent}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Submitted</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.NoOfSubmit}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Checked</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.TotalChecked}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Pending</label>
+                                            <label><b>: {{subjectWiseHWDet.FData.NoOfSubmit-subjectWiseHWDet.FData.TotalChecked}}</b></label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label style="width:107px">Description</label>
+                                            <label>
+                                                <b>
+                                                    : <span @*compile*@ ng-bind-html="subjectWiseHWDet.FData.Description | unsafe">
+                                                    </span>
+                                                </b>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Submitted and not sublitted tab starts -->
+                        <div class="card card-primary card-tabs">
+                            <div class="card-header with-gradient-bg p-0 pt-2">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active"
+                                           data-toggle="pill" href="#custom-tabs-one-subjectwise" role="tab"
+                                           aria-controls="custom-tabs-one-subjectwise" aria-selected="true" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Submitted(@*{{subjectWiseHWDet.FData.NoOfSubmit}}*@ {{subjectWiseHWDet.SubmitHomeWorksCOll.length}})</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="pill"
+                                           href="#custom-tabs-one-subjectwise1" role="tab"
+                                           aria-controls="custom-tabs-one-subjectwise1"
+                                           aria-selected="false" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Pending(@*{{subjectWiseHWDet.FData.TotalStudent-subjectWiseHWDet.FData.NoOfSubmit}}*@{{subjectWiseHWDet.PendingHomeWorksCOll.length}})</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="custom-tabs-one-subjectwise"
+                                         role="tabpanel" aria-labelledby="custom-tabs-one-subjectwise-tab">
+                                        <div class="pt-3">
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-1">
+                                                <table class="table table-bordered table-head-fixed text-nowrap">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px;">S.N.</th>
+                                                            <th style="width: 150px;" ng-click="sortSubjectwiseSub('RegNo')">Adm. No.</th>
+                                                            <th style="width: 200px;" ng-click="sortSubjectwiseSub('Name')">Name</th>
+                                                            <th style="width: 110px;" ng-click="sortSubjectwiseSub('RollNo')">Roll No.</th>
+                                                            <th style="width: 80px;">Section</th>
+                                                            <th style="width: 160px;">Submitted Date</th>
+                                                            <th style="width: 180px;">Status</th>
+                                                            <th style="width: 120px">Action </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="hdc in subjectWiseHWDet.SubmitHomeWorksCOll | orderBy:sortKeySubjectwiseSub:reverseSubjectWiseSub">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{hdc.RegNo}}</td>
+                                                            <td>{{hdc.Name}}</td>
+                                                            <td>{{hdc.RollNo}}</td>
+                                                            <td>{{hdc.Sectionname}}</td>
+                                                            <td>{{hdc.SubmitDate_BS}} {{hdc.SubmitDateTime_AD |timeFormat}}</td>
+
+                                                            <td class="text-warning"><i class="far fa-hourglass"></i> {{hdc.CheckStatus}}</td>
+                                                            <td>
+                                                                <a class="p-1 wait" ng-click="GetAddHomeworkChecksById(hdc)" ng-show="hdc.IsCheck==true">
+                                                                    <i class="fas fa-eye text-primary"></i>
+                                                                </a>
+
+                                                                <button ng-hide="hdc.IsCheck==true" type="button" class="btn btn-sm btn-success" ng-click="GetAddHomeworkChecksById(hdc)" id="hw-correction-btn" style="font-size: 11px; padding:1px 10px;">
+                                                                    Check
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-one-subjectwise1" role="tabpanel"
+                                         aria-labelledby="custom-tabs-one-profile-tab">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="text-right">
+                                                    <a class="btn btn-success btn-sm" data-toggle="modal" ng-click="NotificationToggle(subjectWiseHWDet.PendingHomeWorksCOll)" @*data-target="#modal-notice"*@ style="color:#fff;">
+                                                        <i class="fas fa-bell w-t">
+                                                        </i>
+                                                        Send Notice
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="table-scroll-x-y sales-main-table table-scroll mt-1" style="height: calc(100vh - 22rem) ;overflow-x:auto">
+                                            <table class="table table-bordered table-head-fixed text-nowrap table-head-fixed">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px;">S.N.</th>
+                                                        <th style="width: 150px;" ng-click="sortSubjectwisePen('RegNo')">Adm. No.</th>
+                                                        <th style="width: 200px;" ng-click="sortSubjectwisePen('Name')">Name</th>
+                                                        <th style="width: 110px;" ng-click="sortSubjectwisePen('RollNo')">Roll No.</th>
+                                                        <th style="width: 80px;">Section</th>
+                                                        <th style="width: 240px;">Father's Name</th>
+                                                        <th style="width: 150px;">Contact</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="hdc in subjectWiseHWDet.PendingHomeWorksCOll | orderBy:sortKeySubjectwisePen:reverseSubjectWisePen">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{hdc.RegNo}}</td>
+                                                        <td>{{hdc.Name}}</td>
+                                                        <td>{{hdc.RollNo}}</td>
+                                                        <td>{{hdc.Sectionname}}</td>
+                                                        <td>{{hdc.FatherName}}</td>
+                                                        <td>{{hdc.F_ContactNo}}</td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center">
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info"
+                                                    id="back-subjectwiselist"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                </div>
+            </div>
+            <!--Subjectwise Tab Ends-->
+            <!--Teacherwise Tab Starts-->
+            <div class="tab-pane fade main-section" id="medium" role="tabpanel"
+                 aria-labelledby="medium-tab">
+                <div id="teacherwiselist">
+                    <div class="row">
+                        <div class="col-sm-6 col-lg-6 col-md-6">
+                            <label for="inlineFormInputGroup">Select Employee</label>
+                            <div class="input-group-prepend">
+                                <select class="input-group-text dropdown-toggle p-0"
+                                        style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newTeacherwise.SelectEmployee">
+
+                                    <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newTeacherwise.EmployeeSearchBy">
+                                        {{ss.text}}
+                                    </option>
+                                </select>
+                                <select class="form-control select2 form-control-sm" all-employee ng-model="newTeacherwise.EmployeeId" employee-detail="newTeacherwise.EmployeeDetails" side-bar-data="newTeacherwise.EmpSideBarData" search-by="newTeacherwise.SelectEmployee" style="width: 100%;" confirm-action="GetTeacherWiseHomeWorkList()">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="">From Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newTeacherwise.FromDate_TMP" date-detail="newTeacherwise.FromDateDet" confirm-action="validateDates('fromDate', newTeacherwise)">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="">To Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newTeacherwise.ToDate_TMP" date-detail="newTeacherwise.ToDateDet" confirm-action="validateDates('toDate', newTeacherwise)">
+                            </div>
+                        </div>
+                        <div class="col-md-2 mt-4">
+                            <label><b>Total Homework :  {{newTeacherwise.TotalHomeWork}} </b></label>
+                        </div>
+                    </div>
+                    <div class="p-2 card">
+                        <div class="class-detail" ng-repeat="dhw in TeacherWiseHomeWorkList">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label><b>Class : {{dhw.ClassName}} {{dhw.SectionName}}</b></label>
+                                </div>
+                                <div class="col-md-3">
+                                    <label><b>Total Homework : {{dhw.TotalCount}}</b></label>
+                                </div>
+                            </div>
+
+                            <!-- Table Starts-->
+                            <div class="table-responsive mb-3 table-scroll-x-y">
+                                <table class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 60px;z-index: 2;">S.No.</th>
+                                            <th style="width: 150px;z-index: 2;">Subject</th>
+                                            <th style="width: 150px;z-index: 2;">Teacher Name</th>
+                                            <th style="width: 180px;z-index: 2;">Lesson/Topic</th>
+                                            <th style="width: 250px;z-index: 2;">Description</th>
+                                            <th style="width: 150px;z-index: 2;">Homework Date</th>
+                                            <th style="width: 150px;z-index: 2;"> Deadline</th>
+                                            <th style="width: 90px;z-index: 2;"> Submit</th>
+                                            <th style="width: 90px;z-index: 2;"> Checked</th>
+                                            <th class="align-middle cstm-sticky" style="width: 100px; right:0; z-index: 3; background-color: #fff">Actions </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ddc in dhw.DataColl">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{ddc.SubjectName}}</td>
+                                            <td>{{ddc.TeacherName}}</td>
+                                            <td>{{ddc.Lession}} / {{cd.Topic}}</td>
+                                            <td>
+                                                <div ng-bind-html="ddc.Description | unsafe">
+                                                </div>
+                                            </td>
+                                            <td>{{ddc.AsignDateTime_BS}}</td>
+                                            <td> {{ddc.DeadlineDate_BS}} {{ddc.DeadlineTime}}</td>
+                                            <td>
+                                                <a data-toggle="tooltip"
+                                                   title="Submitted/Total Student">
+                                                    {{ddc.NoOfSubmit}}/{{ddc.TotalStudent}}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a data-toggle="tooltip"
+                                                   title="Completed/Pending"> {{ddc.TotalChecked}}/{{ddc.TotalStudent}}</a>
+                                            </td>
+                                            <td class="align-middle  cstm-sticky" style="width: 100px; right: 0; z-index: 1; background-color: #fff">
+
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        style="min-width: 80px;font-size: 13px;padding: 2px 5px;" ng-click="GetHMByIdForTeacherWise(ddc)">
+                                                    Details
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="teacherwisedetail-form">
+                    <div id="status-tab">
+                        <div class="card mb-0 p-2" style="background-color: #86c5661f">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Assigned By</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.TeacherName}}  </b></label>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Class</label>
+                                            <label for="">
+                                                <b>
+                                                    :  {{teacherWiseHWDet.FData.ClassName}} {{teacherWiseHWDet.FData.SectionName}}
+                                                    <span ng-if="teacherWiseHWDet.FData.Batch">
+                                                        - {{teacherWiseHWDet.FData.Batch}}
+                                                    </span>
+                                                    <span ng-if="teacherWiseHWDet.FData.Semester">
+                                                        - {{teacherWiseHWDet.FData.Semester}}
+                                                    </span>
+
+                                                    <span ng-if="teacherWiseHWDet.FData.ClassYear">
+                                                        - {{teacherWiseHWDet.FData.ClassYear}}
+                                                    </span>
+                                                </b>
+                                            </label>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Subject</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.SubjectName}}  </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Lesson</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.Lession}}  </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Topic</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.Topic}}  </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Homework Type</label>
+                                            <label for=""><b>: {{teacherWiseHWDet.FData.HomeWorkType}}  </b></label>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Homework Date</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.AssignDate_BS}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">DeadLine</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.DeadlineDate_BS}} </b></label>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Total Student</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.TotalStudent}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Submitted</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.NoOfSubmit}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Checked</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.TotalChecked}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label style="width:107px">Pending</label>
+                                            <label><b>: {{teacherWiseHWDet.FData.NoOfSubmit-teacherWiseHWDet.FData.TotalChecked}}</b></label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label style="width:107px">Description</label>
+                                            <label>
+                                                <b>
+                                                    : <span @*compile*@ ng-bind-html="teacherWiseHWDet.FData.Description | unsafe">
+                                                    </span>
+                                                </b>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Submitted and not sublitted tab starts -->
+                        <div class="card card-primary card-tabs">
+                            <div class="card-header with-gradient-bg p-0 pt-2">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active"
+                                           data-toggle="pill" href="#custom-tabs-one-teacherwise" role="tab"
+                                           aria-controls="custom-tabs-one-teacherwise" aria-selected="true" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Submitted(@*{{teacherWiseHWDet.FData.NoOfSubmit}}*@{{teacherWiseHWDet.SubmitHomeWorksCOll.length}})</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="pill"
+                                           href="#custom-tabs-one-teacherwise1" role="tab"
+                                           aria-controls="custom-tabs-one-teacherwise1"
+                                           aria-selected="false" style="padding-left: 3rem;
+                                          padding-right: 3rem;">Pending(@*{{teacherWiseHWDet.FData.TotalStudent-teacherWiseHWDet.FData.NoOfSubmit}}*@{{teacherWiseHWDet.PendingHomeWorksCOll.length}})</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="custom-tabs-one-teacherwise"
+                                         role="tabpanel" aria-labelledby="custom-tabs-one-teacherwise-tab">
+                                        <div class="mt-3">
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-1">
+                                                <table class="table table-bordered table-head-fixed text-nowrap">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px;">S.N.</th>
+                                                            <th style="width: 150px;" ng-click="sortTeacherwiseSub('RegNo')">Adm. No.</th>
+                                                            <th style="width: 200px;" ng-click="sortTeacherwiseSub('Name')">Name</th>
+                                                            <th style="width: 110px;" ng-click="sortTeacherwiseSub('RollNo')">Roll No.</th>
+                                                            <th style="width: 80px;">Section</th>
+                                                            <th style="width: 160px;">Submitted Date</th>
+                                                            <th style="width: 180px;">Status</th>
+                                                            <th style="width: 120px">Action </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="hdc in teacherWiseHWDet.SubmitHomeWorksCOll| orderBy:sortKeyTeacherwiseSub:reverseTeacherWiseSub">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{hdc.RegNo}}</td>
+                                                            <td>{{hdc.Name}}</td>
+                                                            <td>{{hdc.RollNo}}</td>
+                                                            <td>{{hdc.Sectionname}}</td>
+                                                            <td>{{hdc.SubmitDate_BS}} {{hdc.SubmitDateTime_AD |timeFormat}}</td>
+
+                                                            <td class="text-warning"><i class="far fa-hourglass"></i> {{hdc.CheckStatus}}</td>
+                                                            <td>
+                                                                <a class="p-1 wait" ng-click="GetAddHomeworkChecksById(hdc)" ng-show="hdc.IsCheck==true">
+                                                                    <i class="fas fa-eye text-primary"></i>
+                                                                </a>
+
+                                                                <button ng-hide="hdc.IsCheck==true" type="button" class="btn btn-sm btn-success" ng-click="GetAddHomeworkChecksById(hdc)" id="hw-correction-btn" style="font-size: 11px; padding:1px 10px;">
+                                                                    Check
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-one-teacherwise1" role="tabpanel"
+                                         aria-labelledby="custom-tabs-one-profile-tab">
+                                        <div class="row">
+                                            <div class="col-md-12 text-right">
+                                                <a class="btn btn-success btn-sm" data-toggle="modal" ng-click="NotificationToggle(teacherWiseHWDet.PendingHomeWorksCOll)" @*data-target="#modal-notice"*@ style="color:#fff;">
+                                                    <i class="fas fa-bell w-t">
+                                                    </i>
+                                                    Send Notice
+                                                </a>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="table-scroll-x-y sales-main-table table-scroll mt-1" style="height: calc(100vh - 22rem) ;overflow-x:auto">
+                                            <table class="table table-bordered table-head-fixed text-nowrap table-head-fixed">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px;">S.N.</th>
+                                                        <th style="width: 150px;" ng-click="sortTeacherwisePen('RegNo')">Adm. No.</th>
+                                                        <th style="width: 200px;" ng-click="sortTeacherwisePen('Name')">Name</th>
+                                                        <th style="width: 110px;" ng-click="sortTeacherwisePen('RollNo')">Roll No.</th>
+                                                        <th style="width: 80px;">Section</th>
+                                                        <th style="width: 240px;">Father's Name</th>
+                                                        <th style="width: 150px;">Contact</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="hdc in teacherWiseHWDet.PendingHomeWorksCOll| orderBy:sortKeyTeacherwisePen:reverseTeacherWisePen">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{hdc.RegNo}}</td>
+                                                        <td>{{hdc.Name}}</td>
+                                                        <td>{{hdc.RollNo}}</td>
+                                                        <td>{{hdc.Sectionname}}</td>
+                                                        <td>{{hdc.FatherName}}</td>
+                                                        <td>{{hdc.F_ContactNo}}</td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center">
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info"
+                                                    id="back-homework-teacherwise-btn"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                </div>
+            </div>
+            <!--TEacherwise Tab Ends-->
+            <!--Homework Analysis Tab Starts-->
+            <div class="tab-pane fade main-section " id="shift" role="tabpanel" aria-labelledby="shift-tab">
+                <div class="card pt-0">
+                    <div class="row py-1" style="border-bottom: 1px solid #76be4e; background-color: #76be4e21 ">
+                        <div class="col-md-2">
+                            <div class="form-group mb-0">
+                                <label for="">From Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newAnalysis.FromDate_TMP" date-detail="newAnalysis.FromDateDet" confirm-action="GetAnalysisHomeWorkList()">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group mb-0">
+                                <label for="">To Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newAnalysis.ToDate_TMP" date-detail="newAnalysis.ToDateDet" confirm-action="GetAnalysisHomeWorkList()">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                            <label for="">Batch</label>
+                            <select class="form-control form-control-sm select2" ng-model="newAnalysis.BatchId">
+                                <option ng-value="0">**Select Batch**</option>
+                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newAnalysis.BatchId">{{cl.text}}</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group mb-0">
+                                <label class="mt-1 mr-2">Class/Sec</label>
+                                <select class="form-control form-control-sm select2" ng-model="newAnalysis.SelectedClass" ng-change="GetAnalysisHomeWorkList()">
+                                    <option ng-value="cl" ng-repeat="cl in ClassList.SectionListWithClass">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-2" ng-show="newAnalysis.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                            <div class="form-group">
+                                <label for="">Class Year</label>
+                                <select class="form-control form-control-sm select2" ng-model="newAnalysis.ClassYearId" ng-change="GetAnalysisHomeWorkList()">
+                                    <option ng-value="0">**Select Year**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newAnalysis.ClassYearId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2" ng-show="newAnalysis.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                            <div class="form-group">
+                                <label for="">Semester</label>
+                                <select class="form-control form-control-sm select2" ng-model="newAnalysis.SemesterId" ng-change="GetAnalysisHomeWorkList()">
+                                    <option ng-value="0">**Select Semester**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newAnalysis.SemesterId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group mb-0">
+                                <button class="btn btn-sm btn-success mt-4" ng-click="GetAnalysisHomeWorkList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                            </div>
+                        </div>
+
+                        @*<div class="col-md-2">
+                                <div class="d-flex">
+                                    <label class="mt-1 mr-2">Period</label>
+                                    <select class="form-control form-control-sm select2" style="width:75%;">6
+                                        <option value="">All</option>
+                                        <option value="">Baishakh</option>
+                                        <option value="">Jestha</option>
+                                        <option value="">Ashar</option>
+                                        <option value="">Shrawan</option>
+                                    </select>
+                                </div>
+                            </div>*@
+                    </div>
+                    <div style="border-bottom: 2px dashed green;">
+                        <div>
+                            <canvas id="canvas" height="400"
+                                    class="chartjs-render-monitor"></canvas>
+                        </div>
+                    </div>
+                    <div class="table-responsive mb-3">
+                        <div class="table-scroll-x-y">
+                            <table class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th style="width: 60px">S.No.</th>
+                                        <th style="width: 150px">Subject</th>
+                                        <th style="width: 170px">Teacher</th>
+                                        <th style="width: 110px">Total</th>
+                                        <th style="width: 110px; border-bottom: 3px solid #28a745;">Submit</th>
+                                        <th style="width: 130px;border-bottom: 3px solid #ea3333;">Not Submit</th>
+                                        <th style="width: 110px; border-bottom: 3px solid #17a2b8;">Checked</th>
+                                        <th style="width: 120px; border-bottom: 3px solid #ffc107;">Yet to Check</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="ha in AnalysisWiseHomeWorkList">
+                                        <td>{{ha.SNo}}</td>
+                                        <td>{{ha.SubjectName}}</td>
+                                        <td>{{ha.TeacherName}}</td>
+                                        <td class="text-center">{{ha.TotalCount}}</td>
+                                        <td class="text-center">{{ha.NoOfSubmit}}</td>
+                                        <td class="text-center">{{ha.TotalCount-ha.NoOfSubmit}}</td>
+                                        <td class="text-center">{{ha.TotalChecked}}</td>
+                                        <td class="text-center">{{ha.NoOfSubmit-ha.TotalChecked}}</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            <!-- table end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Homework Analysis Tab Ends-->
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-notice">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text" class="form-control form-control-sm" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="5"
+                                  placeholder=""></textarea>
+                    </div>
+
+                    <label for="">Attach File</label>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form class="avatar">
+                                <p style=" text-align: center;
+                                                        color: green;
+                                                        font-size: 2em;
+                                                        position: absolute;
+                                                        top: 25%; left: 33%;"><i class="fas fa-plus w-t"></i></p>
+                                <input type="file" name="avatar" />
+                            </form>
+                        </div>
+                        <div class="col-md-3">
+                            <img src="~/wwwroot/dynamic/images/attach-img.png" class="img-fluid" style="height:70px; width:70px;">
+                            <a class="remove-image" href="#" style="display: inline;">&#215;</a>
+                        </div>
+                        <div class="col-md-3">
+                            <img src="~/wwwroot/dynamic/images/pdf.jpg" class="img-fluid" style="height:70px; width:70px;">
+                            <a class="remove-image" href="#" style="display: inline;">&#215;</a>
+                        </div>
+
+                    </div>
+
+
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success"
+                                style="min-width: 90px;">
+                            Send
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalIMG-resubmit" role="dialog" tabindex="-1" style="margin-top:30px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content text-center">
+                <div class="modal-body mb-0 p-0">
+                    <img class="img-fluid" src="~/wwwroot/dynamic/images/attach-img.png" alt="" style="width:auto; height: 33vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="~/wwwroot/dynamic/images/attach-img.png" target="_blank" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalpdf" role="dialog" tabindex="-1" style="margin-top:30px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content text-center">
+                <div class="modal-body mb-0 p-0">
+                    <iframe src="~/wwwroot/dynamic/images/sample.pdf" style="width: 100%; height: 33vh;"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <div><a href="~/wwwroot/dynamic/images/sample.pdf" target="_blank" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<!-- /.row -->
+</div>
+<!--/. container-fluid -->
+</section>
+</div>
+<script>
+    //var config = {
+    //    type: 'line',
+    //    data: {
+    //        labels: ['English', 'Maths', 'Science', 'Nepali', 'Social Studies', 'Health', 'Account'],
+    //        datasets: [{
+    //            label: 'Submit',
+    //            backgroundColor: '#28a745',
+    //            borderColor: '#28a745',
+    //            fill: false,
+    //            data: [
+    //                10,
+    //                20,
+    //                30,
+    //                40,
+    //                45,
+    //                65,
+    //                25
+    //            ],
+    //        }, {
+    //            label: 'Not Submit',
+    //            backgroundColor: '#ea3333',
+    //            borderColor: '#ea3333',
+    //            fill: false,
+    //            data: [
+    //                50,
+    //                30,
+    //                50,
+    //                45,
+    //                15,
+    //                70,
+    //                90
+    //            ],
+
+    //        },
+    //        {
+    //            label: 'Checked',
+    //            backgroundColor: '#17a2b8',
+    //            borderColor: '#17a2b8',
+    //            fill: false,
+    //            data: [
+    //                20,
+    //                35,
+    //                55,
+    //                25,
+    //                85,
+    //                65,
+    //                97
+    //            ],
+
+    //        },
+    //        {
+    //            label: 'Yet to Check',
+    //            backgroundColor: '#ffc107',
+    //            borderColor: '#ffc107',
+    //            fill: false,
+    //            data: [
+    //                56,
+    //                37,
+    //                90,
+    //                46,
+    //                82,
+    //                47,
+    //                25
+    //            ],
+
+    //        }
+    //        ]
+    //    },
+    //    options: {
+    //        responsive: true,
+    //        // title: {
+    //        // 	display: true,
+    //        // 	text: 'Chart.js Line Chart - Logarithmic'
+    //        // },
+    //        scales: {
+    //            xAxes: [{
+    //                display: true,
+    //                scaleLabel: {
+    //                    display: true,
+    //                    labelString: 'Subjects'
+    //                },
+
+    //            }],
+    //            yAxes: [{
+    //                display: true,
+    //                //type: 'logarithmic',
+    //                scaleLabel: {
+    //                    display: true,
+    //                    labelString: 'No of Students'
+    //                },
+    //                ticks: {
+    //                    min: 0,
+    //                    max: 100,
+
+    //                    // forces step size to be 5 units
+    //                    stepSize: 20
+    //                }
+    //            }]
+    //        }
+    //    }
+    //};
+
+    //window.onload = function () {
+    //    var ctx = document.getElementById('canvas').getContext('2d');
+    //    window.myLine = new Chart(ctx, config);
+    //};
+
+    //document.getElementById('randomizeData').addEventListener('click', function () {
+    //    config.data.datasets.forEach(function (dataset) {
+    //        dataset.data = dataset.data.map(function () {
+    //            return randomScalingFactor();
+    //        });
+
+    //    });
+
+    //    window.myLine.update();
+    //});
+</script>

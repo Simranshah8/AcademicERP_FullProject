@@ -1,0 +1,591 @@
+﻿
+<style>
+    body {
+        background: #f4f6f9;
+    }
+    #cardHeader {
+        position: relative;
+        overflow: hidden;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    .card-box {
+        border: 1px solid #ddd;
+        padding: 15px;
+        background: #ddd;
+        border-radius: 8px;
+    }
+    .school-name:empty::before {
+        content: attr(data-placeholder);
+        color: rgba(255,255,255,0.7);
+        pointer-events: none;
+    }
+    .field-box {
+        border: 1px solid #e3e3e3;
+        padding: 8px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        background: #fafafa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #cardPreview {
+        position: relative;
+
+    }
+    .preview-area {
+        height: 220px;
+        width: 360px;
+        margin: auto;
+        position: relative;
+        background: #e9f3f3;
+        font-family: Arial, sans-serif;
+        padding-bottom: 40px;
+        border-radius: 10px;
+    }
+    .preview-item {
+        position: absolute;
+        font-size: 14px;
+        cursor: move;
+        padding: 3px 6px;
+        border-radius: 4px;
+        user-select: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-height: 22px;
+    }
+        .preview-item input {
+            border: none;
+            outline: none;
+            background: transparent;
+            min-width: 95px;
+            width: auto;
+        }
+
+    .right-panel input[type="number"] {
+        width: 80px;
+    }
+    .bottom-section {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .button-gap {
+        margin-right: 4px;
+    }
+    .dob-wide-input {
+       @* width: 165px;*@
+        height: 30px;
+        font-size: 16px;
+    }
+
+    .card-setting-section {
+        margin-bottom: 15px;
+    }
+
+    .border-size-input {
+        width: 70px;
+        height: 30px;
+    }
+
+    .border-color-input {
+        width: 130px;
+        height: 25px;
+        padding: 0;
+        cursor: pointer;
+    }
+    /* Common wrapper for all images/logos */
+    .resizable-item {
+        position: absolute;
+        resize: both;
+        overflow: hidden;
+        cursor: move;
+    }
+        /* Default image inside wrapper */
+        .resizable-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* X remove button */
+        .resizable-item .image-remove {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            background: #1f7a6b;
+            color: #fff;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            display: none;
+        }
+        /* Show X on hover */
+        .resizable-item:hover .image-remove {
+            display: flex;
+        }
+
+    /* Photo style */
+    .photo-style img {
+        border: 2px solid #2f5597;
+    }
+
+    /* Logo style */
+    .logo-style img {
+        border-radius: 50%;
+        border: 1px solid #ddd;
+    }
+        /* Hide default resize handle */
+        .resizable-item::-webkit-resizer {
+            display: none;
+        }
+    /* Watermark styles */
+    .watermark-item {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 100px;
+        opacity: 0.7;
+        pointer-events: none;
+        z-index: 1;
+    }
+        .watermark-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.3;
+        }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+<script src="~/jslib/exam/reporting/CreateIDCardTemplate.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="CreateIDCardTemplateController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="root">
+                        <div class="card-primary px-0 card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-12">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                            id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active"
+                                                   id="createidcardtemplate-tab"
+                                                   data-toggle="tab"
+                                                   href="#createidcardtemplate"
+                                                   role="tab"
+                                                   aria-controls="contact"
+                                                   aria-selected="false">Create ID Card Template</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="idcardtemplatelist-tab"
+                                                   data-toggle="tab"
+                                                   href="#idcardtemplatelist"
+                                                   role="tab"
+                                                   aria-controls="contact"
+                                                   aria-selected="false">ID Card Template List</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!--Create ID Card Template tab Starts-->
+                                <div class="tab-pane fade main-section active show"
+                                     id="createidcardtemplate"
+                                     role="tabpanel"
+                                     aria-labelledby="createidcardtemplate-tab">
+                                    <div id="createidcardtemplate-section" class="card py-1 mb-0">
+                                        <header class="row">
+                                        </header>
+
+                                    </div>
+                                    <!-- Create ID Card Template Starts -->
+                                    <div id="createidcardtemplate-form" class="card">
+                                        <!-- ID CARD DESIGN SECTION -->
+                                        <div class="row mx-0">
+                                            <!-- LEFT -->
+                                            <div class="col-md-3 card-box">
+                                                <h6><b>Create ID Card Template</b></h6>
+                                                @*<div class="field-box ">
+                                                        Name
+                                                        <button class="btn btn-sm btn-success float-end" ng-click="addField('Name')">Add</button>
+                                                    </div>*@
+                                                <div class="field-box draggable-field" draggable="true" data-field="Name">
+                                                    <span>Name</span>
+                                                    <button type="button" class="btn btn-sm btn-success" ng-click="addField('Name')"> Add </button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="ID">
+                                                    <span>ID</span>
+                                                    <button type="button" class="btn btn-sm btn-success" ng-click="addField('ID')"> Add </button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="Class">
+                                                    <span>Class</span>
+                                                    <button type="button" class="btn btn-sm btn-success" ng-click="addField('Class')"> Add </button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="Section">
+                                                    <span>Section</span>
+                                                    <button type="button" class="btn btn-sm btn-success" ng-click="addField('Section')"> Add </button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="DOB(BS)">
+                                                    <span>DOB(BS)</span>
+                                                    <input type="text" class="form-control dob-wide-input " date-picker ng-model="newDet.DOB_TMP" date-detail="newDet.DOBDet" placeholder="yyyy-mm-dd">
+                                                    <button class="btn btn-sm btn-success" ng-click="addField('DOB(BS): ' + newDet.DOB_TMP)"> Add </button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="DOB(AD)">
+                                                    <span>DOB(AD)</span>
+                                                    <input type="date" class="form-control dob-wide-input" ng-model="newDet.DOB_AD">
+                                                    <button class="btn btn-sm btn-success" ng-click="addField('DOB(AD): ' + (newDet.DOB_AD | date:'MM dd yyyy'))"> Add </button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="Phone">
+                                                    <span>Phone</span>
+                                                    <button class="btn btn-sm btn-success" ng-click="addField('Phone')">Add</button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="Address">
+                                                    <span>Address</span>
+                                                    <button class="btn btn-sm btn-success" ng-click="addField('Address')">Add</button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="Card Valid">
+                                                    <span>Card Valid</span>
+
+                                                    <input type="text" class="form-control dob-wide-input" id="datepicker-1" placeholder="Select date">
+                                                    <button class="btn btn-sm btn-success" ng-click="addField('Card Valid: ' + validDateRange)"> Add </button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="SchoolName">
+                                                    <span>School Name</span>
+                                                    <button class="btn btn-sm btn-success" ng-click="addField('SchoolName')">Add</button>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="CardLabelName">
+                                                    <span>Card Label Name</span>
+                                                    <button class="btn btn-sm btn-success float-end button-gap" ng-click="addField('CardLabelName')" style="margin-left: 51px"> Add </button>
+                                                    <button class="btn btn-sm btn-success" ng-click="rotateSelected()"> Rotate </button>
+                                                </div>
+
+                                                <div class="field-box d-flex align-items-center justify-content-between gap-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span>School Logo </span>
+                                                        <img ng-if="schoolLogoPreview" ng-src="{{schoolLogoPreview}}"
+                                                             style="width:55px;height:55px;border-radius:50%;object-fit:cover;border:1px solid #ddd;">
+                                                    </div>
+                                                    <div>
+                                                        <input type="file" accept="image/*" style="display:none" id="schoolLogoInput" onchange="angular.element(this).scope().previewSchoolLogo(this)">
+                                                        <button class="btn btn-sm btn-success me-1" onclick="document.getElementById('schoolLogoInput').click()"> Add Logo </button>
+                                                        <button class="btn btn-sm btn-success" ng-click="addSchoolLogo()" ng-disabled="!schoolLogoPreview">Add</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="field-box draggable-field" draggable="true" data-field="Barcode">
+                                                    <span>Barcode</span>
+                                                    <input type="text" class="form-control dob-wide-input" ng-model="barcodeValue" placeholder="Enter barcode value">
+                                                    <button class="btn btn-sm btn-success" ng-click="addBarcode()"> Add </button>
+                                                </div>
+
+                                                <div class="field-box d-flex align-items-center justify-content-between gap-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span>Watermark</span>
+                                                        <!-- Show thumbnail preview if selected -->
+                                                        <img ng-if="watermarkPreview" ng-src="{{watermarkPreview}}"
+                                                             style="width:55px; height:55px; object-fit:contain; border:1px solid #ddd; border-radius:4px;">
+                                                    </div>
+                                                    <div>
+                                                        <input type="file" accept="image/*" style="display:none" id="watermarkInput" onchange="angular.element(this).scope().previewWatermark(this)">
+                                                        <button class="btn btn-sm btn-success me-1" onclick="document.getElementById('watermarkInput').click()">Select</button>
+                                                        <button class="btn btn-sm btn-success" ng-click="applyWatermark()" ng-disabled="!watermarkPreview">Add</button>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+
+                                            <!-- PREVIEW(MIDDLE)-->
+                                            <div class="col-md-6 text-center">
+                                                <div id="cardPreview" class="preview-area">
+                                                    <div id="cardHeader"></div>
+                                                    <div id="cardContentArea"></div>
+
+                                                </div>
+                                                <div class="bottom-section">
+                                                    <input type="text" id="cardTitle" ng-model="newDet.Title" class="form-control w-50 d-inline" placeholder="Title of ID Card">
+                                                    <button class="btn btn-success" ng-click="submitTemplate()">Submit Template</button>
+                                                </div>
+                                            </div>
+
+                                            <!-- RIGHT PANEL -->
+                                            <div class="col-md-3 card-box right-panel">
+                                                <h6><b>Card Settings</b></h6>
+                                                <div class="form-group bg-white p-2 rounded border">
+                                                    <label class="form-label">Card Size in (Inches)</label><br />
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <input type="number" step="0.01" class="form-control form-control-sm button-gap" ng-model="inch.width" placeholder="Width (inch)" ng-change="applyInchSize()">
+                                                        <input type="number" step="0.01" class="form-control form-control-sm button-gap" ng-model="inch.height" placeholder="Height (inch)" ng-change="applyInchSize()">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group bg-white p-2 rounded border">
+                                                    <label>Header Height (px)</label>
+                                                    <input type="number" ng-model="card.headerHeight" ng-change="updateHeaderHeight()" class="form-control form-control-sm" min="30">
+                                                </div>
+
+                                                <div class="form-group bg-white p-2 rounded border">
+                                                    <label>Header Color</label>
+                                                    <div class="d-flex gap-2">
+                                                        <input type="color" ng-model="card.headerColor" class="form-control form-control-sm">
+                                                        <button class="btn btn-sm btn-success" ng-click="updateHeaderColor()"> Apply </button>
+                                                    </div>
+                                                </div>
+                                                <!-- Form Orientation -->
+                                                <div class="form-group bg-white p-2 rounded border">
+                                                    <label class="form-label">Choose Form Orientation</label>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input form-control-sm" type="radio" name="orientation" ng-model="card.orientation" value="landscape" ng-change="changeOrientation()">
+                                                            <label class="form-check-label button-gap"> Landscape </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input form-control-sm" type="radio" name="orientation" ng-model="card.orientation" value="portrait" ng-change="changeOrientation()">
+                                                            <label class="form-check-label"> Portrait </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Background Color -->
+                                                <div class="form-group bg-white p-2 rounded border">
+                                                    <label class="form-label">Background Color</label>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <input type="color" ng-model="card.backgroundColor" class="form-control form-control-sm button-gap">
+                                                        <button class="btn btn-sm btn-success" ng-click="applyBackgroundColor()"> Apply </button>
+                                                    </div>
+                                                </div>
+                                                <!-- Add Text -->
+                                                <div class="form-group bg-white p-2 rounded border">
+                                                    <label>Add Text</label>
+                                                    <div class="d-flex gap-2">
+                                                        <input type="text" ng-model="customText" class="form-control form-control-sm button-gap" placeholder="Type text">
+                                                        <button class="btn btn-success btn-sm" ng-click="addCustomText()"> Add</button>
+                                                    </div>
+                                                </div>
+                                                <!-- Add Image -->
+                                                <div class="form-group bg-white p-2 rounded border">
+                                                    <label>Add Image</label>
+                                                    <input type="file" id="imageUpload" onchange="angular.element(this).scope().addImage(this.files)">
+                                                </div>
+                                                <!--Signature-->
+                                                <div class="form-group bg-white p-2 rounded border">
+                                                    <label class="mb-1">Add Signature</label>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <input type="text" ng-model="signatureText" class="form-control form-control-sm button-gap" placeholder="Enter Signature Name" style="width:110px;">
+                                                        <input type="file" id="signatureUpload" style="display:none" onchange="angular.element(this).scope().addSignatureImage(this.files)">
+                                                        <label for="signatureUpload" class="btn btn-success btn-sm button-gap"> Img </label>
+                                                        <button class="btn btn-success btn-sm button-gap" ng-click="addSignature()"> Add </button>
+                                                        <button class="btn btn-success btn-sm " ng-click="rotateSelected()"> Rotate </button>
+                                                    </div>
+                                                </div>
+                                                <!-- Border -->
+                                                <div class="form-group bg-white p-2 rounded border">
+                                                    <label class="form-label mb-2">Border</label>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" ng-model="card.borderEnabled" ng-change="toggleBorder()" id="borderEnable">
+                                                        <label class="form-check-label" for="borderEnable"> Enable </label>
+                                                    </div>
+                                                    <!-- Row 3: Size & Color -->
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <label class="button-gap mb-0">Size</label>
+                                                        <input type="number" ng-model="card.borderSize" ng-change="updateBorder()" class="form-control form-control-sm border-size-input button-gap">
+                                                        <label class="button-gap mb-0 ms-2">Color</label>
+                                                        <input type="color" ng-model="card.borderColor" ng-change="updateBorder()" class="form-control form-control-sm border-color-input">
+                                                    </div>
+                                                </div>
+                                                <!-- Change Text Style Div -->
+                                                <div class="form-group">
+                                                    <label class="form-label fw-bold">Change Text Style</label>
+                                                    <!-- Font -->
+                                                    <div class="row align-items-center mb-2">
+                                                        <div class="col-4">
+                                                            <label class="small mb-0">Font</label>
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <select class="form-select form-select-sm" ng-model="font.selected" ng-change="applyFont()">
+                                                                <option value="">Select Font</option>
+                                                                <option ng-repeat="f in fontList" value="{{f.value}}"> {{f.name}} </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Font Weight -->
+                                                    <div class="row align-items-center mb-2">
+                                                        <div class="col-4">
+                                                            <label class="small mb-0">Font Weight</label>
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <input type="range" class="form-range" ng-model="card.fontWeight" min="100" max="900" step="100">
+                                                            <small class="text-muted">{{card.fontWeight}}  </small>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Size -->
+                                                    <div class="row align-items-center mb-2">
+                                                        <div class="col-4">
+                                                            <label class="small mb-0">Size</label>
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <input type="number" class="form-control form-control-sm">
+                                                        </div>
+                                                    </div>
+                                                    <!-- Color -->
+                                                    <div class="row align-items-center mb-2">
+                                                        <div class="col-4">
+                                                            <label class="small mb-0">Color</label>
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <input type="color" class="form-control form-control-sm" ng-model="card.fontColor" ng-change="applyFontColor()">
+                                                        </div>
+                                                    </div>
+                                                    <!-- Padding -->
+                                                    <div class="row align-items-center mb-2">
+                                                        <div class="col-4">
+                                                            <label class="small mb-0">Padding</label>
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <input type="range" class="form-range">
+                                                        </div>
+                                                    </div>
+                                                    <!-- Radius -->
+                                                    <div class="row align-items-center mb-2">
+                                                        <div class="col-4">
+                                                            <label class="small mb-0">Radius</label>
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <input type="range" class="form-range">
+                                                        </div>
+                                                    </div>
+                                                    <!-- Format -->
+                                                    <div class="row align-items-center mb-2">
+                                                        <div class="col-4">
+                                                            <label class="small mb-0">Format</label>
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <button type="button" class="btn btn-sm btn-dark me-1" ng-click="applyBold()"> <b>B</b> </button>
+                                                            <button type="button" class="btn btn-sm btn-dark" ng-click="applyItalic()"> <i>I</i> </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--Create ID Card Template tab Ends-->
+                                <!--ID Card Template List tab Starts-->
+                                <div class="tab-pane fade main-section" id="idcardtemplatelist" role="tabpanel" aria-labelledby="idcardtemplatelist-tab">
+                                    <div id="idcardtemplatelist-section" class="card py-2" style="margin-top: -42px">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.IdCardTemplate">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.IdCardTemplate"> {{pp.text}} </option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"> <small>entries</small> </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.IdCardTemplate">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit"> <i class="fas fa-search"></i> </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-5 text-right">
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="ClearIdCardTemplate(); goToCreateTab()">
+                                                    <i class="fas fa-plus w-t"></i> Add ID Card Template
+                                                </button>
+                                            </div>
+                                        </header>
+
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="IdCardTemplate" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:30px">S.No</th>
+                                                            <th style="width:70px">Title</th>
+                                                            <th style="width:140px">Description</th>
+                                                            <th style="width:80px">Added</th>
+                                                            <th style="width:170px">Last Update</th>
+                                                            <th style="width:60px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in IdCardTemplateList | filter:searchData.IdCardTemplate | itemsPerPage: perPage.IdCardTemplate" current-page="currentPages.IdCardTemplate" pagination-id="IdCardTemplatePagination">
+                                                            <td>{{$index + 1}}</td>
+                                                            <td>{{cl.Title}}</td>
+                                                            <td>{{cl.Description}}</td>
+                                                            <td>{{cl.Added}}</td>
+                                                            <td>{{cl.LastUpdate}}</td>
+                                                            <td>
+                                                                <a class="p-1" href="#">
+                                                                    <i class="fas fa-eye text-secondary"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#" ng-click="GetIdCardTemplateById(cl)">
+                                                                    <i class="fas fa-edit text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#" ng-click="DelIdCardTemplateById(cl,$index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="IdCardTemplatePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html"> </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                                <!--ID Card Template List tab Ends-->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+
+
+

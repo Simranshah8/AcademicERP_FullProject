@@ -1,0 +1,352 @@
+﻿
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+@*<script src="~/jslib/export/html2canvas.js"></script>*@
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/Attendance/EnrollNumber.js?v=20251115"></script>
+<style>
+    .tedit td{
+        padding:0.25rem!important
+    }
+</style>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="EnrollNumberController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active"
+                         id="pills-second"
+                         role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                        id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active"
+                                               id="home-tab"
+                                               data-toggle="tab"
+                                               href="#home"
+                                               role="tab"
+                                               aria-controls="home"
+                                               aria-selected="true">Student</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="profile-tab"
+                                               data-toggle="tab"
+                                               href="#profile"
+                                               role="tab"
+                                               aria-controls="profile"
+                                               aria-selected="false">Employee</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section"
+                                 id="home"
+                                 role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="attendance-student-section">
+                                    <div class="row mt-2">
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <div class="form-group">
+                                                <label for="">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudent.BatchId" ng-change="GetClassWiseStudentList()">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newStudent.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <div class="form-group">
+                                                <label>Class</label>
+                                                <select ng-model="newStudent.SelectedClass" class="form-control form-control-sm select2" ng-options="x.Name for x in ClassList.ClassList" ng-change="GetClassWiseStudentList()"></select>
+                                                @*<select class="form-control form-control-sm select2" ng-model="newStudent.ClassId" ng-change="GetClassWiseStudentList()" style="width:100%">
+                    <option ng-value="0">**Select Class**</option>
+                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                </select>*@
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <div class="form-group">
+                                                <label>Section</label>
+                                                <select class="select2 form-control-sm" data-placeholder="Select Section" ng-model="newStudent.SectionId" ng-change="GetClassWiseStudentList()" style="width:100%">
+                                                    <option ng-value="0">**Select Section**</option>
+                                                    <option ng-value="se.SectionId" ng-repeat="se in  ClassList.SectionList |  filter: { ClassId: newStudent.SelectedClass.ClassId }">{{se.SectionName}}</option>
+                                                    @*<option ng-value="se.SectionId" ng-repeat="se in ClassSection.SectionList |  filter: { ClassId: newStudent.SelectedClass.ClassId }">{{se.SectionName}}</option>*@
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2" ng-show="newStudent.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group mb-0">
+                                                <label for="">Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudent.ClassYearId" ng-change="GetClassWiseStudentList()">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newStudent.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newStudent.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group mb-0">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudent.SemesterId" ng-change="GetClassWiseStudentList()">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newStudent.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                        <!--<div class="col-sm-4 col-lg-4 col-md-4">-->
+                                        <!-- <label>Shorting As</label> -->
+                                        <!--<div class="input-group input-group-sm">
+            <div class="input-group-prepend">
+                <span class="input-group-text cstm">Sorting As</span>
+            </div>
+            <select name=""
+                    id=""
+                    form=""
+                    class="form-control form-control-sm select2"
+                    style="width: 70%">
+                <option value="">Name</option>
+                <option value="">Section&Name</option>
+                <option value="">Section&RollNo</option>
+                <option value="">Section&{{'REGDNO_LNG' | translate}}</option>
+                <option value="">{{'REGDNO_LNG' | translate}}</option>
+                <option value="">RollNo</option>
+            </select>
+        </div>
+    </div>-->
+
+
+
+                                        <div class="col-md-2 mt-4">
+                                            <div class="form-inline float-right">
+
+                                               
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search"
+                                                           placeholder="Search"
+                                                           aria-label="Search" ng-model="searchData.Student"/>
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 text-right mt-4">
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download py-1"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table'" class="btn btn-secondary mx-1 btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print py-1"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success"
+                                                    style="min-width: 70px" ng-click="SaveUpdateStudent()">
+                                                {{newStudent.Mode}}
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mb-2">
+                                        <div class="table-scroll-x-y tedit" style="max-height: calc(100vh - 11rem);">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-nowrap text-center">
+                                                        <th class="" style="width: 50px">Id</th>
+
+                                                        <th style="width: 80px" ng-click="sortLeft('RegdNo')">@*{{'REGDNO_LNG' | translate}}*@Adm. No</th>
+                                                        <th style="width: 100px">Section</th>
+
+                                                        <th style="width: 80px" ng-click="sortLeft('RollNo')">Roll No.</th>
+                                                        <th style="width: 150px" ng-click="sortLeft('Name')">Name</th>
+                                                        <th style="width: 100px">Enroll Number</th>
+                                                        <th style="width: 80px">RFId Card No.</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="es in newStudent.StudentList | filter:searchData.Student | orderBy:sortKeyLeft:reverse1">
+                                                        <td>{{es.AutoNumber}}</td>
+                                                        <td>{{es.RegdNo}}</td>
+                                                        <td>{{es.SectionName}}</td>
+                                                        <td>{{es.RollNo}}</td>
+                                                        <td>{{es.Name}}</td>
+                                                        <td>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm serialST" ng-model="es.EnrollNo" onfocus="this.select();" />
+                                                            <span ng-show="false">
+                                                                {{es.EnrollNo}}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span ng-show="false">
+                                                                {{es.CardNo}}
+                                                            </span>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm serialST" ng-model="es.CardNo" onfocus="this.select();" />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section"
+                                 id="profile"
+                                 role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="attendance-employee-section">
+                                    <div class="row mt-2">
+                                       
+                                        @*<div class="col-sm-2 col-md-2 col-lg-2 mt-1">
+                <div class="custom-control custom-checkbox checkbox-sm text-center">
+                    <input type="checkbox"
+                           class="custom-control-input"
+                           id="checkbox-2"
+                           checked="" />
+                    <label class="custom-control-label"
+                           for="checkbox-2">Column Wise Focus</label>
+                </div>
+            </div>*@
+                                    <div class="col-md-6">
+                                        <div class="form-inline">
+                                            <button type="button" class="btn btn-sm btn-success mr-2" style="min-width: 70px;" ng-click="GetEmployeeList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search"
+                                                       placeholder="Search"
+                                                       aria-label="Search" ng-model="searchData.Employee" />
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0"
+                                                            type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                     
+                                        <div class="col-md-6 text-right">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success"
+                                                    style="min-width: 90px" ng-click="SaveUpdateEmployee()">
+                                                {{newEmployee.Mode}}
+                                            </button>
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download py-1"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table1'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table1'" class="btn btn-secondary btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print py-1"></i>
+                                            </a>
+                                            <!-- <a href="#" class="btn btn-success btn-sm" id="accept"> Accept</a> -->
+                                        </div>
+                                    </div>
+                                    <div class="card py-2">
+                                        <div class="table-scroll-x-y" style="max-height: calc(100vh - 10rem);">
+                                            <table id="main-table1"
+                                                   class="main-table table tedit table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-nowrap text-center">
+                                                        <th style="width: 50px">Id</th>
+                                                        <th style="width: 80px" ng-click="sortemp('RollNo')">Code</th>
+
+                                                        <th style="width: 150px" ng-click="sortemp('RollNo')">Name</th>
+
+                                                        <th style="width: 80px">Contact</th>
+                                                        <th style="width: 80px">Enroll Number</th>
+                                                        <th style="width: 80px">RFId Card No.</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="emp in newEmployee.EmployeeDetailsColl | filter:searchData.Employee| orderBy:sortKeyemp:reverse2">
+                                                        <td>{{emp.AutoNumber}}</td>
+                                                        <td>{{emp.EmployeeCode}}</td>
+                                                        <td>{{emp.Name}}</td>
+                                                        <td>{{emp.ContactNo}}</td>
+                                                        <td>
+                                                            <span ng-show="false">
+                                                                {{emp.EnrollNumber}}
+                                                            </span>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm serialEM" ng-model="emp.EnrollNumber" onfocus="this.select();" />
+                                                        </td>
+                                                        <td>
+                                                            <span ng-show="false">
+                                                                {{emp.CardNo}}
+                                                            </span>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm serialEM" ng-model="emp.CardNo" onfocus="this.select();" />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>

@@ -1,0 +1,262 @@
+﻿
+<style>
+    .modal {
+        margin-top: 30px !important;
+    }
+
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<script src="~/jslib/admission/EntranceExamResult.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AcademicController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="marksetup-tab" data-toggle="tab"
+                                               href="#marksetup" role="tab" aria-controls="marksetup"
+                                               aria-selected="false">Mark Setup</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="false">Mark Entry</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link " id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="true">Entrance Result</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content">
+                            <!----Mark Setup -->
+                            <div class="tab-pane fade show active main-section" id="marksetup" role="tabpanel" aria-labelledby="marksetup-tab">
+                                <div id="Contact-Group-content" class="card py-2 mb-0">
+                                    <header class="row ">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Class <span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="newMarkSetup.ClassId" ng-change="CallMarkSetupEntry()" data-placeholder="Select Class">
+                                                    <option ng-value=0>**Select Class**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="checkbox-wrap mt-4 text-nowrap">
+                                                Auto Sum Full/Pass Marks
+                                                <input type="checkbox" id="rankCheckbox" ng-model="newMarkSetup.SumFullPass" ng-change="updateMarks()" />
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="">Full Marks <span class="text-danger">*</span></label>
+                                                        <input type="number" class="form-control form-control-sm" placeholder="" ng-model="newMarkSetup.TotallFullMarks" ng-change="checkEntranceSetup()" ng-disabled="newMarkSetup.SumFullPass === true">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="">Pass Marks <span class="text-danger">*</span></label>
+                                                        <input type="number" class="form-control form-control-sm" placeholder="" ng-model="newMarkSetup.TotallPassMarks" ng-change="checkEntranceSetup()" ng-disabled="newMarkSetup.SumFullPass === true">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Copy To Class</label>
+                                                <select class="form-control form-control-sm select2" multiple ng-model="newMarkSetup.ClassIdColl" ng-change="onSumFullPassChange()" data-placeholder="Select Class">
+                                                    <option ng-value=0>**Select Class**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 text-right mt-4">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 70px;" ng-click="ClearMarkSetup()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 70px;" ng-click="SaveMarkSetup()">Save</button>
+                                        </div>
+                                    </header>
+
+
+                                    <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 11rem)!important;">
+                                        <table id="" class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 56px;">S.No.</th>
+                                                    <th style="width: 150px;">Subject Name</th>
+                                                    <th style="width: 70px;">FM</th>
+                                                    <th style="width: 70px;">PM</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="cs in MarkSetupList">
+                                                    <td style="left:0; z-index:2; background-color: #fff !important;" class="cstm-sticky">{{$index+1}}</td>
+                                                    <td>{{cs.SubjectName}}</td>
+                                                    <td><input ng-model="cs.FullMark" type="text" class="form-control form-control-sm" ng-change="updateMarks()" /></td>
+                                                    <td><input ng-model="cs.PassMark" type="text" class="form-control form-control-sm" ng-change="updateMarks()" /></td>
+
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!----Mark Setuo  end here -->
+
+                            <!----contact Group -->
+                            <div class="tab-pane fade main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="Contact-Group-content" class="card mb-0">
+                                    <header class="row ">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newFilter.ClassId" ng-change="CallMarkSetupEntry()" data-placeholder="Select Class">
+                                                    <option ng-value=0>**Select Class**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 mt-4">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.MarkEntry">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-right mt-4">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearMarkEntry()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveEntranceMarkEntry()">Save</button>
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 13rem);">
+                                        <table id="" class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 56px; left:0; z-index:3;" class="cstm-sticky">S.No.</th>
+                                                    <th style="width: 120px; left: 56px; z-index: 3;" class="cstm-sticky">Enquiry/Reg No.</th>
+                                                    <th style="width: 120px; left: 176px; z-index: 3;" class="cstm-sticky">Symbol No</th>
+                                                    <th style="width: 120px; z-index: 2;">Name</th>
+                                                    <th style="width: 120px; z-index: 2;">Applied Class</th>
+                                                    <th style="width: 100px; z-index: 2;">Exam Name</th>
+                                                    <th style="width: 150px; z-index: 2;" ng-repeat="ms in MarkSetupList">{{ms.SubjectName}}</th>
+                                                    <th style="width: 90px; z-index: 2;">Obt. Marks</th>
+                                                    <th style="width: 100px; z-index: 2;">Result</th>
+                                                    <th style="width: 190px; z-index: 2;">Remarks</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="cs in MarkEntryList | filter:searchData.MarkEntry | itemsPerPage: perPage.MarkEntry" current-page="currentPages.MarkEntry" pagination-id="MarkEntryPagination">
+                                                    <td style="left:0; z-index:2; background-color: #fff !important;" class="cstm-sticky">{{$index+1}}</td>
+                                                    <td style="left:56px; z-index:2; background-color: #fff !important;" class="cstm-sticky">
+                                                        {{ cs.EnquiryId ? cs.EnquiryId : ''}} {{ cs.RegId ? cs.RegId : ''  }}
+                                                    </td>
+                                                    <td style="left:176px; z-index:2; background-color: #fff !important;" class="cstm-sticky">{{cs.SymbolNo}}</td>
+                                                    <td>{{cs.Name}}</td>
+                                                    <td>{{cs.ClassName}}</td>
+                                                    <td>{{cs.ExamName}}</td>
+                                                    <td ng-repeat="ms in MarkSetupList">
+                                                        <input ng-model="cs.ObtainedMarks[ms.SubjectId]"
+                                                               type="text"
+                                                               class="form-control form-control-sm"
+                                                               id="markInput{{ cs.EnquiryId || cs.RegId}}_{{ms.SubjectId}}" ng-change="CalculateTotalAndResult(cs)"/>
+                                                    </td>
+                                                    <td><input ng-model="cs.TotalObtMarks" type="number" class="form-control form-control-sm" /></td>
+                                                    <td>
+                                                        <select ng-model="cs.Result" class="form-control form-control-sm" >
+                                                            <option ng-repeat="cs in ResultList" ng-value="cs.id" ng-selected="cs.id==cs.Result">{{cs.text}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input ng-model="cs.Remarks" type="text" class="form-control form-control-sm" /></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- table end -->
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="MarkEntryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+                            </div>
+
+                            <!----contact group  end here -->
+                            <!----contact contents-->
+
+                            <div class="tab-pane fade  main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="Contact-content">
+                                    <div class="card mb-0">
+                                        <header class="row justify-content-end m-1">
+                                                <button type="button" class="btn btn-sm btn-default mr-2" style="min-width: 90px;" ng-click="SendSms()">Send Sms</button>
+                                                <button class="btn btn-sm btn-success" style="min-width: 90px;" type="button" ng-click="GetEntranceExamResult()"><i class="fas fa-sync-alt"></i> Load</button>
+                                        </header>
+                                        <div>
+                                            <div ui-grid="gridOptions2"
+                                                 ui-grid-resize-columns
+                                                 ui-grid-move-columns
+                                                 ui-grid-selection
+                                                 ui-grid-exporter
+                                                 ui-grid-pinning
+                                                 ui-grid-filtering
+                                                 ui-grid-auto-resize
+                                                 ui-grid-save-state style="height: calc(100vh - 138px);"></div>
+                                        </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!----contact contents ends here-->
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+

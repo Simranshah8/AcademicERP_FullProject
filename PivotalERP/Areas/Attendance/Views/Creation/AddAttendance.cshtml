@@ -1,0 +1,904 @@
+﻿<script src="~/jslib/Attendance/AddAttendance.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<style>
+    .edittable td {
+        padding: 0.25rem !important
+    }
+</style>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AddAttendanceController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active"
+                         id="pills-second"
+                         role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                        id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active"
+                                               id="home-tab"
+                                               data-toggle="tab"
+                                               href="#home"
+                                               role="tab"
+                                               aria-controls="home"
+                                               aria-selected="true">Student Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="profile-tab"
+                                               data-toggle="tab"
+                                               href="#profile"
+                                               role="tab"
+                                               aria-controls="profile"
+                                               aria-selected="false">Subject Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="employee-tab"
+                                               data-toggle="tab"
+                                               href="#employee"
+                                               role="tab"
+                                               aria-controls="employee"
+                                               aria-selected="false">Employee Wise</a>
+                                        </li>
+                                        <!--Bio Attendence-->
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="BioAttendence-tab"
+                                               data-toggle="tab"
+                                               href="#BioAttendence"
+                                               role="tab"
+                                               aria-controls="BioAttendence"
+                                               aria-selected="false">
+                                                Bio Attendence
+                                            </a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="StudentType-tab"
+                                               data-toggle="tab"
+                                               href="#StudentType"
+                                               role="tab"
+                                               aria-controls="StudentType"
+                                               aria-selected="false">
+                                                Student Type Wise
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section"
+                                 id="home"
+                                 role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="attendance-student-section">
+                                    <div class="row mt-2">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>For Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newStudentWise.Date_TMP" date-detail="newStudentWise.DateDet" />
+                                            </div>
+                                        </div>
+                                        <!--Added by Suresh on Magh 17-->
+                                        <div class="col-sm-1 col-lg-1 col-md-1" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <div class="form-group">
+                                                <label for="">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.BatchId">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newStudent.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--Ends-->
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Class/Section </label>
+                                                <select class="select2 form-control-sm" data-placeholder="Select Section" style="width:100%" ng-model="newStudentWise.ClassSection" ng-change="GetClassWiseStudentList()">
+                                                    <option ng-value="null">**Select Class**</option>
+                                                    <option ng-value="se" ng-repeat="se in ClassSection.SectionList">{{se.ClassName}} {{se.SectionName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--Added by Simran-->
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="ClassShiftList.length>1">
+                                            <label>Shift</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.ClassShiftId">
+                                                    <option NG-value="cs.ClassShiftId" ng-repeat="cs in ClassShiftList" ng-selected="cs.ClassShiftId==newStudentWise.ClassShiftId">{{cs.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--End-->
+                                        <!--Added By Suresh on 17 Magh starts-->
+                                        <div class="col-md-2" ng-show="newStudentWise.ClassSection.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group mb-0">
+                                                <label for="">Class Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.ClassYearId" ng-change="GetClassWiseStudentList()">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newStudentWise.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newStudentWise.ClassSection.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group mb-0">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.SemesterId" ng-change="GetClassWiseStudentList()">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newStudentWise.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--Ends-->
+                                        <div class="col-md-3  text-right mt-4">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success" title="Load"
+                                                    style="min-width: 70px" ng-click="GetClassWiseStudentList()">
+                                                <i class="fas fa-sync-alt mr-2"></i>
+                                                Load
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success" title="Save"
+                                                    style="min-width: 70px" ng-click="SaveUpdateStudentWise()">
+                                                <i class="fas fa-save mr-2"></i>
+                                                Save
+                                            </button>
+
+                                            <button class="btn btn-sm btn-danger" style="min-width: 70px;" title="Delete" type="button" ng-click="DelStudentManualAttendance()"><i class="fas fa-trash-alt mr-2"></i>Delete</button>
+                                        </div>
+
+                                        <div class=" col-md-2  text-right">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="myCheck" ng-model="newStudentWise.Notify">
+                                                <label for="myCheck"
+                                                       class="custom-control-label">
+                                                    Notify
+                                                </label>
+                                            </div>
+                                            <div class="form-inline float-right">
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search" ng-model="searchData.StudentWise"
+                                                           aria-label="Search">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <div class="table-scroll-x-y edittable" style="max-height:calc(100vh - 10.25rem)">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-center">
+                                                        <th style="width: 80px" ng-click="sortStudentWise('AutoNumber')">Id</th>
+                                                        <th style="width: 110px" ng-click="sortStudentWise('RegdNo')">{{'REGDNO_LNG' | translate}}</th>
+                                                        <th style="width: 75px" ng-click="sortStudentWise('RollNo')">Roll No.</th>
+                                                        <th style="width: 200px" ng-click="sortStudentWise('Name')">Name</th>
+                                                        <th style="width: 90px;z-index:2">
+                                                            <div class="justify-content-center d-flex">
+                                                                Present
+                                                                &nbsp;
+
+                                                                <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newStudentWise.Present" ng-change="PresentAll()">
+                                                            </div>
+
+                                                        </th>
+
+                                                        <th style="width: 70px; z-index: 2"> Absent </th>
+                                                        <th style="width: 60px; z-index: 2">Late </th>
+                                                        <th style="width: 100px" id="late-heading1">Late Min.</th>
+                                                        <th style="width: 60px; z-index: 2"> Leave </th>
+                                                        <th style="width: 150px">Remarks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="sw in newStudentWise.StudentList | filter:searchData.StudentWise |orderBy:sortKeys.StudentWise:reverses.StudentWise track by $index">
+                                                        <td>{{sw.AutoNumber}}</td>
+                                                        <td>{{sw.RegdNo}}</td>
+                                                        <td>{{sw.RollNo}}</td>
+                                                        <td>{{sw.Name}}</td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="1" ng-model="sw.Attendance" ng-change="onAttendanceChange(sw)"/>
+
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="2" ng-model="sw.Attendance" ng-change="onAttendanceChange(sw)"/>
+
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="3" ng-model="sw.Attendance" ng-change="onAttendanceChange(sw)"/>
+
+
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="number" class="form-control form-control-sm" ng-model="sw.LateMin" ng-readonly="sw.Attendance!=3" />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="4" ng-model="sw.Attendance" ng-change="onAttendanceChange(sw)"/>
+                                                        </td>
+                                                        <td>
+                                                            <textarea cols="30"
+                                                                      rows="1"
+                                                                      class="form-control form-control-sm" ng-model="sw.Remarks"></textarea>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section"
+                                 id="profile"
+                                 role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="attendance-employee-section">
+                                    <div class="row mt-2">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>For Date</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newSubjectWise.ForDate_TMP" date-detail="newSubjectWise.ForDateDet" />
+                                            </div>
+                                        </div>
+                                        <!--Added by Suresh on Magh 17-->
+                                        <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <div class="form-group">
+                                                <label for="">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectWise.BatchId">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newSubjectWise.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--Ends-->
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Class/Section </label>
+                                                <select class="select2 form-control-sm" data-placeholder="Select Section" ng-model="newSubjectWise.ClassSection" ng-change="GetClassWiseSubMap()" style="width:100%">
+                                                    <option ng-value="null">**Select Class**</option>
+                                                    <option ng-value="se" ng-repeat="se in ClassSection.SectionList">{{se.ClassName}} {{se.SectionName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--Added by Simran-->
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="ClassShiftListSub.length>1">
+                                            <label>Shift</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectWise.ClassShiftId">
+                                                    <option NG-value="cs.ClassShiftId" ng-repeat="cs in ClassShiftListSub" ng-selected="cs.ClassShiftId==newStudentWise.ClassShiftId">{{cs.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--End-->
+                                        <!--Added By Suresh on 17 Magh starts-->
+                                        <div class="col-md-2" ng-show="newSubjectWise.ClassSection.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group">
+                                                <label for="">Class Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectWise.ClassYearId" ng-change="GetClassWiseSubMap()">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newSubjectWise.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newSubjectWise.ClassSection.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectWise.SemesterId" ng-change="GetClassWiseSubMap()">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newSubjectWise.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--Ends-->
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Subject</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectWise.SubjectId" ng-change="GetPeriodForAttendance()" @*ng-change="GetClassWiseStudentListforSubject()"*@ style="width:100%">
+                                                    <option ng-value="s.id" ng-repeat="s in newSubjectWise.SubjectList">{{s.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--Added by Suresh on Magh 17-->
+                                        <div class="col-md-2" @*ng-show="AcademicConfig.ActiveBatch==true"*@>
+                                            <div class="form-group">
+                                                <label for="">Period</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectWise.PeriodId" ng-change="GetClassWiseStudentListforSubject()">
+                                                    <option ng-value="0">**Select Period**</option>
+                                                    <option ng-value="cl.Period" ng-repeat="cl in PeriodList" ng-selected="cl.Period==newSubjectWise.PeriodId">{{cl.Period}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--Ends-->
+
+                                    </div>
+                                    <div class="row">
+                                        <div class=" col-md-3  text-right">
+                                            <div class="form-inline">
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search" ng-model="searchData.SubjectWise"
+                                                           aria-label="Search">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-9 text-right">
+                                            <div class="form-inline float-right">
+                                                <div class="custom-control custom-checkbox mr-4">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="myCheck11" ng-model="newSubjectWise.Notify">
+                                                    <label for="myCheck11"
+                                                           class="custom-control-label">
+                                                        Notify
+                                                    </label>
+                                                </div>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success" title="Load"
+                                                        style="min-width: 70px" ng-click="GetClassWiseStudentListforSubject()">
+                                                    <i class="fas fa-sync-alt mr-2"></i>
+                                                    Load
+                                                </button>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success ml-3"
+                                                        style="min-width: 70px" ng-click="SaveUpdateSubjectWise()">
+                                                    <i class="fas fa-save"></i> Save
+                                                </button>
+                                                <button class="btn btn-sm btn-danger ml-2" style="min-width: 70px;" title="Delete" type="button" ng-click="DelSubjectWiseAttendance()"><i class="fas fa-trash-alt mr-2"></i>Delete</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <div class="table-scroll-x-y" style="max-height:calc(100vh - 9rem)">
+                                            <table id="main-table"
+                                                   class="main-table edittable table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-center">
+                                                        <th style="width: 80px" ng-click="sortSubjectWise('AutoNumber')">Id</th>
+                                                        <th style="width: 90px" ng-click="sortSubjectWise('RegdNo')">{{'REGDNO_LNG' | translate}}</th>
+                                                        <th style="width: 70px" ng-click="sortSubjectWise('RollNo')">Roll No.</th>
+                                                        <th style="width: 200px" ng-click="sortSubjectWise('Name')">Name</th>
+                                                        <th style="width: 90px;z-index:2">
+                                                            <div class="justify-content-center d-flex">
+                                                                Present
+                                                                &nbsp;
+                                                                <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newSubjectWise.Present" ng-change="PresentAllSubjectWise()">
+                                                            </div>
+
+                                                        </th>
+                                                        <th style="width: 70px; z-index: 2"> Absent </th>
+                                                        <th style="width: 70px; z-index: 2">Late </th>
+                                                        <th style="width: 70px; z-index: 2" id="late-heading1">Late Min.</th>
+                                                        <th style="width: 70px; z-index: 2"> Leave </th>
+                                                        <th style="width: 170px">Remarks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="sw in newSubjectWise.StudentList |filter:searchData.SubjectWise |orderBy:sortKeys.SubjectWise:reverses.SubjectWise track by $index">
+                                                        <td>{{sw.AutoNumber}}</td>
+                                                        <td>{{sw.RegdNo}}</td>
+                                                        <td>{{sw.RollNo}}</td>
+                                                        <td>{{sw.Name}}</td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="1" ng-model="sw.Attendance"  ng-change="onAttendanceChange(sw)"/>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="2" ng-model="sw.Attendance"  ng-change="onAttendanceChange(sw)"/>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="3" ng-model="sw.Attendance"  ng-change="onAttendanceChange(sw)"/>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="number" class="form-control form-control-sm" ng-model="sw.LateMin" ng-readonly="sw.Attendance!=3" />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="4" ng-model="sw.Attendance"  ng-change="onAttendanceChange(sw)"/>
+                                                        </td>
+                                                        <td>
+                                                            <textarea cols="30" rows="1" class="form-control form-control-sm" ng-model="sw.Remarks"></textarea>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section"
+                                 id="employee"
+                                 role="tabpanel"
+                                 aria-labelledby="employee-tab">
+                                <div id="attendance-employee-section">
+                                    <div class="row mt-2">
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mr-2" style="min-width:70px;">For Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newEmployeeWise.Date_TMP" date-detail="newEmployeeWise.DateDet" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mr-2">Department</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newEmployeeWise.DepartmentId" ng-change="GetEmpSummaryList()" style="width:100%">
+                                                    <option ng-value="0" ng-selected="false">**All**</option>
+                                                    <option ng-value="d.id" ng-repeat="d in DepartmentList">{{d.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 text-right">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success" title="Load"
+                                                    style="min-width: 70px" ng-click="GetEmpSummaryList()">
+                                                <i class="fas fa-sync-alt mr-2"></i>
+                                                Load
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success"
+                                                    style="min-width: 70px" ng-click="SaveUpdateEmployeeWise()">
+                                                <i class="fas fa-save"></i> Save
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" style="min-width: 70px;" title="Delete" type="button" ng-click="DelEmployeeWiseAttendance()"><i class="fas fa-trash-alt mr-2"></i>Delete</button>
+                                        </div>
+
+                                        <div class=" col-md-2  text-right">
+                                            <div class="form-inline">
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search" ng-model="searchData.EmployeeWise"
+                                                           aria-label="Search">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <div class="table-scroll-x-y" style="max-height:calc(100vh - 9rem)">
+                                            <table id="main-table"
+                                                   class="main-table table edittable table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-center">
+                                                        <th style="width: 80px" ng-click="sortEmployeeWise('AutoNumber')">Id</th>
+                                                        <th style="width: 100px" ng-click="sortEmployeeWise('EmployeeCode')">Code</th>
+
+                                                        <th style="width: 200px" ng-click="sortEmployeeWise('Name')">Name</th>
+                                                        <th style="width: 100px" ng-click="sortEmployeeWise('ContactNo')">Contact</th>
+                                                        <th style="width: 90px;z-index:2">
+                                                            <div class="justify-content-center d-flex">
+                                                                Present
+                                                                &nbsp;
+
+                                                                <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newEmployeeWise.Present" ng-change="PresentAllEmployee()">
+                                                            </div>
+
+                                                        </th>
+                                                        <th style="width: 70px; z-index: 2"> Absent </th>
+                                                        <th style="width: 70px; z-index: 2">Late </th>
+                                                        <th style="width: 90px; z-index: 2" id="late-heading1">Late Min.</th>
+                                                        <th style="width: 80px; z-index: 2"> Leave </th>
+                                                        <th style="width: 170px">Remarks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="ew in newEmployeeWise.EmployeeWiseDetailsColl |filter:searchData.EmployeeWise |orderBy:sortKeys.EmployeeWise:reverses.EmployeeWise track by $index">
+                                                        <td>{{ew.AutoNumber}}</td>
+                                                        <td>{{ew.EmployeeCode}}</td>
+                                                        <td>{{ew.Name}}</td>
+                                                        <td>{{ew.ContactNo}}</td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="1" ng-model="ew.Attendance"  ng-change="onAttendanceChange(ew)"/>
+
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="2" ng-model="ew.Attendance"  ng-change="onAttendanceChange(ew)"/>
+
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="3" ng-model="ew.Attendance"  ng-change="onAttendanceChange(ew)"/>
+
+
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="number" class="form-control form-control-sm" ng-model="ew.LateMin" ng-readonly="ew.Attendance!=3" />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="4" ng-model="ew.Attendance"  ng-change="onAttendanceChange(ew)"/>
+                                                        </td>
+                                                        <td>
+                                                            <textarea cols="30"
+                                                                      rows="1"
+                                                                      class="form-control form-control-sm" ng-model="ew.Remarks"></textarea>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                            <!-- Bio attendance section start -->
+                            <div class="tab-pane fade main-section"
+                                 id="BioAttendence"
+                                 role="tabpanel"
+                                 aria-labelledby="BioAttendence-tab">
+                                <div id="attendance-BioAttendence-section">
+                                    <div>
+                                        <div class="row mt-2">
+                                            <!-- FOR Dropdown -->
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label class="mt-1 mr-2">For</label>
+                                                    <select class="form-control form-control-sm"
+                                                            ng-model="newDet.selectedFor"
+                                                            style="width:100%" ng-change="ClearTbl()">
+                                                        <option ng-value="d.id"
+                                                                ng-repeat="d in AttendenceForColl">
+                                                            {{d.text}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- STUDENT section -->
+                                            <div class="col-md-6" ng-show="newDet.selectedFor == 1" id="BioAttendenceStudent" style=" margin-top: 28px;">
+                                                <label class="sr-only" for="inlineFormInputGroup">Select Student</label>
+                                                <div class="input-group-prepend">
+                                                    <!-- Left search dropdown for student -->
+                                                    <select class="input-group-text dropdown-toggle p-0"
+                                                            style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                             margin-right: -3px; z-index: 1;"
+                                                            ng-model="newDet.SelectStudent">
+                                                        <option ng-repeat="A in StudentSearchOptions"
+                                                                value="{{A.value}}"
+                                                                ng-selected="{{A.value==newDet.SelectStudent}}">
+                                                            {{A.text}}
+                                                        </option>
+                                                    </select>
+
+                                                    <!-- Right main student select -->
+                                                    <select class="form-control select2 form-control-sm"
+                                                            all-student
+                                                            ng-model="newDet.StudentId"
+                                                            student-detail="newDet.StudentDetails"
+                                                            side-bar-data="newDet.SideBarData"
+                                                            search-by="newDet.SelectStudent" confirm-action="GetBioAttendenceStudentdById()">
+                                                    </select>
+
+                                                </div>
+                                            </div>
+
+                                            <!-- EMPLOYEE section -->
+                                            <div class="col-md-6" ng-show="newDet.selectedFor == 2" style=" margin-top: 28px;">
+                                                <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+                                                <div class="input-group-prepend">
+                                                    <!-- Left search dropdown for employee -->
+                                                    <select class="input-group-text dropdown-toggle p-0"
+                                                            style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                            margin-right: -3px; z-index: 1;"
+                                                            ng-model="newDet.SelectEmployee">
+                                                        <option ng-repeat="A in EmployeeSearchOptions"
+                                                                value="{{A.value}}"
+                                                                ng-selected="{{A.value==newDet.SelectEmployee}}">
+                                                            {{A.text}}
+                                                        </option>
+                                                    </select>
+
+                                                    <!-- Right main employee select -->
+                                                    <select class="form-control select2bs4 form-control-sm"
+                                                            all-employee
+                                                            ng-model="newDet.EmployeeId"
+                                                            employee-detail="newDet.EmployeeDetails"
+                                                            side-bar-data="newDet.EmpSideBarData"
+                                                            search-by="newDet.SelectEmployee" confirm-action="GetBioAttendenceEmployeeById()">
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 text-right">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        style="min-width: 70px; margin-top: 28px;" ng-click=" SaveUpdateBioAttendence()">
+                                                    Save
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <!-- Table only visible if something is selected -->
+                                            <div class="table-scroll-x-y table-container flex-grow-1">
+                                                <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                                    <div class="table-h-scrollbar-fix table-scroll-wrapper">
+
+                                                        <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-resizetable border-0 dynamic-uiux-table">
+                                                            <thead>
+                                                                <tr class="text-center">
+                                                                    <th style="width: 80px" title="S.No.">S.No.</th>
+                                                                    <th style="width: 100px" title="Attendnace Mode">Attendnace Mode</th>
+                                                                    <th style="width: 200px" title="In/Out Time">In/Out Time</th>
+                                                                    <th style="width: 200px" title="Date">Date</th>
+                                                                    <th style="width: 200px" title="Remarks">Remarks</th>
+                                                                    <th rowspan="2" class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll py-1" style="width: 76px; ">
+                                                                        Action
+                                                                    </th>
+
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="S in newDet.BioAttendence">
+                                                                    <td class="text-center">
+                                                                        {{$index + 1}}<br />
+
+                                                                    </td>
+
+                                                                    <td class="text-center align-middle" style="white-space: nowrap;">
+                                                                        <label style="display: inline-flex; align-items: center; margin-right: 15px;">
+
+                                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" style="margin-right: 5px; margin-top:15px;" ng-value=true ng-model="S.AttendenceMode" />
+                                                                            In
+                                                                        </label>
+                                                                        <label style="display: inline-flex; align-items: center; margin-right: 15px;">
+                                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" style="margin-right: 5px; margin-top:15px;" ng-value=false ng-model="S.AttendenceMode" />
+                                                                            Out
+                                                                        </label>
+                                                                    </td>
+
+                                                                    <td class="text-center align-middle">
+                                                                        <input type="time" class="form-control form-control-sm" ng-model="S.InOutTime_TMP" />
+                                                                    </td>
+                                                                    <td class="text-center align-middle"><input type="text" date-picker date-detail="S.AttendenceDateDet" class="form-control form-control-sm" ng-model="S.AttendenceDate_TMP" /></td>
+                                                                    <td>
+                                                                        <textarea cols="30" rows="1" class="form-control form-control-sm" ng-model="S.Remarks"></textarea>
+                                                                    </td>
+                                                                    <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="z-index: 3;">
+                                                                        <a class="p-1" ng-click="AddPHDDetails($index)">
+                                                                            <i class="fas fa-plus text-secondary"></i>
+                                                                        </a>
+                                                                        <a class="p-1" ng-click="newDet.BioAttendence.splice($index, 1)">
+                                                                            <i class="fas fa-trash text-danger"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+
+                                                        </table>
+                                                        <!-- table end -->
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- table section end -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Bio attendence section end-->
+                            <!--Student TypeWise Attendance starts-->
+                            <div class="tab-pane fade main-section"
+                                 id="StudentType"
+                                 role="tabpanel"
+                                 aria-labelledby="StudentType-tab">
+                                <div id="StudentType-section">
+                                    <div class="row mt-2">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>For Date</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newStudentType.ForDate_TMP" date-detail="newStudentType.ForDateDet" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>StudentType</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudentType.StudentTypeId" @*ng-change="GetStudentSummaryList()"*@>
+                                                <option ng-value="0">**All**</option>
+                                                <option ng-value="cl.StudentTypeId" ng-repeat="cl in StudentTypeList" ng-selected="newStudentType.StudentTypeId==cl.StudentTypeId">{{cl.Name}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <div class="form-group">
+                                                <label for="">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentType.BatchId">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newStudentType.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Class</label>
+                                                <select class="select2 form-control-sm" data-placeholder="Select Section" ng-model="newStudentType.ClassSection" style="width:100%">
+                                                    <option ng-value="null">**Select Class**</option>
+                                                    <option ng-value="se" ng-repeat="se in ClassSection.SectionList">{{se.ClassName}} {{se.SectionName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-2" ng-show="newStudentType.ClassSection.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group">
+                                                <label for="">Class Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentType.ClassYearId" ng-change="GetTypeWiseStudentList()">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newStudentType.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2" ng-show="newStudentType.ClassSection.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentType.SemesterId" ng-change="GetTypeWiseStudentList()">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newStudentType.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2" style="margin-top: 23px;">
+                                            <div class="float-right">
+                                                <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button" ng-click="GetTypeWiseStudentList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <form class="form-inline clearfix">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0">
+                                                        <option ng-repeat="pp in perPageColl" value="{{pp.value}}">
+                                                            {{pp.text}}
+                                                        </option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed ml-2">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search"
+                                                               placeholder="Search"
+                                                               aria-label="Search"
+                                                               ng-model="searchData.StudentType">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div class="col-md-5  text-right">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success" title="Save"
+                                                    style="min-width: 70px" ng-click="SaveUpdateStudentTypeWise()">
+                                                <i class="fas fa-save mr-2"></i>
+                                                Save
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" style="min-width: 70px;" title="Delete" type="button" @*ng-click="DelStudentManualAttendance()"*@><i class="fas fa-trash-alt mr-2"></i>Delete</button>
+                                        </div>
+                                    </header>
+                                    <div class="card p-0">
+                                        <div class="table-scroll-x-y edittable" style="max-height:calc(100vh - 10.25rem)">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-center">
+                                                        <th style="width: 80px">Id</th>
+                                                        <th style="width: 110px">{{'REGDNO_LNG' | translate}}</th>
+                                                        <th style="width: 110px">Class/Section</th>
+                                                        <th style="width: 75px">Roll No.</th>
+                                                        <th style="width: 200px">Name</th>
+                                                        <th style="width: 90px;z-index:2">
+                                                            <div class="justify-content-center d-flex">
+                                                                Present
+                                                                &nbsp;
+                                                                <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newStudentType.Present" ng-change="PresentAllStdType()">
+                                                            </div>
+
+                                                        </th>
+
+                                                        <th style="width: 70px; z-index: 2"> Absent </th>
+                                                        <th style="width: 60px; z-index: 2">Late </th>
+                                                        <th style="width: 100px" id="late-heading1">Late Min.</th>
+                                                        <th style="width: 60px; z-index: 2"> Leave </th>
+                                                        <th style="width: 150px">Remarks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="st in newStudentType.StudentList| filter:searchData.StudentType">
+                                                        <td>{{st.AutoNumber}}</td>
+                                                        <td>{{st.RegdNo}}</td>
+                                                        <td>{{st.ClassName}} {{st.SectionName}}</td>
+                                                        <td>{{st.RollNo}}</td>
+                                                        <td>{{st.Name}}</td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="1" ng-model="st.Attendance"  ng-change="onAttendanceChange(st)"/>
+
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="2" ng-model="st.Attendance" ng-change="onAttendanceChange(st)"/>
+
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="3" ng-model="st.Attendance" ng-change="onAttendanceChange(st)"/>
+
+
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="number" class="form-control form-control-sm" ng-model="st.LateMin" ng-readonly="st.Attendance!=3" />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="4" ng-model="st.Attendance" ng-change="onAttendanceChange(st)"/>
+                                                        </td>
+                                                        <td>
+                                                            <textarea cols="30"
+                                                                      rows="1"
+                                                                      class="form-control form-control-sm" ng-model="st.Remarks"></textarea>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                            <!--</div>
+                                            </div>-->
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+

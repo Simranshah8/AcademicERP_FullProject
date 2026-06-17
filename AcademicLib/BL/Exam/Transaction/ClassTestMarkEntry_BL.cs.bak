@@ -1,0 +1,106 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Dynamic.DataAccess.Global;
+
+namespace AcademicLib.BL.Exam.Transaction
+{
+
+	public class ClassTestMarkEntry  
+	{ 
+
+		DA.Exam.Transaction.ClassTestMarkEntryDB db = null;
+
+		int _UserId = 0;
+
+		public ClassTestMarkEntry(int UserId, string hostName, string dbName)
+		{
+			this._UserId = UserId;
+			db = new DA.Exam.Transaction.ClassTestMarkEntryDB(hostName, dbName);
+		}
+        public List<ResponeValues> SaveUpdate(BE.Exam.Transaction.ClassTestMarkEntryCollections dataColl)
+        {
+            List<ResponeValues> responseList = new List<ResponeValues>();
+
+            
+            foreach (var v in dataColl)
+            {
+                if (!v.SectionId.HasValue || v.SectionId == 0)
+                {
+                    ResponeValues invalidResponse = new ResponeValues();
+                    invalidResponse.IsSuccess = false;
+                    invalidResponse.ResponseMSG = "Please select a section.";
+                    responseList.Add(invalidResponse);
+                    return responseList;
+                }
+            }
+          
+            responseList = db.SaveUpdate(_UserId, dataColl);
+            return responseList;
+        }
+        
+        public ResponeValues DeleteById(int EntityId, int TranId)
+		{
+			return db.DeleteById(_UserId, EntityId, TranId);
+		}
+
+		public BE.Exam.Transaction.ClassTestClassWiseCollections GetClassTestClassWise(int EntityId, int? ClassId)
+		{
+			return db.getClassTestClassWise(_UserId, EntityId, ClassId);
+		}
+
+		public BE.Exam.Transaction.SubjectWiseTeacherCollections GetSubjectWiseTeacher(int EntityId, int? EmployeeId)
+		{
+			return db.getSubjectWiseTeacher(_UserId, EntityId, EmployeeId);
+		}
+
+		public BE.Exam.Transaction.CSubjectWiseLessonCollections GetCSubjectWiseLesson(int EntityId, int? SubjectId)
+		{
+			return db.getCSubjectWiseLesson(_UserId, EntityId, SubjectId);
+		}
+
+		public BE.Exam.Transaction.StudentsDetailsClassWiseCollections GetStudentsDetailsClassWise(int EntityId, int? ClassId, int? AcademicYearId)
+		{
+			return db.getStudentsDetailsClassWise(_UserId, EntityId, ClassId, AcademicYearId);
+		}
+		public ResponeValues IsValidData(ref BE.Exam.Transaction.ClassTestMarkEntry beData, bool IsModify)
+		{
+			ResponeValues resVal = new ResponeValues();
+			try
+			{
+			if (beData == null)
+			{
+				resVal.ResponseMSG = GLOBALMSG.NO_DATA_FOUND;
+			}
+			else if (IsModify && beData.TranId == 0)
+			{
+				resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Modify";
+			}
+			else if (!IsModify && beData.TranId != 0)
+			{
+				resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Save";
+			}
+			else if (beData.CUserId == 0)
+			{
+				resVal.ResponseMSG = "Invalid User for CRUD";
+			}
+	
+			else
+			{
+				resVal.IsSuccess = true;
+				resVal.ResponseMSG = "Valid";
+			}
+		}
+		catch (Exception ee)
+		{
+			resVal.IsSuccess = false;
+			resVal.ResponseMSG = ee.Message;
+		}
+			return resVal;
+		}
+	}
+
+}
+

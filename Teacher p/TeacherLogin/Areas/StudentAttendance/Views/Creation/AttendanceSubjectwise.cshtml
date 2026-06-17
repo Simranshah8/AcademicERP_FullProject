@@ -1,0 +1,642 @@
+﻿
+@{
+    ViewBag.Title = "AttendanceSubjectwise";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/AngularJs/Creation/Subjectwise.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="SubjectwiseController" ng-init="LoadData()">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="container-fluid1">
+                <section class="iframe-content-starts-here">
+                    <div class="tab-content">
+                        <!-- Third Tab Content -->
+                        <div id="root">
+                            <div class="card-primary card-tabs">
+                                <header class="if-page-have-nav-tabs PX-2">
+                                    <div class="row upper-tab">
+                                        <div class="col-md-12">
+                                            <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                                role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                       href="#home" role="tab" aria-controls="home"
+                                                       aria-selected="true">Add Attendance</a>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                       href="#profile" role="tab" aria-controls="profile"
+                                                       aria-selected="false">SubjectWise Summary</a>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <a class="nav-link" id="contact-tab" data-toggle="tab"
+                                                       href="#contact" role="tab" aria-controls="contact"
+                                                       aria-selected="false">All Subject Summary</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                </header>
+
+
+
+                                <div class="tab-content" id="myTabContent">
+                                    <!-- Add Attendance Start -->
+                                    <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                         aria-labelledby="home-tab">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="">Date</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" date-picker ng-model="newAddAttendance.forDate" date-detail="newAddAttendance.ToDateDet" ng-change="OnChangeDate()">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label for="">Class</label>
+                                                        <div class="form-group">
+                                                            <select class="form-control form-control-sm select2" ng-model="SelectedClass" id="cboSectionId">
+                                                                <option ng-repeat="ct in SectionColl track by $index" value="{{ ct }}">
+                                                                    {{ct.ClassName}}-{{ct.SectionName}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label for="">Subject</label>
+                                                        <div class="form-group">
+                                                            <select class="form-control form-control-sm select2" ng-model="newAddAttendance.SubjectId" id="cboSubjectId">
+                                                                <option ng-repeat="ct in SubjectColl track by $index" value="{{ ct.SubjectId }}" ng-selected="ct.SubjectId==newAddAttendance.SubjectId">
+                                                                    {{ct.Name}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mt-4">
+                                                <div class="">
+
+                                                    <div class="mb-0">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <label>Total Student:{{SubWiseStdColl.length}}</label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label>Absent:{{(SubWiseStdColl|filter:{Attendance:true}).length}}</label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label>Late:{{(SubWiseStdColl|filter:{IsLate:true}).length}}</label>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label>Present:{{(SubWiseStdColl|filter:{Attendance:false}).length}}</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card p-2">
+                                            <header class="row">
+                                                <div class="col-md-7">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline">
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Show</span>
+                                                                </div>
+                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AddAttendance">
+                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AddAttendance">{{pp.text}}</option>
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                <input class="form-control form-control-navbar"
+                                                                       type="search" placeholder="Search"
+                                                                       aria-label="Search" ng-model="searchData.AddAttendance">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0"
+                                                                            type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <!-- end col-md-8 -->
+                                                <div class="col-md-5 text-right">
+
+                                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download py-1"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/excel.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                Excel
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/csv.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                CSV
+                                                            </a>
+
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                                        <i class="fas fa-print py-1"></i>
+                                                    </a>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-default"
+                                                            style="min-width: 90px">
+                                                        Reset
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-success" ng-click="Callfunction()"
+                                                            style="min-width: 90px">
+                                                        Save
+                                                    </button>
+                                                </div>
+                                            </header>
+                                            <div>
+                                                <div class="table-scroll-x-y sales-main-table table-scroll"  style="max-height: calc(100vh - 22rem) ;overflow-x:auto">
+                                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white table-head-fixed">
+                                                        <thead class="text-center text-nowrap">
+                                                            <tr>
+                                                                <th style="width: 50px">S.No.</th>
+                                                                <th style="width: 150px;">Photo</th>
+                                                                @*<th style="width: 150px;">ID</th>*@
+                                                                <th style="width: 90px;">Regd.No.</th>
+                                                                <th style="width: 90px;">Roll No.</th>
+                                                                <th style="width: 150px;">Name</th>
+                                                                <th style="width: 150px">Present/Absent</th>
+                                                                <th style="width: 90px;">Late</th>
+                                                                <th style="width: 100px">Late Min</th>
+                                                                <th style="width: 90px">Leave</th>
+                                                                <th style="width: 200px">Remarks</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr @*ng-repeat="cl in SubWiseStdColl"*@ dir-paginate="cl in SubWiseStdColl | filter:searchData.AddAttendance | itemsPerPage: perPage.AddAttendance" current-page="currentPages.AddAttendance" pagination-id="AddAttendancePagination">
+                                                                <td>{{$index+1}}</td>
+                                                                <td> <img ng-hide="cl.PhotoPath==''" ng-src="{{cl.PhotoPath}}" style="height: 50px;" alt=""></td>
+                                                                @*<td>{{cl.Id}}</td>*@
+                                                                <td>{{cl.RegdNo}}</td>
+                                                                <td>{{cl.RollNo}}</td>
+                                                                <td class="text-left pl-1">{{cl.Name}}</td>
+                                                                <td>
+                                                                    <div class="cstm-switch-btn-wrap">
+                                                                        <label class="switch">
+                                                                            <input type="checkbox" id="togBtn{{$index}}" ng-model="cl.Attendance" @*ng-change="togChange($index)"*@ class="togBtn">
+                                                                            <div class="slider round">
+                                                                                <!--ADDED HTML -->
+                                                                                <span class="on">P</span>
+                                                                                <span class="off">A</span>
+                                                                                <!--END-->
+                                                                            </div>
+                                                                        </label>
+                                                                        @*<button type="button"
+                        class="btn btn-sm btn-toggle active"
+                        data-toggle="button" aria-pressed="true" ng-model="cl.atende" ng-click="LateCheck(cl.atende)"
+                        autocomplete="off">
+                    <div class="handle"></div>
+                </button>*@
+
+                                                                    </div>
+
+
+
+                                                                </td>
+                                                                <td>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" class="custom-control-input" ng-model="cl.IsLate" id="customCheckbox1{{$index}}" />
+                                                                        <label for="customCheckbox1{{$index}}"
+                                                                               class="custom-control-label"> </label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number"
+                                                                           class="form-control form-control-sm" ng-readonly="cl.IsLate==!true" ng-model="cl.LateMin">
+
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" class="custom-control-input" ng-model="cl.Leave" id="customCheckbox4{{$index}}" />
+                                                                        <label for="customCheckbox4{{$index}}"
+                                                                               class="custom-control-label"> </label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <textarea rows="1" class="form-control form-control-sm" ng-model="cl.Remarks"></textarea>
+                                                                </td>
+
+
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <!-- table end -->
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="AddAttendancePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>
+                                            </footer>
+
+                                        </div>
+                                        
+
+                                    </div>
+                                    <!-- Add Attendance Ends -->
+                                    <!-- SubjectWise Summary Starts -->
+                                    <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                         aria-labelledby="profile-tab">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Class</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="SelectedClass" id="cboClassSecId">
+                                                        <option ng-repeat="ct in SectionColl track by $index" value="{{ ct }}">
+                                                            {{ct.ClassName}}-{{ct.SectionName}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Subject</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="beData.SubjectId" id="cboSubjectId">
+                                                        <option ng-repeat="ct in SubjectColl track by $index" value="{{ ct.SubjectId }}" ng-selected="ct.SubjectId==beData.SubjectId">
+                                                            {{ct.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">From Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newSubjectwiseSummary.FromDate_TMP" date-detail="newSubjectwiseSummary.FromDateDet">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">To Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newSubjectwiseSummary.ToDate_TMP" date-detail="newSubjectwiseSummary.ToDateDet">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-3 mt-2">
+                                                <label>Total Working Days:</label>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <input type="text"
+                                                           class="form-control form-control-sm"
+                                                           placeholder="Weekend" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <input type="text"
+                                                           class="form-control form-control-sm"
+                                                           placeholder="Holiday" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <input type="text"
+                                                           class="form-control form-control-sm"
+                                                           placeholder="Event" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card p-2">
+                                            <header class="row mb-2">
+                                                <div class="col-md-7">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline">
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Show</span>
+                                                                </div>
+                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.SubjectwiseSummary">
+                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.SubjectwiseSummary">{{pp.text}}</option>
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                <input class="form-control form-control-navbar"
+                                                                       type="search" placeholder="Search"
+                                                                       aria-label="Search" ng-model="searchData.SubjectwiseSummary">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0"
+                                                                            type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <!-- end col-md-8 -->
+                                                <div class="col-md-5 text-right">
+                                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/excel.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                Excel
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/csv.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                CSV
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/pdf.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                PDF
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/word.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                Word
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/gmail.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                Mail
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                </div>
+                                            </header>
+                                            <div>
+                                                <div class="table-scroll-x-y sales-main-table table-scroll"  style="height: calc(100vh - 22rem) ;overflow-x:auto">
+                                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white table-head-fixed">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 120px;">Id</th>
+                                                                <th style="width: 120px;">Regd. No.</th>
+                                                                <th style="width: 200px;">Name</th>
+                                                                <th style="width: 120px;">Roll NO.</th>
+                                                                <th style="width: 120px;">Class/Sec</th>
+                                                                <th style="width: 120px;">Present</th>
+                                                                <th style="width: 80px;">Absent</th>
+                                                                <th style="width: 120px;">Late</th>
+                                                                <th style="width: 100px;">Late Min.</th>
+                                                                <th style="width: 250px;">Remarks</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr dir-paginate="cl in SubjectwiseSummaryList | filter:searchData.SubjectwiseSummary | itemsPerPage: perPage.SubjectwiseSummary" current-page="currentPages.SubjectwiseSummary" pagination-id="SubjectwiseSummaryPagination">
+                                                                <td>{{cl.Id}}</td>
+                                                                <td>{{cl.RegdNo}}</td>
+                                                                <td>{{cl.Name}}</td>
+                                                                <td>{{cl.RollNo}}</td>
+                                                                <td>{{cl.ClassSec}}</td>
+                                                                <td>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" class="custom-control-input" id="customCheckbox3" />
+                                                                        <label for="customCheckbox3"
+                                                                               class="custom-control-label"> </label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" class="custom-control-input" id="customCheckbox2" />
+                                                                        <label for="customCheckbox2"
+                                                                               class="custom-control-label"> </label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox" class="custom-control-input" id="customCheckbox1" />
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label"> </label>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="number"
+                                                                           class="form-control form-control-sm" ng-model="cl.LateMin">
+
+                                                                </td>
+                                                                <td>
+                                                                    <textarea rows="1" class="form-control form-control-sm"></textarea>
+
+                                                                </td>
+
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <!-- table end -->
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="SubjectwiseSummaryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                    </div>
+                                    <!-- SubjectWise Summary Ends -->
+                                    <!-- All Subject Summary Starts -->
+                                    <div class="tab-pane fade main-section" id="contact" role="tabpanel"
+                                         aria-labelledby="contact-tab">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">From Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newAllSubjectSummary.FromDate_TMP" date-detail="newAllSubjectSummary.FromDateDet">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">To Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newAllSubjectSummary.ToDate_TMP" date-detail="newAllSubjectSummary.ToDateDet">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card p-2">
+                                            <header class="row mb-2">
+                                                <div class="col-md-7">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline">
+
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Show</span>
+                                                                </div>
+                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AllSubjectSummary">
+                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AllSubjectSummary">{{pp.text}}</option>
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                <input class="form-control form-control-navbar"
+                                                                       type="search" placeholder="Search"
+                                                                       aria-label="Search" ng-model="searchData.AllSubjectSummary">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0"
+                                                                            type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <!-- end col-md-8 -->
+                                                <div class="col-md-5 text-right">
+                                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/excel.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                Excel
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/csv.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                CSV
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/pdf.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                PDF
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/word.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                Word
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/teacherloginFiles/dynamic/images/flaticons/gmail.png"
+                                                                     class="img-fluid exports-icon"
+                                                                     alt="Excel image" />
+                                                                Mail
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+
+                                                </div>
+                                            </header>
+                                            <div>
+                                                <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 120px;">Class</th>
+                                                                <th style="width: 120px;">Total Student</th>
+                                                                <th style="width: 200px;">Present</th>
+                                                                <th style="width: 120px;">Absent</th>
+                                                                <th style="width: 120px;">Late</th>
+                                                                <th style="width: 120px;">Present(%)</th>
+                                                                <th style="width: 80px;">Absent(%)</th>
+                                                                <th style="width: 120px;">Late(%)</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr dir-paginate="cl in AllSubjectSummaryList | filter:searchData.AllSubjectSummary | itemsPerPage: perPage.AllSubjectSummary" current-page="currentPages.AllSubjectSummary" pagination-id="AllSubjectSummaryPagination">
+                                                                <td>{{cl.Class}}</td>
+                                                                <td>{{cl.TotalStudent}}</td>
+                                                                <td>{{cl.Present}}</td>
+                                                                <td>{{cl.Absent}}</td>
+                                                                <td>{{cl.Late}}</td>
+                                                                <td>{{cl.PresentPer}}</td>
+                                                                <td>{{cl.AbsentPer}}</td>
+                                                                <td>{{cl.LatePer}}</td>
+
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <!-- table end -->
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="AllSubjectSummaryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                    </div>
+                                    <!--All Subject Summary Ends -->
+                                </div>
+                                <!-- /.card -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- /.row -->
+            </div>
+            <!--/. container-fluid -->
+        </section>
+        <!-- /.content -->
+    </div>
+</div>

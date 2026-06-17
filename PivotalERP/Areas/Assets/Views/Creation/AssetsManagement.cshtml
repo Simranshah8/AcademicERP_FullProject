@@ -1,0 +1,378 @@
+﻿<script src="/jslib/export/tableExport.js"></script>
+<script src="/jslib/export/jquery.base64.js"></script>
+
+<script src="/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="/jslib/export/jspdf/jspdf.js"></script>
+<script src="/jslib/export/jspdf/libs/base64.js"></script>
+<script src="~/jslib/Assets/Assets.js"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AssetsController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:51px!important;">
+                <div class="tab-content" id="BuildingForm-section">
+                    <div class="card">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group d-flex mb-2" style="width:100%">
+                                    <label for="Building" class="form-label  mt-1 mr-3">Building</label>
+                                    <select class="form-select form-control form-control-sm select2" ng-model="newFilter.BuildingId">
+                                        <option value="">Select the building</option>
+                                        <option ng-repeat="A in BuildingList" ng-value="A.BuildingId" ng-selected="A.id==newFilter.BuildingId">{{A.Name}} - {{A.BuildingId}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group d-flex mb-2" style="width:100%">
+                                    <label for="Floor" class="form-label mt-1 mr-3">Floor</label>
+                                    <select class="form-select form-control form-control-sm select2" ng-model="newFilter.FloorId">
+                                        <option value="">Select the Floor</option>
+                                        <option ng-repeat="A in FloorList" ng-value="A.FloorId" ng-selected="A.id==newFilter.FloorId">{{A.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-sm btn-success" ng-click="GetAllAssetsDet()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                            </div>
+                        </div>
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Assets">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Assets">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search" ng-model="searchData.Assets"
+                                                   aria-label="Search">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+
+                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                     data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'AssetsList'"><img src="/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                    </div>
+                                </div>
+                                <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-success" id="add-BuildingForm"
+                                        style="min-width: 90px" ng-click="ClearDetails()">
+                                    <i class="fas fa-plus w-t"></i> Add Assets Allocation
+                                </button>
+                            </div>
+                        </header>
+
+                        <div>
+
+
+                            <div class="table-scroll table-scroll-x-y sales-main-table">
+                                <table class="table table-bordered table-sm bg-white" id="main-table">
+                                    <thead class="text-nowrap">
+                                        <tr>
+                                            <th class="text-center" style="width:50px">S.No</th>
+                                            <th style="width:150px">Building Name</th>
+                                            <th style="width:150px">Floor Name</th>
+                                            <th style="width:150px">Room Type</th>
+                                            <th style="width:150px">Room Name</th>
+                                            <th style="width:150px">Total Assets</th>
+                                            <th class="text-center" style="width:70px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in AllAssetsList | filter:searchData.Assets | filter:{Qty:'!0'} | itemsPerPage: perPage.Assets" current-page="currentPages.Assets" pagination-id="AssetsPagination">
+                                            <td class="text-center">{{$index+1}}</td>
+                                            <td>{{cl.BuildingName}}</td>
+                                            <td>{{cl.FloorName}}</td>
+                                            <td>
+                                                <span ng-if="cl.RoomTypeId == 1">Class Room</span>
+                                                <span ng-if="cl.RoomTypeId != 1">Other Room</span>
+                                            </td>
+                                            <td>{{cl.RoomName}}</td>
+                                            <td>{{cl.Qty}}</td>
+                                            <td class="text-center">
+                                                <a ng-click="GetAssetsDetaillist(cl)"><i class="p-1 fas fa-info-circle text-info"></i></a>
+                                                <a ng-click="PrintAssetsList(cl)"><i class="p-1 fas fa-print text-secondary"></i></a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="AssetsPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                </div>
+                            </footer>
+
+                        </div>
+
+                    </div>
+                </div>
+                <!-- form area starts -->
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card" id="add-BuildingForm-form">
+                            <div class="card-body p-0">
+                                <form>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="Building" class="form-label">Building</label>
+                                                        <select class="form-select form-control form-control-sm select2" ng-model="newAssets.BuildingId">
+                                                            <option ng-repeat="A in BuildingList" ng-value="A.BuildingId" ng-selected="A.id==newDet.BuildingId">{{A.Name}} - {{A.BuildingId}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="Floor" class="form-label">Floor</label>
+                                                        <select class="form-select form-control form-control-sm select2" ng-model="newAssets.FloorId">
+                                                            <option ng-repeat="A in FloorList" ng-value="A.FloorId" ng-selected="A.id==newAssets.FloorId">{{A.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="RoomType" class="form-label">Room Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newAssets.RoomTypeId" ng-change="GetAllfloorwiseRoom()">
+                                                        <option ng-value="R.id" ng-repeat="R in RoomTypeColl" ng-selected="R.id==newAssets.RoomTypeId">{{R.text}}</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label for="RoomType" class="form-label">Room</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newAssets.RoomId" ng-change="GetAllAssetsList()">
+                                                        <option ng-value="R.FloorWiseRoomDetailsId" ng-repeat="R in RoomListColl" ng-selected="R.FloorWiseRoomDetailsId==newAssets.RoomId">{{R.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered th-fixed-top bg-white w-100">
+                                            <thead class="text-nowrap">
+                                                <tr>
+                                                    <th style="width:50px">S.N</th>
+                                                    <th style="width:250px">Particular</th>
+                                                    <th style="width:100px">Quantity</th>
+                                                    <th style="width:200px">Remarks</th>
+                                                    <th style="width:80px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="row in newAssets.AssetsDetailColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="row.ProductId">
+                                                            <option ng-repeat="A in AssetProductsList" ng-value="A.ProductId" ng-selected="row.ProductId==A.ProductId">{{A.Name}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input ng-model="row.Qty" type="number" min="0" class="form-control form-control-sm" onkeydown="return event.key !== '-' && event.key !== 'e'" oninput="this.value = this.value >= 0 ? this.value : ''" />
+                                                    </td>
+                                                    <td><input ng-model="row.Remarks" type="text" class="form-control form-control-sm" /></td>
+                                                    <td>
+                                                        <button ng-click="AddDetail($index)" class="btn btn-link p-0"> <i class="p-1 fas fa-plus text-secondary"></i></button>
+                                                        <button ng-click="DeleteDetail($index)" class="btn btn-link p-0"><i class="p-1 fas fa-trash-alt text-danger"></i></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="d-flex justify-content-center mt-3" style="gap:0.5rem;">
+                                        <button class="btn btn-sm btn-info" style="min-width:80px" id="BuildingFormback-btn">Back to List</button>
+                                        <button class="btn btn-sm btn-default" style="min-width:80px" ng-click="ClearDetails()">Reset</button>
+                                        <button class="btn btn-sm btn-success" style="min-width:80px" ng-click="SaveUpdateAssets()">Save</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="preview-form">
+                    <div id="printcard" class="card p-2" @*style="display:none"*@>
+
+                        <div class="row " style="border-bottom:2px solid #000000">
+                            <div class="col-md-2 text-center">
+                                <img ng-src="{{ Logo.LogoPath}}" class="img-fluid" style="height:120px; width:auto;" />
+                            </div>
+
+                            <div class="col-md-8 text-center mb-2">
+                                <h3 class="text-secondary" style="font-family: 'Cambria', serif; font-weight: bold; letter-spacing: 1px; font-size: 32px">
+                                    {{newCompanyDet.Name}}
+                                </h3>
+                                <h6 style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+                                    Affiliated to {{newCompanyDet.Affiliated}}
+                                </h6>
+                                <h6 style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+                                    {{newCompanyDet.Address}}
+                                </h6>
+
+                                <p class="mb-0" style="font-family: 'Times New Roman', serif; font-size: 20px; font-weight: bold;">
+                                    {{newCompanyDet.PhoneNo}} ,   {{newCompanyDet.EmailId}}
+                                </p>
+
+                            </div>
+
+                            <div class="col-md-2 text-center">
+                                <img ng-src="{{ Logo.AffiliatedLogo}}" class="img-fluid" style="height:120px; width:auto;" />
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12 text-center">
+                                <h3 class="mb-3"><u>Assets Details</u></h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p class="mb-0">Building Name</p>
+                                <p><b>{{newPrint.BuildingName}}</b></p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-0">Floor Name</p>
+                                <p><b>{{newPrint.FloorName}}</b></p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-0">Room Type</p>
+                                <p>
+                                    <span ng-if="newPrint.RoomTypeId == 1"><b>Class Room</b></span>
+                                    <span ng-if="newPrint.RoomTypeId != 1"><b>Other Room</b></span>
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-0">Room Name</p>
+                                <p><b>{{newPrint.RoomName}}</b></p>
+                            </div>
+                        </div>
+
+                        <div class="table-scroll table-scroll-x-y sales-main-table mb-4">
+                            <table class="table table-bordered table-sm bg-white" id="main-table">
+                                <thead class="text-nowrap">
+                                    <tr>
+                                        <th class="text-center" style="width:50px">S.No</th>
+                                        <th style="width:150px">Particular</th>
+                                        <th class="text-center" style="width:100px">Qty</th>
+                                        <th style="width:250px">Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="cl in AllAssetsDetListP">
+                                        <td class="text-center">{{$index+1}}</td>
+                                        <td>{{cl.ProductName}}</td>
+                                        <td class="text-center">{{cl.Qty}}</td>
+                                        <td>{{cl.Remarks}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- form area ends -->
+                <!-- Assets Detail Modal Starts -->
+                <div class="modal fade" id="assetsdetailmodal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header py-2">
+                                <h6 class="modal-title">Assets Details</h6>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body p-2">
+                                <div class="card p-2 mb-2" style="background-color: aliceblue; border: 2px solid #d2e5f5">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <p class="mb-0">Building Name</p>
+                                            <p><b>{{newDet.BuildingName}}</b></p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p class="mb-0">Floor Name</p>
+                                            <p><b>{{newDet.FloorName}}</b></p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p class="mb-0">Room Type</p>
+                                            <p>
+                                                <span ng-if="newDet.RoomTypeId == 1"><b>Class Room</b></span>
+                                                <span ng-if="newDet.RoomTypeId != 1"><b>Other Room</b></span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p class="mb-0">Room Name</p>
+                                            <p><b>{{newDet.RoomName}}</b></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-scroll table-scroll-x-y sales-main-table mb-4">
+                                    <table class="table table-bordered table-sm bg-white" id="main-table">
+                                        <thead class="text-nowrap">
+                                            <tr>
+                                                <th class="text-center" style="width:50px">S.No</th>
+                                                <th style="width:150px">Particular</th>
+                                                <th class="text-center" style="width:100px">Qty</th>
+                                                <th style="width:250px">Remarks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="cl in AllAssetsDetList">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{cl.ProductName}}</td>
+                                                <td class="text-center">{{cl.Qty}}</td>
+                                                <td>{{cl.Remarks}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

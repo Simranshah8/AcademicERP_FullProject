@@ -1,0 +1,371 @@
+﻿<style>
+    .iframe-content-starts-here {
+        padding-top: 50px !important;
+    }
+</style>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/Hostel/HostelGuardian.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="GuardianController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div class="Guardian-section card" id="Guardian-section">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Hostel</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newFilter.HostelId">
+                                        <option ng-value="">All</option>
+                                        <option ng-repeat="h in HostelList" ng-value="h.HostelId" ng-selected="newFilter.HostelId==h.HostelId">{{h.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Building</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newFilter.BuildingId">
+                                        <option ng-value="">All</option>
+                                        <option ng-repeat="h in BuildingList" ng-value="h.BuildingId" ng-selected="newFilter.BuildingId==h.BuildingId">{{h.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Floor</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newFilter.FloorId">
+                                        <option ng-value="">All</option>
+                                        <option ng-repeat="h in FloorList" ng-value="h.FloorId" ng-selected="newGuardian.FloorId==h.FloorId">{{h.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mt-4">
+                                <div class="form-group tex-right">
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="GetAllGuardianList()">
+                                        <i class="fas fa-sync-alt mr-2 w-t"></i> Load
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline mb-2">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0"
+                                                    id="exampleFormControlSelect1" ng-model="perPage.Guardian">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Guardian">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search"
+                                                   placeholder="Search" aria-label="Search" ng-model="searchData.Guardian" />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                </div>
+                                <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                   data-toggle="tooltip" data-placement="bottom"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+
+                                <button type="button" class="btn btn-sm btn-success" id="add-Guardian"
+                                        style="min-width: 90px">
+                                    <i class="fas fa-plus w-t"></i> Add Hostel Guardian
+                                </button>
+                            </div>
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y sales-main-table table-scroll mb-2" style="max-height: calc(100vh - 10rem) !important;">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead class="text-nowrap">
+                                        <tr>
+                                            <th style="width: 70px">S.No.</th>
+                                            <th style="width: 80px">Adm No</th>
+                                            <th style="width: 250px">Name</th>
+                                            <th style="width: 200px">Class/Sec</th>
+                                            <th style="width: 250px">Room Detail</th>
+                                            <th class="text-center" style="width: 80px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in GuardianList | filter:searchData.Guardian | itemsPerPage: perPage.Guardian" current-page="currentPages.Guardian" pagination-id="GuardianNamePagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.RegNo}}</td>
+                                            <td>{{cl.StudentName}}</td>
+                                            <td>{{cl.ClassSection}}</td>
+                                            <td>{{cl.RoomDetail}}</td>
+                                            <td class="text-center">
+                                                <a class="p-1" ng-click="GetGuardianByStdId(cl)">
+                                                    <i class='fas fa-eye text-secondary'></i>
+                                                </a>
+                                                @*<a class="p-1" ng-click="GetGuardianById(cl)">
+                                    <i class="fas fa-edit text-info"></i>
+                                </a>*@
+                                                <a class="p-1" ng-click="DelGuardianById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- table end -->
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="GuardianNamePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+
+                <!-- form area starts -->
+                <div id="Guardian-form">
+                    <div class="card card-default">
+                        <div class="card-body p-0">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Hostel</label>
+                                        <select class="form-control form-control-sm select2" ng-model="newGuardian.HostelId" ng-change="GetHostelStudent()">
+                                            <option ng-value="">All</option>
+                                            <option  ng-repeat="h in HostelList" ng-value="h.HostelId"  ng-selected="newGuardian.HostelId==h.HostelId">{{h.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Building</label>
+                                        <select class="form-control form-control-sm select2" ng-model="newGuardian.BuildingId" ng-change="GetHostelStudent()">
+                                            <option ng-value="">All</option>
+                                            <option ng-repeat="h in BuildingList" ng-value="h.BuildingId" ng-selected="newGuardian.BuildingId==h.BuildingId" >{{h.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Floor</label>
+                                        <select class="form-control form-control-sm select2" ng-model="newGuardian.FloorId" ng-change="GetHostelStudent()">
+                                            <option ng-value="">All</option>
+                                            <option ng-repeat="h in FloorList" ng-value="h.FloorId" ng-selected="newGuardian.FloorId==h.FloorId">{{h.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Student</label>
+                                        <select class="form-control form-control-sm select2" ng-model="newGuardian.StudentId" ng-change="GetStdGuardianById()">
+                                            <option ng-repeat="h in HostelStudentList" ng-value="h.StudentId" ng-selected="newGuardian.StudentId==h.StudentId">{{h.StudentName}} - {{h.ClassSection}} - {{h.RollNo}} - {{h.RegNo}} - {{h.FatherName}}  - {{h.P_ContactNo}} - {{h.Address}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                @*<div class="col-sm-9 col-lg-9 col-md-9" id="meet-student">
+                                    <label for="inlineFormInputGroup">Select Student</label>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0"
+                                                style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newGuardian.SelectStudent">
+
+                                            <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newGuardian.SelectStudent">
+                                                {{ss.text}}
+                                            </option>
+                                        </select>
+                                        <select class="form-control select2 form-control-sm" all-student ng-model="newGuardian.StudentId" student-detail="newGuardian.StudentDetails" side-bar-data="newGuardian.SideBarData" search-by="newGuardian.SelectStudent">
+                                        </select>
+                                    </div>
+                                </div>*@
+                            </div>
+
+
+                            <div class="table-responsive mt-2">
+                                <table class="table table-hover table-bordered th-fixed-top bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 230px;"> Guardian Name </th>
+                                            <th style="width: 150px;">Relation</th>
+                                            <th style="width: 150px;">Contact No</th>
+                                            <th style="width: 80px;">Photo</th>
+                                            <th style="width: 80px;">Document</th>
+                                            <th class="text-center" style="width: 70px"> Action </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="gDet in newGuardian.GuardianAddDetailsColl">
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm " ng-model="gDet.GuardianName">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm " ng-model="gDet.Relation">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm " ng-model="gDet.ContactNo">
+                                            </td>
+                                            <td>
+                                                <div class="d-flex">
+                                                    <input id="choose-photo" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="gDet.PhotoPath_TMP" fileread="gDet.PhotoData" />
+                                                    <img ng-src="{{gDet.PhotoPath}}"ng-if="gDet.PhotoPath"  style="height:45px;" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex">
+                                                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="gDet.DocumentPathTMP" fileread="gDet.DocumentDoc" />
+                                                    <img ng-src="{{gDet.Document}}" ng-if="gDet.Document" style="height:45px;" />
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <a class="p-1" ng-click="AddGuardianAddDetails($index)">
+                                                    <i class="fas fa-plus text-secondary"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="delGuardianAddDetails($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- timeline time label -->
+                    <div class="time-label pb-3 " style="margin-top: -10px ">
+                        <span class="d-block border-0 p-1 text-center ">
+                            <button type="button" class="btn btn-sm btn-info " id="back-to-list-Guardian"
+                                    style="min-width: 90px ">
+                                Back To List
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-default"
+                                    style="min-width: 90px" ng-click="ClearGuardian()">
+                                Reset
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-success"
+                                    style="min-width: 90px" ng-click="SaveUpdateGuardian()">
+                                {{newGuardian.Mode}}
+                            </button>
+                        </span>
+                    </div>
+                    <!-- /.timeline-label -->
+                </div>
+
+                <div class="modal fade" id="guardiandetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="margin-top: 18px;">
+                    <div class="modal-dialog modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header p-2">
+                                <h5 class="modal-title mb-0" id="exampleModalLabel">{{StudentGuardianList[0].StudentName}}</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body p-2">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row">
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label><b>Admission No :</b></label>
+                                                    <label>{{StudentGuardianList[0].RegNo}}</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label><b>Class/Section :</b></label>
+                                                    <label>{{StudentGuardianList[0].ClassSection}}</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label><b>Room Detail :</b></label>
+                                                    <label>{{StudentGuardianList[0].RoomDetail}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="m-0" />
+                                        <b>Guardian Details</b>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col" style="width: 200px">
+                                                            Guardian Name
+                                                        </th>
+                                                        <th style="width:140px">Relation</th>
+                                                        <th style="width: 140px">Contact No</th>
+                                                        <th class="text-center" style="width: 100px">Photo</th>
+                                                        <th class="text-center" style="width: 100px">Document</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="GD in StudentGuardianList[0].GuardianDetails">
+                                                        <td>
+                                                            {{GD.GuardianName}}
+                                                        </td>
+                                                        <td>
+                                                            {{GD.Relation}}
+                                                        </td>
+                                                        <td>
+                                                            {{GD.ContactNo}}
+                                                        </td>
+
+                                                        <td class="text-center">
+                                                            <img ng-src="{{GD.PhotoPath}}" style="max-height:75px;" />
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <a href="~/wwwroot/dynamic/images/pdf.jpg" target="_blank">
+                                                                <img ng-src="{{GD.Document}}" style="max-height:75px;" />
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>

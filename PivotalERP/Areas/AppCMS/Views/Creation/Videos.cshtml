@@ -1,0 +1,246 @@
+﻿<script src="~/jslib/appcms/videos.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="VideosController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top: 50px!important;">
+                <div class="tab-content" id="table-listing" >
+                    <!-- Second Tab Content -->
+                    <div class="card ">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline mb-2">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Videos">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Videos">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.Videos">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file"
+                                     data-toggle="tooltip"
+                                     data-placement="top"
+                                     title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                            type="button"
+                                            id="dropdownMenuButton"
+                                            data-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'Videos'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+
+                                    </div>
+                                </div>
+                                <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-success"
+                                        id="open-form-btn"
+                                        style="min-width: 90px">
+                                    <i class="fas fa-plus w-t"></i> Add Videos
+                                </button>
+                            </div>
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 70px">S.No.</th>
+                                            <th style="width: 250px">Title</th>
+                                            <th style="width: 350px">Description</th>
+                                            <th style="width: 60px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in VideosList | filter:searchData.Videos | itemsPerPage: perPage.Videos" current-page="currentPages.Videos" pagination-id="VideosPagination">
+                                            <td>{{cl.OrderNo}}</td>
+                                            <td>{{cl.Title}}</td>
+                                            <td>{{cl.Description}}</td>
+                                            <td>
+                                                @*<a class="p-1" href="#">
+                <i class="fas fa-eye text-secondary"></i>
+            </a>*@
+                                                <a class="p-1" href="#" ng-click="GetVideosById(cl)">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="DelVideosById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="VideosPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+                <div id="notice-form">
+                    <div class="card py-2">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row">
+
+                                    <!-- select for others -->
+                                    <div class="col-md-9" id="meet-others">
+                                        <div class="form-group">
+                                            <label for="">Title <span class="text-danger">*</span></label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm" ng-model="newVideos.Title" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Order No.</label>
+                                            <input type="number"
+                                                   class="form-control form-control-sm" ng-model="newVideos.OrderNo" />
+                                        </div>
+                                    </div>
+
+                                    <!-- fields after clicking radio button ends -->
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Description</label>
+                                            <textarea class="form-control form-control-sm" ng-model="newVideos.Description"
+                                                      rows="1"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                    <!-- table starts -->
+                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                        <table id="main-table"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr class="text-nowrap">
+                                                    <th class="text-center"
+                                                        style="width: 60px">
+                                                        S.No.
+                                                    </th>
+                                                    <th class="text-center"
+                                                        style="width:300px">
+                                                        URL
+                                                    </th>
+
+                                                    <th class="text-center"
+                                                        style="width: 300px">
+                                                        Description
+                                                    </th>
+                                                    <th class="text-center"
+                                                        style="width: 120px">
+                                                        Thumbnail
+                                                    </th>
+                                                    <th class="text-center table-action" style="width: 90px">
+                                                        Action
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="sm in newVideos.UrlColl1">
+                                                    <td class="text-center">
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <td>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="sm.URLPath" />
+                                                    </td>
+                                                    <td>
+                                                        <textarea class="form-control form-control-sm" rows="1" ng-model="sm.Description"></textarea>
+                                                    </td>
+                                                    <td class="text-center cstm-sticky" style="width: 95px;left:150px;z-index:2;background-color:#fff;">
+
+                                                        <img class="img-fluid" src="{{sm.ThumbnailData || sm.ThumbnailPath}}" style="width:100px;height:80px;border:1px solid #ccc" />
+                                                        <label for="choose-file{{$index}}"> <i class="fas fa-camera tablecamera text-info"></i></label>
+                                                        <input id="choose-file{{$index}}" type="file" accept=".jpg,.jpeg,.png" style="display: none;" file-model fileread="sm.ThumbnailData" ng-model="sm.Thumbnail_TMP" />                                                        
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <a class="p-1" ng-click="AddNewUrl($index)">
+                                                            <i class="fas fa-plus text-primary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delURL($index)">
+                                                            <i class="fas fa-trash-alt w-t text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- Table Ends -->
+                                    @*<div class="col-md-4">
+                            <div class="form-group">
+                                <label for="">Attach File</label>
+                                <input class="form-control form-control-sm p-0" id="documents" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newVideos.Files_TMP" />
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="">Content</label>
+                                <textarea class="textarea" placeholder="Place some text here"
+                                          style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" html-editor ng-model="newVideos.Content"></textarea>
+                            </div>
+                        </div>*@
+
+                                
+                                <div class="time-label">
+                                    <span class="d-block border-0 p-3 text-center">
+                                        <button type="button"
+                                                class="btn btn-sm btn-info"
+                                                id="back-to-list"
+                                                style="min-width: 90px">
+                                            Back to List
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearVideos()">Reset</button>
+                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateVideos()">{{newVideos.Mode}}</button>
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- col-md-9 -->
+
+                        </div>
+                    </div>
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+

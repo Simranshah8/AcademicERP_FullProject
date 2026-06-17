@@ -1,0 +1,394 @@
+﻿
+<link href="~/Scripts/nepalidate/nepali.datepicker.v3.5.min.css" rel="stylesheet" />
+<script src="~/Scripts/nepalidate/nepali.datepicker.v3.5.min.js"></script>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+@*<script src="~/jslib/export/html2canvas.js"></script>*@
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+
+<script>
+    var EntityId =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.GatePass);
+    var entityForSMS = @Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.GatePass);
+</script>
+
+<script src="~/jslib/frontdesk/transaction/GatePass.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<link href="~/wwwroot/dynamic-erp/css/Tableresize.css" rel="stylesheet" />
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="GatePassController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:55px!important">
+                <div class="tab-content" id="table-listing">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group mb-1 d-flex">
+                                <label for="" class="mt-1" style="min-width:63px">From Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newGatePass.FromDate_TMP" date-detail="newGatePass.FromDateDet" confirm-action="validateDates('fromDate')"@*confirm-action="GetAllGatePassList()"*@>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group mb-1 d-flex">
+                                <label for="" class="mt-1" style="min-width:62px">To Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newGatePass.ToDate_TMP" date-detail="newGatePass.ToDateDet" confirm-action="validateDates('toDate')"@*confirm-action="GetAllGatePassList()"*@>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-group-sm mr-sm-2">
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 80px;" ng-click="GetAllGatePassList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- Second Tab Content -->
+                    <div class="card p-0">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.GatePass">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.GatePass">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.GatePass">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+
+                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        @*<a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>*@
+                                    </div>
+                                </div>
+                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="top" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-success" id="open-form-btn" ng-click="open_form_btn()" style="min-width: 90px">
+                                    <i class="fas fa-plus w-t"></i> Add GatePass
+                                </button>
+                            </div>
+                        </header>
+                        <div class="table-scroll-x-y sales-main-table table-scroll flex-grow-1">
+                            <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                <div class="table-h-scrollbar-fix table-scroll-wrapper">
+                                    <table id="main-table" make-table-resizable
+                                           class="main-table table table-sm table-bordered bg-white cstm-resizetable border-0 dynamic-uiux-table">
+                                        <thead>
+                                            <tr>
+                                                <th title="S.No." style="width: 50px">S.No.</th>
+                                                <th title="Name" style="width: 200px" ng-click="sortGatePass('Name')">Name</th>
+                                                <th title="Address" style="width: 200px" ng-click="sortGatePass('Address')">Address</th>
+                                                <th title="Purpose" style="width: 130px" ng-click="sortGatePass('Purpose')">Purpose</th>
+                                                <th title="For" style="width: 100px">For</th>
+                                                <th title="In Time" style="width: 80px" ng-click="sortGatePass('InTime')">In Time</th>
+                                                <th title="Validity Time" style="width: 100px" ng-click="sortGatePass('ValidityTime')">Validity Time</th>
+                                                <th title="Out Time" style="width: 80px" ng-click="sortGatePass('OutTime')">Out Time</th>
+                                                <th title="LogDate" style="width: 100px" ng-click="sortGatePass('LogDate')">LogDate</th>
+                                                <th title="GatePassNo" style="width: 90px" ng-click="sortGatePass('GatePassNo')">GatePassNo</th>
+                                                <th title="User" style="width: 90px" >User</th>
+                                                <th title="Action" rowspan="2" class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll py-1" style="width: 90px;">
+                                                    <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                        <option value="" disabled selected>Action</option>
+                                                        <option value="save">Save Layout</option>
+                                                        <option value="reset">Reset Layout</option>
+                                                    </select>
+                                                </th>                                            
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="cl in GatePassList | filter:searchData.GatePass | itemsPerPage: perPage.GatePass |orderBy:sortKeys.GatePass:reverses.GatePass track by $index" current-page="currentPages.GatePass" pagination-id="GatePassPagination">
+                                                <td>
+                                                    {{$index+1}}
+                                                </td>
+                                                <td>{{cl.OthersName}}</td>
+                                                <td>{{cl.Address}}</td>
+                                                <td>{{cl.Purpose}}</td>
+                                                <td>
+                                                    {{cl.MeeTo}}
+                                                    @*<a class="p-1" href="#" ng-click="ShowInTime(cl)">
+                                {{cl.MeeTo}}
+                            </a>*@
+                                                </td>
+                                                <td>{{cl.InTime |timeFormat}}</td>
+                                                <td>{{cl.ValidityTime |timeFormat}}</td>
+                                                <td>{{cl.OutTime |timeFormat}}</td>
+                                                <td>{{cl.LogMiti}} {{cl.LogDateTime | timeFormat}}</td>
+                                                <td>
+                                                    {{cl.GatePassNo}}
+                                                </td>
+                                                <td>
+                                                    {{cl.UserName}}
+                                                </td>
+                                                <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="right:0;background-color:#ffffff!important;z-index:2">
+                                                    <a class="p-1" ng-show="cl.WillReturnBack==true && !cl.InTime" ng-click="ShowInTime(cl)">
+                                                        <i class="fas fa-save text-success"></i>
+                                                    </a>
+                                                    <a class="p-1" ng-click="Print(cl.TranId)">
+                                                        <i class="fas fa-print text-secondary"></i>
+                                                    </a>
+                                                    <a class="p-1" ng-click="DelGatePassById(cl)">
+                                                        <i class="fas fa-trash text-danger"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="GatePassPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+                <div id="enquiry-form">
+                    <!-- The time line -->
+                    <div class="timeline registration-form">
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="" style="border:2px solid #ececec">GatePass Information</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>For</label>
+                                                    <select ng-model-options="newGatePass.MeeTo"
+                                                            class="form-control form-control-sm select2"
+                                                            style="width: 100%" ng-model="newGatePass.MeeTo">
+                                                        <option ng-value="1"> Student </option>
+                                                        <option ng-value="2">  Employee </option>
+                                                        <option ng-value="3">Other</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!-- fields after clicking the radio button starts -->
+                                            <!-- meet to student field -->
+                                            <div class="col-sm-9 col-lg-9 col-md-9 mt-4"
+                                                 id="meet-student" ng-show="newGatePass.MeeTo==1">
+                                                <label class="sr-only"
+                                                       for="inlineFormInputGroup">Select Student</label>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px;  z-index: 1; " ng-model="newGatePass.SelectStudent">
+                                                        <option ng-repeat="ss in StudentSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newGatePass.SelectStudent}}">
+                                                            {{ss.text}}
+                                                        </option>
+                                                    </select>
+                                                    <select class="form-control select2 form-control-sm" all-student ng-model="newGatePass.StudentId" student-detail="newGatePass.StudentDetails" side-bar-data="newGatePass.SideBarData" search-by="newGatePass.SelectStudent">
+                                                    </select>
+
+                                                </div>
+                                            </div>
+
+                                            <!-- Field For meet Teacher -->
+                                            <div class="col-sm-8 col-lg-8 col-md-8 mt-4"
+                                                 id="meet-employee" ng-show="newGatePass.MeeTo==2">
+                                                <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px; z-index: 1; " ng-model="newGatePass.SelectEmployee">
+
+                                                        <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newGatePass.SelectEmployee}}">
+                                                            {{ss.text}}
+                                                        </option>
+                                                    </select>
+                                                    <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newGatePass.EmployeeId" employee-detail="newGatePass.EmployeeDetails" side-bar-data="newGatePass.EmpSideBarData" search-by="newGatePass.SelectEmployee">
+                                                    </select>
+                                                </div>
+
+                                            </div>
+                                            <!-- select for others -->
+                                            <div class="col-md-8" id="meet-others" ng-show="newGatePass.MeeTo==3">
+                                                <div class="form-group">
+                                                    <label for="">Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newGatePass.OthersName" />
+                                                </div>
+                                            </div>
+                                            <!-- fields after clicking radio button ends -->
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Purpose<span style="color:red">*</span></label>
+                                                    <textarea class="form-control form-control-sm" ng-model="newGatePass.Purpose" rows="1"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Out Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newGatePass.OutTime_TMP" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Validity Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newGatePass.ValidityTime_TMP" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">In Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newGatePass.InTime_TMP" />
+                                                </div>
+                                            </div>
+                                            @*<div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Will Return Back<span style="color:red">*</span></label>
+                                                        <input type="checkbox" class="form-control form-control-sm" ng-model="newGatePass.WillReturnBack" />
+                                                    </div>
+                                                </div>*@
+
+                                            <div class="col-md-3">
+                                                <div class="custom-control custom-checkbox mt-4">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="customCheckbox1111" ng-model="newGatePass.WillReturnBack">
+                                                    <label for="customCheckbox1111"
+                                                           class="custom-control-label">
+                                                        Will Return Back<span style="color:red">*</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Remarks</label>
+                                                    <textarea class="form-control form-control-sm" ng-model="newGatePass.Remarks" rows="1"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="time-label1">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button"
+                                        class="btn btn-sm btn-info"
+                                        id="back-to-list" ng-click="back_to_list()"
+                                        style="min-width: 90px">
+                                    Back to List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearGatePass()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateGatePass()">{{newGatePass.Mode}}</button>
+                            </span>
+                        </div>
+                        <!-- /.timeline-label -->
+                    </div>
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- Main content -->
+    <!-- /.content -->
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Update In Time</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 200px;">Name</th>
+                                    <th style="width: 100px;">Address</th>
+                                    <th style="width: 100px;">Purpose</th>
+                                    <th style="width: 150px;">Out Time</th>
+                                    <th style="width: 150px;">In Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{CurGatePass.OthersName}}</td>
+                                    <td>{{CurGatePass.Address}}</td>
+                                    <td>{{CurGatePass.Purpose}}</td>
+                                    <td>{{CurGatePass.OutTime |timeFormat}}</td>
+                                    <td><input type="time" class="form-control form-control-sm" ng-model="CurGatePass.InTime_TMP" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" ng-click="UpdateInTime()" style="min-width: 90px;">Update InTime</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+
+</div>

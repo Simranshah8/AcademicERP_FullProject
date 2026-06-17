@@ -1,0 +1,325 @@
+﻿<script src="~/jslib/OnlineClass/Studentattendance.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="StudentAttendanceController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active"
+                         id="pills-second"
+                         role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                        id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active"
+                                               id="home-tab"
+                                               data-toggle="tab"
+                                               href="#home"
+                                               role="tab"
+                                               aria-controls="home"
+                                               aria-selected="true">Classwise Attendance</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="profile-tab"
+                                               data-toggle="tab"
+                                               href="#profile"
+                                               role="tab"
+                                               aria-controls="profile"
+                                               aria-selected="false">Subjectwise Attendance</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <div class="tab-content" id="myTabContent">
+                            <!--Classwise Attendance Tab Starts -->
+                            <div class="tab-pane fade show active main-section"
+                                 id="home"
+                                 role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="class-attendence-section">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group row">
+                                                <label class="col-md-3 mt-1">Class</label>
+                                                <div class="col-md-9">
+                                                    <select class="form-control form-control-sm select2" ng-model="newClassAttendence.SelectedClass">
+                                                        <option ng-value="cl" ng-repeat="cl in ClassSectionList.SectionList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group row">
+                                                <label class="col-md-4 mt-1">For Date</label>
+                                                <div class="col-md-8">
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newClassAttendence.InitialDate_TMP" date-detail="newClassAttendence.InitialDateDet" @*confirm-action="GetDateWiseAttendance()" *@ after-days="0" before-days="360" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group row">
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="GetDateWiseAttendance()">Load</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ClasswiseAttendance">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ClasswiseAttendance">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.ClasswiseAttendance">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table-classwise'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-classwise').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-classwise').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-classwise').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-classwise').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#main-table-classwise'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table id="main-table-classwise" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 0; z-index: 2; width: 50px;">S.No.</th>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 70px; z-index: 2; width: 80px;">RegdNo.</th>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 170px; z-index: 2; width: 200px;">Student Name</th>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 370px; z-index: 2; width: 60px;">Roll NO.</th>
+                                                        <th colspan="1" class="text-center align-middle" style="width: 100px;" ng-repeat="sb in newClassAttendence.SubjectList">Period {{sb.id}}</th>
+                                                        <th rowspan="2" class="text-center align-middle" style="width: 100px;">Total Period</th>
+                                                        <th rowspan="2" class="text-center align-middle" style="width: 100px;">Attendence</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th class="text-center align-middle" ng-repeat="sb in newClassAttendence.SubjectList">{{sb.text}}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in newClassAttendence.StudentList | filter:searchData.ClasswiseAttendance | itemsPerPage: perPage.ClasswiseAttendance" current-page="currentPages.ClasswiseAttendance" pagination-id="ClassAttendencePagination">
+                                                        <td class="cstm-sticky" style="width: 70px; left: 0; z-index: 1;">{{cl.SNo}}</td>
+                                                        <td class="cstm-sticky" style="width: 100px; left: 70px; z-index: 1; background-color: #fff">{{cl.RegNo}}</td>
+                                                        <td class="cstm-sticky" style="width: 200px; left: 170px; z-index: 1; background-color: #fff">{{cl.Name}}</td>
+                                                        <td class="cstm-sticky" style="width: 100px; left: 370px; z-index: 1; background-color: #fff">{{cl.RollNo}}</td>
+                                                        <td ng-repeat="sb in cl.SubjectDetailsColl">{{sb.Attendance}}</td>
+                                                        <td>{{cl.SubjectDetailsColl.length}}</td>
+                                                        <td>{{cl.TotalAttendance}}</td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="ClassAttendencePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Classwise Attendance Tab Ends -->
+                            <!--Subjectwise Attendance Tab Starts -->
+                            <div class="tab-pane fade main-section"
+                                 id="profile"
+                                 role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="subject-attendence-section">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectAttendence.SelectedClass" ng-change="GetClassWiseSubMap()">
+                                                    <option ng-value="cl" ng-repeat="cl in ClassSectionList.SectionList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Subject</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectAttendence.SubjectId">
+                                                    <option ng-value="s.SubjectId" ng-repeat="s in newSubjectAttendence.SubjectList">{{s.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">From Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newSubjectAttendence.FromDate_TMP" confirm-action="validateDates('fromDate')" date-detail="newSubjectAttendence.FromDateDet">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">To Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newSubjectAttendence.ToDate_TMP" confirm-action="validateDates('toDate')" date-detail="newSubjectAttendence.ToDateDet">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <button class="btn btn-sm btn-success mt-4" style="min-width:90px;" ng-click="GetSubjectWiseAttendance()">Load</button>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.SubjectwiseAttendance">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.SubjectwiseAttendance">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.SubjectwiseAttendance">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table-subjectwise'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-subjectwise').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-subjectwise').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-subjectwise').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-subjectwise').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#main-table-subjectwise'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table id="main-table-subjectwise" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 0; z-index: 2; width: 70px;">S.No.</th>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 70px; z-index: 2; width: 100px;">RegdNo.</th>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 170px; z-index: 2; width: 200px;">Name</th>
+                                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 370px; z-index: 2; width: 100px;">Roll NO.</th>
+                                                        <th colspan="1" class="text-center align-middle" style="width: 50px;" ng-repeat="sb in newSubjectAttendence.DateList">{{sb.shorttext}}</th>
+                                                        <th rowspan="2" class="text-center align-middle" style="width: 120px;">Total Attendance</th>
+                                                        <th rowspan="2" class="text-center align-middle" style="width: 120px;">Attendence %</th>
+                                                        <th rowspan="2" class="text-center align-middle" style="width: 100px;">Abesnt %</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th class="text-center align-middle" ng-repeat="sb in newSubjectAttendence.DateList">{{sb.forDate | date:'EEE'}}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in newSubjectAttendence.StudentList  | filter:searchData.SubjectwiseAttendance | itemsPerPage: perPage.SubjectwiseAttendance" current-page="currentPages.SubjectwiseAttendance" pagination-id="SubjectAttendencePagination">
+                                                        <td class="align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 1;">{{cl.SNo}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 100px; left: 70px; z-index: 1; background-color: #fff">{{cl.RegNo}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 200px; left: 170px; z-index: 1; background-color: #fff">{{cl.Name}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 100px; left: 370px; z-index: 1; background-color: #fff">{{cl.RollNo}}</td>
+                                                        <td ng-repeat="sb in cl.SubjectDetailsColl">{{sb.Attendance}}</td>
+                                                        <td>{{cl.SubjectDetailsColl.length}}</td>
+                                                        <td>{{cl.AttendancePer |number:2}}</td>
+                                                        <td>{{cl.AbsentPer |number:2}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="SubjectAttendencePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!--Subjectwise Attendance Tab Starts -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

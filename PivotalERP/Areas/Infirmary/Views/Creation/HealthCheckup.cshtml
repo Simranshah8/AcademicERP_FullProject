@@ -1,0 +1,423 @@
+﻿<style>
+    .page-button-disabled {
+        z-index: 2;
+        color: #0056b3;
+        text-decoration: none;
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+    }
+    .lab-parameter-delete {
+        display: none;
+    }
+</style>
+<script src="~/jslib/Infirmary/HealthCheckup.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="HealthCheckupController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                                               aria-controls="home" aria-selected="true">CheckUp Group</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                                               aria-controls="profile" aria-selected="false">Test Name</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <!-- TEst Group Starts -->
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div class="card py-2 px-0">
+                                    <div id="CheckupGrouptable">
+                                        <header class="row">
+                                            <div class="col-md-7">  
+                                                <div class="clearfix">
+                                                    <form class="form-inline mb-2">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.HealthCheckup">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.HealthCheckup">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.HealthCheckup" />
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#CheckupGroup'" sheet-name="'CheckupGroupList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#CheckupGroup').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#CheckupGroup'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success" ng-click="ClearCheckupGroup()"
+                                                        id="add-CheckupGroup-btn"
+                                                        style="min-width: 90px">
+                                                    <i class="fas fa-plus w-t"></i> Add Checkup Group
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: 410px;">
+                                            <table id="CheckupGroup" class="main-table table table-sm table-bordered bg-white" cellspacing="0" width="100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:50px">S.No.</th>
+                                                        <th style="width:200px">Name</th>
+                                                        <th style="width:400px">Description</th>
+                                                        <th style="width:162px">Student Infirmary OrderNo</th>
+                                                        <th style="width:170px">Employee Infirmary OrderNo</th>
+                                                        <th style="width:80px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>                                                   
+                                                    <tr dir-paginate="cl in CheckupGroupList | filter:searchData.HealthCheckup | itemsPerPage: perPage.HealthCheckup" current-page="currentPages.HealthCheckup" pagination-id="HealthCheckupPagination">
+                                                        <td> {{ $index+1}} </td>
+                                                        <td> {{ cl.Name }} </td>
+                                                        <td> {{ cl.Description }} </td>
+                                                        <td> {{ cl.StudentInfirmaryOrderNo }} </td>
+                                                        <td> {{ cl.EmployeeInfirmaryOrderNo }} </td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetCheckupGroupById( cl ) ">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelCheckupGroupById( cl ) ">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="HealthCheckupPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                    <div id="groupform">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="">Group Name</label> <span style="color:red">*</span>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newCheckupGroup.Name" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Description</label>
+                                                            <textarea class="form-control form-control-sm" rows="1" ng-model="newCheckupGroup.Description"></textarea>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <div class="form-group mt-3">
+                                                            <label class="checkbox-wrap">
+                                                                Show in Student Infirmary 
+                                                                <input type="checkbox" ng-model="newCheckupGroup.ShowinStudentInfirmary" />
+                                                                <span class="checkmark"></span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" ng-show="newCheckupGroup.ShowinStudentInfirmary == true">
+                                                        <div class="form-group">
+                                                            <label for="">Student Infirmary Order No</label> 
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newCheckupGroup.StudentInfirmaryOrderNo" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <div class="form-group mt-3">
+                                                            <label class="checkbox-wrap">
+                                                                Show in Employee Infirmary 
+                                                                <input type="checkbox" ng-model="newCheckupGroup.ShowinEmployeeInfirmary" />
+                                                                <span class="checkmark"></span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" ng-show="newCheckupGroup.ShowinEmployeeInfirmary == true">
+                                                        <div class="form-group">
+                                                            <label for="">Employee Infirmary Order No</label> 
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newCheckupGroup.EmployeeInfirmaryOrderNo" />
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-info"
+                                                        id="back-CheckupGroup-list"
+                                                        style="min-width: 90px" ng-click = "GetAllCheckupGroupListPage( 1 ) " >
+                                                    Back to List
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearCheckupGroup()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateCheckupGroup()">{{newCheckupGroup.Mode}}</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <div class="card py-2 px-0">
+                                    <div id="Nametable">
+                                        <header class="row">
+                                            <div class="col-md-7"> 
+                                                <div class="clearfix">
+                                                    <form class="form-inline mb-2">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.TestName">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.TestName">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.TestName" />
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#TestName'" sheet-name="'TestNameList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#TestName').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#TestName'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success" ng-click="ClearTestName()"
+                                                        id="add-testname-btn"
+                                                        style="min-width: 90px">
+                                                    <i class="fas fa-plus w-t"></i> Add Test Name
+                                                </button>
+                                            </div>
+                                        </header>
+
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table id="TestName" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 50px;">S.No.</th>
+                                                        <th style="width: 200px;">Test Name</th>
+                                                        <th style="width: 200px;"> CheckUp Group</th>
+                                                        <th style="width: 300px;">Description</th>
+                                                        <th style="width: 140px;">Text Input Type</th>
+                                                        <th style="width: 80px;">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in TestNameList | filter:searchData.TestName | itemsPerPage: perPage.TestName" current-page="currentPages.TestName" pagination-id="TestNamePagination">
+                                                        <td> {{ cl.OrderNo }} </td>
+                                                        <td> {{ cl.Name }} </td>
+                                                        <td> {{ cl.CheckUpGroupName }} </td>
+                                                        <td> {{ cl.Description }} </td>
+                                                        <td> {{ cl.InputTextType }} </td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click=" GetTestNameById( cl ) ">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click=" DelTestNameById( cl ) ">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="TestNamePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+
+                                    <div id="Nameform">
+                                        <div id="groupform">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="">Test Name</label>  <span style="color:red">*</span>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTestName.Name" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>CheckUp Group</label> <span style="color:red">*</span>
+                                                                <select class="form-control  form-control-sm" ng-model="newTestName.CheckupGroupId">
+                                                                    <option ng-repeat="s in CheckupGroupList" ng-value="s.CheckupGroupId" ng-selected="newTestName.CheckupGroupId==s.CheckupGroupId">{{s.Name}}</option>
+                                                                </select>
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-group">
+                                                                <label for="">Order No</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newTestName.OrderNo" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-group">
+                                                                <label>Input Text Type</label>                                                            
+                                                                <select class="form-control  form-control-sm" ng-model="newTestName.InputTextType">
+                                                                    <option ng-repeat="s in InputTypeList" ng-value="s.id" ng-selected="newTestName.InputTextType==s.id">{{s.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-group">
+                                                                <label for="">Sample Collection</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTestName.SampleCollection" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-group">
+                                                                <label for="">Sample (Unit/Volume)</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newTestName.SampleUnit" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Description</label>
+                                                                <textarea class="form-control form-control-sm" rows="1" ng-model="newTestName.Description"></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <label><b>Lab Value Parameters</b></label>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll mt-2" style="max-height:300px!important;">
+                                                <table id="TestName" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 60px;">S.No.</th>
+                                                            <th style="width: 200px;">Name</th>
+                                                            <th style="width: 110px;">Default Value</th>
+                                                            <th style="width: 110px;">Normal Range</th>
+                                                            <th style="width: 110px;">Lower Range</th>
+                                                            <th style="width: 110px;">Upper Range</th>
+                                                            <th style="width: 200px;">Group Name</th>
+                                                            <th style="width: 200px;">Remarks</th>
+                                                            <th style="width: 80px;">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="L in newTestName.TestNameLabDetailColl">
+                                                            <td> {{ $index + 1 }} </td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="L.Name" /></td>
+                                                            <td><input type="number" class="form-control form-control-sm" ng-model="L.DefaultValue" /></td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="L.NormalRange" /></td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="L.LowerRange" /></td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="L.UpperRange" /></td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="L.GroupName" /></td>
+                                                            <td><textarea class="form-control form-control-sm" rows="1" ng-model="L.Remarks"></textarea></td>
+                                                            <td>
+                                                                <a class="p-1" ng-click="AddLabValueDetails($index)">
+                                                                    <i class="fas fa-plus text-secondary"></i>
+                                                                </a>
+                                                                <a class="p-1" ng-click="delLabValueDetails($index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <!-- table end -->
+                                            </div>
+                                            <div class="time-label">
+                                                <span class="d-block border-0 p-3 text-center">
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-info"
+                                                            id="back-testname-list"
+                                                            style="min-width: 90px">
+                                                        Back to List
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearTestName()">Reset</button>
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateTestName()">{{newTestName.Mode}}</button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

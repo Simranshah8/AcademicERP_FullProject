@@ -1,0 +1,3235 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Dynamic.DataAccess.Global;
+
+namespace AcademicLib.DA.Exam.Transaction
+{
+    internal class MarksEntryDB
+    {
+        DataAccessLayer1 dal = null;
+        public MarksEntryDB(string hostName, string dbName)
+        {
+            dal = new DataAccessLayer1(hostName, dbName);
+        }
+
+        public ResponeValues IsValidForMarkEntry(int UserId, int ExamTypeId)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            try
+            {
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@ExamTypeId",  ExamTypeId);                
+                cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+                cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+                cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
+                cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+                cmd.CommandText = "usp_IsValidForMarkEntryFromAPI";
+                cmd.ExecuteNonQuery();
+                if (!(cmd.Parameters[2].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[2].Value);
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[3].Value);
+                  
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            { 
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public ResponeValues IsValidForReMarkEntry(int UserId, int ExamTypeId,int ReExamTypeId)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            try
+            {
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+                cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+                cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+                cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
+                cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+                cmd.CommandText = "usp_IsValidForReMarkEntryFromAPI";
+                cmd.Parameters.AddWithValue("@ReExamTypeId", ReExamTypeId);
+                cmd.ExecuteNonQuery();
+                if (!(cmd.Parameters[2].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[2].Value);
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[3].Value);
+
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+        public ResponeValues SaveMarkEntry(int UserId,AcademicLib.API.Teacher.MarkEntryCollections dataColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            dal.BeginTransaction();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;           
+            try
+            {
+                foreach (var beData in dataColl)
+                {
+                    if(beData.ExamTypeId>0 && beData.SubjectId > 0)
+                    {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@UserId", UserId);
+                        cmd.Parameters.AddWithValue("@ExamTypeId", beData.ExamTypeId);
+                        cmd.Parameters.AddWithValue("@StudentId", beData.StudentId);
+                        cmd.Parameters.AddWithValue("@SubjectId", beData.SubjectId);
+                        cmd.Parameters.AddWithValue("@Remarks", beData.Remarks);
+                        cmd.Parameters.AddWithValue("@ObtainMarkTH", beData.ObtainMarkTH);
+                        cmd.Parameters.AddWithValue("@ObtainMarkPR", beData.ObtainMarkPR);
+                        cmd.Parameters.AddWithValue("@ObtainMark", beData.ObtainMark);
+                        cmd.Parameters.AddWithValue("@OM", beData.OM);
+                        cmd.Parameters.AddWithValue("@OM_TH", beData.OM_TH);
+                        cmd.Parameters.AddWithValue("@OM_PR", beData.OM_PR);
+                        cmd.Parameters.AddWithValue("@O_Grade", beData.O_Grade);
+                        cmd.Parameters.AddWithValue("@IsAbsentTH", beData.IsAbsentTH);
+                        cmd.Parameters.AddWithValue("@IsAbsentPR", beData.IsAbsentPR);
+                        cmd.Parameters.AddWithValue("@IsAbsent", beData.IsAbsent);
+                        cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+                        cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+                        cmd.Parameters[15].Direction = System.Data.ParameterDirection.Output;
+                        cmd.Parameters[16].Direction = System.Data.ParameterDirection.Output;
+                        cmd.CommandText = "usp_AddMarkEntryFromAPI";
+                        cmd.Parameters.AddWithValue("@SubjectRemarks", beData.SubjectRemarks);
+                        cmd.ExecuteNonQuery();
+                        if (!(cmd.Parameters[15].Value is DBNull))
+                            resVal.ResponseMSG = Convert.ToString(cmd.Parameters[15].Value);
+
+                        if (!(cmd.Parameters[16].Value is DBNull))
+                            resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[16].Value);
+
+                        if (!resVal.IsSuccess)
+                            return resVal;
+                    }
+                    
+                }
+                dal.CommitTransaction();
+                resVal.IsSuccess = true;
+                resVal.ResponseMSG = "MarkEntry Update Success";
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public ResponeValues SaveStudentWiseComment(int UserId, AcademicLib.API.Teacher.StudentWiseCommentCollections dataColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            dal.BeginTransaction();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            try
+            {
+                foreach (var beData in dataColl)
+                {
+                    if (beData.ExamTypeId > 0 && beData.StudentId > 0)
+                    {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@UserId", UserId);
+                        cmd.Parameters.AddWithValue("@ExamTypeId", beData.ExamTypeId);
+                        cmd.Parameters.AddWithValue("@StudentId", beData.StudentId);
+                        cmd.Parameters.AddWithValue("@Remarks", beData.Comment);  
+                        cmd.CommandText = "usp_UpdateStudentComment"; 
+                        cmd.ExecuteNonQuery();                      
+                    }
+
+                }
+                dal.CommitTransaction();
+                resVal.IsSuccess = true;
+                resVal.ResponseMSG = "Comment Update Success";
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public ResponeValues SaveReMarkEntry(int UserId, AcademicLib.API.Teacher.MarkEntryCollections dataColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            dal.BeginTransaction();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            try
+            {
+                foreach (var beData in dataColl)
+                {
+                    if (beData.ExamTypeId > 0 && beData.SubjectId > 0)
+                    {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@UserId", UserId);
+                        cmd.Parameters.AddWithValue("@ExamTypeId", beData.ExamTypeId);
+                        cmd.Parameters.AddWithValue("@StudentId", beData.StudentId);
+                        cmd.Parameters.AddWithValue("@SubjectId", beData.SubjectId);
+                        cmd.Parameters.AddWithValue("@Remarks", beData.Remarks);
+                        cmd.Parameters.AddWithValue("@ObtainMarkTH", beData.ObtainMarkTH);
+                        cmd.Parameters.AddWithValue("@ObtainMarkPR", beData.ObtainMarkPR);
+                        cmd.Parameters.AddWithValue("@ObtainMark", beData.ObtainMark);
+                        cmd.Parameters.AddWithValue("@OM", beData.OM);
+                        cmd.Parameters.AddWithValue("@OM_TH", beData.OM_TH);
+                        cmd.Parameters.AddWithValue("@OM_PR", beData.OM_PR);
+                        cmd.Parameters.AddWithValue("@O_Grade", beData.O_Grade);
+                        cmd.Parameters.AddWithValue("@IsAbsentTH", beData.IsAbsentTH);
+                        cmd.Parameters.AddWithValue("@IsAbsentPR", beData.IsAbsentPR);
+                        cmd.Parameters.AddWithValue("@IsAbsent", beData.IsAbsent);
+                        cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+                        cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+                        cmd.Parameters[15].Direction = System.Data.ParameterDirection.Output;
+                        cmd.Parameters[16].Direction = System.Data.ParameterDirection.Output;
+                        cmd.CommandText = "usp_AddReMarkEntryFromAPI";
+                        cmd.Parameters.AddWithValue("@ReExamTypeId", beData.ReExamTypeId);
+                        cmd.ExecuteNonQuery();
+                        if (!(cmd.Parameters[15].Value is DBNull))
+                            resVal.ResponseMSG = Convert.ToString(cmd.Parameters[15].Value);
+
+                        if (!(cmd.Parameters[16].Value is DBNull))
+                            resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[16].Value);
+
+                        if (!resVal.IsSuccess)
+                            return resVal;
+                    }
+
+                }
+                dal.CommitTransaction();
+                resVal.IsSuccess = true;
+                resVal.ResponseMSG = "MarkEntry Update Success";
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public ResponeValues SaveExamWiseBlockMarkSheet(int UserId,int AcademicYearId, int ClassId,int? SectionId,int ExamTypeId, BE.Exam.Transaction.ExamWiseBlockMarkSheetCollections dataColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            dal.BeginTransaction();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            try
+            {
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@ClassId", ClassId);
+                cmd.Parameters.AddWithValue("@SectionId", SectionId);
+                cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+                cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+                cmd.CommandText = "usp_DelExamWiseBlockMarkSheet";
+                cmd.ExecuteNonQuery();
+
+                foreach (var beData in dataColl)
+                {
+                    if (beData.ExamTypeId > 0 && beData.StudentId > 0)
+                    {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@UserId", UserId);
+                        cmd.Parameters.AddWithValue("@ExamTypeId", beData.ExamTypeId);
+                        cmd.Parameters.AddWithValue("@StudentId", beData.StudentId);
+                        cmd.Parameters.AddWithValue("@Message", beData.Message);                   
+                        cmd.CommandText = "usp_AddExamWiseBlockMarkSheet";
+                        cmd.ExecuteNonQuery();
+                    }
+
+                }
+                dal.CommitTransaction();
+                resVal.IsSuccess = true;
+                resVal.ResponseMSG = "ExamWise Blocked Marksheet Update Success";
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public AcademicLib.BE.Exam.Transaction.ExamWiseBlockMarkSheetCollections getExamWiseBlockedMarksheet(int UserId, int AcademicYearId, int ClassId, int? SectionId, int ExamTypeId)
+        {
+            AcademicLib.BE.Exam.Transaction.ExamWiseBlockMarkSheetCollections dataColl = new BE.Exam.Transaction.ExamWiseBlockMarkSheetCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_GetExamWiseBlockMarkSheet";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.BE.Exam.Transaction.ExamWiseBlockMarkSheet beData = new BE.Exam.Transaction.ExamWiseBlockMarkSheet();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ClassId = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.SectionId = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.RollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.Name = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.IsBlocked = reader.GetBoolean(6);
+                    if (!(reader[7] is DBNull)) beData.Message = reader.GetString(7);
+                    beData.ExamTypeId = ExamTypeId;
+
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public ResponeValues SaveExamGroupWiseBlockMarkSheet(int UserId, int AcademicYearId, int ClassId, int? SectionId, int ExamTypeId, BE.Exam.Transaction.ExamWiseBlockMarkSheetCollections dataColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            dal.BeginTransaction();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            try
+            {
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@ClassId", ClassId);
+                cmd.Parameters.AddWithValue("@SectionId", SectionId);
+                cmd.Parameters.AddWithValue("@ExamTypeGroupId", ExamTypeId);
+                cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+                cmd.CommandText = "usp_DelExamGroupWiseBlockMarkSheet";
+                cmd.ExecuteNonQuery();
+
+                foreach (var beData in dataColl)
+                {
+                    if (beData.ExamTypeId > 0 && beData.StudentId > 0)
+                    {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@UserId", UserId);
+                        cmd.Parameters.AddWithValue("@ExamTypeGroupId", beData.ExamTypeId);
+                        cmd.Parameters.AddWithValue("@StudentId", beData.StudentId);
+                        cmd.Parameters.AddWithValue("@Message", beData.Message);
+                        cmd.CommandText = "usp_AddExamGroupWiseBlockMarkSheet";
+                        cmd.ExecuteNonQuery();
+                    }
+
+                }
+                dal.CommitTransaction();
+                resVal.IsSuccess = true;
+                resVal.ResponseMSG = "ExamGroupWise Blocked Marksheet Update Success";
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                dal.RollbackTransaction();
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public AcademicLib.BE.Exam.Transaction.ExamWiseBlockMarkSheetCollections getExamGroupWiseBlockedMarksheet(int UserId, int AcademicYearId, int ClassId, int? SectionId, int ExamTypeId)
+        {
+            AcademicLib.BE.Exam.Transaction.ExamWiseBlockMarkSheetCollections dataColl = new BE.Exam.Transaction.ExamWiseBlockMarkSheetCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeGroupId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_GetExamGroupWiseBlockMarkSheet";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.BE.Exam.Transaction.ExamWiseBlockMarkSheet beData = new BE.Exam.Transaction.ExamWiseBlockMarkSheet();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ClassId = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.SectionId = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.RollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.Name = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.IsBlocked = reader.GetBoolean(6);
+                    if (!(reader[7] is DBNull)) beData.Message = reader.GetString(7);
+                    beData.ExamTypeId = ExamTypeId;
+
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+
+        public AcademicLib.API.Teacher.StudentForMarkEntryCollections getStudentForMarkEntry(int UserId,int AcademicYearId, int ClassId,int? SectionId,int ExamTypeId,int SubjectId, bool FilterSection, int? SemesterId = null, int? ClassYearId = null, int? BatchId = null)
+        {
+            AcademicLib.API.Teacher.StudentForMarkEntryCollections dataColl = new API.Teacher.StudentForMarkEntryCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
+            cmd.Parameters.AddWithValue("@FilterSection", FilterSection);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.CommandText = "usp_GetStudentListForMarkEntrySubjectWise";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.API.Teacher.StudentForMarkEntry beData = new API.Teacher.StudentForMarkEntry();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.AutoNumber = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.RollNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.Name = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.SymbolNo = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.CRTH = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.CRPR = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.FMTH = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.FMPR = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.PMTH = Convert.ToDouble(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.PMPR = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.PaperType = reader.GetInt32(14);
+                    if (!(reader[15] is DBNull)) beData.ObtainMarkTH = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.ObtainMarkPR = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.Remarks = reader.GetString(17);
+                    if (!(reader[18] is DBNull)) beData.SubjectRemarks = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.ClassName = reader.GetString(19);
+                    if (!(reader[20] is DBNull)) beData.SectionName = reader.GetString(20);
+
+
+                    try
+                    {
+                        double thVal = 0, prVal = 0;
+                        double.TryParse(beData.ObtainMarkTH, out thVal);
+                        if (thVal != 0)
+                            beData.ObtainMarkTH = thVal.ToString();
+
+                        double.TryParse(beData.ObtainMarkPR, out prVal);
+                        if (prVal != 0)
+                            beData.ObtainMarkPR = prVal.ToString();
+
+                        if (beData.ObtainMarkTH == "0")
+                            beData.ObtainMarkTH = "";
+
+                        if (beData.ObtainMarkPR == "0")
+                            beData.ObtainMarkPR = "";
+                    }
+                    catch { }
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Teacher.StudentForMarkEntryCollections getStudentForReMarkEntry(int UserId, int ClassId, int? SectionId, int ExamTypeId,int ReExamTypeId, int SubjectId)
+        {
+            AcademicLib.API.Teacher.StudentForMarkEntryCollections dataColl = new API.Teacher.StudentForMarkEntryCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@ReExamTypeId", ReExamTypeId);
+            cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
+            cmd.CommandText = "usp_GetStudentListForReMarkEntrySubjectWise";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.API.Teacher.StudentForMarkEntry beData = new API.Teacher.StudentForMarkEntry();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.AutoNumber = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.RollNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.Name = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.SymbolNo = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.CRTH = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.CRPR = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.FMTH = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.FMPR = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.PMTH = Convert.ToDouble(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.PMPR = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.PaperType = reader.GetInt32(14);
+                    if (!(reader[15] is DBNull)) beData.ObtainMarkTH = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.ObtainMarkPR = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.Remarks = reader.GetString(17);
+                    if (!(reader[18] is DBNull)) beData.SubjectRemarks = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.ClassName = reader.GetString(19);
+                    if (!(reader[20] is DBNull)) beData.SectionName = reader.GetString(20);
+
+                    try
+                    {
+                        double thVal = 0, prVal = 0;
+                        double.TryParse(beData.ObtainMarkTH, out thVal);
+                        if (thVal != 0)
+                            beData.ObtainMarkTH = thVal.ToString();
+
+                        double.TryParse(beData.ObtainMarkPR, out prVal);
+                        if (prVal != 0)
+                            beData.ObtainMarkPR = prVal.ToString();
+
+                        if (beData.ObtainMarkTH == "0")
+                            beData.ObtainMarkTH = "";
+
+                        if (beData.ObtainMarkPR == "0")
+                            beData.ObtainMarkPR = "";
+                    }
+                    catch { }
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public ResponeValues resetSubjectMapping(int UserId, int AcademicYearId)
+        {
+            ResponeValues dataColl = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            //cmd.Parameters.AddWithValue("@UserId", UserId);
+          //  cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId); 
+            cmd.CommandText = "usp_ReUpdateAllSubjectMapping";
+            try
+            {
+                cmd.ExecuteNonQuery();
+               // cmd.CommandText = "usp_ReInsertSubjectMappingStudentWise";
+               // cmd.ExecuteNonQuery();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Teacher.StudentForMarkEntryCollections getStudentForMarkEntry(int UserId,int AcademicYearId, int ClassId, int? SectionId, int ExamTypeId,bool FilterSection)
+        {
+            AcademicLib.API.Teacher.StudentForMarkEntryCollections dataColl = new API.Teacher.StudentForMarkEntryCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@FilterSection", FilterSection);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_GetStudentListForMarkEntryClassWise";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.API.Teacher.StudentForMarkEntry beData = new API.Teacher.StudentForMarkEntry();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.AutoNumber = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.RollNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.Name = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.SymbolNo = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.CRTH = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.CRPR = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.FMTH = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.FMPR = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.PMTH = Convert.ToDouble(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.PMPR = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.PaperType = reader.GetInt32(14);
+                    if (!(reader[15] is DBNull)) beData.ObtainMarkTH = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.ObtainMarkPR = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.SubjectId = reader.GetInt32(17);
+                    if (!(reader[18] is DBNull)) beData.Remarks = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.SubjectRemarks = reader.GetString(19);
+                    if (!(reader[20] is DBNull)) beData.ClassName = reader.GetString(20);
+                    if (!(reader[21] is DBNull)) beData.SectionName = reader.GetString(21);
+                    try
+                    {
+                        double thVal = 0, prVal = 0;
+                        double.TryParse(beData.ObtainMarkTH, out thVal);
+                        if (thVal != 0)
+                            beData.ObtainMarkTH = thVal.ToString();
+
+                        double.TryParse(beData.ObtainMarkPR, out prVal);
+                        if (prVal != 0)
+                            beData.ObtainMarkPR = prVal.ToString();
+
+                        if (beData.ObtainMarkTH == "0")
+                            beData.ObtainMarkTH = "";
+
+                        if (beData.ObtainMarkPR == "0")
+                            beData.ObtainMarkPR = "";
+                    }
+                    catch { }
+
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Teacher.StudentForMarkEntryCollections getStudentForReMarkEntry(int UserId, int ClassId, int? SectionId, int ExamTypeId,int ReExamTypeId)
+        {
+            AcademicLib.API.Teacher.StudentForMarkEntryCollections dataColl = new API.Teacher.StudentForMarkEntryCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@ReExamTypeId", ReExamTypeId);
+            cmd.CommandText = "usp_GetStudentListForReMarkEntryClassWise";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.API.Teacher.StudentForMarkEntry beData = new API.Teacher.StudentForMarkEntry();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.AutoNumber = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.RollNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.Name = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.SymbolNo = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.CRTH = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.CRPR = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.FMTH = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.FMPR = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.PMTH = Convert.ToDouble(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.PMPR = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.PaperType = reader.GetInt32(14);
+                    if (!(reader[15] is DBNull)) beData.ObtainMarkTH = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.ObtainMarkPR = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.SubjectId = reader.GetInt32(17);
+                    if (!(reader[18] is DBNull)) beData.Remarks = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.SubjectRemarks = reader.GetString(19);
+                    if (!(reader[20] is DBNull)) beData.ClassName = reader.GetString(20);
+                    if (!(reader[21] is DBNull)) beData.SectionName = reader.GetString(21);
+                    try
+                    {
+                        double thVal = 0, prVal = 0;
+                        double.TryParse(beData.ObtainMarkTH, out thVal);
+                        if (thVal != 0)
+                            beData.ObtainMarkTH = thVal.ToString();
+
+                        double.TryParse(beData.ObtainMarkPR, out prVal);
+                        if (prVal != 0)
+                            beData.ObtainMarkPR = prVal.ToString();
+
+                        if (beData.ObtainMarkTH == "0")
+                            beData.ObtainMarkTH = "";
+
+                        if (beData.ObtainMarkPR == "0")
+                            beData.ObtainMarkPR = "";
+                    }
+                    catch { }
+
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public ResponeValues SaveUpdate(AcademicLib.BE.Exam.Transaction.MarksEntry beData, bool isModify)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@ClassId", beData.ClassId);
+            cmd.Parameters.AddWithValue("@TeacherId", beData.TeacherId);
+            cmd.Parameters.AddWithValue("@TestDate", beData.TestDate);
+            cmd.Parameters.AddWithValue("@IsColumnwiseFocus", beData.IsColumnwiseFocus);
+            cmd.Parameters.AddWithValue("@SubjectId", beData.SubjectId);
+            cmd.Parameters.AddWithValue("@FullMarksTH", beData.FullMarksTH);
+            cmd.Parameters.AddWithValue("@FullMarksPR", beData.FullMarksPR);
+            cmd.Parameters.AddWithValue("@PassMarksTH", beData.PassMarksTH);
+            cmd.Parameters.AddWithValue("@PassMarksPR", beData.PassMarksPR);
+            //
+            cmd.Parameters.AddWithValue("@UserId", beData.CUserId);
+            cmd.Parameters.AddWithValue("@EntityId", beData.EntityId);
+            cmd.Parameters.AddWithValue("@MarksEntryId", beData.MarksEntryId);
+            if (isModify)
+            {
+                cmd.CommandText = "usp_UpdateMarksEntry";
+            }
+            else
+            {
+                cmd.Parameters[11].Direction = System.Data.ParameterDirection.Output;
+                cmd.CommandText = "usp_AddMarksEntry";
+            }
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.Parameters.Add("@ErrorNumber", System.Data.SqlDbType.Int);
+            cmd.Parameters[12].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[13].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[14].Direction = System.Data.ParameterDirection.Output;
+
+            //cmd.Parameters.AddWithValue("@StartMonth", beData.StartMonth);
+            //cmd.Parameters.AddWithValue("@EndMonth", beData.EndMonth);
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+
+                if (!(cmd.Parameters[11].Value is DBNull))
+                    resVal.RId = Convert.ToInt32(cmd.Parameters[11].Value);
+
+                if (!(cmd.Parameters[12].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[12].Value);
+
+                if (!(cmd.Parameters[13].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[13].Value);
+
+                if (!(cmd.Parameters[14].Value is DBNull))
+                    resVal.ErrorNumber = Convert.ToInt32(cmd.Parameters[14].Value);
+
+                if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
+                    resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
+                if (resVal.RId > 0 && resVal.IsSuccess)
+                {
+                    SaveMarksEntryDetails(beData.CUserId, resVal.RId, beData.MarksEntryDetailsColl);
+                }
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+        private void SaveMarksEntryDetails(int UserId, int StudentId, List<BE.Exam.Transaction.MarksEntryDetails> beDataColl)
+        {
+            if (beDataColl == null || beDataColl.Count == 0 || StudentId == 0)
+                return;
+
+            foreach (BE.Exam.Transaction.MarksEntryDetails beData in beDataColl)
+            {
+
+                System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@MarksEntryId", beData.MarksEntryId);
+                cmd.Parameters.AddWithValue("@StudentId", beData.StudentId);
+                cmd.Parameters.AddWithValue("@ObtainMarksTH", beData.ObtainMarksTH);
+                cmd.Parameters.AddWithValue("@ObtainMarksPR", beData.ObtainMarksPR);
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "usp_AddMarksEntryDetails";
+                cmd.ExecuteNonQuery();
+            }
+
+        }
+
+        public ResponeValues PublishedExamResult(int UserId,int AcademicYearId, int ExamTypeId,string ClassIdColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@ClassIdColl", ClassIdColl);
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.CommandText = "usp_PublishedResult";
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            try
+            {
+                cmd.ExecuteNonQuery();
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[3].Value);
+
+                if (!(cmd.Parameters[4].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[4].Value);
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public ResponeValues PublishedExamGroupResult(int UserId,int AcademicYearId, int ExamTypeGroupId,int? CurExamTypeId, string ClassIdColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ExamTypeGroupId", ExamTypeGroupId);
+            cmd.Parameters.AddWithValue("@ClassIdColl", ClassIdColl);
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.CommandText = "usp_PublishedGroupResult";
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@CurrentExamTypeId", CurExamTypeId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            try
+            {
+                cmd.ExecuteNonQuery();
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[3].Value);
+
+                if (!(cmd.Parameters[4].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[4].Value);
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public AcademicLib.RE.Exam.MarkSheetCollections getMarkSheetClassWise(int UserId, int AcademicYearId, int? StudentId,int? ClassId,int? SectionId,int ExamTypeId, bool FilterSection,string classIdColl,int? BatchId=null,int? SemesterId=null,int? ClassYearId=null,bool FromPublished=false)
+        {
+            AcademicLib.RE.Exam.MarkSheetCollections dataColl = new RE.Exam.MarkSheetCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@StudentId", StudentId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+
+            if(FromPublished)
+                cmd.CommandText = "usp_PrintMarkSheet_Only";
+            else
+                cmd.CommandText = "usp_PrintMarkSheet";
+
+            cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[6].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@ForMarkSheet", 0);
+            cmd.Parameters.AddWithValue("@FilterSection", FilterSection);
+            cmd.Parameters.AddWithValue("@ClassIdColl", classIdColl);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.MarkSheet beData = new RE.Exam.MarkSheet();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ClassName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SectionName = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.RollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.Name = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.FatherName = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.Address = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.DOB_AD = reader.GetDateTime(10);
+                    if (!(reader[11] is DBNull)) beData.DOB_BS = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.Gender = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.ContactNo = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.F_ContactNo = reader.GetString(14);
+                    if (!(reader[15] is DBNull)) beData.MotherName = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.M_ContactNo = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.HouseName = reader.GetString(17);
+                    if (!(reader[18] is DBNull)) beData.CRTH = Convert.ToDouble(reader[18]);
+                    if (!(reader[19] is DBNull)) beData.CRPR = Convert.ToDouble(reader[19]);
+                    if (!(reader[20] is DBNull)) beData.CR = Convert.ToDouble(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.FMTH = Convert.ToDouble(reader[21]);
+                    if (!(reader[22] is DBNull)) beData.FMPR = Convert.ToDouble(reader[22]);
+                    if (!(reader[23] is DBNull)) beData.FM = Convert.ToDouble(reader[23]);
+                    if (!(reader[24] is DBNull)) beData.PMTH = Convert.ToDouble(reader[24]);
+                    if (!(reader[25] is DBNull)) beData.PMPR = Convert.ToDouble(reader[25]);
+                    if (!(reader[26] is DBNull)) beData.PM = Convert.ToDouble(reader[26]);
+                    if (!(reader[27] is DBNull)) beData.OTH = Convert.ToDouble(reader[27]);
+                    if (!(reader[28] is DBNull)) beData.OPR = Convert.ToDouble(reader[28]);
+                    if (!(reader[29] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[29]);
+                    if (!(reader[30] is DBNull)) beData.TotalFail = reader.GetInt32(30);
+                    if (!(reader[31] is DBNull)) beData.TotalFailTH = reader.GetInt32(31);
+                    if (!(reader[32] is DBNull)) beData.TotalFailPR = reader.GetInt32(32);
+                    if (!(reader[33] is DBNull)) beData.Per = Convert.ToDouble(reader[33]);
+                    if (!(reader[34] is DBNull)) beData.Per_TH = Convert.ToDouble(reader[34]);
+                    if (!(reader[35] is DBNull)) beData.Per_PR = Convert.ToDouble(reader[35]);
+                    if (!(reader[36] is DBNull)) beData.SubCount = reader.GetInt32(36);
+                    if (!(reader[37] is DBNull)) beData.GSubCount = reader.GetInt32(37);
+                    if (!(reader[38] is DBNull)) beData.GPA = Convert.ToDouble(reader[38]);
+                    if (!(reader[39] is DBNull)) beData.GP = Convert.ToDouble(reader[39]);
+                    if (!(reader[40] is DBNull)) beData.GP_TH = Convert.ToDouble(reader[40]);
+                    if (!(reader[41] is DBNull)) beData.GP_PR = Convert.ToDouble(reader[41]);
+                    if (!(reader[42] is DBNull)) beData.Division = reader.GetString(42);
+                    if (!(reader[43] is DBNull)) beData.Grade = reader.GetString(43);
+                    if (!(reader[44] is DBNull)) beData.GradeTH = reader.GetString(44);
+                    if (!(reader[45] is DBNull)) beData.GradePR = reader.GetString(45);
+                    if (!(reader[46] is DBNull)) beData.GP_Grade = reader.GetString(46);
+                    if (!(reader[47] is DBNull)) beData.H_ObtainMark = Convert.ToDouble(reader[47]);
+                    if (!(reader[48] is DBNull)) beData.H_Per = Convert.ToDouble(reader[48]);
+                    if (!(reader[49] is DBNull)) beData.H_GPA = Convert.ToDouble(reader[49]);
+                    if (!(reader[50] is DBNull)) beData.H_GP = Convert.ToDouble(reader[50]);
+                    if (!(reader[51] is DBNull)) beData.HS_ObtainMark = Convert.ToDouble(reader[51]);
+                    if (!(reader[52] is DBNull)) beData.HS_Per = Convert.ToDouble(reader[52]);
+                    if (!(reader[53] is DBNull)) beData.HS_GPA = Convert.ToDouble(reader[53]);
+                    if (!(reader[54] is DBNull)) beData.HS_GP = Convert.ToDouble(reader[54]);
+                    if (!(reader[55] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[55]);
+                    if (!(reader[56] is DBNull)) beData.RankInClass = reader.GetInt32(56);
+                    if (!(reader[57] is DBNull)) beData.RankInSection = reader.GetInt32(57);
+                    if (!(reader[58] is DBNull)) beData.SymbolNo = reader.GetString(58);
+                    if (!(reader[59] is DBNull)) beData.Weight = reader.GetString(59);
+                    if (!(reader[60] is DBNull)) beData.Height = reader.GetString(60);
+                    if (!(reader[61] is DBNull)) beData.WorkingDays = reader.GetInt32(61);
+                    if (!(reader[62] is DBNull)) beData.PresentDays = reader.GetInt32(62);
+                    if (!(reader[63] is DBNull)) beData.AbsentDays = reader.GetInt32(63);
+                    if (!(reader[64] is DBNull)) beData.Result = reader.GetString(64);
+                    if (!(reader[65] is DBNull)) beData.BoardName = reader.GetString(65);
+
+                    if (!(reader[66] is DBNull)) beData.Comment = reader.GetString(66);
+                    if (!(reader[89] is DBNull)) beData.Caste = reader.GetString(89);
+                    if (!(reader[90] is DBNull)) beData.StudentType = reader.GetString(90);
+
+                    dataColl.Add(beData);
+                }
+                reader.NextResult();
+                while (reader.Read())
+                {
+                    int sid = 0;
+                    AcademicLib.RE.Exam.MarkSheetDetails beData = new RE.Exam.MarkSheetDetails();
+                    beData.SubjectName = reader.GetString(0);
+                    if (!(reader[1] is DBNull)) sid = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.SNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.SubjectId = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.PaperType = reader.GetInt32(4);
+                    if (!(reader[5] is DBNull)) beData.CodeTH = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.CodePR = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.IsOptional = reader.GetBoolean(7);
+                    if (!(reader[8] is DBNull)) beData.CRTH = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.CRPR = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.CR = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.FMTH = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.FMPR = Convert.ToDouble(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.FM = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.PMTH = Convert.ToDouble(reader[14]);
+                    if (!(reader[15] is DBNull)) beData.PMPR = Convert.ToDouble(reader[15]);
+                    if (!(reader[16] is DBNull)) beData.PM = Convert.ToDouble(reader[16]);
+                    if (!(reader[17] is DBNull)) beData.IsInclude = reader.GetBoolean(17);
+                    if (!(reader[18] is DBNull)) beData.StudentRemarks = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.SubjectRemarks = reader.GetString(19);
+                    if (!(reader[20] is DBNull)) beData.OTH = Convert.ToDouble(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.OPR = Convert.ToDouble(reader[21]);
+                    if (!(reader[22] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[22]);
+                    if (!(reader[23] is DBNull)) beData.ObtainMark_Str = reader.GetString(23);
+                    if (!(reader[24] is DBNull)) beData.ObtainMarkTH_Str = reader.GetString(24);
+                    if (!(reader[25] is DBNull)) beData.ObtainMarkPR_Str = reader.GetString(25);
+                    if (!(reader[26] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[26]);
+                    if (!(reader[27] is DBNull)) beData.IsFailTH = Convert.ToBoolean(reader[27]);
+                    if (!(reader[28] is DBNull)) beData.IsFailPR = Convert.ToBoolean(reader[28]);
+                    if (!(reader[29] is DBNull)) beData.Per = Convert.ToDouble(reader[29]);
+                    if (!(reader[30] is DBNull)) beData.Per_TH = Convert.ToDouble(reader[30]);
+                    if (!(reader[31] is DBNull)) beData.Per_PR = Convert.ToDouble(reader[31]);
+                    if (!(reader[32] is DBNull)) beData.GP = Convert.ToDouble(reader[32]);
+                    if (!(reader[33] is DBNull)) beData.GP_TH = Convert.ToDouble(reader[33]);
+                    if (!(reader[34] is DBNull)) beData.GP_PR = Convert.ToDouble(reader[34]);
+                    if (!(reader[35] is DBNull)) beData.Grade = reader.GetString(35);
+                    if (!(reader[36] is DBNull)) beData.GradeTH = reader.GetString(36);
+                    if (!(reader[37] is DBNull)) beData.GradePR = reader.GetString(37);
+                    if (!(reader[38] is DBNull)) beData.GP_Grade = reader.GetString(38);
+                    if (!(reader[39] is DBNull)) beData.GP_GradeTH = reader.GetString(39);
+                    if (!(reader[40] is DBNull)) beData.GP_GradePR = reader.GetString(40);
+                    if (!(reader[41] is DBNull)) beData.IsAbsent = reader.GetBoolean(41);
+                    if (!(reader[42] is DBNull)) beData.IsAbsentTH = reader.GetBoolean(42);
+                    if (!(reader[43] is DBNull)) beData.IsAbsentPR = reader.GetBoolean(43);
+                    if (!(reader[44] is DBNull)) beData.H_OM = Convert.ToDouble(reader[44]);
+                    if (!(reader[45] is DBNull)) beData.H_OM_TH = Convert.ToDouble(reader[45]);
+                    if (!(reader[46] is DBNull)) beData.H_OM_PR = Convert.ToDouble(reader[46]);
+                    if (!(reader[47] is DBNull)) beData.H_GP = Convert.ToDouble(reader[47]);
+                    if (!(reader[48] is DBNull)) beData.H_GP_TH = Convert.ToDouble(reader[48]);
+                    if (!(reader[49] is DBNull)) beData.H_GP_PR = Convert.ToDouble(reader[49]);
+
+                    if (!(reader[50] is DBNull)) beData.IsECA = Convert.ToBoolean(reader[50]);
+                    if (!(reader[51] is DBNull)) beData.CRGPTH = Convert.ToDouble(reader[51]);
+                    if (!(reader[52] is DBNull)) beData.CRGPPR = Convert.ToDouble(reader[52]);
+                    if (!(reader[53] is DBNull)) beData.CRGP = Convert.ToDouble(reader[53]);
+                    if (!(reader[54] is DBNull)) beData.IsExtra = Convert.ToBoolean(reader[54]);
+                    if (!(reader[55] is DBNull)) beData.SubjectType = Convert.ToString(reader[55]);
+                    if (!(reader[56] is DBNull)) beData.CAS1 = Convert.ToString(reader[56]);
+                    if (!(reader[57] is DBNull)) beData.CAS2 = Convert.ToString(reader[57]);
+                    if (!(reader[58] is DBNull)) beData.CAS3 = Convert.ToString(reader[58]);
+                    if (!(reader[59] is DBNull)) beData.CAS4 = Convert.ToString(reader[59]);
+                    if (!(reader[60] is DBNull)) beData.CAS5 = Convert.ToString(reader[60]);
+                    if (!(reader[61] is DBNull)) beData.CAS6 = Convert.ToString(reader[61]);
+                    if (!(reader[62] is DBNull)) beData.CAS7 = Convert.ToString(reader[62]);
+                    if (!(reader[63] is DBNull)) beData.CAS8 = Convert.ToString(reader[63]);
+                    if (!(reader[64] is DBNull)) beData.CAS9 = Convert.ToString(reader[64]);
+                    if (!(reader[65] is DBNull)) beData.CAS10 = Convert.ToString(reader[65]);
+                    if (!(reader[66] is DBNull)) beData.CAS11 = Convert.ToString(reader[66]);
+                    if (!(reader[67] is DBNull)) beData.CAS12 = Convert.ToString(reader[67]);
+
+                    dataColl.Find(p1 => p1.StudentId == sid).DetailsColl.Add(beData);
+                }
+                reader.Close();
+
+                if (!(cmd.Parameters[5].Value is DBNull))
+                    dataColl.ResponseMSG = Convert.ToString(cmd.Parameters[5].Value);
+
+                if (!(cmd.Parameters[6].Value is DBNull))
+                    dataColl.IsSuccess = Convert.ToBoolean(cmd.Parameters[6].Value);
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.RE.Exam.MarkSheetCollections getReExamMarkSheetClassWise(int UserId, int AcademicYearId, int? StudentId, int? ClassId, int? SectionId, int ExamTypeId,int ReExamTypeId, bool FilterSection, string classIdColl, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null)
+        {
+            AcademicLib.RE.Exam.MarkSheetCollections dataColl = new RE.Exam.MarkSheetCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@StudentId", StudentId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.CommandText = "usp_PrintReExamMarkSheet";
+            cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[6].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@ForMarkSheet", 0);
+            cmd.Parameters.AddWithValue("@FilterSection", FilterSection);
+            cmd.Parameters.AddWithValue("@ClassIdColl", classIdColl);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@ReExamTypeId", ReExamTypeId);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.MarkSheet beData = new RE.Exam.MarkSheet();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ClassName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SectionName = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.RollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.Name = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.FatherName = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.Address = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.DOB_AD = reader.GetDateTime(10);
+                    if (!(reader[11] is DBNull)) beData.DOB_BS = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.Gender = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.ContactNo = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.F_ContactNo = reader.GetString(14);
+                    if (!(reader[15] is DBNull)) beData.MotherName = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.M_ContactNo = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.HouseName = reader.GetString(17);
+                    if (!(reader[18] is DBNull)) beData.CRTH = Convert.ToDouble(reader[18]);
+                    if (!(reader[19] is DBNull)) beData.CRPR = Convert.ToDouble(reader[19]);
+                    if (!(reader[20] is DBNull)) beData.CR = Convert.ToDouble(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.FMTH = Convert.ToDouble(reader[21]);
+                    if (!(reader[22] is DBNull)) beData.FMPR = Convert.ToDouble(reader[22]);
+                    if (!(reader[23] is DBNull)) beData.FM = Convert.ToDouble(reader[23]);
+                    if (!(reader[24] is DBNull)) beData.PMTH = Convert.ToDouble(reader[24]);
+                    if (!(reader[25] is DBNull)) beData.PMPR = Convert.ToDouble(reader[25]);
+                    if (!(reader[26] is DBNull)) beData.PM = Convert.ToDouble(reader[26]);
+                    if (!(reader[27] is DBNull)) beData.OTH = Convert.ToDouble(reader[27]);
+                    if (!(reader[28] is DBNull)) beData.OPR = Convert.ToDouble(reader[28]);
+                    if (!(reader[29] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[29]);
+                    if (!(reader[30] is DBNull)) beData.TotalFail = reader.GetInt32(30);
+                    if (!(reader[31] is DBNull)) beData.TotalFailTH = reader.GetInt32(31);
+                    if (!(reader[32] is DBNull)) beData.TotalFailPR = reader.GetInt32(32);
+                    if (!(reader[33] is DBNull)) beData.Per = Convert.ToDouble(reader[33]);
+                    if (!(reader[34] is DBNull)) beData.Per_TH = Convert.ToDouble(reader[34]);
+                    if (!(reader[35] is DBNull)) beData.Per_PR = Convert.ToDouble(reader[35]);
+                    if (!(reader[36] is DBNull)) beData.SubCount = reader.GetInt32(36);
+                    if (!(reader[37] is DBNull)) beData.GSubCount = reader.GetInt32(37);
+                    if (!(reader[38] is DBNull)) beData.GPA = Convert.ToDouble(reader[38]);
+                    if (!(reader[39] is DBNull)) beData.GP = Convert.ToDouble(reader[39]);
+                    if (!(reader[40] is DBNull)) beData.GP_TH = Convert.ToDouble(reader[40]);
+                    if (!(reader[41] is DBNull)) beData.GP_PR = Convert.ToDouble(reader[41]);
+                    if (!(reader[42] is DBNull)) beData.Division = reader.GetString(42);
+                    if (!(reader[43] is DBNull)) beData.Grade = reader.GetString(43);
+                    if (!(reader[44] is DBNull)) beData.GradeTH = reader.GetString(44);
+                    if (!(reader[45] is DBNull)) beData.GradePR = reader.GetString(45);
+                    if (!(reader[46] is DBNull)) beData.GP_Grade = reader.GetString(46);
+                    if (!(reader[47] is DBNull)) beData.H_ObtainMark = Convert.ToDouble(reader[47]);
+                    if (!(reader[48] is DBNull)) beData.H_Per = Convert.ToDouble(reader[48]);
+                    if (!(reader[49] is DBNull)) beData.H_GPA = Convert.ToDouble(reader[49]);
+                    if (!(reader[50] is DBNull)) beData.H_GP = Convert.ToDouble(reader[50]);
+                    if (!(reader[51] is DBNull)) beData.HS_ObtainMark = Convert.ToDouble(reader[51]);
+                    if (!(reader[52] is DBNull)) beData.HS_Per = Convert.ToDouble(reader[52]);
+                    if (!(reader[53] is DBNull)) beData.HS_GPA = Convert.ToDouble(reader[53]);
+                    if (!(reader[54] is DBNull)) beData.HS_GP = Convert.ToDouble(reader[54]);
+                    if (!(reader[55] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[55]);
+                    if (!(reader[56] is DBNull)) beData.RankInClass = reader.GetInt32(56);
+                    if (!(reader[57] is DBNull)) beData.RankInSection = reader.GetInt32(57);
+                    if (!(reader[58] is DBNull)) beData.SymbolNo = reader.GetString(58);
+                    if (!(reader[59] is DBNull)) beData.Weight = reader.GetString(59);
+                    if (!(reader[60] is DBNull)) beData.Height = reader.GetString(60);
+                    if (!(reader[61] is DBNull)) beData.WorkingDays = reader.GetInt32(61);
+                    if (!(reader[62] is DBNull)) beData.PresentDays = reader.GetInt32(62);
+                    if (!(reader[63] is DBNull)) beData.AbsentDays = reader.GetInt32(63);
+                    if (!(reader[64] is DBNull)) beData.Result = reader.GetString(64);
+                    if (!(reader[65] is DBNull)) beData.BoardName = reader.GetString(65);
+
+                    if (!(reader[66] is DBNull)) beData.Comment = reader.GetString(66);
+                    if (!(reader[89] is DBNull)) beData.Caste = reader.GetString(89);
+                    if (!(reader[90] is DBNull)) beData.StudentType = reader.GetString(90);
+
+                    try
+                    {
+                        if (!(reader[91] is DBNull)) beData.QrCode = reader.GetString(91);
+                        if (!(reader[92] is DBNull)) beData.PromotedClass = reader.GetString(92);
+                        if (!(reader[93] is DBNull)) beData.IsReExam = reader.GetBoolean(93);
+                    }
+                    catch { }
+                    
+
+                    dataColl.Add(beData);
+                }
+                reader.NextResult();
+                while (reader.Read())
+                {
+                    int sid = 0;
+                    AcademicLib.RE.Exam.MarkSheetDetails beData = new RE.Exam.MarkSheetDetails();
+                    beData.SubjectName = reader.GetString(0);
+                    if (!(reader[1] is DBNull)) sid = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.SNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.SubjectId = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.PaperType = reader.GetInt32(4);
+                    if (!(reader[5] is DBNull)) beData.CodeTH = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.CodePR = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.IsOptional = reader.GetBoolean(7);
+                    if (!(reader[8] is DBNull)) beData.CRTH = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.CRPR = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.CR = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.FMTH = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.FMPR = Convert.ToDouble(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.FM = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.PMTH = Convert.ToDouble(reader[14]);
+                    if (!(reader[15] is DBNull)) beData.PMPR = Convert.ToDouble(reader[15]);
+                    if (!(reader[16] is DBNull)) beData.PM = Convert.ToDouble(reader[16]);
+                    if (!(reader[17] is DBNull)) beData.IsInclude = reader.GetBoolean(17);
+                    if (!(reader[18] is DBNull)) beData.StudentRemarks = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.SubjectRemarks = reader.GetString(19);
+                    if (!(reader[20] is DBNull)) beData.OTH = Convert.ToDouble(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.OPR = Convert.ToDouble(reader[21]);
+                    if (!(reader[22] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[22]);
+                    if (!(reader[23] is DBNull)) beData.ObtainMark_Str = reader.GetString(23);
+                    if (!(reader[24] is DBNull)) beData.ObtainMarkTH_Str = reader.GetString(24);
+                    if (!(reader[25] is DBNull)) beData.ObtainMarkPR_Str = reader.GetString(25);
+                    if (!(reader[26] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[26]);
+                    if (!(reader[27] is DBNull)) beData.IsFailTH = Convert.ToBoolean(reader[27]);
+                    if (!(reader[28] is DBNull)) beData.IsFailPR = Convert.ToBoolean(reader[28]);
+                    if (!(reader[29] is DBNull)) beData.Per = Convert.ToDouble(reader[29]);
+                    if (!(reader[30] is DBNull)) beData.Per_TH = Convert.ToDouble(reader[30]);
+                    if (!(reader[31] is DBNull)) beData.Per_PR = Convert.ToDouble(reader[31]);
+                    if (!(reader[32] is DBNull)) beData.GP = Convert.ToDouble(reader[32]);
+                    if (!(reader[33] is DBNull)) beData.GP_TH = Convert.ToDouble(reader[33]);
+                    if (!(reader[34] is DBNull)) beData.GP_PR = Convert.ToDouble(reader[34]);
+                    if (!(reader[35] is DBNull)) beData.Grade = reader.GetString(35);
+                    if (!(reader[36] is DBNull)) beData.GradeTH = reader.GetString(36);
+                    if (!(reader[37] is DBNull)) beData.GradePR = reader.GetString(37);
+                    if (!(reader[38] is DBNull)) beData.GP_Grade = reader.GetString(38);
+                    if (!(reader[39] is DBNull)) beData.GP_GradeTH = reader.GetString(39);
+                    if (!(reader[40] is DBNull)) beData.GP_GradePR = reader.GetString(40);
+                    if (!(reader[41] is DBNull)) beData.IsAbsent = reader.GetBoolean(41);
+                    if (!(reader[42] is DBNull)) beData.IsAbsentTH = reader.GetBoolean(42);
+                    if (!(reader[43] is DBNull)) beData.IsAbsentPR = reader.GetBoolean(43);
+                    if (!(reader[44] is DBNull)) beData.H_OM = Convert.ToDouble(reader[44]);
+                    if (!(reader[45] is DBNull)) beData.H_OM_TH = Convert.ToDouble(reader[45]);
+                    if (!(reader[46] is DBNull)) beData.H_OM_PR = Convert.ToDouble(reader[46]);
+                    if (!(reader[47] is DBNull)) beData.H_GP = Convert.ToDouble(reader[47]);
+                    if (!(reader[48] is DBNull)) beData.H_GP_TH = Convert.ToDouble(reader[48]);
+                    if (!(reader[49] is DBNull)) beData.H_GP_PR = Convert.ToDouble(reader[49]);
+
+                    try
+                    {
+                        if (!(reader[50] is DBNull)) beData.IsECA = Convert.ToBoolean(reader[50]);
+                        if (!(reader[51] is DBNull)) beData.CRGPTH = Convert.ToDouble(reader[51]);
+                        if (!(reader[52] is DBNull)) beData.CRGPPR = Convert.ToDouble(reader[52]);
+                        if (!(reader[53] is DBNull)) beData.CRGP = Convert.ToDouble(reader[53]);
+                        if (!(reader[54] is DBNull)) beData.IsExtra = Convert.ToBoolean(reader[54]);
+                        if (!(reader[55] is DBNull)) beData.IsReExam = Convert.ToBoolean(reader[55]);
+                    }
+                    catch { }
+                    
+                    dataColl.Find(p1 => p1.StudentId == sid).DetailsColl.Add(beData);
+                }
+                reader.Close();
+
+                if (!(cmd.Parameters[5].Value is DBNull))
+                    dataColl.ResponseMSG = Convert.ToString(cmd.Parameters[5].Value);
+
+                if (!(cmd.Parameters[6].Value is DBNull))
+                    dataColl.IsSuccess = Convert.ToBoolean(cmd.Parameters[6].Value);
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.RE.Exam.TeacherWiseSubjectAnalysisCollections getTeacherWiseSubjectAnalysis(int UserId, int AcademicYearId, int ExamTypeId,int ExamTypeGroupId)
+        {
+            AcademicLib.RE.Exam.TeacherWiseSubjectAnalysisCollections dataColl = new RE.Exam.TeacherWiseSubjectAnalysisCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.CommandText = "usp_GetTeacherWiseSubjectAnalysis";
+            cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@ExamTypeGroupId", ExamTypeGroupId);
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                int sno = 1;
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.TeacherWiseSubjectAnalysis beData = new RE.Exam.TeacherWiseSubjectAnalysis();
+                    beData.NoOfStudent = 1;
+                    if (!(reader[0] is DBNull)) beData.Teacher = reader.GetString(0);
+                    if (!(reader[1] is DBNull)) beData.StudentName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.ClassName = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.Section = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.RollNo = reader.GetInt32(4);
+                    if (!(reader[5] is DBNull)) beData.Subject = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.PaperType = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.OM = Convert.ToDouble(reader[7]);
+                    if (!(reader[8] is DBNull)) beData.OM_Str = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.OP = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.Grade = reader.GetString(10);
+                    if (!(reader[11] is DBNull)) beData.Result = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.SymbolNo = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.RegNo = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.BoardRegNo = reader.GetString(14);
+                    if (!(reader[15] is DBNull)) beData.FM = Convert.ToDouble(reader[15]);
+                    if (!(reader[16] is DBNull)) beData.PM = Convert.ToDouble(reader[16]);
+
+                    if (!(reader[17] is DBNull)) beData.GP_Grade = Convert.ToString(reader[17]);
+                    if (!(reader[18] is DBNull)) beData.GP = Convert.ToDouble(reader[18]);
+                    if (!(reader[19] is DBNull)) beData.SubCode = Convert.ToString(reader[19]);
+                    if (!(reader[20] is DBNull)) beData.CH = Convert.ToString(reader[20]);
+
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                reader.Close();
+
+                if (!(cmd.Parameters[2].Value is DBNull))
+                    dataColl.ResponseMSG = Convert.ToString(cmd.Parameters[2].Value);
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    dataColl.IsSuccess = Convert.ToBoolean(cmd.Parameters[3].Value);
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.RE.Exam.MarkSheetCollections getExamResultSummary(int UserId,int AcademicYearId,int ExamTypeId)
+        {
+            AcademicLib.RE.Exam.MarkSheetCollections dataColl = new RE.Exam.MarkSheetCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);            
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.CommandText = "usp_MarkSheetSummary";
+            cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                int sno = 1;
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.MarkSheet beData = new RE.Exam.MarkSheet();
+                    beData.SNo = sno;
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ClassName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SectionName = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.RollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.Name = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.FatherName = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.Address = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.DOB_AD = reader.GetDateTime(10);
+                    if (!(reader[11] is DBNull)) beData.DOB_BS = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.Gender = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.ContactNo = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.F_ContactNo = reader.GetString(14);
+                    if (!(reader[15] is DBNull)) beData.MotherName = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.M_ContactNo = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.HouseName = reader.GetString(17);                    
+                    if (!(reader[18] is DBNull)) beData.CR = Convert.ToDouble(reader[18]);
+                    if (!(reader[19] is DBNull)) beData.FM = Convert.ToDouble(reader[19]);                    
+                    if (!(reader[20] is DBNull)) beData.PM = Convert.ToDouble(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.OTH = Convert.ToDouble(reader[21]);
+                    if (!(reader[22] is DBNull)) beData.OPR = Convert.ToDouble(reader[22]);
+                    if (!(reader[23] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[23]);
+                    if (!(reader[24] is DBNull)) beData.TotalFail = reader.GetInt32(24);
+                    if (!(reader[25] is DBNull)) beData.TotalFailTH = reader.GetInt32(25);
+                    if (!(reader[26] is DBNull)) beData.TotalFailPR = reader.GetInt32(26);
+                    if (!(reader[27] is DBNull)) beData.Per = Convert.ToDouble(reader[27]);                    
+                    if (!(reader[28] is DBNull)) beData.GPA = Convert.ToDouble(reader[28]);
+                    if (!(reader[29] is DBNull)) beData.GP = Convert.ToDouble(reader[29]);                    
+                    if (!(reader[30] is DBNull)) beData.Division = reader.GetString(30);
+                    if (!(reader[31] is DBNull)) beData.Grade = reader.GetString(31);
+                    if (!(reader[32] is DBNull)) beData.GP_Grade = reader.GetString(32);
+                    if (!(reader[33] is DBNull)) beData.H_ObtainMark = Convert.ToDouble(reader[33]);
+                    if (!(reader[34] is DBNull)) beData.H_Per = Convert.ToDouble(reader[34]);
+                    if (!(reader[35] is DBNull)) beData.H_GPA = Convert.ToDouble(reader[35]);
+                    if (!(reader[36] is DBNull)) beData.H_GP = Convert.ToDouble(reader[36]);
+                    if (!(reader[37] is DBNull)) beData.HS_ObtainMark = Convert.ToDouble(reader[37]);
+                    if (!(reader[38] is DBNull)) beData.HS_Per = Convert.ToDouble(reader[38]);
+                    if (!(reader[39] is DBNull)) beData.HS_GPA = Convert.ToDouble(reader[39]);
+                    if (!(reader[40] is DBNull)) beData.HS_GP = Convert.ToDouble(reader[40]);
+                    if (!(reader[41] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[41]);
+                    if (!(reader[42] is DBNull)) beData.RankInClass = reader.GetInt32(42);
+                    if (!(reader[43] is DBNull)) beData.RankInSection = reader.GetInt32(43);
+                    if (!(reader[44] is DBNull)) beData.SymbolNo = reader.GetString(44);                    
+                    if (!(reader[45] is DBNull)) beData.WorkingDays = reader.GetInt32(45);
+                    if (!(reader[46] is DBNull)) beData.PresentDays = reader.GetInt32(46);
+                    if (!(reader[47] is DBNull)) beData.AbsentDays = reader.GetInt32(47);
+                    if (!(reader[48] is DBNull)) beData.Result = reader.GetString(48);
+                    if (!(reader[49] is DBNull)) beData.Comment = reader.GetString(49);
+                    if (!(reader[50] is DBNull)) beData.RankInSchool = reader.GetInt32(50);
+                    if (!(reader[51] is DBNull)) beData.Caste = reader.GetString(51);
+
+                    dataColl.Add(beData);
+                    sno++;
+                }        
+                reader.Close();
+
+                if (!(cmd.Parameters[2].Value is DBNull))
+                    dataColl.ResponseMSG = Convert.ToString(cmd.Parameters[2].Value);
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    dataColl.IsSuccess = Convert.ToBoolean(cmd.Parameters[3].Value);
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.RE.Exam.MarkSheetCollections getExamGroupResultSummary(int UserId, int AcademicYearId, int ExamTypeGroupId)
+        {
+            AcademicLib.RE.Exam.MarkSheetCollections dataColl = new RE.Exam.MarkSheetCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ExamTypeGroupId", ExamTypeGroupId);
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.CommandText = "usp_GroupMarkSheetSummary";
+            cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.MarkSheet beData = new RE.Exam.MarkSheet();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ClassName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SectionName = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.RollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.Name = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.FatherName = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.Address = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.DOB_AD = reader.GetDateTime(10);
+                    if (!(reader[11] is DBNull)) beData.DOB_BS = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.Gender = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.ContactNo = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.F_ContactNo = reader.GetString(14);
+                    if (!(reader[15] is DBNull)) beData.MotherName = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.M_ContactNo = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.HouseName = reader.GetString(17);
+                    if (!(reader[18] is DBNull)) beData.CR = Convert.ToDouble(reader[18]);
+                    if (!(reader[19] is DBNull)) beData.FM = Convert.ToDouble(reader[19]);
+                    if (!(reader[20] is DBNull)) beData.PM = Convert.ToDouble(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.OTH = Convert.ToDouble(reader[21]);
+                    if (!(reader[22] is DBNull)) beData.OPR = Convert.ToDouble(reader[22]);
+                    if (!(reader[23] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[23]);
+                    if (!(reader[24] is DBNull)) beData.TotalFail = reader.GetInt32(24);
+                    if (!(reader[25] is DBNull)) beData.TotalFailTH = reader.GetInt32(25);
+                    if (!(reader[26] is DBNull)) beData.TotalFailPR = reader.GetInt32(26);
+                    if (!(reader[27] is DBNull)) beData.Per = Convert.ToDouble(reader[27]);
+                    if (!(reader[28] is DBNull)) beData.GPA = Convert.ToDouble(reader[28]);
+                    if (!(reader[29] is DBNull)) beData.GP = Convert.ToDouble(reader[29]);
+                    if (!(reader[30] is DBNull)) beData.Division = reader.GetString(30);
+                    if (!(reader[31] is DBNull)) beData.Grade = reader.GetString(31);
+                    if (!(reader[32] is DBNull)) beData.GP_Grade = reader.GetString(32);
+                    if (!(reader[33] is DBNull)) beData.H_ObtainMark = Convert.ToDouble(reader[33]);
+                    if (!(reader[34] is DBNull)) beData.H_Per = Convert.ToDouble(reader[34]);
+                    if (!(reader[35] is DBNull)) beData.H_GPA = Convert.ToDouble(reader[35]);
+                    if (!(reader[36] is DBNull)) beData.H_GP = Convert.ToDouble(reader[36]);
+                    if (!(reader[37] is DBNull)) beData.HS_ObtainMark = Convert.ToDouble(reader[37]);
+                    if (!(reader[38] is DBNull)) beData.HS_Per = Convert.ToDouble(reader[38]);
+                    if (!(reader[39] is DBNull)) beData.HS_GPA = Convert.ToDouble(reader[39]);
+                    if (!(reader[40] is DBNull)) beData.HS_GP = Convert.ToDouble(reader[40]);
+                    if (!(reader[41] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[41]);
+                    if (!(reader[42] is DBNull)) beData.RankInClass = reader.GetInt32(42);
+                    if (!(reader[43] is DBNull)) beData.RankInSection = reader.GetInt32(43);
+                    if (!(reader[44] is DBNull)) beData.SymbolNo = reader.GetString(44);
+                    if (!(reader[45] is DBNull)) beData.WorkingDays = reader.GetInt32(45);
+                    if (!(reader[46] is DBNull)) beData.PresentDays = reader.GetInt32(46);
+                    if (!(reader[47] is DBNull)) beData.AbsentDays = reader.GetInt32(47);
+                    if (!(reader[48] is DBNull)) beData.Result = reader.GetString(48);
+                    if (!(reader[49] is DBNull)) beData.Comment = reader.GetString(49);
+                    if (!(reader[50] is DBNull)) beData.RankInSchool = reader.GetInt32(50);
+                    if (!(reader[51] is DBNull)) beData.Caste = reader.GetString(51);
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+
+                if (!(cmd.Parameters[2].Value is DBNull))
+                    dataColl.ResponseMSG = Convert.ToString(cmd.Parameters[2].Value);
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    dataColl.IsSuccess = Convert.ToBoolean(cmd.Parameters[3].Value);
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.RE.Exam.GroupMarkSheetCollections getGroupMarkSheetClassWise(int UserId, int AcademicYearId, int? StudentId, int? ClassId, int? SectionId, int ExamTypeGroupId,bool FilterSection,int? CurExamTypeId, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null,bool FromPublished=false)
+        {
+            AcademicLib.RE.Exam.GroupMarkSheetCollections dataColl = new RE.Exam.GroupMarkSheetCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@StudentId", StudentId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeGroupId", ExamTypeGroupId);
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+
+
+            if (FromPublished)
+                cmd.CommandText = "usp_PrintGroupMarkSheet_Only";
+            else
+                cmd.CommandText = "usp_PrintGroupMarkSheet";
+            
+            cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[6].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@ForMarkSheet", 0);
+            cmd.Parameters.AddWithValue("@FilterSection", FilterSection);
+            cmd.Parameters.AddWithValue("@CurExamTypeId", CurExamTypeId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+            try
+            {
+                int sno = 1;
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.GroupMarkSheet beData = new RE.Exam.GroupMarkSheet();                    
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ClassName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SectionName = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.RollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.Name = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.FatherName = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.Address = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.DOB_AD = reader.GetDateTime(10);
+                    if (!(reader[11] is DBNull)) beData.DOB_BS = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.Gender = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.ContactNo = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.F_ContactNo = reader.GetString(14);
+                    if (!(reader[15] is DBNull)) beData.MotherName = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.M_ContactNo = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.HouseName = reader.GetString(17);
+                    if (!(reader[18] is DBNull)) beData.CRTH = Convert.ToDouble(reader[18]);
+                    if (!(reader[19] is DBNull)) beData.CRPR = Convert.ToDouble(reader[19]);
+                    if (!(reader[20] is DBNull)) beData.CR = Convert.ToDouble(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.FMTH = Convert.ToDouble(reader[21]);
+                    if (!(reader[22] is DBNull)) beData.FMPR = Convert.ToDouble(reader[22]);
+                    if (!(reader[23] is DBNull)) beData.FM = Convert.ToDouble(reader[23]);
+                    if (!(reader[24] is DBNull)) beData.PMTH = Convert.ToDouble(reader[24]);
+                    if (!(reader[25] is DBNull)) beData.PMPR = Convert.ToDouble(reader[25]);
+                    if (!(reader[26] is DBNull)) beData.PM = Convert.ToDouble(reader[26]);
+                    if (!(reader[27] is DBNull)) beData.OTH = Convert.ToDouble(reader[27]);
+                    if (!(reader[28] is DBNull)) beData.OPR = Convert.ToDouble(reader[28]);
+                    if (!(reader[29] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[29]);
+                    if (!(reader[30] is DBNull)) beData.TotalFail = reader.GetInt32(30);
+                    if (!(reader[31] is DBNull)) beData.TotalFailTH = reader.GetInt32(31);
+                    if (!(reader[32] is DBNull)) beData.TotalFailPR = reader.GetInt32(32);
+                    if (!(reader[33] is DBNull)) beData.Per = Convert.ToDouble(reader[33]);
+                    if (!(reader[34] is DBNull)) beData.Per_TH = Convert.ToDouble(reader[34]);
+                    if (!(reader[35] is DBNull)) beData.Per_PR = Convert.ToDouble(reader[35]);
+                    if (!(reader[36] is DBNull)) beData.SubCount = reader.GetInt32(36);
+                    if (!(reader[37] is DBNull)) beData.GSubCount = reader.GetInt32(37);
+                    if (!(reader[38] is DBNull)) beData.GPA = Convert.ToDouble(reader[38]);
+                    if (!(reader[39] is DBNull)) beData.GP = Convert.ToDouble(reader[39]);
+                    if (!(reader[40] is DBNull)) beData.GP_TH = Convert.ToDouble(reader[40]);
+                    if (!(reader[41] is DBNull)) beData.GP_PR = Convert.ToDouble(reader[41]);
+                    if (!(reader[42] is DBNull)) beData.Division = reader.GetString(42);
+                    if (!(reader[43] is DBNull)) beData.Grade = reader.GetString(43);
+                    if (!(reader[44] is DBNull)) beData.GradeTH = reader.GetString(44);
+                    if (!(reader[45] is DBNull)) beData.GradePR = reader.GetString(45);
+                    if (!(reader[46] is DBNull)) beData.GP_Grade = reader.GetString(46);
+                    if (!(reader[47] is DBNull)) beData.H_ObtainMark = Convert.ToDouble(reader[47]);
+                    if (!(reader[48] is DBNull)) beData.H_Per = Convert.ToDouble(reader[48]);
+                    if (!(reader[49] is DBNull)) beData.H_GPA = Convert.ToDouble(reader[49]);
+                    if (!(reader[50] is DBNull)) beData.H_GP = Convert.ToDouble(reader[50]);
+                    if (!(reader[51] is DBNull)) beData.HS_ObtainMark = Convert.ToDouble(reader[51]);
+                    if (!(reader[52] is DBNull)) beData.HS_Per = Convert.ToDouble(reader[52]);
+                    if (!(reader[53] is DBNull)) beData.HS_GPA = Convert.ToDouble(reader[53]);
+                    if (!(reader[54] is DBNull)) beData.HS_GP = Convert.ToDouble(reader[54]);
+                    if (!(reader[55] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[55]);
+                    if (!(reader[56] is DBNull)) beData.RankInClass = reader.GetInt32(56);
+                    if (!(reader[57] is DBNull)) beData.RankInSection = reader.GetInt32(57);
+                    if (!(reader[58] is DBNull)) beData.SymbolNo = reader.GetString(58);
+                    if (!(reader[59] is DBNull)) beData.Weight = reader.GetString(59);
+                    if (!(reader[60] is DBNull)) beData.Height = reader.GetString(60);
+                    if (!(reader[61] is DBNull)) beData.WorkingDays = reader.GetInt32(61);
+                    if (!(reader[62] is DBNull)) beData.PresentDays = reader.GetInt32(62);
+                    if (!(reader[63] is DBNull)) beData.AbsentDays = reader.GetInt32(63);
+                    if (!(reader[64] is DBNull)) beData.Result = reader.GetString(64);
+                    if (!(reader[65] is DBNull)) beData.BoardName = reader.GetString(65);
+
+                    if (!(reader[66] is DBNull)) beData.TeacherComment = reader.GetString(66);
+                    if (!(reader[67] is DBNull)) beData.CompanyName = reader.GetString(67);
+                    if (!(reader[68] is DBNull)) beData.CompanyAddress = reader.GetString(68);
+                    if (!(reader[69] is DBNull)) beData.CompPhoneNo = reader.GetString(69);
+                    if (!(reader[70] is DBNull)) beData.CompFaxNo = reader.GetString(70);
+                    if (!(reader[71] is DBNull)) beData.CompEmailId = reader.GetString(71);
+                    if (!(reader[72] is DBNull)) beData.CompWebSite = reader.GetString(72);
+                    if (!(reader[73] is DBNull)) beData.CompLogoPath = reader.GetString(73);
+                    if (!(reader[74] is DBNull)) beData.CompImgPath = reader.GetString(74);
+                    if (!(reader[75] is DBNull)) beData.CompBannerPath = reader.GetString(75);
+                    if (!(reader[76] is DBNull)) beData.ExamName = reader.GetString(76);
+                    if (!(reader[77] is DBNull)) beData.IssueDateAD = reader.GetDateTime(77);
+                    if (!(reader[78] is DBNull)) beData.IssueDateBS = reader.GetString(78);
+                    if (!(reader[79] is DBNull)) beData.CompRegdNo = reader.GetString(79);
+                    if (!(reader[80] is DBNull)) beData.CompPanVat = reader.GetString(80);
+                    if (!(reader[81] is DBNull)) beData.TotalStudentInClass= Convert.ToInt32(reader[81]);
+                    if (!(reader[82] is DBNull)) beData.TotalStudentInSection= Convert.ToInt32(reader[82]);
+                    if (!(reader[83] is DBNull)) beData.ResultDateAD = Convert.ToDateTime(reader[83]);
+                    if (!(reader[84] is DBNull)) beData.ResultDateBS = Convert.ToString(reader[84]);
+                    if (!(reader[85] is DBNull)) beData.Exam1 = Convert.ToDouble(reader[85]);
+                    if (!(reader[86] is DBNull)) beData.Exam2 = Convert.ToDouble(reader[86]);
+                    if (!(reader[87] is DBNull)) beData.Exam3 = Convert.ToDouble(reader[87]);
+                    if (!(reader[88] is DBNull)) beData.Exam4 = Convert.ToDouble(reader[88]);
+                    if (!(reader[89] is DBNull)) beData.Exam5 = Convert.ToDouble(reader[89]);
+                    if (!(reader[90] is DBNull)) beData.Exam6 = Convert.ToDouble(reader[90]);
+                    if (!(reader[91] is DBNull)) beData.Exam7 = Convert.ToDouble(reader[91]);
+                    if (!(reader[92] is DBNull)) beData.Exam8 = Convert.ToDouble(reader[92]);
+                    if (!(reader[93] is DBNull)) beData.Exam9 = Convert.ToDouble(reader[93]);
+                    if (!(reader[94] is DBNull)) beData.Exam10 = Convert.ToDouble(reader[94]);
+                    if (!(reader[95] is DBNull)) beData.Exam11 = Convert.ToDouble(reader[95]);
+                    if (!(reader[96] is DBNull)) beData.Exam12 = Convert.ToDouble(reader[96]);
+                    if (!(reader[97] is DBNull)) beData.E_Grade_1 = reader.GetString(97);
+                    if (!(reader[98] is DBNull)) beData.E_Grade_2 = reader.GetString(98);
+                    if (!(reader[99] is DBNull)) beData.E_Grade_3 = reader.GetString(99);
+                    if (!(reader[100] is DBNull)) beData.E_Grade_4 = reader.GetString(100);
+                    if (!(reader[101] is DBNull)) beData.E_Grade_5 = reader.GetString(101);
+                    if (!(reader[102] is DBNull)) beData.E_Grade_6 = reader.GetString(102);
+                    if (!(reader[103] is DBNull)) beData.E_Grade_7 = reader.GetString(103);
+                    if (!(reader[104] is DBNull)) beData.E_Grade_8 = reader.GetString(104);
+                    if (!(reader[105] is DBNull)) beData.E_Grade_9 = reader.GetString(105);
+                    if (!(reader[106] is DBNull)) beData.E_Grade_10 = reader.GetString(106);
+                    if (!(reader[107] is DBNull)) beData.E_Grade_11 = reader.GetString(107);
+                    if (!(reader[108] is DBNull)) beData.E_Grade_12 = reader.GetString(108);
+                    if (!(reader[109] is DBNull)) beData.E_AVGGP_1 = Convert.ToDouble(reader[109]);
+                    if (!(reader[110] is DBNull)) beData.E_AVGGP_2 = Convert.ToDouble(reader[110]);
+                    if (!(reader[111] is DBNull)) beData.E_AVGGP_3 = Convert.ToDouble(reader[111]);
+                    if (!(reader[112] is DBNull)) beData.E_AVGGP_4 = Convert.ToDouble(reader[112]);
+                    if (!(reader[113] is DBNull)) beData.E_AVGGP_5 = Convert.ToDouble(reader[113]);
+                    if (!(reader[114] is DBNull)) beData.E_AVGGP_6 = Convert.ToDouble(reader[114]);
+                    if (!(reader[115] is DBNull)) beData.E_AVGGP_7 = Convert.ToDouble(reader[115]);
+                    if (!(reader[116] is DBNull)) beData.E_AVGGP_8 = Convert.ToDouble(reader[116]);
+                    if (!(reader[117] is DBNull)) beData.E_AVGGP_9 = Convert.ToDouble(reader[117]);
+                    if (!(reader[118] is DBNull)) beData.E_AVGGP_10 = Convert.ToDouble(reader[118]);
+                    if (!(reader[119] is DBNull)) beData.E_AVGGP_11 = Convert.ToDouble(reader[119]);
+                    if (!(reader[120] is DBNull)) beData.E_AVGGP_12 = Convert.ToDouble(reader[120]);
+
+                    //if (!(reader[121] is DBNull)) beData.E1 = Convert.ToString(reader[121]);
+                    //if (!(reader[122] is DBNull)) beData.E2 = Convert.ToString(reader[122]);
+                    //if (!(reader[123] is DBNull)) beData.E3 = Convert.ToString(reader[123]);
+                    //if (!(reader[124] is DBNull)) beData.E4 = Convert.ToString(reader[124]);
+                    //if (!(reader[125] is DBNull)) beData.E5 = Convert.ToString(reader[125]);
+                    //if (!(reader[126] is DBNull)) beData.E6 = Convert.ToString(reader[126]);
+                    //if (!(reader[127] is DBNull)) beData.E7 = Convert.ToString(reader[127]);
+                    //if (!(reader[128] is DBNull)) beData.E8 = Convert.ToString(reader[128]);
+                    //if (!(reader[129] is DBNull)) beData.E9 = Convert.ToString(reader[129]);
+                    //if (!(reader[130] is DBNull)) beData.E10 = Convert.ToString(reader[130]);
+                    //if (!(reader[131] is DBNull)) beData.E11 = Convert.ToString(reader[131]);
+                    //if (!(reader[132] is DBNull)) beData.E12 = Convert.ToString(reader[132]);
+
+                    if (!(reader[137] is DBNull)) beData.Caste = reader.GetString(137);
+                    if (!(reader[138] is DBNull)) beData.StudentType = reader.GetString(138);
+                    dataColl.Add(beData);
+                }
+                reader.NextResult();
+                while (reader.Read())
+                {
+                    int sid = 0;
+                    AcademicLib.RE.Exam.GroupMarkSheetDetails beData = new RE.Exam.GroupMarkSheetDetails();
+                    beData.SubjectName = reader.GetString(0);
+                    if (!(reader[1] is DBNull)) sid = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.SNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.SubjectId = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.PaperType = reader.GetInt32(4);
+                    if (!(reader[5] is DBNull)) beData.CodeTH = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.CodePR = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.IsOptional = reader.GetBoolean(7);
+                    if (!(reader[8] is DBNull)) beData.CRTH = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.CRPR = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.CR = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.FMTH = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.FMPR = Convert.ToDouble(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.FM = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.PMTH = Convert.ToDouble(reader[14]);
+                    if (!(reader[15] is DBNull)) beData.PMPR = Convert.ToDouble(reader[15]);
+                    if (!(reader[16] is DBNull)) beData.PM = Convert.ToDouble(reader[16]);
+                    if (!(reader[17] is DBNull)) beData.IsInclude = reader.GetBoolean(17);
+                    if (!(reader[18] is DBNull)) beData.StudentRemarks = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.SubjectRemarks = reader.GetString(19);
+                    if (!(reader[20] is DBNull)) beData.OTH = Convert.ToDouble(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.OPR = Convert.ToDouble(reader[21]);
+                    if (!(reader[22] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[22]);
+                    if (!(reader[23] is DBNull)) beData.ObtainMark_Str = reader.GetString(23);
+                    if (!(reader[24] is DBNull)) beData.ObtainMarkTH_Str = reader.GetString(24);
+                    if (!(reader[25] is DBNull)) beData.ObtainMarkPR_Str = reader.GetString(25);
+                    if (!(reader[26] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[26]);
+                    if (!(reader[27] is DBNull)) beData.IsFailTH = Convert.ToBoolean(reader[27]);
+                    if (!(reader[28] is DBNull)) beData.IsFailPR = Convert.ToBoolean(reader[28]);
+                    if (!(reader[29] is DBNull)) beData.Per = Convert.ToDouble(reader[29]);
+                    if (!(reader[30] is DBNull)) beData.Per_TH = Convert.ToDouble(reader[30]);
+                    if (!(reader[31] is DBNull)) beData.Per_PR = Convert.ToDouble(reader[31]);
+                    if (!(reader[32] is DBNull)) beData.GP = Convert.ToDouble(reader[32]);
+                    if (!(reader[33] is DBNull)) beData.GP_TH = Convert.ToDouble(reader[33]);
+                    if (!(reader[34] is DBNull)) beData.GP_PR = Convert.ToDouble(reader[34]);
+                    if (!(reader[35] is DBNull)) beData.Grade = reader.GetString(35);
+                    if (!(reader[36] is DBNull)) beData.GradeTH = reader.GetString(36);
+                    if (!(reader[37] is DBNull)) beData.GradePR = reader.GetString(37);
+                    if (!(reader[38] is DBNull)) beData.GP_Grade = reader.GetString(38);
+                    if (!(reader[39] is DBNull)) beData.GP_GradeTH = reader.GetString(39);
+                    if (!(reader[40] is DBNull)) beData.GP_GradePR = reader.GetString(40);
+                    if (!(reader[41] is DBNull)) beData.IsAbsent = reader.GetBoolean(41);
+                    if (!(reader[42] is DBNull)) beData.IsAbsentTH = reader.GetBoolean(42);
+                    if (!(reader[43] is DBNull)) beData.IsAbsentPR = reader.GetBoolean(43);
+                    if (!(reader[44] is DBNull)) beData.H_OM = Convert.ToDouble(reader[44]);
+                    if (!(reader[45] is DBNull)) beData.H_OM_TH = Convert.ToDouble(reader[45]);
+                    if (!(reader[46] is DBNull)) beData.H_OM_PR = Convert.ToDouble(reader[46]);
+                    if (!(reader[47] is DBNull)) beData.H_GP = Convert.ToDouble(reader[47]);
+                    if (!(reader[48] is DBNull)) beData.H_GP_TH = Convert.ToDouble(reader[48]);
+                    if (!(reader[49] is DBNull)) beData.H_GP_PR = Convert.ToDouble(reader[49]);
+                    
+                    if (!(reader[50] is DBNull)) beData.IsECA = Convert.ToBoolean(reader[50]);
+                    if (!(reader[51] is DBNull)) beData.IsExtra = Convert.ToBoolean(reader[51]);
+                    if (!(reader[52] is DBNull)) beData.Sub_Exam1 = Convert.ToDouble(reader[52]);
+                    if (!(reader[53] is DBNull)) beData.Sub_Exam2 = Convert.ToDouble(reader[53]);
+                    if (!(reader[54] is DBNull)) beData.Sub_Exam3 = Convert.ToDouble(reader[54]);
+                    if (!(reader[55] is DBNull)) beData.Sub_Exam4 = Convert.ToDouble(reader[55]);
+                    if (!(reader[56] is DBNull)) beData.Sub_Exam5 = Convert.ToDouble(reader[56]);
+                    if (!(reader[57] is DBNull)) beData.Sub_Exam6 = Convert.ToDouble(reader[57]);
+                    if (!(reader[58] is DBNull)) beData.Sub_Exam7 = Convert.ToDouble(reader[58]);
+                    if (!(reader[59] is DBNull)) beData.Sub_Exam8 = Convert.ToDouble(reader[59]);
+                    if (!(reader[60] is DBNull)) beData.Sub_Exam9 = Convert.ToDouble(reader[60]);
+                    if (!(reader[61] is DBNull)) beData.Sub_Exam10 = Convert.ToDouble(reader[61]);
+                    if (!(reader[62] is DBNull)) beData.Sub_Exam11 = Convert.ToDouble(reader[62]);
+                    if (!(reader[63] is DBNull)) beData.Sub_Exam12 = Convert.ToDouble(reader[63]);
+                    if (!(reader[64] is DBNull)) beData.Sub_E_TH_1 = Convert.ToDouble(reader[64]);
+                    if (!(reader[65] is DBNull)) beData.Sub_E_TH_2 = Convert.ToDouble(reader[65]);
+                    if (!(reader[66] is DBNull)) beData.Sub_E_TH_3 = Convert.ToDouble(reader[66]);
+                    if (!(reader[67] is DBNull)) beData.Sub_E_TH_4 = Convert.ToDouble(reader[67]);
+                    if (!(reader[68] is DBNull)) beData.Sub_E_TH_5 = Convert.ToDouble(reader[68]);
+                    if (!(reader[69] is DBNull)) beData.Sub_E_TH_6 = Convert.ToDouble(reader[69]);
+                    if (!(reader[70] is DBNull)) beData.Sub_E_TH_7 = Convert.ToDouble(reader[70]);
+                    if (!(reader[71] is DBNull)) beData.Sub_E_TH_8 = Convert.ToDouble(reader[71]);
+                    if (!(reader[72] is DBNull)) beData.Sub_E_TH_9 = Convert.ToDouble(reader[72]);
+                    if (!(reader[73] is DBNull)) beData.Sub_E_TH_10 = Convert.ToDouble(reader[73]);
+                    if (!(reader[74] is DBNull)) beData.Sub_E_TH_11 = Convert.ToDouble(reader[74]);
+                    if (!(reader[75] is DBNull)) beData.Sub_E_TH_12 = Convert.ToDouble(reader[75]);
+                    if (!(reader[76] is DBNull)) beData.Sub_E_PR_1 = Convert.ToDouble(reader[76]);
+                    if (!(reader[77] is DBNull)) beData.Sub_E_PR_2 = Convert.ToDouble(reader[77]);
+                    if (!(reader[78] is DBNull)) beData.Sub_E_PR_3 = Convert.ToDouble(reader[78]);
+                    if (!(reader[79] is DBNull)) beData.Sub_E_PR_4 = Convert.ToDouble(reader[79]);
+                    if (!(reader[80] is DBNull)) beData.Sub_E_PR_5 = Convert.ToDouble(reader[80]);
+                    if (!(reader[81] is DBNull)) beData.Sub_E_PR_6 = Convert.ToDouble(reader[81]);
+                    if (!(reader[82] is DBNull)) beData.Sub_E_PR_7 = Convert.ToDouble(reader[82]);
+                    if (!(reader[83] is DBNull)) beData.Sub_E_PR_8 = Convert.ToDouble(reader[83]);
+                    if (!(reader[84] is DBNull)) beData.Sub_E_PR_9 = Convert.ToDouble(reader[84]);
+                    if (!(reader[85] is DBNull)) beData.Sub_E_PR_10 = Convert.ToDouble(reader[85]);
+                    if (!(reader[86] is DBNull)) beData.Sub_E_PR_11 = Convert.ToDouble(reader[86]);
+                    if (!(reader[87] is DBNull)) beData.Sub_E_PR_12 = Convert.ToDouble(reader[87]);
+                    if (!(reader[88] is DBNull)) beData.Sub_E_GP_1 = Convert.ToDouble(reader[88]);
+                    if (!(reader[89] is DBNull)) beData.Sub_E_GP_2 = Convert.ToDouble(reader[89]);
+                    if (!(reader[90] is DBNull)) beData.Sub_E_GP_3 = Convert.ToDouble(reader[90]);
+                    if (!(reader[91] is DBNull)) beData.Sub_E_GP_4 = Convert.ToDouble(reader[91]);
+                    if (!(reader[92] is DBNull)) beData.Sub_E_GP_5 = Convert.ToDouble(reader[92]);
+                    if (!(reader[93] is DBNull)) beData.Sub_E_GP_6 = Convert.ToDouble(reader[93]);
+                    if (!(reader[94] is DBNull)) beData.Sub_E_GP_7 = Convert.ToDouble(reader[94]);
+                    if (!(reader[95] is DBNull)) beData.Sub_E_GP_8 = Convert.ToDouble(reader[95]);
+                    if (!(reader[96] is DBNull)) beData.Sub_E_GP_9 = Convert.ToDouble(reader[96]);
+                    if (!(reader[97] is DBNull)) beData.Sub_E_GP_10 = Convert.ToDouble(reader[97]);
+                    if (!(reader[98] is DBNull)) beData.Sub_E_GP_11 = Convert.ToDouble(reader[98]);
+                    if (!(reader[99] is DBNull)) beData.Sub_E_GP_12 = Convert.ToDouble(reader[99]);
+                    if (!(reader[100] is DBNull)) beData.Sub_E_Grade_1 = Convert.ToString(reader[100]);
+                    if (!(reader[101] is DBNull)) beData.Sub_E_Grade_2 = Convert.ToString(reader[101]);
+                    if (!(reader[102] is DBNull)) beData.Sub_E_Grade_3 = Convert.ToString(reader[102]);
+                    if (!(reader[103] is DBNull)) beData.Sub_E_Grade_4 = Convert.ToString(reader[103]);
+                    if (!(reader[104] is DBNull)) beData.Sub_E_Grade_5 = Convert.ToString(reader[104]);
+                    if (!(reader[105] is DBNull)) beData.Sub_E_Grade_6 = Convert.ToString(reader[105]);
+                    if (!(reader[106] is DBNull)) beData.Sub_E_Grade_7 = Convert.ToString(reader[106]);
+                    if (!(reader[107] is DBNull)) beData.Sub_E_Grade_8 = Convert.ToString(reader[107]);
+                    if (!(reader[108] is DBNull)) beData.Sub_E_Grade_9 = Convert.ToString(reader[108]);
+                    if (!(reader[109] is DBNull)) beData.Sub_E_Grade_10 = Convert.ToString(reader[109]);
+                    if (!(reader[110] is DBNull)) beData.Sub_E_Grade_11 = Convert.ToString(reader[110]);
+                    if (!(reader[111] is DBNull)) beData.Sub_E_Grade_12 = Convert.ToString(reader[111]);
+
+                    if (!(reader[112] is DBNull)) beData.Sub_E_TH_Grade_1 = Convert.ToString(reader[112]);
+                    if (!(reader[113] is DBNull)) beData.Sub_E_TH_Grade_2 = Convert.ToString(reader[113]);
+                    if (!(reader[114] is DBNull)) beData.Sub_E_TH_Grade_3 = Convert.ToString(reader[114]);
+                    if (!(reader[115] is DBNull)) beData.Sub_E_TH_Grade_4 = Convert.ToString(reader[115]);
+                    if (!(reader[116] is DBNull)) beData.Sub_E_TH_Grade_5 = Convert.ToString(reader[116]);
+                    if (!(reader[117] is DBNull)) beData.Sub_E_TH_Grade_6 = Convert.ToString(reader[117]);
+                    if (!(reader[118] is DBNull)) beData.Sub_E_TH_Grade_7 = Convert.ToString(reader[118]);
+                    if (!(reader[119] is DBNull)) beData.Sub_E_TH_Grade_8 = Convert.ToString(reader[119]);
+                    if (!(reader[120] is DBNull)) beData.Sub_E_TH_Grade_9 = Convert.ToString(reader[120]);
+                    if (!(reader[121] is DBNull)) beData.Sub_E_TH_Grade_10 = Convert.ToString(reader[121]);
+                    if (!(reader[122] is DBNull)) beData.Sub_E_TH_Grade_11 = Convert.ToString(reader[122]);
+                    if (!(reader[123] is DBNull)) beData.Sub_E_TH_Grade_12 = Convert.ToString(reader[123]);
+                    if (!(reader[124] is DBNull)) beData.Sub_E_PR_Grade_1 = Convert.ToString(reader[124]);
+                    if (!(reader[125] is DBNull)) beData.Sub_E_PR_Grade_2 = Convert.ToString(reader[125]);
+                    if (!(reader[126] is DBNull)) beData.Sub_E_PR_Grade_3 = Convert.ToString(reader[126]);
+                    if (!(reader[127] is DBNull)) beData.Sub_E_PR_Grade_4 = Convert.ToString(reader[127]);
+                    if (!(reader[128] is DBNull)) beData.Sub_E_PR_Grade_5 = Convert.ToString(reader[128]);
+                    if (!(reader[129] is DBNull)) beData.Sub_E_PR_Grade_6 = Convert.ToString(reader[129]);
+                    if (!(reader[130] is DBNull)) beData.Sub_E_PR_Grade_7 = Convert.ToString(reader[130]);
+                    if (!(reader[131] is DBNull)) beData.Sub_E_PR_Grade_8 = Convert.ToString(reader[131]);
+                    if (!(reader[132] is DBNull)) beData.Sub_E_PR_Grade_9 = Convert.ToString(reader[132]);
+                    if (!(reader[133] is DBNull)) beData.Sub_E_PR_Grade_10 = Convert.ToString(reader[133]);
+                    if (!(reader[134] is DBNull)) beData.Sub_E_PR_Grade_11 = Convert.ToString(reader[134]);
+                    if (!(reader[135] is DBNull)) beData.Sub_E_PR_Grade_12 = Convert.ToString(reader[135]);
+
+
+                    if (!(reader[136] is DBNull)) beData.Sub_Cur_FTH = Convert.ToDouble(reader[136]);
+                    if (!(reader[137] is DBNull)) beData.Sub_Cur_FPR = Convert.ToDouble(reader[137]);
+                    if (!(reader[138] is DBNull)) beData.Sub_Cur_PTH = Convert.ToDouble(reader[138]);
+                    if (!(reader[139] is DBNull)) beData.Sub_Cur_PPR = Convert.ToDouble(reader[139]);
+                    if (!(reader[140] is DBNull)) beData.Sub_Cur_OTH = Convert.ToDouble(reader[140]);
+                    if (!(reader[141] is DBNull)) beData.Sub_Cur_OPR = Convert.ToDouble(reader[141]);
+                    if (!(reader[142] is DBNull)) beData.Sub_Cur_OM = Convert.ToString(reader[142]);
+                    if (!(reader[143] is DBNull)) beData.Sub_Cur_OTH_Str = Convert.ToString(reader[143]);
+                    if (!(reader[144] is DBNull)) beData.Sub_Cur_OPR_Str = Convert.ToString(reader[144]);
+
+                    if (!(reader[163] is DBNull)) beData.Sub_Exam1_Str = Convert.ToString(reader[163]);
+                    if (!(reader[164] is DBNull)) beData.Sub_Exam2_Str = Convert.ToString(reader[164]);
+                    if (!(reader[165] is DBNull)) beData.Sub_Exam3_Str = Convert.ToString(reader[165]);
+                    if (!(reader[166] is DBNull)) beData.Sub_Exam4_Str = Convert.ToString(reader[166]);
+                    if (!(reader[167] is DBNull)) beData.Sub_Exam5_Str = Convert.ToString(reader[167]);
+                    if (!(reader[168] is DBNull)) beData.Sub_Exam6_Str = Convert.ToString(reader[168]);
+                    if (!(reader[169] is DBNull)) beData.Sub_Exam7_Str = Convert.ToString(reader[169]);
+                    if (!(reader[170] is DBNull)) beData.Sub_Exam8_Str = Convert.ToString(reader[170]);
+                    if (!(reader[171] is DBNull)) beData.Sub_Exam9_Str = Convert.ToString(reader[171]);
+                    if (!(reader[172] is DBNull)) beData.Sub_Exam10_Str = Convert.ToString(reader[172]);
+                    if (!(reader[173] is DBNull)) beData.Sub_Exam11_Str = Convert.ToString(reader[173]);
+                    if (!(reader[174] is DBNull)) beData.Sub_Exam12_Str = Convert.ToString(reader[174]);
+
+                    dataColl.Find(p1 => p1.StudentId == sid).DetailsColl.Add(beData);
+                }
+                reader.Close();
+
+                if (!(cmd.Parameters[5].Value is DBNull))
+                    dataColl.ResponseMSG = Convert.ToString(cmd.Parameters[5].Value);
+
+                if (!(cmd.Parameters[6].Value is DBNull))
+                    dataColl.IsSuccess = Convert.ToBoolean(cmd.Parameters[6].Value);
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+        public AcademicLib.BE.Exam.Transaction.MarksEntryCollections getAllMarksEntry(int UserId, int EntityId)
+        {
+            AcademicLib.BE.Exam.Transaction.MarksEntryCollections dataColl = new AcademicLib.BE.Exam.Transaction.MarksEntryCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@EntityId", EntityId);
+            cmd.CommandText = "usp_GetAllMarksEntry";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.BE.Exam.Transaction.MarksEntry beData = new AcademicLib.BE.Exam.Transaction.MarksEntry();
+                    beData.MarksEntryId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ClassId = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.TeacherId = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.TestDate = reader.GetDateTime(3);
+                    if (!(reader[4] is DBNull)) beData.IsColumnwiseFocus = reader.GetBoolean(4);
+                    if (!(reader[5] is DBNull)) beData.SubjectId = reader.GetInt32(5);
+                    if (!(reader[6] is DBNull)) beData.FullMarksTH = reader.GetInt32(6);
+                    if (!(reader[7] is DBNull)) beData.FullMarksPR = reader.GetInt32(7);
+                    if (!(reader[8] is DBNull)) beData.PassMarksTH = reader.GetInt32(8);
+                    if (!(reader[9] is DBNull)) beData.PassMarksPR = reader.GetInt32(9);
+
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+        public AcademicLib.BE.Exam.Transaction.MarksEntry getMarksEntryById(int UserId, int EntityId, int TranId)
+        {
+            AcademicLib.BE.Exam.Transaction.MarksEntry beData = new AcademicLib.BE.Exam.Transaction.MarksEntry();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@TranId", TranId);
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@EntityId", EntityId);
+            cmd.CommandText = "usp_GetMarksEntryById";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    beData = new AcademicLib.BE.Exam.Transaction.MarksEntry();
+                    beData.MarksEntryId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ClassId = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.TeacherId = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.TestDate = reader.GetDateTime(3);
+                    if (!(reader[4] is DBNull)) beData.IsColumnwiseFocus = reader.GetBoolean(4);
+                    if (!(reader[5] is DBNull)) beData.SubjectId = reader.GetInt32(5);
+                    if (!(reader[6] is DBNull)) beData.FullMarksTH = reader.GetInt32(6);
+                    if (!(reader[7] is DBNull)) beData.FullMarksPR = reader.GetInt32(7);
+                    if (!(reader[8] is DBNull)) beData.PassMarksTH = reader.GetInt32(8);
+                    if (!(reader[9] is DBNull)) beData.PassMarksPR = reader.GetInt32(9);
+                }
+
+
+                reader.Close();
+                beData.IsSuccess = true;
+                beData.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                beData.IsSuccess = false;
+                beData.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return beData;
+        }
+        public ResponeValues DeleteById(int UserId, int EntityId, int MarksEntryId)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@EntityId", EntityId);
+            cmd.Parameters.AddWithValue("@MarksEntryId", MarksEntryId);
+            cmd.CommandText = "usp_DelMarksEntryById";
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.Parameters.Add("@ErrorNumber", System.Data.SqlDbType.Int);
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+            try
+            {
+                cmd.ExecuteNonQuery();
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[3].Value);
+
+                if (!(cmd.Parameters[4].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[4].Value);
+
+                if (!(cmd.Parameters[5].Value is DBNull))
+                    resVal.ErrorNumber = Convert.ToInt32(cmd.Parameters[5].Value);
+
+                if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
+                    resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
+
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+        public AcademicLib.API.Teacher.StudentForMarkEntryCollections getStudentForStudentWiseMarkEntry(int UserId,int AcademicYearId, int StudentId, int ExamTypeId, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null)
+        {
+            AcademicLib.API.Teacher.StudentForMarkEntryCollections dataColl = new API.Teacher.StudentForMarkEntryCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@StudentId", StudentId);            
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+            cmd.CommandText = "usp_GetStudentListForMarkEntryStudentWise";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.API.Teacher.StudentForMarkEntry beData = new API.Teacher.StudentForMarkEntry();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.AutoNumber = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.RollNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.Name = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.SymbolNo = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.CRTH = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.CRPR = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.FMTH = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.FMPR = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.PMTH = Convert.ToDouble(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.PMPR = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.PaperType = reader.GetInt32(14);
+                    if (!(reader[15] is DBNull)) beData.ObtainMarkTH = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.ObtainMarkPR = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.SubjectId = reader.GetInt32(17);
+                    if (!(reader[18] is DBNull)) beData.SubjectName = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.Remarks = reader.GetString(19);
+                    if (!(reader[20] is DBNull)) beData.SubjectRemarks = reader.GetString(20);
+                    
+                    try
+                    {
+                        double thVal = 0, prVal = 0;
+                        double.TryParse(beData.ObtainMarkTH, out thVal);
+                        if (thVal != 0)
+                            beData.ObtainMarkTH = thVal.ToString();
+
+                        double.TryParse(beData.ObtainMarkPR, out prVal);
+                        if (prVal != 0)
+                            beData.ObtainMarkPR = prVal.ToString();
+
+                        if (beData.ObtainMarkTH == "0")
+                            beData.ObtainMarkTH = "";
+
+                        if (beData.ObtainMarkPR == "0")
+                            beData.ObtainMarkPR = "";
+                    }
+                    catch { }
+
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Teacher.StudentForMarkEntryCollections getStudentForStudentWiseReMarkEntry(int UserId, int StudentId, int ExamTypeId,int ReExamTypeId,int AcademicYearId, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null)
+        {
+            AcademicLib.API.Teacher.StudentForMarkEntryCollections dataColl = new API.Teacher.StudentForMarkEntryCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@StudentId", StudentId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@ReExamTypeId", ReExamTypeId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+            cmd.CommandText = "usp_GetStudentListForReMarkEntryStudentWise";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.API.Teacher.StudentForMarkEntry beData = new API.Teacher.StudentForMarkEntry();
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.AutoNumber = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.RollNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.Name = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.RegdNo = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.BoardRegdNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.SymbolNo = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.CRTH = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.CRPR = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.FMTH = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.FMPR = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.PMTH = Convert.ToDouble(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.PMPR = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.PaperType = reader.GetInt32(14);
+                    if (!(reader[15] is DBNull)) beData.ObtainMarkTH = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.ObtainMarkPR = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.SubjectId = reader.GetInt32(17);
+                    if (!(reader[18] is DBNull)) beData.SubjectName = reader.GetString(18);
+
+                    try
+                    {
+                        double thVal = 0, prVal = 0;
+                        double.TryParse(beData.ObtainMarkTH, out thVal);
+                        if (thVal != 0)
+                            beData.ObtainMarkTH = thVal.ToString();
+
+                        double.TryParse(beData.ObtainMarkPR, out prVal);
+                        if (prVal != 0)
+                            beData.ObtainMarkPR = prVal.ToString();
+
+                        if (beData.ObtainMarkTH == "0")
+                            beData.ObtainMarkTH = "";
+
+                        if (beData.ObtainMarkPR == "0")
+                            beData.ObtainMarkPR = "";
+                    }
+                    catch { }
+
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.RE.Exam.StudentForExamCollections getStudentListForExam(int UserId,int AcademicYearId, int ClassId,int? SectionId,int ExamTypeId,int? SubjectId, bool FilterSection, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null)
+        {
+            AcademicLib.RE.Exam.StudentForExamCollections dataColl = new RE.Exam.StudentForExamCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
+            cmd.Parameters.AddWithValue("@FilterSection", FilterSection);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+            cmd.CommandText = "usp_GetStudentListForExam";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.StudentForExam beData = new AcademicLib.RE.Exam.StudentForExam();
+                    if (!(reader[0] is DBNull)) beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.AutoNumber = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.RegNo = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.BoardRegNo = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.BoardName = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.Name = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.RollNo = reader.GetInt32(6);
+                    if (!(reader[7] is DBNull)) beData.ClassName = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.SectionName = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.SymbolNo = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.SubjectDetails = reader.GetString(10);
+                    if (!(reader[11] is DBNull)) beData.SubjectCodeDetails = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.SubjectDetailsWExamDate = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.SubjectDetailsWExamDateTime = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.TotalSubject = Convert.ToInt32(reader[14]);
+
+                    if (!(reader[15] is DBNull)) beData.Room = Convert.ToString(reader[15]);
+                    if (!(reader[16] is DBNull)) beData.RowName = Convert.ToString(reader[16]);
+                    if (!(reader[17] is DBNull)) beData.BenchNo = Convert.ToInt32(reader[17]);
+                    if (!(reader[18] is DBNull)) beData.BenchOrdinalNo = Convert.ToString(reader[18]);
+                    if (!(reader[19] is DBNull)) beData.SeatCol = Convert.ToInt32(reader[19]);
+                    if (!(reader[20] is DBNull)) beData.ExamShiftName = Convert.ToString(reader[20]);
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.RE.Exam.StudentForExamCollections getStudentListForReExam(int UserId,int AcademicYearId, int ClassId, int? SectionId, int ExamTypeId,int ReExamTypeId,int? SubjectId, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null)
+        {
+            AcademicLib.RE.Exam.StudentForExamCollections dataColl = new RE.Exam.StudentForExamCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@ReExamTypeId", ReExamTypeId);
+            cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+            cmd.CommandText = "usp_GetStudentListForReExam";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.StudentForExam beData = new AcademicLib.RE.Exam.StudentForExam();
+                    if (!(reader[0] is DBNull)) beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.AutoNumber = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.RegNo = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.BoardRegNo = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.BoardName = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.Name = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.RollNo = reader.GetInt32(6);
+                    if (!(reader[7] is DBNull)) beData.ClassName = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.SectionName = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.SymbolNo = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.SubjectDetails = reader.GetString(10);
+                    if (!(reader[11] is DBNull)) beData.SubjectCodeDetails = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.SubjectDetailsWExamDate = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.SubjectDetailsWExamDateTime = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.TotalSubject = Convert.ToInt32(reader[14]);
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+        public AcademicLib.RE.Exam.MarkSubmitCollections getMarkSubmit(int UserId,int AcademicYearId, int ExamTypeId)
+        {
+            AcademicLib.RE.Exam.MarkSubmitCollections dataColl = new RE.Exam.MarkSubmitCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_GetMarkSubmitList";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.MarkSubmit beData = new RE.Exam.MarkSubmit();
+                    if (!(reader[0] is DBNull)) beData.ClassName = reader.GetString(0);
+                    if (!(reader[1] is DBNull)) beData.SectionName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SubjectName = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.IsPending = reader.GetBoolean(3);
+                    if (!(reader[4] is DBNull)) beData.SubmitDateTime_AD = reader.GetDateTime(4);
+                    if (!(reader[5] is DBNull)) beData.SubmitDate_BS = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.UserName = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.ClassTeacher = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.SubjectTeacherName = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.TeacherContactNo = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.UserId = reader.GetInt32(10);
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Student.MarkSheetTemplate getMarkSheetTemplateTranId(int UserId,int AcademicYearId)
+        {
+            AcademicLib.API.Student.MarkSheetTemplate beData = new API.Student.MarkSheetTemplate();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_GeneralMarkSheetTemplate";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {                    
+                    if (!(reader[0] is DBNull)) beData.MarkSheetId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.GroupMarkSheetId = reader.GetInt32(1);                    
+                }
+                reader.Close();                
+
+            }
+            catch (Exception ee)
+            {
+                throw ee;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return beData;
+        }
+
+
+        public AcademicLib.API.Admin.ClassWiseTopCollections admin_ClassWiseTop(int UserId, int ClassId,int ExamTypeId,int top)
+        {
+            AcademicLib.API.Admin.ClassWiseTopCollections dataColl = new API.Admin.ClassWiseTopCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@Top", top);
+            cmd.CommandText = "usp_Admin_ClassWiseTopper";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                do
+                {
+                    while (reader.Read())
+                    {
+                        AcademicLib.API.Admin.ClassWiseTop beData = new API.Admin.ClassWiseTop();
+                        if (!(reader[0] is DBNull)) beData.ClassId = reader.GetInt32(0);
+                        if (!(reader[1] is DBNull)) beData.SectionId = reader.GetInt32(1);
+                        if (!(reader[2] is DBNull)) beData.ExamTypeId = reader.GetInt32(2);
+                        if (!(reader[3] is DBNull)) beData.StudentType = reader.GetString(3);
+                        if (!(reader[4] is DBNull)) beData.ExamType = reader.GetString(4);
+                        if (!(reader[5] is DBNull)) beData.ClassName = reader.GetString(5);
+                        if (!(reader[6] is DBNull)) beData.SectionName = reader.GetString(6);
+                        if (!(reader[7] is DBNull)) beData.Name = reader.GetString(7);
+                        if (!(reader[8] is DBNull)) beData.RollNo = reader.GetInt32(8);
+                        if (!(reader[9] is DBNull)) beData.RegNo = reader.GetString(9);
+                        if (!(reader[10] is DBNull)) beData.RankInClass = reader.GetInt32(10);
+                        if (!(reader[11] is DBNull)) beData.RankInSection = reader.GetInt32(11);
+                        if (!(reader[12] is DBNull)) beData.GPA = Convert.ToDouble(reader[12]);
+                        if (!(reader[13] is DBNull)) beData.Grade = reader.GetString(13);
+                        if (!(reader[14] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[14]);
+                        if (!(reader[15] is DBNull)) beData.ObtainPer = Convert.ToDouble(reader[15]);
+                        dataColl.Add(beData);
+                    }
+
+                } while (reader.NextResult());
+                
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Admin.SubjectWiseTopCollections admin_SubjectWiseTop(int UserId, int ClassId,int? SectionId, int ExamTypeId, int top)
+        {
+            AcademicLib.API.Admin.SubjectWiseTopCollections dataColl = new API.Admin.SubjectWiseTopCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.Parameters.AddWithValue("@Top", top);
+            cmd.CommandText = "usp_Admin_SubjectWiseTopper";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                do
+                {
+                    while (reader.Read())
+                    {
+                        AcademicLib.API.Admin.SubjectWiseTop beData = new API.Admin.SubjectWiseTop();
+                        if (!(reader[0] is DBNull)) beData.RankInClass = reader.GetInt32(0);
+                        if (!(reader[0] is DBNull)) beData.RankInSection = reader.GetInt32(0);
+                        if (!(reader[1] is DBNull)) beData.SubjectName = reader.GetString(1);
+                        if (!(reader[2] is DBNull)) beData.SubjectSNo = reader.GetInt32(2);
+                        if (!(reader[3] is DBNull)) beData.ClassId = reader.GetInt32(3);
+                        if (!(reader[4] is DBNull)) beData.SectionId = reader.GetInt32(4);
+                        if (!(reader[5] is DBNull)) beData.ExamTypeId = reader.GetInt32(5);
+                        if (!(reader[6] is DBNull)) beData.StudentType = reader.GetString(6);
+                        if (!(reader[7] is DBNull)) beData.ExamType = reader.GetString(7);
+                        if (!(reader[8] is DBNull)) beData.ClassName = reader.GetString(8);
+                        if (!(reader[9] is DBNull)) beData.SectionName = reader.GetString(9);
+                        if (!(reader[10] is DBNull)) beData.Name = reader.GetString(10);
+                        if (!(reader[11] is DBNull)) beData.RollNo = reader.GetInt32(11);
+                        if (!(reader[12] is DBNull)) beData.RegNo = reader.GetString(12);                   
+                        if (!(reader[13] is DBNull)) beData.GPA = Convert.ToDouble(reader[13]);
+                        if (!(reader[14] is DBNull)) beData.Grade = reader.GetString(14);
+                        if (!(reader[15] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[15]);
+                        if (!(reader[16] is DBNull)) beData.ObtainPer = Convert.ToDouble(reader[16]);
+                        dataColl.Add(beData);
+                    }
+
+                } while (reader.NextResult());
+
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Admin.ClassWiseTopCollections admin_ExamWiseTop(int UserId, int top,int? AcademicYearId)
+        {
+            AcademicLib.API.Admin.ClassWiseTopCollections dataColl = new API.Admin.ClassWiseTopCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);      
+            cmd.Parameters.AddWithValue("@Top", top);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_Admin_ExamWiseTopper";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                do
+                {
+                    while (reader.Read())
+                    {
+                        AcademicLib.API.Admin.ClassWiseTop beData = new API.Admin.ClassWiseTop();
+                        if (!(reader[0] is DBNull)) beData.RankInClass = reader.GetInt32(0);
+                        if (!(reader[0] is DBNull)) beData.RankInSection = reader.GetInt32(0);
+                        if (!(reader[1] is DBNull)) beData.ClassId = reader.GetInt32(1);
+                        if (!(reader[2] is DBNull)) beData.SectionId = reader.GetInt32(2);
+                        if (!(reader[3] is DBNull)) beData.ExamTypeId = reader.GetInt32(3);
+                        if (!(reader[4] is DBNull)) beData.StudentType = reader.GetString(4);
+                        if (!(reader[5] is DBNull)) beData.ExamType = reader.GetString(5);
+                        if (!(reader[6] is DBNull)) beData.ClassName = reader.GetString(6);
+                        if (!(reader[7] is DBNull)) beData.SectionName = reader.GetString(7);
+                        if (!(reader[8] is DBNull)) beData.Name = reader.GetString(8);
+                        if (!(reader[9] is DBNull)) beData.RollNo = reader.GetInt32(9);
+                        if (!(reader[10] is DBNull)) beData.RegNo = reader.GetString(10);                       
+                        if (!(reader[11] is DBNull)) beData.GPA = Convert.ToDouble(reader[11]);
+                        if (!(reader[12] is DBNull)) beData.Grade = reader.GetString(12);
+                        if (!(reader[13] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[13]);
+                        if (!(reader[14] is DBNull)) beData.ObtainPer = Convert.ToDouble(reader[14]);
+                        dataColl.Add(beData);
+                    }
+
+                } while (reader.NextResult());
+
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Admin.ExamWiseEvaluationCollections admin_ExamWiseEvaluation(int UserId, int ExamTypeId)
+        {
+            AcademicLib.API.Admin.ExamWiseEvaluationCollections dataColl = new API.Admin.ExamWiseEvaluationCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.CommandText = "usp_Admin_ExamWiseEvaluation";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                do
+                {
+                    while (reader.Read())
+                    {
+                        AcademicLib.API.Admin.ExamWiseEvaluation beData = new API.Admin.ExamWiseEvaluation();
+                        if (!(reader[0] is DBNull)) beData.ExamTypeId = reader.GetInt32(0);
+                        if (!(reader[1] is DBNull)) beData.ClassId = reader.GetInt32(1);
+                        if (!(reader[2] is DBNull)) beData.SectionId = reader.GetInt32(2);                        
+                        if (!(reader[3] is DBNull)) beData.ExamTypeName = reader.GetString(3);
+                        if (!(reader[4] is DBNull)) beData.ClassName = reader.GetString(4);
+                        if (!(reader[5] is DBNull)) beData.SectionName = reader.GetString(5);
+                        if (!(reader[6] is DBNull)) beData.NoOfStudent = Convert.ToInt32(reader[6]);
+                        if (!(reader[7] is DBNull)) beData.NoOfPass = Convert.ToInt32(reader[7]);
+                        if (!(reader[8] is DBNull)) beData.NoOfFail = Convert.ToInt32(reader[8]);
+                        if (!(reader[9] is DBNull)) beData.PassPer = Convert.ToDouble(reader[9]);
+                        if (!(reader[10] is DBNull)) beData.FailPer = Convert.ToDouble(reader[10]);
+                        dataColl.Add(beData);
+                    }
+
+                } while (reader.NextResult());
+
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Admin.ExamGradeWiseEvaluationCollections admin_ExamGradeWiseEvaluation(int UserId, int ExamTypeId)
+        {
+            AcademicLib.API.Admin.ExamGradeWiseEvaluationCollections dataColl = new API.Admin.ExamGradeWiseEvaluationCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.CommandText = "usp_Admin_ExamGradeWiseEvaluation";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                do
+                {
+                    while (reader.Read())
+                    {
+                        AcademicLib.API.Admin.ExamGradeWiseEvaluation beData = new API.Admin.ExamGradeWiseEvaluation();
+                        if (!(reader[0] is DBNull)) beData.ExamTypeId = reader.GetInt32(0);
+                        if (!(reader[1] is DBNull)) beData.ClassId = reader.GetInt32(1);
+                        if (!(reader[2] is DBNull)) beData.SectionId = reader.GetInt32(2);
+                        if (!(reader[3] is DBNull)) beData.ExamTypeName = reader.GetString(3);
+                        if (!(reader[4] is DBNull)) beData.ClassName = reader.GetString(4);
+                        if (!(reader[5] is DBNull)) beData.SectionName = reader.GetString(5);
+                        if (!(reader[6] is DBNull)) beData.Grade = reader.GetString(6);
+                        if (!(reader[7] is DBNull)) beData.NoOfStudent = Convert.ToInt32(reader[7]);                       
+                        dataColl.Add(beData);
+                    }
+
+                } while (reader.NextResult());
+
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Admin.ClassWiseEvaluationCollections admin_ClassWiseEvaluation(int UserId,int ClassId,int? SectionId, int ExamTypeId)
+        {
+            AcademicLib.API.Admin.ClassWiseEvaluationCollections dataColl = new API.Admin.ClassWiseEvaluationCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.CommandText = "usp_admin_ClassWiseEvaluation";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                do
+                {
+                    while (reader.Read())
+                    {
+                        AcademicLib.API.Admin.ClassWiseEvaluation beData = new API.Admin.ClassWiseEvaluation();
+                        if (!(reader[0] is DBNull)) beData.ClassId = reader.GetInt32(0);
+                        if (!(reader[1] is DBNull)) beData.SectionId = reader.GetInt32(1);
+                        if (!(reader[2] is DBNull)) beData.ExamTypeId = reader.GetInt32(2);
+                        if (!(reader[3] is DBNull)) beData.StudentId = reader.GetInt32(3);
+                        if (!(reader[4] is DBNull)) beData.RollNo = reader.GetInt32(4);
+                        if (!(reader[5] is DBNull)) beData.RegNo = reader.GetString(5);
+                        if (!(reader[6] is DBNull)) beData.Name = reader.GetString(6);
+                        if (!(reader[7] is DBNull)) beData.FatherName = reader.GetString(7);
+                        if (!(reader[8] is DBNull)) beData.ContactNo = reader.GetString(8);
+                        if (!(reader[9] is DBNull)) beData.ClassName = reader.GetString(9);
+                        if (!(reader[10] is DBNull)) beData.SectionName = reader.GetString(10);
+                        if (!(reader[11] is DBNull)) beData.PhotoPath = reader.GetString(11);
+                        if (!(reader[12] is DBNull)) beData.ObtainMark = Convert.ToInt32(reader[12]);
+                        if (!(reader[13] is DBNull)) beData.Per = Convert.ToInt32(reader[13]);
+                        if (!(reader[14] is DBNull)) beData.Division = reader.GetString(14);
+                        if (!(reader[15] is DBNull)) beData.Grade = reader.GetString(15);
+                        if (!(reader[16] is DBNull)) beData.GPA = Convert.ToInt32(reader[16]);
+                        if (!(reader[17] is DBNull)) beData.RankInClass = Convert.ToInt32(reader[17]);
+                        if (!(reader[18] is DBNull)) beData.RankInSection = Convert.ToInt32(reader[18]);
+                        if (!(reader[19] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[19]);
+                        
+                        dataColl.Add(beData);
+                    }
+
+                } while (reader.NextResult());
+
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.API.Admin.SubjectWiseEvaluationCollections admin_SubjectWiseEvaluation(int UserId, int ClassId, int? SectionId, int ExamTypeId)
+        {
+            AcademicLib.API.Admin.SubjectWiseEvaluationCollections dataColl = new API.Admin.SubjectWiseEvaluationCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.CommandText = "usp_admin_SubjectWiseEvaluation";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                do
+                {
+                    while (reader.Read())
+                    {
+                        AcademicLib.API.Admin.SubjectWiseEvaluation beData = new API.Admin.SubjectWiseEvaluation();
+                        if (!(reader[0] is DBNull)) beData.SNo = reader.GetInt32(0);
+                        if (!(reader[1] is DBNull)) beData.SubjectName = reader.GetString(1);
+                        if (!(reader[2] is DBNull)) beData.NoOfStudent = Convert.ToInt32(reader[2]);
+                        if (!(reader[3] is DBNull)) beData.NoOfPass = Convert.ToInt32(reader[3]);
+                        if (!(reader[4] is DBNull)) beData.NoOfFail = Convert.ToInt32(reader[4]);
+                        if (!(reader[5] is DBNull)) beData.PassPer = Convert.ToDouble(reader[5]);
+                        if (!(reader[6] is DBNull)) beData.FailPer = Convert.ToDouble(reader[6]);
+                        
+
+                        dataColl.Add(beData);
+                    }
+
+                } while (reader.NextResult());
+
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.RE.Exam.StudentResultCollections getStudentResult(int UserId,int AcademicYearId, int StudentId)
+        {
+            AcademicLib.RE.Exam.StudentResultCollections dataColl = new RE.Exam.StudentResultCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@StudentId", StudentId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_GetExamDetailsForQuickAccess";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.StudentResult beData = new RE.Exam.StudentResult();
+                    if (!(reader[0] is DBNull)) beData.ExamOrderNo = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ExamTypeId = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.ExamTypeName = Convert.ToString(reader[2]);
+                    if (!(reader[3] is DBNull)) beData.FM = Convert.ToDouble(reader[3]);
+                    if (!(reader[4] is DBNull)) beData.PM = Convert.ToDouble(reader[4]);
+                    if (!(reader[5] is DBNull)) beData.OM = Convert.ToDouble(reader[5]);
+                    if (!(reader[6] is DBNull)) beData.Per = Convert.ToDouble(reader[6]);
+                    if (!(reader[7] is DBNull)) beData.Division = Convert.ToString(reader[7]);
+                    if (!(reader[8] is DBNull)) beData.GPA = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.Grade = Convert.ToString(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.RankInClass = Convert.ToInt32(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.RankInSection = Convert.ToInt32(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.Result = Convert.ToString(reader[12]);
+                    dataColl.Add(beData);
+                }
+                reader.NextResult();
+                while (reader.Read())
+                {
+                    int etId = 0;
+                    AcademicLib.RE.Exam.StudentSubjectResult beData = new RE.Exam.StudentSubjectResult();
+                    etId= reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.SubjectName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SNo = Convert.ToInt32(reader[2]);
+                    if (!(reader[3] is DBNull)) beData.FM = Convert.ToDouble(reader[3]);
+                    if (!(reader[4] is DBNull)) beData.PM = Convert.ToDouble(reader[4]);
+                    if (!(reader[5] is DBNull)) beData.OM = Convert.ToDouble(reader[5]);
+                    if (!(reader[6] is DBNull)) beData.Per = Convert.ToDouble(reader[6]);
+                    if (!(reader[7] is DBNull)) beData.Grade = Convert.ToString(reader[7]);
+                    if (!(reader[8] is DBNull)) beData.GP = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.SubjectId = Convert.ToInt32(reader[9]);
+                    dataColl.Find(p1 => p1.ExamTypeId == etId).SubjectMarkColl.Add(beData);
+                }
+                reader.NextResult();
+                List<RE.Exam.StudentSubject> tmpSubjectList = new List<RE.Exam.StudentSubject>();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.StudentSubject beData = new RE.Exam.StudentSubject();
+                    if (!(reader[1] is DBNull)) beData.SubjectId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.SubjectName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SNo = Convert.ToInt32(reader[2]);
+                    if (!(reader[3] is DBNull)) beData.AOM = Convert.ToDouble(reader[3]);
+                    if (!(reader[4] is DBNull)) beData.APer = Convert.ToDouble(reader[4]);
+                    tmpSubjectList.Add(beData);
+                }
+
+                foreach (var v in dataColl)
+                    v.SubjectList = tmpSubjectList;
+
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public AcademicLib.RE.Exam.StudentResultCollections getStudentGroupResult(int UserId, int StudentId)
+        {
+            AcademicLib.RE.Exam.StudentResultCollections dataColl = new RE.Exam.StudentResultCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@StudentId", StudentId);
+            cmd.CommandText = "usp_GetExamGroupDetailsForQuickAccess";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.StudentResult beData = new RE.Exam.StudentResult();
+                    if (!(reader[0] is DBNull)) beData.ExamOrderNo = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.ExamTypeId = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.ExamTypeName = Convert.ToString(reader[2]);
+                    if (!(reader[3] is DBNull)) beData.FM = Convert.ToDouble(reader[3]);
+                    if (!(reader[4] is DBNull)) beData.PM = Convert.ToDouble(reader[4]);
+                    if (!(reader[5] is DBNull)) beData.OM = Convert.ToDouble(reader[5]);
+                    if (!(reader[6] is DBNull)) beData.Per = Convert.ToDouble(reader[6]);
+                    if (!(reader[7] is DBNull)) beData.Division = Convert.ToString(reader[7]);
+                    if (!(reader[8] is DBNull)) beData.GPA = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.Grade = Convert.ToString(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.RankInClass = Convert.ToInt32(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.RankInSection = Convert.ToInt32(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.Result = Convert.ToString(reader[12]);
+                    dataColl.Add(beData);
+                }
+                reader.NextResult();
+                while (reader.Read())
+                {
+                    int etId = 0;
+                    AcademicLib.RE.Exam.StudentSubjectResult beData = new RE.Exam.StudentSubjectResult();
+                    etId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.SubjectName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SNo = Convert.ToInt32(reader[2]);
+                    if (!(reader[3] is DBNull)) beData.FM = Convert.ToDouble(reader[3]);
+                    if (!(reader[4] is DBNull)) beData.PM = Convert.ToDouble(reader[4]);
+                    if (!(reader[5] is DBNull)) beData.OM = Convert.ToDouble(reader[5]);
+                    if (!(reader[6] is DBNull)) beData.Per = Convert.ToDouble(reader[6]);
+                    if (!(reader[7] is DBNull)) beData.Grade = Convert.ToString(reader[7]);
+                    if (!(reader[8] is DBNull)) beData.GP = Convert.ToDouble(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.SubjectId = Convert.ToInt32(reader[9]);
+                    dataColl.Find(p1 => p1.ExamTypeId == etId).SubjectMarkColl.Add(beData);
+                }
+                reader.NextResult();
+                List<RE.Exam.StudentSubject> tmpSubjectList = new List<RE.Exam.StudentSubject>();
+                while (reader.Read())
+                {
+                    AcademicLib.RE.Exam.StudentSubject beData = new RE.Exam.StudentSubject();
+                    if (!(reader[1] is DBNull)) beData.SubjectId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.SubjectName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.SNo = Convert.ToInt32(reader[2]);
+                    if (!(reader[3] is DBNull)) beData.AOM = Convert.ToDouble(reader[3]);
+                    if (!(reader[4] is DBNull)) beData.APer = Convert.ToDouble(reader[4]);
+                    tmpSubjectList.Add(beData);
+                }
+
+                foreach (var v in dataColl)
+                    v.SubjectList = tmpSubjectList;
+
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+
+        public AcademicLib.API.Teacher.ExamWiseCommentCollections getStudentForTeacherComment(int UserId, int ClassId,int? SectionId,int? AcademicYearId,int ExamTypeId)
+        {
+            AcademicLib.API.Teacher.ExamWiseCommentCollections dataColl = new API.Teacher.ExamWiseCommentCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@ExamTypeId", ExamTypeId);
+            cmd.CommandText = "usp_GetMarkSummaryForRemarks";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    AcademicLib.API.Teacher.ExamWiseComment beData = new API.Teacher.ExamWiseComment();                    
+                    beData.ExamTypeId = ExamTypeId;
+                    if (!(reader[0] is DBNull)) beData.StudentId = Convert.ToInt32(reader[0]);
+                    if (!(reader[1] is DBNull)) beData.AutoNumber = Convert.ToInt32(reader[1]);
+                    if (!(reader[2] is DBNull)) beData.RegNo = Convert.ToString(reader[2]);
+                    if (!(reader[3] is DBNull)) beData.Name = Convert.ToString(reader[3]);
+                    if (!(reader[4] is DBNull)) beData.ClassName = Convert.ToString(reader[4]);
+                    if (!(reader[5] is DBNull)) beData.SectionName = Convert.ToString(reader[5]);
+                    if (!(reader[6] is DBNull)) beData.RollNo = Convert.ToInt32(reader[6]);
+                    if (!(reader[7] is DBNull)) beData.PhotoPath = Convert.ToString(reader[7]);
+                    if (!(reader[8] is DBNull)) beData.SymbolNo = Convert.ToString(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.FM = Convert.ToDouble(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.PM = Convert.ToDouble(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.ObtainMark = Convert.ToDouble(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.TotalFail = Convert.ToInt32(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.ObtainPer = Convert.ToDouble(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.AVGGP = Convert.ToDouble(reader[14]);
+                    if (!(reader[15] is DBNull)) beData.Division = Convert.ToString(reader[15]);
+                    if (!(reader[16] is DBNull)) beData.Grade = Convert.ToString(reader[16]);
+                    if (!(reader[17] is DBNull)) beData.GP_Grade = Convert.ToString(reader[17]);
+                    if (!(reader[18] is DBNull)) beData.IsFail = Convert.ToBoolean(reader[18]);
+                    if (!(reader[19] is DBNull)) beData.RankInClass = Convert.ToInt32(reader[19]);
+                    if (!(reader[20] is DBNull)) beData.RankInSection = Convert.ToInt32(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.WorkingDays = Convert.ToInt32(reader[21]);
+                    if (!(reader[22] is DBNull)) beData.PresentDays = Convert.ToInt32(reader[22]);
+                    if (!(reader[23] is DBNull)) beData.Result = Convert.ToString(reader[23]);
+                    if (!(reader[24] is DBNull)) beData.TeacherComment = Convert.ToString(reader[24]);
+                    dataColl.Add(beData);
+                }
+                
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public ResponeValue UpdateExamComment(int UserId, AcademicLib.API.Teacher.ExamWiseCommentCollections dataColl)
+        {
+            ResponeValue resVal = new ResponeValue();
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+        
+            try
+            {
+                
+                foreach(var beData in dataColl)
+                {
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@UserId", UserId);
+                    cmd.Parameters.AddWithValue("@StudentId", beData.StudentId);
+                    cmd.Parameters.AddWithValue("@ExamTypeId", beData.ExamTypeId);
+                    cmd.Parameters.AddWithValue("@TeacherComment", beData.TeacherComment);                    
+                    cmd.CommandText = "usp_UpdateExamCommentOfStudent";
+                    cmd.ExecuteNonQuery();
+                }
+                resVal.IsSuccess = true;
+                resVal.ResponseMSG = "Comment Updated Success";
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+    }
+}

@@ -1,0 +1,458 @@
+﻿<script>
+    var remarksNotificationEntity =@Convert.ToInt32(AcademicLib.BE.Global.NOTIFICATION_ENTITY.STUDENT_REMARKS);
+     var remarksSMSEntity=@Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.StudentRemarks);
+</script>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+@*<script src="~/jslib/export/html2canvas.js"></script>*@
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+
+<script src="~/jslib/Academic/StudentRemarks.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="StudentRemarksController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel" aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active"
+                                               id="home-tab"
+                                               data-toggle="tab"
+                                               href="#home"
+                                               role="tab"
+                                               aria-controls="home"
+                                               aria-selected="true">Student Remarks</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="profile-tab"
+                                               data-toggle="tab"
+                                               href="#profile"
+                                               role="tab"
+                                               aria-controls="profile"
+                                               aria-selected="false">Remarks List</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                <div id="student-remarks-section">
+                                    <div class="row mt-2">
+                                        <div class="col-sm-8 col-lg-8 col-md-8">
+                                            <label class="sr-only"
+                                                   for="inlineFormInputGroup">Select Student</label>
+                                            <div class="input-group-prepend">
+                                                <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newStudentRemarks.SelectStudent">
+
+                                                    <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newStudentRemarks.SelectStudent">
+                                                        {{ss.text}}
+                                                    </option>
+                                                </select>
+                                                <select class="form-control select2 form-control-sm" all-student ng-model="newStudentRemarks.StudentId" student-detail="newStudentRemarks.StudentDetails" side-bar-data="newStudentRemarks.SideBarData" search-by="newStudentRemarks.SelectStudent" confirm-action="GetRemarks()" class-id="newStudentRemarks.SelectedClass.ClassId" section-id="newStudentRemarks.SelectedClass.SectionId">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        @*<div class="col-md-4">
+                                                <div class="float-right">
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;"> Save</button>
+                                                </div>
+                                            </div>*@
+                                    </div>
+                                    <div class="card p-0 mt-2">
+                                        <div class="table-scroll-x-y">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-center text-nowrap">
+                                                        <th style="width: 150px">Remarks For</th>
+                                                        <th style="width: 150px">Date</th>
+                                                        <th style="width: 200px">Remarks Type</th>
+                                                        <th style="width: 90px">Point</th>
+                                                        <th style="width: 250px">
+                                                            Remarks
+                                                            <input class="form-check-input ml-1"
+                                                                   type="checkbox" />
+                                                            <label class="form-check-label ml-4"
+                                                                   for="flexCheckDefault"
+                                                                   style="font-size: 10px">
+                                                                (Unicode)
+                                                            </label>
+
+
+                                                        </th>
+                                                        <th style="width: 150px">Attach Document</th>
+                                                        <th style="width: 90px">Action</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="sr in StudentRemarksList">
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="sr.RemarksFor">
+                                                                <option ng-value="rl.id" ng-repeat="rl  in RemarksForList" ng-selected="rl.id==sr.RemarksFor">{{rl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="sr.ForDate_TMP" date-detail="sr.ForDateDet" />
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="sr.RemarksTypeId">
+                                                                <option ng-value="rl.RemarksTypeId" ng-repeat="rl  in RemarksTypeList" ng-selected="rl.RemarksTypeId==sr.RemarksTypeId">{{rl.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="sr.Point" />
+                                                        </td>
+                                                        <td>
+                                                            <textarea cols="30" rows="1" class="form-control form-control-sm" ng-model="sr.Remarks"></textarea>
+                                                        </td>
+                                                        <td>
+                                                            <input ng-hide="sr.TranId>0" type="file" class="form-control form-control-sm" accept="image/png, image/gif, image/jpeg, image/jpg, application/pdf, application/msword"
+                                                                   style="padding: 1px" file-model ng-model="sr.AttachFile" />
+                                                            <a ng-show="sr.TranId>0 && sr.FilePath.length>0" class="p-1" href="#" ng-click="ShowPersonalImg(sr)">
+                                                                <i class="fas fa-eye text-secondary"></i>
+                                                            </a>
+                                                        </td>
+                                                        <td  class="text-center">
+                                                            <a ng-hide="sr.TranId>0" class="p-1" ng-click="SaveUpdateStudentRemarks(sr)">
+                                                                <i class="fas fa-save text-primary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="AddRowInRemarks($index)">
+                                                                <i class="fas fa-plus text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delRowInRemarks($index,sr)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="text-secondary"><b>Previous Record</b></label>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 17rem)">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead class=" text-nowrap">
+                                                        <tr>
+                                                            <th style="width: 70px;">S.No.</th>
+                                                            <th style="width: 160px;">Remarks For</th>
+                                                            <th style="width: 120px;">Date</th>
+                                                            <th style="width: 150px;">Remarks Type</th>
+                                                            <th style="width: 90px;">Point</th>
+                                                            <th style="width: 300px;">Remarks</th>
+                                                            <th style="width: 85px;">Document</th>
+                                                            <th style="width: 150px;">Create By</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="sr in PStudentRemarksList" ng-style="{
+        'background-color':
+            sr.RemarksFor === 'MERITS' ? '#ebf5e5' :
+            sr.RemarksFor === 'DEMERITS' ? '#fff3f4' :
+            sr.RemarksFor === 'OTHERS' ? '#e4f2ff' :
+            'transparent'
+    }">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{sr.RemarksFor}}</td>
+                                                            <td>{{sr.ForMiti}}</td>
+                                                            <td>{{sr.RemarsType}}</td>
+                                                            <td>{{sr.Point}}</td>
+                                                            <td>{{sr.Remarks}}</td>
+                                                            <td>
+                                                                <a ng-show="sr.FilePath.length>0" class="p-1" href="#" ng-click="ShowPersonalImg(sr)">
+                                                                    <i class="fas fa-file-pdf text-success" style="font-size:21px;"></i>
+                                                                </a>
+                                                            </td>
+                                                            <td>{{sr.LogMiti}}<br /> {{sr.UserName}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--<div id="student-remarks-section1">
+
+                                    <div class="mt-2 card p-2">
+                                        <div class="table-scroll-x-y">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+
+                                                <tbody>
+                                                    <tr ng-repeat="sr in StudentRemarksList">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="sr.RemarksFor">
+                                                                <option ng-value="rl.id" ng-repeat="rl  in RemarksForList" ng-selected="rl.id==sr.RemarksFor">{{rl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" date-picker ng-model="sr.ForDate_TMP" date-detail="sr.ForDateDet" />
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="sr.RemarksTypeId">
+                                                                <option ng-value="rl.RemarksTypeId" ng-repeat="rl  in RemarksTypeList" ng-selected="rl.RemarksTypeId==sr.RemarksTypeId">{{rl.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm" ng-model="sr.Point" />
+                                                        </td>
+                                                        <td>
+                                                            <textarea cols="30"
+                                                                      rows="1"
+                                                                      class="form-control form-control-sm" ng-model="sr.Remarks"></textarea>
+                                                        </td>
+                                                        <td>
+                                                            <input ng-hide="sr.TranId>0" type="file"
+                                                                   class="form-control form-control-sm"
+                                                                   style="padding: 1px" file-model ng-model="sr.AttachFile" />
+                                                            <a ng-show="sr.TranId>0 && sr.FilePath.length>0" class="p-1" href="#" ng-click="ShowPersonalImg(sr)">
+                                                                <i class="fas fa-eye text-secondary"></i>
+                                                            </a>
+                                                        </td>
+                                                        <td class="text-center">
+
+                                                            <a ng-hide="sr.TranId>0" class="p-1" ng-click="SaveUpdateStudentRemarks(sr)">
+                                                                <i class="fas fa-save text-primary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="AddRowInRemarks($index)">
+                                                                <i class="fas fa-plus text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delRowInRemarks($index,sr)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <a class="p-1" ng-click="SendSMSToStudent(sr)">
+                                                                <i class="fas fa-envelope text-primary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="SendNotificationToStudent(sr)">
+                                                                <i class="fas fa-bell text-info"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>-->
+                                <!-- table end -->
+                                <!--</div>
+                                    </div>
+
+                                </div>-->
+                            </div>
+                            <div class="tab-pane fade main-section"
+                                 id="profile"
+                                 role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="remarks-list-section">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>From Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newRemarkList.FromDate_TMP" date-detail="newRemarkList.FromDateDet" confirm-action="GetRemarksList()" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>To Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newRemarkList.ToDate_TMP" date-detail="newRemarkList.ToDateDet" confirm-action="GetRemarksList()" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Remarks For</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newRemarkList.RemarksFor" ng-change="GetRemarksList()">
+                                                <option ng-value="0">**All**</option>
+                                                <option ng-value="rl.id" ng-repeat="rl  in RemarksForList">{{rl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Remarks Type</label>
+                                            <select class="select2 form-control-sm"
+                                                    data-placeholder="Select Source" ng-model="newRemarkList.RemarksTypeId"
+                                                    style="width: 100%" ng-change="GetRemarksList()">
+                                                <option ng-value="0">**All**</option>
+                                                <option ng-value="rl.RemarksTypeId" ng-repeat="rl  in RemarksTypeList">{{rl.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.RemarkList">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.RemarkList">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search"
+                                                                   placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.RemarkList" />
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table1'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#main-table1'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y">
+                                            <table id="main-table1"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 100px;">
+                                                            Remarks For
+                                                        </th>
+                                                        <th style="width: 100px;">
+                                                            RegdNo.
+                                                        </th>
+                                                        <th style="width: 100px;">
+                                                            Roll No.
+                                                        </th>
+                                                        <th style="width: 200px;">
+                                                            Name
+                                                        </th>
+                                                        <th style="width: 80px">Class</th>
+                                                        <th style="width: 150px">Date</th>
+                                                        <th style="width: 150px">RemarksType</th>
+                                                        <th style="width: 200px">Remarks</th>
+                                                        <th style="width: 80px">Point</th>
+                                                        <th style="width: 90px">User</th>
+                                                        <th class="text-center" style="width: 90px">Send</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="rl in AllRemarksList | filter:searchData.RemarkList | itemsPerPage: perPage.RemarkList" current-page="currentPages.RemarkList" pagination-id="studentRemarksPagination"  ng-style="{
+            'background-color': 
+                rl.RemarksFor === 'MERITS' ? '#ebf5e5' :
+                rl.RemarksFor === 'DEMERITS' ? '#fff3f4' :
+                rl.RemarksFor === 'OTHERS' ? '#e4f2ff' :
+                'transparent'
+        }">
+                                                        <td>{{rl.RemarksFor}}</td>
+                                                        <td>{{rl.RegNo}}</td>
+                                                        <td>{{rl.RollNo}}</td>
+                                                        <td>{{rl.Name}}</td>
+
+                                                        <td>{{rl.ClassName}} {{rl.SectionName}}</td>
+                                                        <td>{{rl.ForMiti}}</td>
+                                                        <td>{{rl.RemarsType}}</td>
+                                                        <td>{{rl.Remarks}}</td>
+                                                        <td>{{rl.Point}}</td>
+                                                        <td>{{rl.UserName}}</td>
+
+                                                        <td class="text-center">
+                                                            <a class="p-1" href="javascript:void(0)"
+                                                               ng-click="SendRemarkSMS(rl)"
+                                                               title="Send SMS">
+                                                                <i class="fas fa-envelope text-primary"></i>
+                                                            </a>
+                                                            <a class="p-1" href="javascript:void(0)"
+                                                               ng-click="SendRemarkNotification(rl)"
+                                                               title="Send Notification">
+                                                                <i class="fas fa-bell text-info"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="studentRemarksPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+   
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1" style="margin-top:50px;">
+        <div class="modal-dialog" role="document" style="margin-top: 0; width: auto; max-width: 90vw; padding: 3px; display: flex; justify-content: center; align-items: center;">
+            <div class="modal-content" style="width: auto; display: inline-block; padding: 10px;">
+                <div class="modal-body p-0" style="padding: 10px;">
+                    <img ng-src="{{viewImg.ContentPath}}" alt="" id="modalImage" style="display: block; width: 100%; height: auto; max-height: 80vh; object-fit: contain;">
+                </div>
+                <div class="modal-footer px-0 pt-2 pb-0" style="display: flex; justify-content: flex-end; gap: 3px;">
+                    <a href="{{viewImg.ContentPath}}" class="btn btn-sm btn-success" target="_blank" download style="text-decoration: none; font-size: 14px;">Download</a>
+                    <button class="btn btn-danger btn-rounded btn-sm text-center" data-dismiss="modal" type="button" style="min-width: 80px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

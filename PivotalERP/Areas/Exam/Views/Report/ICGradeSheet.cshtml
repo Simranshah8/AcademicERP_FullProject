@@ -1,0 +1,489 @@
+﻿
+@{
+    ViewBag.Title = "ICGradeSheet";
+}
+
+
+<style>
+    @@media print {
+
+        @@page {
+            size: A4 portrait;
+            margin: 6mm;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            zoom: 0.80; /* scale page to fit A4 */
+        }
+        .no-print {
+            display: none !important
+           
+        }
+        .container-fluid {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        table {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+    }
+
+    .custom-print-btn {
+        background-color: #39bcd3;
+        color: white;
+        border: none;
+        padding: 6px 18px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+        .custom-print-btn:hover {
+            background-color: #2faac1;
+            color: white;
+        }
+    .header-container {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        padding: 20px;
+        font-family: "Times New Roman", serif;
+    }
+
+    .logo-section {
+        width: 120px;
+    }
+
+        .logo-section img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+
+    .text-section {
+        flex: 1;
+        text-align: center;
+    }
+
+    .tagline {
+        font-size: 16px;
+        margin: 0;
+    }
+
+    .text-section h2 {
+        margin: 5px 0;
+        font-weight: bold;
+    }
+
+    .text-section p {
+        margin: 2px 0;
+    }
+
+    .text-section h3 {
+        margin-top: 10px;
+        font-weight: normal;
+        letter-spacing: 1px;
+    }
+    .title-container {
+        text-align: center;
+        background: #fff;
+        padding: 15px 0;
+        margin-top: -25px;
+    }
+
+    .grade-title {
+        font-family: Impact,Charcoal,sans-serif;
+        font-weight: 900;
+        font-size: 36px;
+        text-decoration: underline;
+        text-decoration-thickness: 4px;
+        margin: 0;
+    }
+    .gs-meta {
+        width: 100%;
+        margin: 0 auto;
+        border: 1px solid #cfcfcf;
+        background: #fff;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+    }
+
+    .gs-meta-row {
+        display: flex;
+    }
+
+        .gs-meta-row:not(:last-child) {
+            border-bottom: 1px solid #cfcfcf;
+        }
+
+    .gs-meta-cell {
+        flex: 1;
+        padding: 8px 15px;
+        display: flex;
+        align-items: center;
+    }
+
+        .gs-meta-cell:first-child {
+            border-right: 1px solid #cfcfcf;
+        }
+
+    .lbl {
+        font-weight: normal;
+        margin-right: 8px;
+    }
+
+    .val {
+        font-weight: 600;
+    }
+
+    .grade-container {
+        width: 100%;
+        margin: auto;
+        font-family: Arial, sans-serif;
+    }
+
+    .grade-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        font-size: 14px;
+    }
+
+        .grade-table th,
+        .grade-table td {
+            border: 1px solid #cfcfcf;
+            padding: 8px;
+        }
+
+        .grade-table thead th {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .grade-table tbody td:nth-child(3) {
+            text-align: left;
+        }
+
+        .grade-table tfoot td {
+            font-weight: bold;
+            background: #f5f5f5;
+        }
+  
+    .abbreviation-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f1f1f1;
+        padding: 12px 20px;
+        font-family: Arial;
+        font-size: 14px;
+    }
+
+    .rank-box {
+        border: 2px solid #333;
+        padding: 8px 18px;
+        font-weight: bold;
+        background: #fff;
+    }
+    .grade-details {
+        width: 70%;
+         margin:15px auto;
+        font-family: Arial, sans-serif;
+    }
+
+    .title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .details-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .details-table th,
+        .details-table td {
+            border: 1px solid #cfcfcf;
+            padding: 6px 10px;
+            text-align: left;
+        }
+
+        .details-table th {
+            background: #f1f1f1;
+        }
+
+    .signature-section {
+        width: 100%;
+        margin-top: 40px;
+        font-family: Arial;
+    }
+
+    .sign-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 40px;
+    }
+
+    .sign-left,
+    .sign-right {
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .line {
+        width: 150px;
+        border-top: 2px solid black;
+        margin: 0 auto 5px auto;
+    }
+
+    .issue-date {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+</style>
+
+<div class="hold-transition layout-navbar-fixed"
+     ng-app="myApp"
+     ng-controller="ICGradeSheetController"
+     ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid py-2 px-2" style="margin-top:15px;">
+            <!-- HEADER -->
+            <div class="header-container" ng-repeat="sch in Details">
+
+                <div class="logo-section">
+
+                    <img src="~/wwwroot/dynamic/images/avatar-img.png" alt="Logo" onerror="this.style.visibility='hidden'">
+                </div>
+
+                <div class="text-section">
+                    <p class="tagline"><b>{{sch.greet}}</b></p>
+                    <h2>{{sch.name}}</h2>
+                    <p><b>{{sch.address}}</b></p>
+                    <p><b>{{sch.email}}</b></p>
+                    <h3>{{sch.department}}</h3>
+                </div>
+
+            </div>
+
+            <!-- TITLE -->
+            <div class="title-container">
+                <h1 class="grade-title">IC GRADE-SHEET</h1>
+            </div>
+
+            <!-- META -->
+            <div class="gs-meta mb-3" ng-repeat="s in student">
+
+                <div class="gs-meta-row">
+                    <div class="gs-meta-cell">
+                        <span class="lbl">Reg No. :</span>
+                        <span class="val">{{s.regNo}}</span>
+                    </div>
+
+                    <div class="gs-meta-cell">
+                        <span class="lbl">Name :</span>
+                        <span class="val">{{s.name}}</span>
+                    </div>
+                </div>
+
+                <div class="gs-meta-row">
+                    <div class="gs-meta-cell">
+                        <span class="lbl">Class/Sec. :</span>
+                        <span class="val">{{s.classSec}}</span>
+                    </div>
+
+                    <div class="gs-meta-cell">
+                        <span class="lbl">Date of Birth :</span>
+                        <span class="val">{{s.dob}}</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- MAIN TABLE -->
+            <table class="grade-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">SN</th>
+                        <th colspan="2">SUBJECT / COURSE</th>
+                        <th rowspan="2">THEMES</th>
+                        <th rowspan="2">LEARNING OUTCOMES</th>
+                        <th rowspan="2">CREDIT</th>
+                        <th rowspan="2">OBTAINED GRADE</th>
+                        <th rowspan="2">GRADE POINT</th>
+                    </tr>
+                    <tr>
+                        <th>CODE</th>
+                        <th>TITLE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in gradeData">
+                        <td>{{item.sn}}</td>
+                        <td>{{item.code}}</td>
+                        <td>{{item.title}}</td>
+                        <td>{{item.themes}}</td>
+                        <td>{{item.outcomes}}</td>
+                        <td>{{item.credit}}</td>
+                        <td>{{item.grade}}</td>
+                        <td>{{item.point}}</td>
+                    </tr>
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <td colspan="3">AVERAGE GRADE : A+</td>
+                        <td colspan="3">GRADE POINT AVERAGE : 3.94</td>
+                        <td colspan="2">REMARK : EXCELLENT</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- ABBREVIATIONS + RANK -->
+            <div class="abbreviation-container">
+
+                <div class="abbr-text">
+                    <strong>Abbreviations</strong> |
+                    TH:Theory,
+                    PR:Practical,
+                    *AB:Absent,
+                    *NG:No Grade,
+                    *MG:Missing Grade,
+                    *MP:Missing Point
+                </div>
+
+                <div class="rank-box">
+                    RANK : 1
+                </div>
+
+            </div>
+
+            <!-- DETAILS OF GRADE SHEET -->
+            <div class="grade-details">
+
+                <div class="title">
+                    DETAILS OF GRADE SHEET
+                </div>
+
+                <table class="details-table">
+                    <thead>
+                        <tr>
+                            <th>SN</th>
+                            <th>Interval in Percent</th>
+                            <th>Grade</th>
+                            <th>Description</th>
+                            <th>Grade Point</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in gradeDetails">
+                            <td>{{item.sn}}</td>
+                            <td>{{item.interval}}</td>
+                            <td>{{item.grade}}</td>
+                            <td>{{item.description}}</td>
+                            <td>{{item.point}}</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+
+            </div>
+            @*signature*@
+            <div class="signature-section">
+
+                <div class="sign-row">
+
+                    <div class="sign-left">
+                        <div class="line"></div>
+                        CLASS TEACHER
+                    </div>
+
+                    <div class="sign-right">
+                        <div class="line"></div>
+                        CONTROLLER OF EXAMINATION
+                    </div>
+
+                </div>
+
+                <div class="issue-date">
+                    DATE OF ISSUE : 2022-08-29
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-12 text-center mt-1">
+                    <button class="btn custom-print-btn no-print" onclick="window.print();">
+                        Print Ledger
+                    </button>
+                </div>
+            </div>
+        </div>
+       
+    </section>
+</div>
+
+<script>
+    app.controller("ICGradeSheetController", function ($scope) {
+
+        $scope.LoadData = function () {
+            $scope.Details = [
+                {
+                    greet: '"Modern Education for Modern Age"',
+                    name: "SHREE BHALESHWOR SECONDARY SCHOOL",
+                    address: "Panauti-8, Malpi, Kavrepalanchok, 011441426",
+                    email: "bhaleshwor2014@gmail.com, www.bhaleshwormavi.edu.np",
+                    department: "DEPARTMENT OF EXAMINATION"
+                }
+            ];
+            $scope.student = [
+
+                {
+                    regNo: "S00051",
+                    name: "UNISHA THING",
+                    classSec: "ONE / ONE-A",
+                    dob: "04-Jul-2015"
+                }
+
+            ];
+
+            $scope.gradeData = [
+
+                { sn: 1, code: "O01", title: "ENGLISH", themes: 8, outcomes: 159, credit: 4, grade: "A+", point: "4.00" },
+                { sn: 2, code: "O02", title: "NEPALI", themes: 10, outcomes: 133, credit: 5, grade: "A+", point: "4.00" },
+                { sn: 3, code: "O03", title: "MATHEMATICS", themes: 7, outcomes: 34, credit: 4, grade: "A+", point: "4.00" },
+                { sn: 4, code: "O04", title: "SCIENCE", themes: 21, outcomes: 43, credit: 4, grade: "A+", point: "4.00" },
+                { sn: 5, code: "O11", title: "ME AND MY SURROUNDINGS", themes: 8, outcomes: 84, credit: 4, grade: "A+", point: "4.00" },
+                { sn: 6, code: "O12", title: "EXTRA ENGLISH", themes: 13, outcomes: 65, credit: 5, grade: "A", point: "3.60" },
+                { sn: 7, code: "O13", title: "EXTRA NEPALI", themes: 9, outcomes: 9, credit: 2, grade: "A+", point: "4.00" },
+                { sn: 8, code: "O14", title: "EXTRA MATHS", themes: 10, outcomes: 10, credit: 2, grade: "A+", point: "4.00" },
+                { sn: 9, code: "O15", title: "GENERAL KNOWLEDGE", themes: 22, outcomes: 22, credit: 2, grade: "A+", point: "4.00" },
+                { sn: 10, code: "O16", title: "COMPUTER SCIENCE", themes: 11, outcomes: 55, credit: 3, grade: "A", point: "3.60" },
+                { sn: 11, code: "O17", title: "HEALTH EDUCATION", themes: 7, outcomes: 40, credit: 3, grade: "B+", point: "3.20" },
+                { sn: 12, code: "O18", title: "MORAL EDUCATION", themes: 6, outcomes: 32, credit: 2, grade: "A", point: "3.60" },
+                { sn: 13, code: "O19", title: "ENVIRONMENTAL STUDIES", themes: 8, outcomes: 44, credit: 3, grade: "B+", point: "3.20" },
+                { sn: 14, code: "O20", title: "SOCIAL STUDIES", themes: 12, outcomes: 60, credit: 4, grade: "A", point: "3.60" },
+                { sn: 15, code: "O21", title: "PHYSICAL EDUCATION", themes: 5, outcomes: 25, credit: 2, grade: "A+", point: "4.00" },
+               
+
+            ];
+            $scope.gradeDetails = [
+                { sn: 1, interval: "90.00 to 100.00", grade: "A+", description: "Excellent", point: "4.00" },
+                { sn: 2, interval: "75.00 to 90.00", grade: "A", description: "Very Good", point: "3.60" },
+                { sn: 3, interval: "60.00 to 75.00", grade: "B", description: "Good", point: "2.80" },
+                { sn: 4, interval: "45.00 to 60.00", grade: "C", description: "Satisfactory", point: "2.00" },
+                { sn: 5, interval: "30.00 to 45.00", grade: "D", description: "Weak", point: "1.60" },
+                { sn: 6, interval: "0.00 to 30.00", grade: "E", description: "Very Weak", point: "0.80" }
+            ];
+
+        };
+
+    });
+</script>

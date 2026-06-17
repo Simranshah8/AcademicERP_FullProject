@@ -1,0 +1,136 @@
+﻿
+
+<script src="~/jslib/account/creation/BranchWiseLedgerOpening.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BranchWiseLedgerOpeningController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top: 51px !important;">
+                <div class="tab-content">
+                    <div id="branchwise-form">
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="name">Branch<span class="text-danger">*</span></label>
+                                    <select class="form-control form-control-sm select2" ng-model="newBranchWiseLedgerOpening.BranchId" data-placeholder="**Select Branch**">
+                                        <option ng-value="pl.BranchId" ng-repeat="pl in BranchList" ng-selected="pl.id==newBranchWiseLedgerOpening.BranchId">{{pl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            @*<div class="col-md-3">
+            <div class="form-group">
+                <label for="name">Ledger Group</label>
+                <select class="form-control form-control-sm select2" ng-model="newBranchWiseLedgerOpening.LedgerGroupId" data-placeholder="**Select Group**">
+                    <option ng-value="pl.LedgerGroupId" ng-repeat="pl in LedgerGroupList" ng-selected="pl.LedgerGroupId==newBranchWiseLedgerOpening.LedgerGroupId">{{pl.Name}}</option>
+                </select>
+            </div>
+        </div>*@
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">Currency<span class="text-danger">*</span></label>
+                                    <select class="form-control form-control-sm" ng-model="newBranchWiseLedgerOpening.SelectedCurrency" data-placeholder="**Select Currency**">
+                                        <option ng-value="pl" ng-repeat="pl in CurrencyList">{{pl.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">Rate<span class="text-danger">*</span></label>
+                                    <input type="text" number-input class="form-control form-control-sm" ng-model="newBranchWiseLedgerOpening.CurRate">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>For Fiscal Year<span class="text-danger">*</span></label>
+                                    <select class="form-control form-control-sm select2" ng-model="newBranchWiseLedgerOpening.CostClassId" ng-change=OnFiscalYearChange()>
+                                        <option ng-value="pp.CostClassId" ng-repeat="pp in CostClassColl" ng-selected="pp.CostClassId==newBranchWiseLedgerOpening.CostClassId">{{pp.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">Opening Date<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="newBranchWiseLedgerOpening.VoucherDate_TMP" date-picker date-detail="newBranchWiseLedgerOpening.VoucherDateDet">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card ">
+                         
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table class="table table-bordered table-head-fixed text-nowrap">
+                                    <thead class=" text-nowrap">
+                                        <tr>
+                                            <th class="text-center" style="width: 60px;">S.No.</th>
+                                            <th style="width: 300px;">Ledger Name</th>
+                                            <th style="width: 100px;">Opening Amount</th>
+                                            <th style="width: 50px;">DrCr</th>
+                                            <th class="text-center" style="width: 70px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="op in newBranchWiseLedgerOpening.OpeningColl">
+                                            <td align="center">{{$index+1}}</td>
+                                            <td>
+                                                <select autoShowHide="true" class="form-control form-control-sm" all-ledger ng-model="op.LedgerId" ledgertype="1"
+                                                        placeholder="** Select Ledger Name **" showdetails="true" confirm-action="ChangeParticularLedger(op)" ledger-detail="op.LedgerDetails" side-bar-data="op.partySideBarData"></select>
+                                            </td>
+                                            <td>
+                                                <input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="op.Amount" ng-change="ChangeDrCrAmount()">
+                                            </td>
+                                            <td>
+                                                <select class="form-control form-control-sm rounded-0" ng-model="op.DrCr" ng-change="ChangeDrCrAmount()">
+                                                    <option ng-value="d.id" ng-repeat="d in DrCrList" ng-selected="d.id==op.DrCr">{{d.text}}</option>
+                                                </select>
+                                            </td>
+                                            <td class="text-center">
+                                                @*<b> {{newBranchWiseLedgerOpening.SelectedCurrency.Name}} </b>*@ 
+                                                <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInOpening($index)">
+                                                    <i class="fas fa-plus text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowOpening($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <!-- /.card-body -->
+                            <div class="clearfix">
+                                <div class="d-flex justify-content-end mr-5">
+                                    <span>{{newBranchWiseLedgerOpening.TotalDr |number:2}} DR</span> <span class="ml-4">{{newBranchWiseLedgerOpening.TotalCr |number:2}}CR</span>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-9"></div>
+                                    <div class="col-md-3">                                        
+                                        <span>Closing Balance :{{newBranchWiseLedgerOpening.TotalDr-newBranchWiseLedgerOpening.TotalCr |formatNumberAC}} </span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 mb-3 text-center">
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearBranchWiseLedgerOpening()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateBranchWiseLedgerOpening()">Save</button>
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Table Area Ends -->
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+
+
+

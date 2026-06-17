@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AcademicLib.BE.HomeWork
+{
+   public class AssignmentType :  ResponeValues
+    {
+        public int? AssignmentTypeId { get; set; }
+        public int OrderNo { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+    public class AssignmentTypeCollections : List<AssignmentType> {
+        public string ResponseMSG { get; set; }
+        public bool IsSuccess { get; set; }
+    }
+}

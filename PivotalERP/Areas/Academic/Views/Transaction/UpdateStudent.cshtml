@@ -1,0 +1,978 @@
+﻿
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+<script src="~/jslib/Academic/UpdateStudent.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="UpdateStudentController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Update Student</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="board-tab" data-toggle="tab"
+                                               href="#board" role="tab" aria-controls="board"
+                                               aria-selected="false">Board Regd No.</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">Left Student</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="passout-tab" data-toggle="tab"
+                                               href="#passout" role="tab" aria-controls="passout"
+                                               aria-selected="false">Passout Details</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="update-student-section mt-1">
+                                    <form action="" class="mb-0">
+                                        <div class="row">
+                                            <div class="col-md-2" ng-show="BranchColl.length>1">
+                                                <div class="form-group">
+                                                    <label for="">School<span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newUpdateStudent.BranchId">
+                                                        <option ng-value="0">**Select School**</option>
+                                                        <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newUpdateStudent.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                <label for="">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newUpdateStudent.BatchId" ng-change="GetStudentForUpdate()">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newUpdateStudent.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Class</label>
+                                                <select ng-model="newUpdateStudent.SelectedClass" class="form-control form-control-sm select2" ng-options="x.Name for x in ClassListRunning.ClassList" ng-change="GetStudentForUpdate()"></select>
+                                            </div>
+                                            <div class="col-md-2" ng-show="newUpdateStudent.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newUpdateStudent.ClassYearId" ng-change="GetStudentForUpdate()">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newUpdateStudent.ClassYearId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-show="newUpdateStudent.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newUpdateStudent.SemesterId" ng-change="GetStudentForUpdate()">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newUpdateStudent.SemesterId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Section</label>
+                                                <select class="select2 form-control-sm" data-placeholder="Select Section" ng-model="newUpdateStudent.SelectedSection" ng-change="GetStudentForUpdate()" style="width:100%">
+                                                    <option ng-value="0">**Select Section**</option>
+                                                    <option ng-value="se" ng-repeat="se in ClassListRunning.SectionList |  filter: { ClassId: newUpdateStudent.SelectedClass.ClassId }:true">{{se.SectionName}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Sort As</label>
+                                                <select class="select2 form-control-sm" data-placeholder="Select Sorting" ng-model="newUpdateStudent.SortAs" ng-change="DataSorting()" style="width:100%">
+                                                    <option ng-value="RollNo">**Select Section**</option>
+                                                    <option ng-value="se.value" ng-repeat="se in SortAsList">{{se.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Re-Arrange RollNo</label>
+                                                <select class="select2 form-control-sm" data-placeholder="Select Sorting" ng-model="newUpdateStudent.RollNoAs" ng-change="ReArrangeRollNo()" style="width:100%">
+                                                    <option ng-value="0">**Select RollNo As**</option>
+                                                    <option ng-value="1">ClassSectionWise</option>
+                                                    <option ng-value="2">ClassWise</option>
+                                                </select>
+                                            </div>
+                                            @*<div class="col-sm-2 col-lg-2 col-md-2">
+            <label>Freeze Column</label>
+            <input type="number" class="form-control-sm" ng-model="newUpdateStudent.FreezCol" ng-change="freezColumns()" />
+        </div>*@
+
+                                        </div>
+                                    </form>
+                                    <div class="card p-0 mt-2 mb-0">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.UpdateStudent">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.UpdateStudent">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.UpdateStudent">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox ml-3">
+                                                            <input type="checkbox" class="custom-control-input"
+                                                                   id="chkColumnFocus" ng-model="newClassWise.ColumnWiseFocus">
+                                                            <label for="chkColumnFocus"
+                                                                   class="custom-control-label">Column Wise Focus</label>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false" style="height:30px">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                       
+                                                    </div>
+                                                </div>
+                                                
+                                                <button class="btn btn-success btn-sm ml-2" ng-click="UpdateClassWiseST()"> Update</button>
+                                            </div>
+                                        </header>
+                                        <!--NEw Table starts-->
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="height: auto;max-height:calc(100vh - 14.5rem)!important;">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 60px; left: 0; z-index: 2; background-color: #fff">Action</th>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 100px; left: 60px; z-index: 2; background-color: #fff">@*{{'REGDNO_LNG' | translate}}*@Adm. No.</th>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 130px; left: 160px; z-index: 2; background-color: #fff">First Name</th>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 130px; left: 290px; z-index: 2; background-color: #fff">Middle Name</th>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 130px; left: 420px; z-index: 2; background-color: #fff">Last Name</th>
+                                                        <th class="text-center align-middle" style="width: 200px" ng-click="sort('BoardRegNo')">Board RegdNo.</th>
+                                                        <th style="width: 90px" ng-click="sort('CardNo')">Card No.</th>
+                                                        <th style="width: 90px" ng-click="sort('EMSId')">EMS Id</th>
+                                                        <th style="width: 115px" ng-click="sort('Gender')">Gender</th>
+                                                        <th style="width: 90px" ng-click="sort('RollNo')">Roll No.</th>
+                                                        <th style="width: 130px" ng-click="sort('SectionId')">Section</th>
+                                                        <th style="width: 120px" ng-click="sort('DOBAD_TMP')">DOB(BS)</th>
+                                                        <th style="width: 200px" ng-click="sort('FatherName')">Father Name</th>
+                                                        <th style="width: 150px" ng-click="sort('F_ContactNo')">Father Contact No.</th>
+                                                        <th style="width: 150px" ng-click="sort('MotherName')">Mother Name</th>
+                                                        <th style="width: 150px" ng-click="sort('M_Contact')">Mother Contact No.</th>
+                                                        <th style="width: 200px" ng-click="sort('PA_FullAddress')">Address</th>
+                                                        <th style="width: 150px" ng-click="sort('MediumId')">Medium</th>
+                                                        <th style="width: 150px" ng-click="sort('HouseNameId')">House Name</th>
+                                                        <th style="width: 80px" ng-click="sort('Weigth')">Weight</th>
+                                                        <th style="width: 80px" ng-click="sort('Height')">Height</th>
+                                                        <th style="width: 200px" ng-click="sort('Aim')">Aim</th>
+                                                        <th style="width: 150px" ng-click="sort('Caste')">Caste</th>
+                                                        <th style="width: 150px" ng-click="sort('PhysicalDisability')">Disability</th>
+                                                        <th style="width: 100px" ng-click="sort('BloodGroup')">Blood Group</th>
+                                                        <th style="width:115px;" ng-click="sort('IsNewStudent')">Is New Student</th>
+                                                        <th style="width:185px;" ng-click="sort('StudentTypeId')">StudentType</th>
+                                                        <th style="width:110px;" ng-click="sort('LedgerPanaNo')">LedgerPanaNo</th>
+                                                        <th style="width:130px;" ng-click="sort('CitizenshipNo')">{{'CITIZENSHIP_LNG' | translate}}</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="us in UpdateStudentList |filter:searchData.UpdateStudent | itemsPerPage: perPage.UpdateStudent" current-page="currentPages.UpdateStudent" pagination-id="UpdateStudentPagination">
+                                                        <td class="align-middle cstm-sticky" style="width: 60px; left: 0; z-index: 1; background-color: #f5f5f9">
+                                                            <a class="btn btn-sm btn-success" href="#" ng-click="SaveUpdateStudentWise(us)">
+                                                                <i class="fas fa-save"></i>
+                                                            </a>
+                                                        </td>
+                                                        @*<tr dir-paginate="us in UpdateStudentList |orderBy:sortKey:reverse|filter:searchData.UpdateStudent | itemsPerPage: perPage.UpdateStudent" current-page="currentPages.UpdateStudent" pagination-id="UpdateStudentPagination">*@
+                                                        <th class="align-middle cstm-sticky" style="width: 100px; left: 60px; z-index: 1; background-color: #f5f5f9">
+                                                            <input type="text" onfocus="this.select();" class="form-control form-control-sm serial" readonly ng-model="us.RegNo">
+                                                        </th>
+
+                                                        <th class="align-middle cstm-sticky" style="width: 130px; left: 160px; z-index: 1; background-color: #f5f5f9 ">
+                                                            <input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.FirstName">
+                                                        </th>
+                                                        <th class="align-middle cstm-sticky" style="width: 130px; left: 290px; z-index: 1; background-color: #f5f5f9 ">
+                                                            <input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.MiddleName">
+                                                        </th>
+                                                        <th class="align-middle cstm-sticky" style="width: 130px; left: 420px; z-index: 1; background-color: #f5f5f9 ">
+                                                            <input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.LastName">
+                                                        </th>
+                                                        <th class="align-middle">
+                                                            <input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.BoardRegNo">
+                                                        </th>
+                                                        <td>  <input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.CardNo"></td>
+                                                        <td>  <input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.EMSId"></td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm serial" ng-model="us.Gender">
+                                                                <option ng-value="gen.id" ng-repeat="gen in GenderColl" ng-selected="gen.id==us.Gender">{{gen.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>  <input type="number" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.RollNo"></td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm serial" data-placeholder="Select Section" ng-model="us.SectionId">
+                                                                <option ng-value="null">**Select Section**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in SectionList" ng-selected="cl.id==us.SectionId">{{cl.text}}</option>
+                                                            </select>
+                                                        </td>
+
+                                                        <td>
+                                                            @*<input type="text"
+            class="form-control form-control-sm" ng-model="us.DOBAD_TMP" date-picker date-detail="us.DOB_ADDet" />*@
+
+                                                            <input type="text" onfocus="this.select();"
+                                                                   class="form-control form-control-sm serial" date-picker ng-model="us.DOBAD_TMP" date-detail="us.DOB_ADDet">
+                                                        </td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.FatherName"></td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.F_ContactNo"></td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.MotherName"></td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.M_Contact"></td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.PA_FullAddress"></td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm serial" ng-model="us.MediumId">
+                                                                <option ng-value="0">**Select Medium**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in MediumList" ng-selected="cl.id==us.MediumId">{{cl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm serial" ng-model="us.HouseNameId">
+                                                                <option ng-value="0">**Select HouseName**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in HouseNameList" ng-selected="cl.id==us.HouseNameId">{{cl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.Weigth"></td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.Height"></td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.Aim"></td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm serial" ng-model="us.CasteId">
+                                                                <option ng-value="0">**Select Caste**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in CasteList" ng-selected="cl.id==us.CasteId">{{cl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control-sm form-control serial" data-ng-model="us.PhysicalDisability" list="lstPhysicalDisability"></td>
+                                                        <td> <input type="text" onfocus="this.select();" class="form-control-sm form-control serial" data-ng-model="us.BloodGroup" list="lstBloodGroup"></td>
+                                                        <td><input type="checkbox" ng-value="true" ng-model="us.IsNewStudent" /></td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm serial" ng-model="us.StudentTypeId">
+                                                                <option ng-value="0">**Select StudentType**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in StudentTypeList" ng-selected="cl.id==us.StudentTypeId">{{cl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.LedgerPanaNo"></td>
+                                                        <td><input type="text" onfocus="this.select();" class="form-control form-control-sm serial" ng-model="us.CitizenshipNo"></td>
+
+
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!---->
+
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="UpdateStudentPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                        <datalist id="lstPhysicalDisability">
+                                            <option data-ng-repeat="ttl in DisablityList" value="{{ttl}}">
+                                        </datalist>
+
+                                        <datalist id="lstBloodGroup">
+                                            <option data-ng-repeat="ttl in BloodGroupList" value="{{ttl}}">
+                                        </datalist>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="board" role="tabpanel"
+                                 aria-labelledby="board-tab">
+                                <div class="board-section">
+
+                                    <form action="" class="mb-2">
+                                        <div class="row">
+                                            <div class="col-md-2" ng-show="BranchColl.length>1">
+                                                <div class="form-group">
+                                                    <label for="">School<span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newBoardRegdNo.BranchId">
+                                                        <option ng-value="0">**Select School**</option>
+                                                        <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newBoardRegdNo.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                <label for="">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newBoardRegdNo.BatchId" ng-change="GetStudentLstForBoardRegd()">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newBoardRegdNo.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newBoardRegdNo.SelectedClass" ng-change="GetStudentLstForBoardRegd()">
+                                                    <option>**Select Class**</option>
+                                                    <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2" ng-show="newBoardRegdNo.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Class Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newBoardRegdNo.ClassYearId" ng-change="GetStudentLstForBoardRegd()">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newBoardRegdNo.ClassYearId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-show="newBoardRegdNo.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newBoardRegdNo.SemesterId" ng-change="GetStudentLstForBoardRegd()">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newBoardRegdNo.SemesterId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-1 col-lg-1 col-md-1">
+                                                <label>Start No.</label>
+                                                <input type="number" class="form-control-sm form-control" ng-model="newBoardRegdNo.StartNo" ng-change="AutoGenerateRegdNo()">
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Pad Width</label>
+                                                <input type="number" class="form-control-sm form-control" ng-model="newBoardRegdNo.PadWidth" ng-change="AutoGenerateRegdNo()">
+                                            </div>
+                                            <div class="col-sm-1 col-lg-1 col-md-1">
+                                                <label>Prefix</label>
+                                                <input type="text" class="form-control-sm form-control" ng-model="newBoardRegdNo.Prefix" ng-change="AutoGenerateRegdNo()">
+                                            </div>
+                                            <div class="col-sm-1 col-lg-1 col-md-1">
+                                                <label>Suffix</label>
+                                                <input type="text" class="form-control-sm form-control" ng-model="newBoardRegdNo.Suffix" ng-change="AutoGenerateRegdNo()">
+                                            </div>
+                                        </div>
+                                    </form>
+
+
+                                    <div class="card p-0">
+                                        <header class="row  ">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.BoardRegdNo">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.BoardRegdNo">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.BoardRegdNo">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearBoardRegdNo()">Reset</button>
+                                                @*<button type="button" class="btn btn-sm btn-danger" style="min-width: 90px;" ng-click="DelBoardRegdNo()">Delete</button>*@
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateBoardRegdNo()">Update</button>
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item wait" export-excel table-id="'#boardregdtable'" sheet-name="'Board Regd No'"><img src="/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#boardregdtable').tableExport({type:'csv',escape:'false'});"><img src="/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#boardregdtable'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 13rem);">
+
+                                            <table id="boardregdtable" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-center text-nowrap">
+                                                        <th class="text-center align-middle " style="width: 50px;left: 0px; z-index: 2;" ng-click="sortBoard('AutoNumber')">Id</th>
+                                                        <th class="text-center align-middle " style="width: 100px;left: 50px; z-index: 2;" ng-click="sortBoard('RegdNo')">@*{{'REGDNO_LNG' | translate}}*@Adm. No.</th>
+                                                        <th class="text-center align-middle " style="width: 100px;left: 50px; z-index: 2;" ng-click="sortBoard('RollNo')">Roll No.</th>
+                                                        <th class="text-center align-middle " style="width: 150px;left: 150px; z-index: 2;" ng-click="sortBoard('Name')">Name</th>
+                                                        <th style="width: 80px;">Is Left</th>
+                                                        <th style="width: 150px;">Board Regd.</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="br in newBoardRegdNo.BoardRegdNoDetailsColl |orderBy:sortKeyBoard:reverse1|filter:searchData.BoardRegdNo">
+                                                        <td>{{br.AutoNumber}}</td>
+                                                        <td>{{br.RegdNo}}</td>
+                                                        <td>{{br.RollNo}}</td>
+                                                        <td>{{br.Name}}</td>
+                                                        <td>{{br.IsLeft}}</td>
+                                                        <td>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm"
+                                                                   placeholder="" ng-model="br.BoardRegdNo" />
+                                                        </td>
+
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                       
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="left-student-section">
+                                    <div class="row">
+                                        <div class="col-md-2" ng-show="BranchColl.length>1">
+                                            <div class="form-group">
+                                                <label for="">School<span style="color:red">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="newLeftStudent.BranchId">
+                                                    <option ng-value="0">**Select School**</option>
+                                                    <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newLeftStudent.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <label for="">Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newLeftStudent.BatchId" ng-change="GetStudentLstForLeft(false)">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newLeftStudent.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 col-md-3">
+                                            <label>Class <span class="text-danger">*</span></label>
+                                            <select class="form-control form-control-sm select2" ng-model="newLeftStudent.SelectedClass" ng-change="GetStudentLstForLeft(true)">
+                                                <option>**Select Class**</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newLeftStudent.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group mb-0">
+                                                <label for="">Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newLeftStudent.ClassYearId" ng-change="GetStudentLstForLeft(false)">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newLeftStudent.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newLeftStudent.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group mb-0">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newLeftStudent.SemesterId" ng-change="GetStudentLstForLeft(false)">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newLeftStudent.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-4 col-lg-4 col-md-4 mt-4">
+                                            <div class="row">
+                                                <div class="col-sm-4 col-lg-4 col-md-4">
+                                                    <span>Total : {{newLeftStudent.StudentColl.length}}</span>
+                                                </div>
+                                                <div class="col-sm-4 col-lg-4 col-md-4">
+                                                    <span>Left :{{newLeftStudent.LeftCount}}</span>
+                                                </div>
+                                                <div class="col-sm-4 col-lg-4 col-md-4">
+                                                    <span>Current :{{newLeftStudent.StudentColl.length-newLeftStudent.LeftCount}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.LeftStudent">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.LeftStudent">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.LeftStudent">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 text-right">
+                                            <button type="button" class="btn btn-success btn-sm" style="min-width:90px" ng-click="CallSaveUpdateLeftStudent()">Update</button>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="height:auto;max-height: calc(100vh - 15rem)!important;">
+                                            <datalist id="passoutlst">
+                                                <option data-ng-repeat="ttl in PassoutoptList" value="{{ttl.text}}">
+                                            </datalist>
+                                            <datalist id="dropoutlst">
+                                                <option data-ng-repeat="ttl in DropoutOptList" value="{{ttl.text}}">
+                                            </datalist>
+                                            <table id="main-table2" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-center text-nowrap">
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 50px;left: 0px; z-index: 2;" ng-click="sortLeft('AutoNumber')">Id</th>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 100px;left: 50px; z-index: 2;" ng-click="sortLeft('RegdNo')">@*{{'REGDNO_LNG' | translate}}.*@Adm. No.</th>
+
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 150px;left: 150px; z-index: 2;" ng-click="sortLeft('Name')">Name</th>
+
+                                                        <th class="text-center align-middle cstm-sticky" style="width:100px;left: 300px; z-index: 2;" ng-click="sortLeft('RollNo')">Roll No.</th>
+                                                        @*<th style="width: 80px;z-index:3" ng-click="sortLeft('IsLeft')">
+                        <label>
+                            Is Left
+                            <input type="checkbox"
+                                   class="custom-control-input"
+                                   id="checkbox-isleft-all"
+                                   ng-model="newLeftStudent.IsLeft" ng-change="CheckUnCheckAllLeft(newLeftStudent.IsLeft)" />
+                        </label>
+                    </th>*@
+                                                        <th class="text-center align-middle" style="width:140px; z-index: 2;">
+                                                            Status
+                                                            <select class="form-control form-control-sm" ng-model="newLeftStudent.StatusId" ng-change="ChangeAllStatus()">
+                                                                <option ng-value="cl.id" ng-repeat="cl in StatusList" ng-selected="cl.id==newLeftStudent.StatusId">{{cl.text}}</option>
+                                                            </select>
+                                                        </th>
+                                                        <th style="width: 150px;">
+                                                            Date
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm"
+                                                                   placeholder="" ng-model="newLeftStudent.LeftDate_TMP" date-picker date-detail="newLeftStudent.LeftDateDet" confirm-action="ChangeAllLeftDate()" />
+                                                        </th>
+                                                        <th style="width: 200px;">
+                                                            Remarks
+                                                            @*<input type="text"
+                        class="form-control form-control-sm"
+                        placeholder="" ng-model="newLeftStudent.LeftRemarks" ng-change="ChangeAllLeftRemarks()" />*@
+
+                                                            <div ng-show="newLeftStudent.StatusId==1">
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="newLeftStudent.LeftRemarks" list="passoutlst" ng-change="ChangeAllLeftRemarks()">
+                                                               
+                                                            </div>
+                                                            <div ng-show="newLeftStudent.StatusId==2">
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="newLeftStudent.LeftRemarks" list="dropoutlst" ng-change="ChangeAllLeftRemarks()">
+                                                               
+                                                            </div>
+                                                        </th>
+                                                        <th style="width: 150px; z-index: 3">Send</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="sl in newLeftStudent.StudentColl |orderBy:sortKeyLeft:reverse2|filter:searchData.LeftStudent | itemsPerPage: perPage.LeftStudent" current-page="currentPages.LeftStudent" pagination-id="LeftStudentPagination">
+                                                        <td>{{sl.AutoNumber}}</td>
+                                                        <td>{{sl.RegdNo}}</td>
+                                                        <td>{{sl.Name}}</td>
+                                                        <td>{{sl.RollNo}}</td>
+                                                        @*<td class="text-center">
+                        <div class="custom-control custom-checkbox checkbox-lg ml-2">
+                            <input type="checkbox"
+                                   class="custom-control-input"
+                                   id="checkbox-isleft{{$index}}"
+                                   ng-model="sl.IsLeft" ng-change="CheckUnCheckIsLeft(sl)" />
+                            &nbsp;
+                            <label class="custom-control-label"
+                                   for="checkbox-isleft{{$index}}"></label>
+                            <span style="color:red">*</span>
+                        </div>
+
+                    </td>*@
+
+                                                        <td>
+                                                            <select class="form-control form-control-sm" ng-model="sl.StatusId" ng-change="ChangeStatus(sl)">
+                                                                <option ng-value="cl.id" ng-repeat="cl in StatusList" ng-selected="cl.id==sl.StatusId">{{cl.text}}</option>
+                                                            </select>
+                                                        <td>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm"
+                                                                   placeholder="" ng-model="sl.LeftDate_TMP" date-picker date-detail="sl.LeftDateDet" />
+                                                        </td>
+                                                        <td>
+                                                            @*<textarea cols="30"
+                        rows="1"
+                        class="form-control form-control-sm" ng-model="sl.LeftRemarks"></textarea>*@
+                                                            <div ng-show="sl.StatusId==1">
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="sl.LeftRemarks" list="passoutlst">
+
+                                                            </div>
+                                                            <div ng-show="sl.StatusId==2">
+                                                                <input type="text" class="form-control-sm form-control" data-ng-model="sl.LeftRemarks" list="dropoutlst">
+
+                                                            </div>
+                                                        </td>
+
+                                                        <td class="d-flex text-center border-0">
+                                                            <div class="custom-control custom-checkbox checkbox-lg">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkbox-sms"
+                                                                       value="" ng-model="sl.SMS" disabled />
+                                                                &nbsp;
+                                                                <label class="custom-control-label"
+                                                                       for="checkbox-sms">SMS</label>
+                                                            </div>
+                                                            <div class="custom-control custom-checkbox checkbox-lg ml-2">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkbox-notification"
+                                                                       value="" ng-model="sl.Notification" disabled />
+                                                                &nbsp;
+                                                                <label class="custom-control-label"
+                                                                       for="checkbox-notification">Notification</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="LeftStudentPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="passout" role="tabpanel"
+                                 aria-labelledby="passout-tab">
+                                <div id="passoutsec">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="row">
+                                                <div class="col-md-2" ng-show="BranchColl.length>1">
+                                                    <div class="form-group">
+                                                        <label for="">School<span style="color:red">*</span></label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newPassout.BranchId">
+                                                            <option ng-value="0">**Select School**</option>
+                                                            <option ng-value="cl.BranchId" ng-repeat="cl in BranchColl" ng-selected="cl.BranchId==newPassout.BranchId">{{cl.Name}}-{{cl.Code}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                    <label for="">Batch</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newPassout.BatchId" ng-change="GetStudentForPassoutUpdate()">
+                                                        <option ng-value="0">**Select Batch**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newPassout.BatchId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>Class <span class="text-danger">*</span></label>
+                                                    <select ng-model="newPassout.SelectedClass" class="form-control form-control-sm select2" ng-options="x.Name for x in ClassList.ClassList" ng-change="GetStudentForPassoutUpdate()"></select>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>Section</label>
+                                                    <select class="select2 form-control-sm" data-placeholder="Select Section" ng-model="newPassout.SelectedSection" ng-change="GetStudentForPassoutUpdate()">
+                                                        <option ng-value="0">**Select Section**</option>
+                                                        <option ng-value="se" ng-repeat="se in ClassList.SectionList |  filter: { ClassId: newPassout.SelectedClass.ClassId }:true">{{se.SectionName}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2" ng-show="newPassout.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                    <div class="form-group mb-0">
+                                                        <label for="">Year</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newPassout.ClassYearId" ng-change="GetStudentForPassoutUpdate()">
+                                                            <option ng-value="0">**Select Year**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newPassout.ClassYearId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2" ng-show="newPassout.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                    <div class="form-group mb-0">
+                                                        <label for="">Semester</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newPassout.SemesterId" ng-change="GetStudentForPassoutUpdate()">
+                                                            <option ng-value="0">**Select Semester**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newPassout.SemesterId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-3 col-lg-3 col-md-3 mt-4">
+                                                    <div class="row">
+                                                        <div class="col-sm-4 col-lg-4 col-md-4">
+                                                            <span>Total : {{newPassout.UpdatePassoutStudentList.length}}</span>
+                                                        </div>
+                                                        <div class="col-sm-4 col-lg-4 col-md-4">
+                                                            <span>Left :{{newPassout.LeftCount}}</span>
+                                                        </div>
+                                                        <div class="col-sm-4 col-lg-4 col-md-4">
+                                                            <span>Current :{{newPassout.UpdatePassoutStudentList.length-newPassout.LeftCount}}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-8">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline">
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Show</span>
+                                                                </div>
+                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Passout">
+                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Passout">{{pp.text}}</option>
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                <input class="form-control form-control-navbar"
+                                                                       type="search" placeholder="Search"
+                                                                       aria-label="Search" ng-model="searchData.Passout">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0"
+                                                                            type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="custom-control custom-checkbox ml-3">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                       id="chkColumnFocus" ng-model="newClassWise.ColumnWiseFocus">
+                                                                <label for="chkColumnFocus"
+                                                                       class="custom-control-label">Column Wise Focus</label>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 text-right">
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdatePassoutStudent()">{{newPassout.Mode}}</button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0 mb-0">
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 15.5rem)!important;">
+                                            <table id="main-table2" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr class="text-center text-nowrap">
+
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 70px;z-index: 3;left:0" ng-click="sortLeft('RegdNo')">@*{{'REGDNO_LNG' | translate}}.*@Adm. No.</th>
+
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 150px;left: 70px; z-index: 3;" ng-click="sortLeft('Name')">Name</th>
+
+                                                        <th class="text-center align-middle" style="width:60px;z-index: 2;" ng-click="sortLeft('RollNo')">Roll No.</th>
+                                                        <th class="text-center align-middle" style="width:100px;z-index: 2;" ng-click="sortLeft('BoardRegdNo')">Board Regd No.</th>
+                                                        <th style="width: 65px; z-index: 3" ng-click="sortLeft('IsLeft')">
+                                                            Status
+                                                        </th>
+                                                        <!--New form added by suresh-->
+                                                        @*<th class="text-center align-middle" style="width:140px; z-index: 2;"> Status</th>
+                                                        <th class="text-center align-middle" style="width:220px; z-index: 2;">  Type</th>
+                                                        <th class="text-center align-middle" style="width:120px; z-index: 2;"> Date</th>*@
+                                                        <!--Ends-->
+                                                        <th class="text-center align-middle" style="width:100px; z-index: 2;"> Passout Class</th>
+                                                        <th class="text-center align-middle" style="width:100px; z-index: 2;"> SymbolNo</th>
+                                                        <th class="text-center align-middle" style="width:100px; z-index: 2;"> GPA</th>
+                                                        <th class="text-center align-middle" style="width:100px; z-index: 2;"> Grade</th>
+                                                        <th class="text-center align-middle" style="width:200px; z-index: 2;"> Remarks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="sl in newPassout.UpdatePassoutStudentList |filter:searchData.Passout | itemsPerPage: perPage.Passout" current-page="currentPages.Passout" pagination-id="PassoutPagination">
+
+                                                        <td class="text-center align-middle cstm-sticky" style="z-index: 2;left:0;background-color:#ffffff!important">{{sl.RegdNo}}</td>
+                                                        <td class="align-middle cstm-sticky"style="z-index: 2;left:70px;background-color:#ffffff!important" >{{sl.Name}}</td>
+                                                        <td>{{sl.RollNo}}</td>
+                                                        <td>{{sl.BoardRegdNo}}</td>
+                                                        <td class="text-center">
+                                                            {{sl.IsLeft}}
+                                                        </td>
+                                                        @*<td>
+                                                            <select class="form-control form-control-sm" ng-model="sl.StatusId">
+                                                                <option  ng-value="cl.id" ng-repeat="cl in StatusList"  ng-selected="cl.id==sl.StatusId">{{cl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm" ng-show="sl.StatusId==1" ng-model="sl.PassoutOptId">
+                                                                <option value="">**Select PassOut Reason**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in PassoutoptList" ng-selected="cl.id==sl.PassoutOptId">{{cl.text}}</option>
+                                                            </select>
+
+                                                            <select class="form-control form-control-sm" ng-show="sl.StatusId==2" ng-model="sl.DropoutOptId">
+                                                                <option value="">**Select DropOut Reason**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in DropoutOptList"  ng-selected="cl.id==sl.DropoutOptId">{{cl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                       
+                                                        <td>
+                                                            <input type="text" 
+                                                                   class="form-control form-control-sm serial" date-picker ng-model="sl.PassoutDate_TMP" date-detail="sl.PassoutDateDet">
+                                                        </td>*@
+                                                        <td>
+                                                            <select class="form-control form-control-sm"  ng-model="sl.PassOutClassId" >
+                                                                <option>**Select Class**</option>
+                                                                @*<option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==sl.PassOutClassId">{{cl.text}}</option>*@
+                                                                <option ng-value="cl.id" ng-repeat="cl in ClassList.ClassList" ng-selected="cl.id==sl.PassOutClassId">{{cl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="sl.PassOutSymbolNo" /></td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="sl.PassOutGPA" /></td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="sl.PassOutGrade" /></td>
+                                                        <td>
+                                                            <textarea cols="30" rows="1" class="form-control form-control-sm" ng-model="sl.PassOutRemarks"></textarea>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="PassoutPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+<script>
+    $(document).ready(function () {
+
+        $(document).on('keyup', '.serial', function (e) {
+            if (e.which == 13) {
+                var checkBoxChecked = $('#chkColumnFocus').prop('checked');
+                if (checkBoxChecked == true) {
+                    var $this = $(this);
+                    var $td = $this.closest('td');
+                    var $row = $td.closest('tr');
+                    var $rows = $row.parent();
+                    var column = $td.index();
+
+
+                    while ($td.length) {
+
+                        $row = $row.next('tr');
+
+                        if ($row.length == 0) {
+
+                            $row = $rows.children().first();
+                            // $row = $rows.children().get(2);
+
+                            column++;
+                        }
+
+                        $td = $row.children().eq(column);
+                        var $input = $td.find('.serial');
+                        if ($input.length) {
+                            $input.focus();
+                            break;
+                        }
+                    }
+                } else {
+
+                    var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+                    if (key == 13) {
+                        e.preventDefault();
+                        var inputs = $(this).closest('form').find(':input:visible');
+                        inputs.eq(inputs.index(this) + 1).focus();
+                    }
+                }
+
+            }
+        });
+    });
+</script>

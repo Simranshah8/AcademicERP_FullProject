@@ -1,0 +1,167 @@
+﻿<style>
+    .table td {
+        padding: 0.2rem;
+    }
+</style>
+<script src="~/jslib/attendance/ArrearSalarySheet.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ArrearSalarySheetController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="card p-0" style="margin-top:-13px">
+                    <div class="row">
+                        <div class="col-sm-2 col-md-2">
+                            <div class="form-group">
+                                <label>For Year</label>
+                                <select class="form-control form-control-sm" ng-model="newFilter.YearId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="A.AcademicYearId" ng-repeat="A in AcademicYearColl" ng-selected="A.AcademicYearId==newFilter.YearId">{{A.Description}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-2 col-md-2">
+                            <div class="form-group">
+                                <label for="">For Month</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.MonthId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFilter.MonthId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Branch</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.BranchId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newFilter.BranchId">{{B.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Department</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.DepartmentId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==newFilter.DepartmentId">{{c.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.CategoryId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.id" ng-repeat="c in CategoryList" ng-selected="c.id==newFilter.CategoryId">{{c.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-sm btn-success mt-4 float-right" ng-click="GetEmployeeForArrearSalarySheet()"><i class="fas fa-sync-alt mr-2"></i> Load</button>
+                        </div>
+                    </div>
+                    <header class="row">
+                        <div class="col-md-7">
+                            <div class="clearfix">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm mr-sm-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text cstm">Show</span>
+                                        </div>
+                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ArrearSalarySheet">
+                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ArrearSalarySheet">{{pp.text}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar"
+                                               type="search" placeholder="Search"
+                                               aria-label="Search" ng-model="searchData.ArrearSalarySheet">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0"
+                                                    type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-right">
+                            <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                 data-placement="top" title="Download File">
+                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-download py-1"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item wait" export-excel table-id="'#ArrearSalarySheet'" sheet-name="'ArrearSalarySheetList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                    <a class="dropdown-item wait" onClick="$('#ArrearSalarySheet').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-secondary" style="min-width:70px">Generate</button>
+                            <button class="btn btn-sm btn-info" style="min-width:70px"> Show Closing</button>
+                            <button class="btn btn-sm btn-success"  style="min-width:70px" ng-click="SaveArrearSalarySheet()"> Save</button>
+                            <button class="btn btn-sm btn-danger"  style="min-width:70px" ng-click="DeleteArrearSalarySheet()"> Delete</button>
+                        </div>
+                    </header>
+                    <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 13rem);">
+                        <table id="ArrearSalarySheet"
+                               class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="text-center align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 3; background-color: #fff">Code</th>
+                                    <th class="text-center align-middle cstm-sticky" style="width: 80px; left: 70px; z-index: 3; background-color: #fff">Enroll No</th>
+                                    <th class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 3; background-color: #fff">Name</th>
+                                    <th class="text-center align-middle" style="width: 120px;z-index:2" ng-repeat="Ph in AttendanceTypeList">
+                                        {{Ph.Name}}
+                                    </th>
+                                    <th class="text-center align-middle" style="width: 120px;z-index:2" ng-repeat="Ph in PayHeadingList">
+                                        {{Ph.Name}}
+                                    </th>
+                                    <th class="text-center cstm-sticky align-middle" style="width:62px;right:0;z-index:3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="cl in EmployeeListForArrearSalarySheet | filter:searchData.ArrearSalarySheet | itemsPerPage: perPage.ArrearSalarySheet" current-page="currentPages.ArrearSalarySheet" pagination-id="ArrearSalarySheetPagination">
+                                    <td class="align-middle text-center cstm-sticky" style="width: 70px; left: 0; z-index: 1; background-color: #fff">{{cl.EmployeeCode}}</td>
+                                    <td class="align-middle text-center cstm-sticky" style="width: 80px; left: 70px; z-index: 1; background-color: #fff">{{cl.EnrollNo}}</td>
+                                    <td class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 1; background-color: #fff">{{cl.EmployeeName}}</td>
+                                    <td class="text-center align-middle" ng-repeat="Ph in cl.AttendanceTypeColl">
+                                        <input type="number" class="form-control form-control-sm text-right" ng-model="Ph.Value" />
+                                    </td>
+                                    <td class="text-center" ng-repeat="Ph in cl.PayHeadColl">
+                                        <input type="number" class="form-control form-control-sm text-right" ng-model="Ph.Amount" />
+                                    </td>
+                                    <td class="text-center cstm-sticky" style="width:62px;right:0;z-index:2;background-color:#ececec">
+                                        <a class="p-1 btn btn-sm btn-info" data-toggle="tooltip" title="Update" href="#" ng-click="UpdateDetailData(cl,$index)">
+                                            <i class="fas fa-save "></i>
+                                        </a>
+                                        <a class="p-1 btn btn-danger btn-sm" data-toggle="tooltip" title="Delete" href="#" ng-click="DelArrearSalarySheetData(cl)">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="ArrearSalarySheetPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+            </section>
+        </div>
+    </section>
+
+</div>

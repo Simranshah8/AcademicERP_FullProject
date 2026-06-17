@@ -1,0 +1,467 @@
+﻿<style>
+    .info {
+        background-color: #4e8b89;
+        color: #fff;
+        padding: 8px;
+    }
+
+    .table-scroll-x-y table thead th, .table.table-head-fixed thead tr th {
+        background-color: #0b605f !important;
+        color: aliceblue !important;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #e5f2ff;
+        font-weight: 500;
+    }
+
+    .table-striped tbody tr:nth-of-type(even) {
+        background-color: #eef9f4;
+        font-weight: 500;
+    }
+
+    .statustable {
+        background-color: #76be4e3b;
+        color: #51623f;
+        border-radius: 5px;
+    }
+    .card-body a {
+        font-size: 0.875rem;
+        color: #0d6efd;
+        text-decoration: underline;
+    }
+    .card-body img {
+        max-width: 120px; /* or 80px if you want smaller */
+        height: auto;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+</style>
+<link href="~/wwwroot/dynamic/css/lessonplan.css" rel="stylesheet" />
+<script src="~/jslib/academic/creation/TodaysClass.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="TodaysClassController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Class Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Teacher Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Subject Wise</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                <div id="classwiseList">
+                                    <div class="row mt-2">
+                                        <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Batch</label>
+                                                <select class="form-control form-control-sm select2" style="width:100%" ng-model="todayClass.BatchId" ng-change="GetTodayLessonPlan(1)">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==todayClass.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Class/Sec</label>
+                                                <select class="form-control form-control-sm select2" style="width:100%" ng-model="todayClass.SelectedClass" ng-change="GetTodayLessonPlan(1)">
+                                                    <option ng-value="cl" ng-repeat="cl in ClassSection.SectionList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        @*<div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="todayClass.SelectedClass" ng-change="GetTodayLessonPlan(1)">
+                                                    <option ng-value="cl" ng-repeat="cl in ClassSection.SectionList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>*@
+                                        <div class="col-md-4" ng-show="todayClass.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Class Year</label>
+                                                <select class="form-control form-control-sm select2" style="width:100%" ng-model="todayClass.ClassYearId" ng-change="GetTodayLessonPlan(1)">
+                                                    <option ng-value="cl.ClassYearId" ng-repeat="cl in ClassYearList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4" ng-show="todayClass.SelectedClass.ClassType==3  &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Semester</label>
+                                                <select class="form-control form-control-sm select2" style="width:100%" ng-model="todayClass.SemesterId" ng-change="GetTodayLessonPlan(1)">
+                                                    <option ng-value="cl.SemesterId" ng-repeat="cl in SemesterList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        @*<div class="col-sm-3 col-lg-3 col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Date</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="todayClass.ForDate_TMP" date-detail="todayClass.ForDateDet" style="width:80%" confirm-action="GetTodayLessonPlan(1)">
+                                            </div>
+                                        </div>*@
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Date</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="todayClass.ForDate_TMP" date-detail="todayClass.ForDateDet" style="width:80%" confirm-action="GetTodayLessonPlan(1)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search" ng-model="searchData.Classwise"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#ClasswiseTbl'" sheet-name="'ClasswiseList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#ClasswiseTbl').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                       
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#ClasswiseTbl'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" ng-show="DataList1.length> 0">
+                                                <table id="ClasswiseTbl" class="main-table table table-sm table-bordered table-striped">
+                                                    <thead class=" text-nowrap">
+                                                        <tr>
+                                                            <th style="width: 150px;">Teacher Name</th>
+                                                            <th style="width: 150px;">Subject Name</th>
+                                                            <th style="width: 200px;">Lesson/Topic</th>
+                                                            <th style="width: 450px;">Teaching Content</th>
+                                                            <th style="width: 170px;">Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in DataList1 | filter:searchData.Classwise | itemsPerPage: perPage.Classwise" current-page="currentPages.Classwise" pagination-id="ClasswisePagination">
+                                                            <td>{{cl.EmpName}}</td>
+                                                            <td>{{cl.SubjectName}}</td>
+                                                            <td>{{cl.LessonName}}/{{cl.TopicName}}</td>
+                                                            <td>
+                                                                <div class="card-body p-0"
+                                                                     ng-bind-html="cl.Contents | unsafe">
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <label class="text-warning float-right mr-2" style="padding:1px 8px" ng-show="cl.StatusValue==1">
+                                                                    Pending <i class="fas fa-hourglass-half"></i>
+                                                                </label>
+                                                                <label class="text-success mr-2 float-right" ng-show="cl.StatusValue==3">
+                                                                    <b> Completed By :- {{cl.EmpName}} On {{cl.EndMiti}} <i class="fas fa-check-double"></i></b>
+                                                                </label>
+                                                                <label class="text-primary mr-2 float-right" ng-show="cl.StatusValue==2">
+                                                                    <b><i class="fas fa-spinner fa-spin"></i> In Progress :- {{cl.EmpName}} On {{cl.StartMiti}} </b>
+                                                                </label>
+                                                            </td>
+                                                            @*<td> <label class="statustable px-2 py-1 mt-1"><strong>{{cl.Status}}</strong></label></td>*@
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div ng-show="DataList1.length<1" style="text-align: center; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 24px; padding: 3rem 2rem; margin: 1rem 0; border-left: 6px solid #2e7d32; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02); font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+                                                <h4 style="color: #1b5e20; font-weight: 600; margin-bottom: 0.5rem; letter-spacing: -0.3px;">📘 Please Add Lesson / Lesson Plan</h4>
+                                                <p style="color: #2e5c2e; font-size: 1rem; margin-bottom: 1rem; opacity: 0.85;">No Content for Class Wise. Start from menu Add Lesson and Add lesson Plan.</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!--Classwise Ends-->
+                            <!--Teacherwise Starts-->
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <div id="teacherwiselist">
+                                    <div class="row mt-2">
+                                        <div class="col-sm-7 col-lg-7 col-md-7">
+                                            <div>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0"
+                                                            style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newTeacherwise.SelectEmployee">
+
+                                                        <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newTeacherwise.EmployeeSearchBy">
+                                                            {{ss.text}}
+                                                        </option>
+                                                    </select>
+                                                    <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newTeacherwise.EmployeeId" student-detail="newTeacherwise.EmployeeDetails" side-bar-data="newTeacherwise.EmpSideBarData" search-by="newTeacherwise.EmployeeSearchBy" confirm-action="GetTodayLessonPlan(2)">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newTeacherwise.ForDate_TMP" date-detail="newTeacherwise.ForDateDet" style="width:80%" confirm-action="GetTodayLessonPlan(2)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search" ng-model="searchData.Teacherwise"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#TeacherwiseTbl'" sheet-name="'TeacherwiseList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#TeacherwiseTbl').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                       
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#TeacherwiseTbl'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" ng-show="DataList2.length > 0">
+                                                <table id="TeacherwiseTbl" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead class=" text-nowrap">
+                                                        <tr>
+                                                            <th style="width: 150px;">Class/Sec</th>
+                                                            <th style="width: 150px;" ng-show="AcademicConfig.ActiveBatch==true">Batch</th>
+                                                            <th style="width: 150px;" ng-show="AcademicConfig.ActiveSemester==true">Semester</th>
+                                                            <th style="width: 150px;" ng-show="AcademicConfig.ActiveClassYear==true">Class Year</th>
+                                                            <th style="width: 170px;">Subject</th>
+                                                            <th style="width: 200px;">Lesson/Topic</th>
+                                                            <th style="width: 450px;">Teaching Content</th>
+                                                            @*<th style="width: 120px;">Status</th>*@
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                        <tr dir-paginate="cl in DataList2 | filter:searchData.Teacherwise | itemsPerPage: perPage.Teacherwise" current-page="currentPages.Teacherwise" pagination-id="TeacherwisePagination">
+                                                            <td>{{cl.ClassName}}</td>
+                                                            <td ng-show="AcademicConfig.ActiveBatch==true">{{cl.Batch}}</td>
+                                                            <td ng-show="AcademicConfig.ActiveSemester==true">{{cl.Semester}}</td>
+                                                            <td ng-show="AcademicConfig.ActiveClassYear==true">{{cl.ClassYear}}</td>
+                                                            <td>{{cl.SubjectName}}</td>
+                                                            <td>{{cl.LessonName}}/{{cl.TopicName}}</td>
+                                                            <td>
+                                                                <div class="card-body p-0" ng-bind-html="cl.Contents | unsafe">
+                                                                </div>
+                                                            </td>
+                                                            <!--
+    <td>
+        <label class="text-warning float-right mr-2" style="padding:1px 8px" ng-show="cl.StatusValue==1">
+            Pending <i class="fas fa-hourglass-half"></i>
+        </label>
+        <label class="text-success mr-2 float-right" ng-show="cl.StatusValue==3">
+            <b> Completed By :- {{cl.EmpName}} On {{cl.EndDate_BS}} <i class="fas fa-check-double"></i></b>
+        </label>
+        <label class="text-primary mr-2 float-right" ng-show="cl.StatusValue==2">
+            <b><i class="fas fa-spinner fa-spin"></i> In Progress :- {{cl.EmpName}} On {{cl.StartDate_BS}} </b>
+        </label>
+    </td>
+                                                                -->
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div ng-show="DataList2.length<1" style="text-align: center; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 24px; padding: 3rem 2rem; margin: 1rem 0; border-left: 6px solid #2e7d32; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02); font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+                                                <h4 style="color: #1b5e20; font-weight: 600; margin-bottom: 0.5rem; letter-spacing: -0.3px;">📘 Please Add Lesson / Lesson Plan</h4>
+                                                <p style="color: #2e5c2e; font-size: 1rem; margin-bottom: 1rem; opacity: 0.85;">No Content for Teacher Wise. Start from menu Add Lesson and Add lesson Plan.</p>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!--Teacherwise Ends-->
+                            <!--Subjectwise Starts-->
+                            <div class="tab-pane fade main-section" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                                <div id="subjectlist">
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Subject</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectwise.SubjectId" style="width:85%" ng-change="GetTodayLessonPlan(3)">                                                    
+                                                    <option ng-value="cl.SubjectId" ng-repeat="cl in SubjectList" ng-selected="cl.id==newSubjectwise.SubjectId">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1 mx-2">Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newSubjectwise.ForDate_TMP" date-detail="newSubjectwise.ForDateDet" style="width:80%" confirm-action="GetTodayLessonPlan(3)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search" ng-model="searchData.Subjectwise"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#SubjectwiseTbl'" sheet-name="'SubjectwiseList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#SubjectwiseTbl').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                       
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#SubjectwiseTbl'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" ng-show="DataList3.length > 0">
+                                                <table id="SubjectwiseTbl" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead class=" text-nowrap">
+                                                        <tr>
+                                                            <th style="width: 150px;">Class/Sec</th>
+                                                            <th style="width: 150px;" ng-show="AcademicConfig.ActiveBatch==true">Batch</th>
+                                                            <th style="width: 150px;" ng-show="AcademicConfig.ActiveSemester==true">Semester</th>
+                                                            <th style="width: 150px;" ng-show="AcademicConfig.ActiveClassYear==true">Class Year</th>
+                                                            <th style="width: 180px;">Teacher Name</th>
+                                                            <th style="width: 200px;">Lesson/Topic</th>
+                                                            <th style="width: 400px;">Teaching Content</th>
+                                                            @*<th style="width: 130px;">Status</th>*@
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in DataList3 | filter:searchData.Subjectwise | itemsPerPage: perPage.Subjectwise" current-page="currentPages.Subjectwise" pagination-id="SubjectwisePagination">
+                                                            <td>{{cl.ClassName}}</td>
+                                                            <td ng-show="AcademicConfig.ActiveBatch==true">{{cl.Batch}}</td>
+                                                            <td ng-show="AcademicConfig.ActiveSemester==true">{{cl.Semester}}</td>
+                                                            <td ng-show="AcademicConfig.ActiveClassYear==true">{{cl.ClassYear}}</td>
+                                                            <td>{{cl.EmpName}}</td>
+                                                            <td>{{cl.LessonName}}/{{cl.TopicName}}</td>
+                                                            <td>
+                                                                <div class="card-body p-0" ng-bind-html="cl.Contents | unsafe">
+                                                                </div>
+                                                            </td>
+                                                            <!--
+    <td>
+        <label class="text-warning float-right mr-2" style="padding:1px 8px" ng-show="cl.StatusValue==1">
+            Pending <i class="fas fa-hourglass-half"></i>
+        </label>
+        <label class="text-success mr-2 float-right" ng-show="cl.StatusValue==3">
+            <b> Completed By :- {{cl.EmpName}} On {{cl.EndDate_BS}} <i class="fas fa-check-double"></i></b>
+        </label>
+        <label class="text-primary mr-2 float-right" ng-show="cl.StatusValue==2">
+            <b><i class="fas fa-spinner fa-spin"></i> In Progress :- {{cl.EmpName}} On {{cl.StartDate_BS}} </b>
+        </label>
+    </td>
+                                                                -->
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div ng-show="DataList3.length<1" style="text-align: center; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 24px; padding: 3rem 2rem; margin: 1rem 0; border-left: 6px solid #2e7d32; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02); font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+                                                <h4 style="color: #1b5e20; font-weight: 600; margin-bottom: 0.5rem; letter-spacing: -0.3px;">📘 Please Add Lesson / Lesson Plan</h4>
+                                                <p style="color: #2e5c2e; font-size: 1rem; margin-bottom: 1rem; opacity: 0.85;">No Content for Subject Wise. Start from menu Add Lesson and Add lesson Plan.</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,271 @@
+﻿<link href="~/wwwroot/dynamic-erp/css/treeview.css" rel="stylesheet" />
+<script src="~/jslib/exam/transaction/ICIndicator.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="IndicatorController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Add Indicator</a>
+                                        </li>
+
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="board-tab" data-toggle="tab"
+                                               href="#board" role="tab" aria-controls="board"
+                                               aria-selected="false">List of Indicators</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="summary-tab" data-toggle="tab"
+                                               href="#summary" role="tab" aria-controls="board"
+                                               aria-selected="false">Summary</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <div class="tab-content" id="myTabContent">
+                            <!-- Class Wise Tab Starts -->
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div class="row mt-2 px-2">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Class</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.ClassId" ng-change="GetClassWiseSubjectList(newIndicator.ClassId)">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==newIndicator.ClassId">{{cl.text}}</option>
+                                            </select>
+                                           
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Subject</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.SubjectId" ng-change="GetSubjectLessonWise()">
+                                                <option ng-value="cl.id" ng-repeat="cl in SubjectListAdd" ng-selected="cl.id==newIndicator.SubjectId">{{cl.text}}</option>
+                                            </select>
+                                           
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Lesson/Theme</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.LessonId" ng-change="GetLessonTopicDetailsWise()">
+                                                <option ng-value="cl.LessonId" ng-repeat="cl in SubjectLessonWiseList" ng-selected="cl.LessonId==newIndicator.LessonId">{{cl.LessonName}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Topic/LOC</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.TopicName" ng-change="GetTopicWiseIndicator()">
+                                                <option ng-value="cl.TopicName" ng-repeat="cl in LessonTopicDetailsWiseList" ng-selected="cl.TopicName==newIndicator.TopicName">{{cl.TopicName}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-1 float-right mt-4">
+                                            <button type="button" class="btn btn-sm btn-default btn-sm px-1" style="width:60px" ng-click="ClearIndicator()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-success btn-sm px-1" style="width:60px" ng-click="SaveUpdateIndicator()">Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card p-2">
+                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center" style="width: 80px">S.No</th>
+                                                    <th style="width: 500px">Name of Indicator</th>
+                                                    <th style="width: 100px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="I in newIndicator.IndicatorDetailsColl">
+                                                    <td class="text-center">{{$index+1}}</td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="I.IndicatorName" /></td>
+                                                    <td>
+                                                        <a class="p-1" ng-click="AddIndicatorDetails($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delIndicatorDetails($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Class Wise Tab Ends -->
+                            <!-- Mark Submitted Status Starts -->
+                            <div class="tab-pane fade main-section" id="board" role="tabpanel"
+                                 aria-labelledby="board-tab">
+                                <div class="row mt-2">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Class</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.ClassId" ng-change="GetClassWiseSubjectListRpt(newDet.ClassId)">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==newDet.ClassId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Subject</label>   
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.SubjectId" ng-change="GetRSubjectLessonWise()">
+                                                <option ng-value="cl.id" ng-repeat="cl in SubjectListRpt" ng-selected="cl.id==newDet.SubjectId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Lesson/Theme</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.LessonId" ng-change="GetRLessonTopicDetailsWise()">
+                                                <option ng-value="cl.LessonId" ng-repeat="cl in RSubjectLessonWiseList" ng-selected="cl.LessonId==newDet.LessonId">{{cl.LessonName}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Topic/LOC</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.TopicName" ng-change="GetAllIndicatorList()">
+                                                <option ng-value="cl.TopicName" ng-repeat="cl in RLessonTopicDetailsWiseList" ng-selected="cl.TopicName==newDet.TopicName">{{cl.TopicName}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-sm btn-success mt-4" ng-click="GetAllIndicatorList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                    </div>
+                                </div>                                
+                              
+                                <div class="table-scroll-x-y sales-main-table table-scroll mb-4">
+                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center" style="width: 45px">S.No</th>
+                                                <th style="width: 150px">Lesson/Theme</th>
+                                                <th style="width: 200px">Topic/LOC</th>
+                                                <th style="width: 300px">Indicator</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody ng-repeat="S in IndicatorList | filter: searchData.Indicator">
+                                            <tr>
+                                                <td class="text-center" scope="rowgroup">{{$index + 1}}</td>
+                                                <td> {{S.LessonName}}</td>
+                                                <td scope="row"colspan="2" class="p-0">
+                                                    <table>
+                                                        <tr ng-repeat="Mo in S.ChieldColl">
+                                                            <td style="width: 200px">
+                                                                <label>{{Mo.TopicName}}</label>
+                                                            </td>
+                                                            <td scope="row" style="width: 300px" class="p-0">
+                                                                <table>
+                                                                    <tr ng-repeat="te in Mo.ChieldColl">
+                                                                        <td>
+                                                                            <label>{{te.IndicatorName}}</label>
+                                                                        </td>
+
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                                
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+
+                            </div>
+                           
+                            <!-- Summary Tab Starts -->
+                            <div class="tab-pane fade main-section" id="summary" role="tabpanel"
+                                 aria-labelledby="board-tab">
+                                <div class="row mt-2">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Class</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSummary.ClassId" ng-change="GetClassWiseSubjectListRpt(newSummary.ClassId)">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==newSummary.ClassId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Subject</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSummary.SubjectId">
+                                                <option ng-value="cl.id" ng-repeat="cl in SubjectListRpt" ng-selected="cl.id==newSummary.SubjectId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-sm btn-success mt-4" ng-click="GetIndicatorSummary()">Load</button>
+                                    </div>
+
+
+                                    @*<div class="col-md-2">
+                <div class="input-group input-group-sm table-search-filed mt-4">
+                    <input class="form-control form-control-navbar" type="search"
+                           placeholder="Search" aria-label="Search">
+                    <div class="input-group-append">
+                        <button class="btn btn-default border-left-0" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>*@
+                                </div>
+
+                                <div class="table-scroll-x-y sales-main-table table-scroll">
+                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 45px">S.No</th>
+                                                <th style="width: 140px">Lesson/Theme</th>
+                                                <th style="width: 150px">Topic/LOC</th>
+                                                <th style="width: 150px">Indicator</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>{{IndicatorTotalSummaryList.TotalLessonIds}}</td>
+                                                <td>{{IndicatorTotalSummaryList.TotalTopicNames}}</td>
+                                                <td>{{IndicatorTotalSummaryList.TotalIndicatorNames}}</td>
+                                            </tr>
+
+                                        </tbody>
+
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+

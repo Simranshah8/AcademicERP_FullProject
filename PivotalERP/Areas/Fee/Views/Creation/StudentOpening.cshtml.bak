@@ -1,0 +1,571 @@
+﻿
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/fee/creation/StudentOpening.js?v=4"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="StudentOpeningController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">Class Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="medium-tab" data-toggle="tab"
+                                               href="#medium" role="tab" aria-controls="medium"
+                                               aria-selected="false">Fee Item Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="contact-tab" data-toggle="tab"
+                                               href="#contact" role="tab" aria-controls="contact"
+                                               aria-selected="false">Report</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <!-- Class Wise Starts -->
+                            <div class="tab-pane fade show active main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Class</label>
+                                            <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newClassWise.SelectedClass" ng-change="GetStudentLstForClassWise(true)">
+                                                <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList">{{cs.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newClassWise.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group">
+                                            <label for="">Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newClassWise.ClassYearId" ng-change="GetStudentLstForClassWise(false)">
+                                                <option ng-value="0">**Select Year**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in newClassWise.SelectedClassClassYearList" ng-selected="cl.id==newClassWise.ClassYearId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newClassWise.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label for="">Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newClassWise.SemesterId" ng-change="GetStudentLstForClassWise(false)">
+                                                <option ng-value="0">**Select Semester**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in newClassWise.SelectedClassSemesterList" ng-selected="cl.id==newClassWise.SemesterId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card p-2">
+                                    <header class="row mb-2">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.ClassWise">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y sales-main-table table-scroll" style="height: 450px;">
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <thead class="text-nowrap">
+                                                <tr>
+                                                    <th class="align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 2; background-color: #fff">S.No.</th>
+                                                    <th class="align-middle cstm-sticky" style="width: 90px; left: 0; z-index: 2; background-color: #fff">Regd No.</th>
+                                                    <th class="align-middle cstm-sticky" style="width: 200px; left: 90px; z-index: 2; background-color: #fff; background-color: #fff">Name</th>
+                                                    <th class="align-middle cstm-sticky" style="width: 100px; left: 290px; z-index: 2; background-color: #fff">Roll No</th>
+                                                    <th style="width: 130px;">Opening Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="st in newClassWise.StudentColl | filter:searchData.ClassWise" ng-hide="newBillingConfiguration.ShowLeftStudentInOpening==false && st.IsLeft==true">
+                                                    <td class="align-middle cstm-sticky">
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <th class="align-middle cstm-sticky" style="width: 90px; left: 0; z-index: 1; background-color: #fff">{{st.RegdNo}}</th>
+                                                    <td class="align-middle cstm-sticky" style="width: 200px; left: 90px; z-index: 1; background-color: #fff">
+                                                        {{st.Name}}
+                                                    </td>
+                                                    <td class="align-middle cstm-sticky" style="width: 100px; left: 290px; z-index: 1; background-color: #fff">
+                                                        {{st.RollNo}} {{st.Semester}} {{st.ClassYear}}
+                                                    </td>
+                                                    <td>
+                                                        <a href="#" ng-click="ShowFeeItemWise(st)">{{st.OpeningAmt |number:2}} </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- table end -->
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" id="admission-list-back-btn" ng-click="ClearClassWise()">Reset</button>
+                                            @*<button type="button" class="btn btn-sm btn-danger" style="min-width: 90px;">Delete</button>*@
+                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateClassWise()">Save</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Class Wise Ends -->
+                            <!-- Fee Item Wise Starts -->
+                            <div class="tab-pane fade main-section" id="medium" role="tabpanel"
+                                 aria-labelledby="medium-tab">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Class</label>
+                                            <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newFeeItemWise.SelectedClass" ng-change="GetStudentLstForFeeWise(true)">
+                                                <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList">{{cs.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newFeeItemWise.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group">
+                                            <label for="">Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newFeeItemWise.ClassYearId" ng-change="GetStudentLstForFeeWise(false)">
+                                                <option ng-value="0">**Select Year**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in newFeeItemWise.SelectedClassClassYearList" ng-selected="cl.id==newFeeItemWise.ClassYearId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newFeeItemWise.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label for="">Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newFeeItemWise.SemesterId" ng-change="GetStudentLstForFeeWise(false)">
+                                                <option ng-value="0">**Select Semester**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in newFeeItemWise.SelectedClassSemesterList" ng-selected="cl.id==newFeeItemWise.SemesterId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Fee Item</label>
+                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="newFeeItemWise.SelectedFeeItem" ng-change="GetStudentLstForFeeWise()">
+                                                <option ng-value="fi" ng-repeat="fi in FeeItemList">{{fi.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="card p-2">
+                                    <header class="row mb-2">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.FeeItemWise">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table1'" sheet-name="'data'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table1').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table1'" class="btn btn-secondary btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y sales-main-table table-scroll" style="height: 450px;">
+                                        <table id="main-table1" class="main-table table table-sm table-bordered bg-white">
+                                            <thead class="text-nowrap">
+                                                <tr>
+                                                    <th class="align-middle cstm-sticky" style="width: 90px; left: 0; z-index: 2; background-color: #fff">Regd No.</th>
+                                                    <th class="align-middle cstm-sticky" style="width: 200px; left: 90px; z-index: 2; background-color: #fff; background-color: #fff">Name</th>
+                                                    <th class="align-middle cstm-sticky" style="width: 100px; left: 290px; z-index: 2; background-color: #fff">Roll No</th>
+                                                    <th style="width: 130px;">Opening Amount</th>
+                                                    <th style="width: 130px;">Remarks</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>                                               
+                                                <tr ng-repeat="st in newFeeItemWise.StudentColl | filter:searchData.FeeItemWise" ng-hide="newBillingConfiguration.ShowLeftStudentInOpening==false && st.IsLeft==true">
+                                                    <th class="align-middle cstm-sticky" style="width: 90px; left: 0; z-index: 1; background-color: #fff">{{st.RegdNo}}</th>
+                                                    <td class="align-middle cstm-sticky" style="width: 200px; left: 90px; z-index: 1; background-color: #fff">
+                                                        {{st.Name}}
+                                                    </td>
+                                                    <td class="align-middle cstm-sticky" style="width: 100px; left: 290px; z-index: 1; background-color: #fff">
+                                                        {{st.RollNo}} {{st.Semester}} {{st.ClassYear}}
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="st.OpeningAmt" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="st.Remarks" />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- table end -->
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" id="admission-list-back-btn" ng-click="ClearFeeItemWise()">Reset</button>
+                                            @*<button type="button" class="btn btn-sm btn-danger" style="min-width: 90px;">Delete</button>*@
+                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateFeeWise()">Save</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fee Item Wise Ends -->
+                            <!--Student Opening Report Starts -->
+                            <div class="tab-pane fade main-section" id="contact" role="tabpanel"
+                                 aria-labelledby="contact-tab">
+                                <div id="report-section" class="card p-2">
+                                    <header class="row mb-3">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Report">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Report">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.ClassWiseOpening">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table_1'" sheet-name="'data'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table_1').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table_1').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table_1').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table_1').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table_1'" class="btn btn-secondary btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                             
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y sales-main-table table-scroll" style="height: 530px;">
+                                        <table id="main-table_1" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 50px;">S.No.</th>
+                                                    <th style="width: 100px;">Class/Sec</th>
+                                                    <th style="width: 120px;" ng-repeat="fi in ClassWiseOpeningFeeItemColl">{{fi.text}}</th>
+                                                    <th style="width: 100px;">Total</th>
+                                                    <th style="width: 50px;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="cl in ClassWiseOpening | filter:searchData.ClassWiseOpening" @*current-page="currentPages.Report" pagination-id="ReportPagination"*@>
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{cl.ClassSec}}</td>
+                                                    <td ng-repeat="fid in cl.FeeItemDetailsColl">{{fid.Amount |number:2}}</td>
+                                                    <td><b>{{cl.Amount |number:2}}</b></td>
+                                                    <td>
+
+                                                        <button class="btn btn-sm btn-success p-0" style="min-width: 80px;" ng-click="GetStudentWiseOpening(cl)">Details</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="2" align="center">
+                                                        TOTAL :-
+                                                    </td>
+                                                    <td style="width: 120px;" ng-repeat="fi in ClassWiseOpeningFeeItemColl"><b>{{fi.Amount |number:2}}</b> </td>
+                                                    <td>
+                                                        <b>{{GrandTotal |number:2}}</b>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        <!-- table end -->
+                                    </div>
+                                </div>
+                                <!-- report details  Starts -->
+                                <div id="report-detail-section">
+                                    <div class="card p-2">
+                                        <header class="row mb-3">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Report">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Report">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.StudentWiseOpening">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table_2'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table_2').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table_2').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table_2').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table_2').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#main-table_2'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+
+
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll" style="height:530px;">
+                                            <table id="main-table_2" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 50px;">S.No.</th>
+                                                        <th style="width: 100px;">RegdNo.</th>
+                                                        <th style="width: 200px;">Name</th>
+                                                        <th style="width: 100px;">Roll No.</th>
+                                                        <th style="width: 120px;" ng-repeat="fi in StudentWiseOpeningFeeItemColl">{{fi.text}}</th>
+                                                        <th style="width: 100px;">Total</th>
+                                                        <th style="width: 250px;">Remarks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cl in StudentWiseOpening | filter:searchData.NotApplicable">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.RegNo}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.RollNo}} {{st.Semester}} {{st.ClassYear}}</td>
+                                                        <td ng-repeat="fid in cl.FeeItemDetailsColl">{{fid.Amount |number:2}}</td>
+                                                        <td><b>{{cl.Amount |number:2}}</b></td>
+                                                        <td>{{cl.Remarks}}</td>
+                                                    </tr>
+
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="4" align="center">
+                                                            TOTAL :-
+                                                        </td>
+                                                        <td style="width: 120px;" ng-repeat="fi in StudentWiseOpeningFeeItemColl"><b>{{fi.Amount |number:2}}</b> </td>
+                                                        <td>
+                                                            <b>{{ClassGrandTotal |number:2}}</b>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-info" id="back-btn-report" style="min-width: 90px;">Back to List</button>
+
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- report details   Ends -->
+                            </div>
+                            <!-- Student Opening Report Ends -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+            <!-- /.row -->
+
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+    <!-- model form for table input -->
+    <div class="modal fade " id="modal-custom-month-fee1" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">FeeItem Details ( {{CurStudent.Name}}-{{CurStudent.RollNo}})</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <div aria-hidden="true">&times;</div>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-content">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <table id="main-table-medium" class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr class="text-nowrap">
+                                                <th class="cstm-sticky" style="width: 150px; left: 0; z-index: 2; background-color: #fff">Fee</th>
+                                                <th style="width:130px">Amount</th>
+                                                <th style="width:130px">Remarks</th>
+                                                <th style="width:100px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-nowrap">
+                                            <tr ng-repeat="md in CurFeeDetailsColl">
+                                                <td class="align-middle cstm-sticky" style="width: 150px; left: 0; z-index: 1; background-color: #fff">
+                                                    <select name="comment-group" class="form-control form-control-sm select2" ng-model="md.FeeItemId">
+                                                        <option ng-value="fi.FeeItemId" ng-repeat="fi in FeeItemList" ng-selected="fi.FeeItemId==md.FeeItemId">{{fi.Name}}</option>
+                                                    </select>
+                                                </td>
+                                                <td><input type="number" class="form-control form-control-sm" ng-model="md.OpeningAmt" ng-change="StudentTotal()"></td>
+                                                <td><input type="text" class="form-control form-control-sm" ng-model="md.Remarks"></td>
+                                                <td>
+                                                    <a class="p-1" href="#" ng-click="AddCurFeeDetails($index)">
+                                                        <i class="fas fa-plus text-info"></i>
+                                                    </a>
+                                                    <a class="p-1" href="#" ng-click="delCurFeeDetails($index)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" data-dismiss="modal">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal form for table input close -->
+</div>
+
+

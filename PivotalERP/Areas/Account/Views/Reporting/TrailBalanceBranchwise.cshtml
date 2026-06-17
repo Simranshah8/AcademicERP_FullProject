@@ -1,0 +1,192 @@
+﻿
+<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<script src="~/jslib/account/reporting/TrailBalanceBranchwise.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BranchwiseController" ng-init="LoadData()">
+    <div class="wrapper">
+        <div class="content-wrapper">
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                    <section class="iframe-content-starts-here">
+                        <div class="tab-content">
+                            <div id="day-book-section">
+
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Date From</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm" date-picker ng-model="newBranchwise.DateFrom_TMP" date-detail="newBranchwise.DateFromDet">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Date To</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm" date-picker ng-model="newBranchwise.DateTo_TMP" date-detail="newBranchwise.DateToDet">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="name">Ignore Ledger</label>
+                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newBranchwise.LedgerId">
+                                                <option ng-value="0">**Select Ledger**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in LedgerList" ng-selected="cl.id==newBranchwise.LedgerId">{{cl.text}}</option>
+                                            </select>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="name">Select Branch</label>
+                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newBranchwise.BranchId">
+                                                <option ng-value="0">**Select Branch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BranchList" ng-selected="cl.id==newBranchwise.BranchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mt-4">
+                                        <button class="btn btn-sm btn-success float-right" style="min-width: 90px;">Load</button>
+                                    </div>
+
+                                </div>
+                                <div class="card p-2 ">
+                                    <header class="row">
+                                        <div class="col-md-5 col-sm-5">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Find:</span>
+                                                        </div>
+                                                        <select class="form-control pr-0"
+                                                                id="exampleFormControlSelect1">
+                                                            <option>Contain</option>
+                                                            <option>Prefix</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="input-group input-group-sm" style="width: 150px;">
+                                                        <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                                        <div class="input-group-append">
+                                                            <button type="submit" class="btn btn-default">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7 col-sm-7 text-right">
+                                            <form class="form-inline  float-right">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Search By:</span>
+                                                    </div>
+                                                    <select class="form-control pr-0" id="exampleFormControlSelect1">
+                                                        <option>Ledger</option>
+                                                        <option>Ledger Group</option>
+                                                        <option>Opening Balance</option>
+                                                        <option>Opening</option>
+                                                        <option>Debit Amount</option>
+                                                        <option>Credit Amount</option>
+                                                        <option>Balance</option>
+                                                        
+                                                    </select>
+                                                </div>
+                                                <div class="input-group input-group-sm" style="width: 150px;">
+                                                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                                    <div class="input-group-append">
+                                                        <button type="submit" class="btn btn-default">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                            type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                   data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </form>
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y card p-2">
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th rowspan="2" class="text-center" style="width: 50px;">S.No.</th>
+                                                    <th rowspan="2" class="text-center" style="width: 100px;">Ledger</th>
+                                                    <th rowspan="2" class="text-center" style="width: 150px;">LedgerGroup</th>
+                                                    <th rowspan="2" class="text-center" style="width: 150px;">Opening Balance</th>
+                                                    <th colspan="4" scope="colgroup" class="text-center" style="width: 400px">Total</th>
+
+
+                                                </tr>
+                                                <tr>
+                                                    <th scope="col" class="text-center">Opening</th>
+                                                    <th scope="col" class="text-center">Debit</th>
+                                                    <th scope="col" class="text-center">Credit</th>
+                                                    <th scope="col" class="text-center">Balance</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+                    <!-- /.row -->
+                </div>
+                <!--/. container-fluid -->
+            </section>
+            <!-- /.content -->
+        </div>
+    </div>
+</div>

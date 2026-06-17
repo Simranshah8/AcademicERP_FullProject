@@ -1,0 +1,2154 @@
+﻿<style>
+    .lesson_tab .tab-content {
+        background: #F6FAF8;
+        padding: 10px !important;
+    }
+
+    table thead tr {
+        background-color: #b4e1f4 !important;
+    }
+
+    .table-scroll-x-y table thead th, .table.table-head-fixed thead tr th {
+        background-color: #0b605f !important;
+        color: aliceblue !important;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #e5f2ff;
+        font-weight: 500;
+    }
+
+    .table-striped tbody tr:nth-of-type(even) {
+        background-color: #eef9f4;
+        font-weight: 500;
+    }
+
+    .custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+        background-color: #025a58;
+        border-radius: 4px;
+    }
+
+    .imgtoprevlist {
+        height: 100px;
+        width: auto;
+    }
+
+    .fullimg {
+        width: auto;
+        height: 600px;
+        object-fit: cover;
+    }
+
+    .tree li span {
+        background-color: aliceblue;
+        border: 1px solid #d5e8fc;
+        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    }
+    .switch-field {
+        display: flex;
+        overflow: hidden;
+    }
+
+        .switch-field input {
+            position: absolute !important;
+            clip: rect(0, 0, 0, 0);
+            height: 1px;
+            width: 1px;
+            border: 0;
+            overflow: hidden;
+        }
+
+        .switch-field label {
+            background-color: #e4e4e4;
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+            line-height: 1;
+            text-align: center;
+            padding: 8px 16px;
+            margin-right: -1px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.1s ease-in-out;
+        }
+
+            .switch-field label:hover {
+                cursor: pointer;
+            }
+
+        .switch-field input:checked + label {
+            background-color: #025a58;
+            box-shadow: none;
+            color: #ffff !important
+        }
+
+        .switch-field label:first-of-type {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .switch-field label:last-of-type {
+            border-radius: 0 4px 4px 0;
+        }
+   
+</style>
+<link href="~/wwwroot/dynamic/css/lms.css" rel="stylesheet" />
+<link href="~/wwwroot/dynamic/css/lessonplan.css" rel="stylesheet" />
+@*<script src="~/jslib/academic/creation/LMS.js"></script>*@
+<script src="~/jslib/ELearning/Econtent.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="LMSController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="english-tab" data-toggle="tab" href="#english" role="tab"
+                                               aria-controls="english" aria-selected="true">Add Lesson Content</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="science-tab" data-toggle="tab" href="#lms2" role="tab"
+                                               aria-controls="science" aria-selected="false">Lesson Content List</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="english" role="tabpanel"
+                                 aria-labelledby="english-tab">
+                                <div class="row mt-2">
+                                    <div class="col-md-4">
+                                        <div class="form-group d-flex">
+                                            <label class="mt-1 mr-2">Class</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newAddLessonContent.ClassId" ng-change="GetClassWiseSubjectList(newAddLessonContent.ClassId)">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==newAddLessonContent.ClassId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group d-flex">
+                                            <label class="mt-1 mr-2">Subject</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newAddLessonContent.SubjectId" ng-change="GetLessonPlanByClassSubject(newAddLessonContent.ClassId,newAddLessonContent.SubjectId)">
+                                                <option ng-value="cl.id" ng-repeat="cl in SubjectList" ng-selected="cl.id==newAddLessonContent.SubjectId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label><b>{{newAddLessonContent.NoOfLesson}} lesson & its Topics</b></label>
+                                        <div class="tree" style="height: calc(100vh - 10rem);overflow-y: auto;">
+                                            <ul class="card p-0" style="padding-left: 0px;margin-bottom: 6px;" ng-repeat="ld in newAddLessonContent.DetailsColl">
+                                                <li>
+                                                    <span data-toggle="collapse" style=" background-color: #b4e1f4;">
+                                                        <a style="color:#000; text-decoration:none;" data-toggle="collapse" href="#Web" aria-expanded="true"
+                                                           aria-controls="Web">
+                                                            <i class="collapsed"><i class="fas fa-folder"></i></i>
+                                                            <i class="expanded"><i class="far fa-folder-open"></i></i> {{ld.SNo}}. {{ld.LessonName}}
+                                                        </a>
+                                                    </span>
+                                                    <div id="Web" class="collapse show" style="background-color: #d7ecf5;">
+                                                        <ul class="pb-3">
+                                                            <li ng-repeat="tc in ld.TopicColl" ng-click="ClickOnTopic(ld,tc)"><span>{{ld.SNo}}.{{tc.SNo}} <a href="#!" ng-click="ClickOnTopic(ld,tc)"> {{tc.TopicName}}</a></span></li>
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="row">
+                                            <div class="col-md-12 lesson_tab">
+                                                <ul class="nav nav-tabs" role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link active" data-toggle="tab" href="#tabs-1" id="content" role="tab">Contents(2)</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" data-toggle="tab" href="#tabs-2" id="videos" role="tab">Videos(2)</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" data-toggle="tab" href="#tabs-3" id="quiz" role="tab">Quiz(20)</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" data-toggle="tab" href="#tabs-4" id="questions" role="tab">Questions(11)</a>
+                                                    </li>
+                                                </ul>
+
+                                                <div class="row">
+                                                    <div class="col-md-9">
+                                                        <p class="ml-4 mt-2 mb-0"><b>{{CurrentLessionTopic.LessonName}} - {{CurrentLessionTopic.TopicName}}</b></p>
+                                                    </div>
+                                                    <div class="col-md-3 mt-1">
+                                                        <button id="addcontent" class="btn btn-sm btn-success float-right mr-2" data-toggle="modal" data-target="#addcontentform"><i class="fas fa-plus mr-2"></i>Add Content</button>
+                                                        <button class="btn btn-sm btn-success  float-right mr-2" id="AddVideoBtn" data-toggle="modal" data-target="#addvideoform"><i class="fas fa-plus mr-2"></i> Add Video</button>
+                                                        <button class="btn btn-sm btn-success float-right mr-2" id="addquiz"><i class="fas fa-plus w-t mr-2"></i> Add Quiz</button>
+                                                        <button class="btn btn-sm btn-success float-right mr-2" id="addqstn"><i class="fas fa-plus w-t mr-2"></i> Add Question</button>
+                                                    </div>
+                                                </div>
+
+
+                                                <!-- Tab panes -->
+                                                <div class="tab-content" style="border: 1px solid #2b757330;height:auto!important">
+                                                    <div class="tab-pane active" id="tabs-1" role="tabpanel">
+                                                        <label>{{CurrentLessionTopic.LessonSNo}}.{{CurrentLessionTopic.TopicSNo}} {{CurrentLessionTopic.TopicName}}</label>
+                                                        <!--Old Design is commented below as new design is added by suresh-->
+                                                        <!--<div class="row upload_img">
+                                                            <div class="col-md-2">
+                                                                <div class="add">
+
+                                                                    <div class="upload-btn-wrapper">
+                                                                        <button class="btn"><i class="fas fa-link"></i><br>Upload</button>
+                                                                        <input type="file" name="myfile" file-models ng-model="CurrentLessionTopic.TMPContentsColl" after-selected="ChooseContentFile()"-->
+                                                        @*fileread="CurrentLessionTopic.TMPContent"*@
+                                                        <!--/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-2" ng-repeat="cc in CurrentLessionTopic.ContentsColl">
+                                                                <div class="float-right">
+                                                                    <i class="fas fa-times cross" ng-click="delContentFile($index)"></i>
+                                                                </div>
+                                                                <img class="imgtoprev" ng-src="{{cc.DocData || cc.FilePath}}" ng-hide="cc.FileType=='pdf'">
+                                                                <div class="imgtoprev" ng-show="cc.FileType=='pdf'">
+                                                                    <a href="#" ng-click="DocumentAtt_Toggle(cc)" data-toggle="modal" class="color-gray-darker c6 td-hover-none">
+                                                                        <div class="ba-0 ds-1">
+                                                                            <img src="~/wwwroot/dynamic/images/flaticons/pdf.png" style="max-height:50px;" />
+                                                                        </div>
+                                                                    </a>
+                                                                </div>
+                                                                <div class="text-center mb-3">
+                                                                    <label>{{cc.Name}}</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>-->
+                                                        <!--New Design added by suresh starts-->
+                                                    <div>
+                                                        <div class="card p-2" style="border: 1px solid #cccccc8a;background-color:#ffffff">
+                                                            <div class="row">
+                                                                <div class="col-md-7">
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Title</b></label>
+                                                                        <label>: PDF</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>URL</b></label>
+                                                                        <label>: </label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Document Attached</b></label>
+                                                                        <label>: C:\Users\acer\Downloads\CRM Files</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Description</b></label>
+                                                                        <label>: Lorem Ipsum Set amet</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Added By</b></label>
+                                                                        <label>: Suresh Paudel on 12 Falgun at 3:09 PM</label>
+                                                                    </div>
+
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <img class="img-fluid" src="~/wwwroot/dynamic/images/pdf.jpg" style="max-height:90px;" />
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <div class="float-right">
+                                                                        <button type="button" class="btn btn-success btn-sm mb-2"><span class="fas fa-upload mr-2"></span>Publish</button><br />
+                                                                        <button type="button" class="btn btn-default mb-2"><span class="fas fa-trash-alt text-danger"></span></button>
+                                                                        <button type="button" class="btn btn-default mb-2"><i class="far fa-edit text-info"></i></button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+
+                                                        <div class="card p-2" style="border: 1px solid #cccccc8a;background-color:#ffffff">
+                                                            <div class="row">
+                                                                <div class="col-md-7">
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Title</b></label>
+                                                                        <label>: PDF</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>URL</b></label>
+                                                                        <label>: </label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Document Attached</b></label>
+                                                                        <label>: C:\Users\acer\Downloads\CRM Files</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Description</b></label>
+                                                                        <label>: Lorem Ipsum Set amet</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Added By</b></label>
+                                                                        <label>: Suresh Paudel on 12 Falgun at 3:09 PM</label>
+                                                                    </div>
+
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <img class="img-fluid" src="~/wwwroot/dynamic/images/schoollogo.png" style="max-height:90px;" />
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <div class="float-right">
+                                                                        <button type="button" class="btn btn-success btn-sm mb-2"><span class="fas fa-upload mr-2"></span>Publish</button><br />
+                                                                        <button type="button" class="btn btn-default mb-2"><span class="fas fa-trash-alt text-danger"></span></button>
+                                                                        <button type="button" class="btn btn-default mb-2"><i class="far fa-edit text-info"></i></button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="card p-2" style="border: 1px solid #cccccc8a;background-color:#ffffff">
+                                                            <div class="row">
+                                                                <div class="col-md-7">
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Title</b></label>
+                                                                        <label>: PDF</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>URL</b></label>
+                                                                        <label>: </label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Document Attached</b></label>
+                                                                        <label>: C:\Users\acer\Downloads\CRM Files</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Description</b></label>
+                                                                        <label>: Lorem Ipsum Set amet</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Added By</b></label>
+                                                                        <label>: Suresh Paudel on 12 Falgun at 3:09 PM</label>
+                                                                    </div>
+
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <img class="img-fluid" src="~/wwwroot/dynamic/images/schoollogo.png" style="max-height:90px;" />
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <div class="float-right">
+                                                                        <button type="button" class="btn btn-success btn-sm mb-2"><span class="fas fa-upload mr-2"></span>Publish</button><br />
+                                                                        <button type="button" class="btn btn-default mb-2"><span class="fas fa-trash-alt text-danger"></span></button>
+                                                                        <button type="button" class="btn btn-default mb-2"><i class="far fa-edit text-info"></i></button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="card p-2" style="border: 1px solid #cccccc8a;background-color:#ffffff">
+                                                            <div class="row">
+                                                                <div class="col-md-7">
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Title</b></label>
+                                                                        <label>: PDF</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>URL</b></label>
+                                                                        <label>: </label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Document Attached</b></label>
+                                                                        <label>: C:\Users\acer\Downloads\CRM Files</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Description</b></label>
+                                                                        <label>: Lorem Ipsum Set amet</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Added By</b></label>
+                                                                        <label>: Suresh Paudel on 12 Falgun at 3:09 PM</label>
+                                                                    </div>
+
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <img class="img-fluid" src="~/wwwroot/dynamic/images/schoollogo.png" style="max-height:90px;" />
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <div class="float-right">
+                                                                        <button type="button" class="btn btn-success btn-sm mb-2"><span class="fas fa-upload mr-2"></span>Publish</button><br />
+                                                                        <button type="button" class="btn btn-default mb-2"><span class="fas fa-trash-alt text-danger"></span></button>
+                                                                        <button type="button" class="btn btn-default mb-2"><i class="far fa-edit text-info"></i></button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="card p-2" style="border: 1px solid #cccccc8a;background-color:#ffffff">
+                                                            <div class="row">
+                                                                <div class="col-md-7">
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Title</b></label>
+                                                                        <label>: PDF</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>URL</b></label>
+                                                                        <label>: </label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Document Attached</b></label>
+                                                                        <label>: C:\Users\acer\Downloads\CRM Files</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Description</b></label>
+                                                                        <label>: Lorem Ipsum Set amet</label>
+                                                                    </div>
+                                                                    <div class="form-group mb-0">
+                                                                        <label style="min-width:125px"><b>Added By</b></label>
+                                                                        <label>: Suresh Paudel on 12 Falgun at 3:09 PM</label>
+                                                                    </div>
+
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <img class="img-fluid" src="~/wwwroot/dynamic/images/schoollogo.png" style="max-height:90px;" />
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <div class="float-right">
+                                                                        <button type="button" class="btn btn-success btn-sm mb-2"><span class="fas fa-upload mr-2"></span>Publish</button><br />
+                                                                        <button type="button" class="btn btn-default mb-2"><span class="fas fa-trash-alt text-danger"></span></button>
+                                                                        <button type="button" class="btn btn-default mb-2"><i class="far fa-edit text-info"></i></button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                        <!--Ends-->
+                                                        <div class="time-label" ng-show="CurrentLessionTopic.LessonId>0">
+                                                            <span class="d-block border-0 p-3 mt-4">
+                                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;">Reset</button>
+                                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="CallSaveUpdateLessonTopicContent()">Save</button>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="tab-pane px-0" id="tabs-2" role="tabpanel">
+                                                        <div class="video_section" id="videolist">
+
+                                                            @*<div class="row">
+                                                                    <div class="col-md-4" ng-repeat="vt in CurrentLessionTopic.VideoColl">
+                                                                        <iframe width="220" max-height="120" ng-src="{{vt.Link | trusted}}">
+                                                                        </iframe>
+                                                                        <span>{{vt.Title}}</span>
+                                                                    </div>
+
+                                                                </div>*@
+
+                                                            <!--New Design added by suresh starts-->
+                                                            <div>
+                                                                <div class="card p-2" style="border: 1px solid #cccccc8a;background-color:#ffffff">
+                                                                    <div class="row">
+                                                                        <div class="col-md-7">
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>Title</b></label>
+                                                                                <label>: PDF</label>
+                                                                            </div>
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>URL</b></label>
+                                                                                <label>: </label>
+                                                                            </div>
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>Document Attached</b></label>
+                                                                                <label>: C:\Users\acer\Downloads\CRM Files</label>
+                                                                            </div>
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>Description</b></label>
+                                                                                <label>: Lorem Ipsum Set amet</label>
+                                                                            </div>
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>Added By</b></label>
+                                                                                <label>: Suresh Paudel on 12 Falgun at 3:09 PM</label>
+                                                                            </div>
+
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <iframe width="150" height="130" src="https://www.youtube.com/embed/-l5E3nCDBwU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen  style="max-height: 130px;"></iframe>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <div class="float-right">
+                                                                                <button type="button" class="btn btn-success btn-sm mb-2"><span class="fas fa-upload mr-2"></span>Publish</button><br />
+                                                                                <button type="button" class="btn btn-default mb-2"><span class="fas fa-trash-alt text-danger"></span></button>
+                                                                                <button type="button" class="btn btn-default mb-2"><i class="far fa-edit text-info"></i></button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+
+                                                                <div class="card p-2" style="border: 1px solid #cccccc8a;background-color:#ffffff">
+                                                                    <div class="row">
+                                                                        <div class="col-md-7">
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>Title</b></label>
+                                                                                <label>: Academic Video</label>
+                                                                            </div>
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>URL</b></label>
+                                                                                <label>: </label>
+                                                                            </div>
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>Document Attached</b></label>
+                                                                                <label>: C:\Users\acer\Downloads\CRM Files</label>
+                                                                            </div>
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>Description</b></label>
+                                                                                <label>: Lorem Ipsum Set amet</label>
+                                                                            </div>
+                                                                            <div class="form-group mb-0">
+                                                                                <label style="min-width:125px"><b>Added By</b></label>
+                                                                                <label>: Suresh Paudel on 12 Falgun at 3:09 PM</label>
+                                                                            </div>
+
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <iframe width="150" height="130" src="https://www.youtube.com/embed/1nMDbcwMxqI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="max-height: 130px;"></iframe>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <div class="float-right">
+                                                                                <button type="button" class="btn btn-success btn-sm mb-2"><span class="fas fa-upload mr-2"></span>Publish</button><br />
+                                                                                <button type="button" class="btn btn-default mb-2"><span class="fas fa-trash-alt text-danger"></span></button>
+                                                                                <button type="button" class="btn btn-default mb-2"><i class="far fa-edit text-info"></i></button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                        </div>
+                                                        @*<div id="addVideo">
+                                                            <div class="col-md-12">
+                                                                <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width: 40px">S.No</th>
+                                                                                <th style="width: 200px">Video Title</th>
+                                                                                <th style="width: 170px">Video Link</th>
+                                                                                <th style="width: 220px">Remarks</th>
+                                                                                <th style="width: 60px">Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr ng-repeat="vt in CurrentLessionTopic.VideoColl">
+                                                                                <td>{{$index+1}}</td>
+                                                                                <td><input type="text" class="form-control form-control-sm" ng-model="vt.Title" /></td>
+                                                                                <td><input type="text" class="form-control form-control-sm" ng-model="vt.Link" /></td>
+                                                                                <td><input type="text" class="form-control form-control-sm" ng-model="vt.Remarks" /></td>
+                                                                                <td>
+                                                                                    <a class="p-1" ng-click="AddVideo($index)" href="#" data-toggle="tooltip" data-placement="top" title="Edit">
+                                                                                        <i class="fas fa-plus text-info"></i>
+                                                                                    </a>
+                                                                                    <a class="p-1" href="#" ng-click="delVideo($index)" data-toggle="tooltip" data-placement="top" title="Delete">
+                                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                <div class="time-label text-center">
+                                                                    <span class="d-block border-0 p-3 mt-4">
+                                                                        <button type="button" class="btn btn-sm btn-info" id="backtoVideo" style="min-width: 90px;">Back to list</button>
+                                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="CallSaveUpdateLessonTopicVideo()">Save</button>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>*@
+                                                    </div>
+
+                                                    <div class="tab-pane" id="tabs-3" role="tabpanel">
+                                                        <div id="quizlist">
+
+                                                            <div class=" sales-main-table table-scroll-x-y table-scroll">
+                                                                @*<table class="main-table table table-sm table-bordered table-striped">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width: 250px;">Title</th>
+                                                                                <th style="width: 90px;">No.of Questions</th>
+                                                                                <th style="width: 100px;">Time Duration(min)</th>
+                                                                                <th style="width: 70px;">FM</th>
+                                                                                <th style="width: 70px;">PM</th>
+                                                                                <th style="width: 90px;">Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>
+                                                                                    <a class="p-1" href="#" id="preview">
+                                                                                        <i class="fas fa-eye text-success"></i>
+                                                                                    </a>
+                                                                                    <a class="p-1" href="#">
+                                                                                        <i class="fas fa-edit text-info"></i>
+                                                                                    </a>
+                                                                                    <a class="p-1" href="#">
+                                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>
+                                                                                    <a class="p-1" href="#">
+                                                                                        <i class="fas fa-eye text-success"></i>
+                                                                                    </a>
+                                                                                    <a class="p-1" href="#">
+                                                                                        <i class="fas fa-edit text-info"></i>
+                                                                                    </a>
+                                                                                    <a class="p-1" href="#">
+                                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>1</td>
+                                                                                <td>
+                                                                                    <a class="p-1" href="#">
+                                                                                        <i class="fas fa-eye text-success"></i>
+                                                                                    </a>
+                                                                                    <a class="p-1" href="#">
+                                                                                        <i class="fas fa-edit text-info"></i>
+                                                                                    </a>
+                                                                                    <a class="p-1" href="#">
+                                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>*@
+                                                            </div>
+                                                        </div>
+                                                        <div id="quizform">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <div class="form-group">
+                                                                                <label>Topic</label>
+                                                                                <input type="text" class="form-control form-control-sm" ng-model="CurrentLessionTopic.Quiz.Topic">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>No.of Questions</label>
+                                                                                <input type="number" class="form-control form-control-sm" ng-model="CurrentLessionTopic.Quiz.NoOfQuestion" ng-change="ChangeNoOfQuestion()">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Quiz Time Duration (min)</label>
+                                                                                <input type="number" class="form-control form-control-sm" ng-model="CurrentLessionTopic.Quiz.Duration">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label>Description</label>
+                                                                        <textarea class="form-control form-control-sm" rows="4"
+                                                                                  placeholder="" ng-model="CurrentLessionTopic.Quiz.Description"></textarea>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-3">
+                                                                    <div class="form-group">
+                                                                        <label>Full Mark</label>
+                                                                        <input type="number" class="form-control form-control-sm" ng-model="CurrentLessionTopic.Quiz.FullMark">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="form-group">
+                                                                        <label>Pass Mark</label>
+                                                                        <input type="number" class="form-control form-control-sm" ng-model="CurrentLessionTopic.Quiz.PassMark">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="form-group">
+                                                                        <label>Each Question Time (min)</label>
+                                                                        <input type="number" class="form-control form-control-sm" ng-model="SelectedQuestion.Duration">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="form-group">
+                                                                        <label>Question Mark</label>
+                                                                        <input type="number" class="form-control form-control-sm" ng-model="SelectedQuestion.Mark">
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            <label><b>Question No: {{SelectedQuestion.SNo}}</b></label>
+                                                            <div class="select-button">
+                                                                <b>Question Title:</b>
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-check form-check-inline">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="inlineRadioQ1"
+                                                                                   ng-value="1" ng-model="SelectedQuestion.QuestionType" />
+                                                                            <span class="form-check-label" for="inlineRadioQ1">Text</span>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="inlineRadioQ2"
+                                                                                   ng-value="2" ng-model="SelectedQuestion.QuestionType" />
+                                                                            <span class="form-check-label" for="inlineRadioQ2">Image</span>
+                                                                        </div>
+
+                                                                        <div class="form-check form-check-inline">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="inlineRadioQ3"
+                                                                                   ng-value="3" ng-model="SelectedQuestion.QuestionType" />
+                                                                            <span class="form-check-label" for="inlineRadioQ3">Audio</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div>
+                                                                            <div class="form-group">
+                                                                                <div ng-show="SelectedQuestion.QuestionType==2">
+                                                                                    <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="SelectedQuestion.Files_TMP" fileread="SelectedQuestion.ImageData" />
+                                                                                </div>
+                                                                                <div ng-show="SelectedQuestion.QuestionType==3">
+                                                                                    <input class="form-control form-control-sm p-0" type="file" style="padding: 1px;width: 100%;" accept="audio/mp3" file-model ng-model="SelectedQuestion.Files_TMP" fileread="SelectedQuestion.ImageData" />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-md-3" ng-show="SelectedQuestion.QuestionType==2">
+                                                                        <img id="imgQuestion" ng-src="{{SelectedQuestion.ImageData || SelectedQuestion.ContentPath}}" style="width: auto; height: 100px;">
+                                                                    </div>
+                                                                    <div class="col-md-3" ng-show="SelectedQuestion.QuestionType==3">
+
+                                                                        <iframe ng-src=" " name="iframe_a" style="height:70px; width:auto " title="Iframe Example"></iframe>
+                                                                        <div class="row">
+                                                                            <p><a ng-href="{{SelectedQuestion.ImageData || SelectedQuestion.ContentPath}}" target="iframe_a">Play Audio</a></p>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                                <textarea id="txtQuestionContent" class="textarea mb-0" placeholder="Place some text here" style="width: 100%; height: 200px; font-size: 14px;  line-height: 18px; border: 1px solid #dddddd;" html-editor ng-model="SelectedQuestion.QuestionContent"></textarea>
+                                                                <!--ofu'vhp;sndosfsdfsadffaff'-->
+                                                                <div>
+                                                                    <div class="select-button">
+                                                                        <b>Answer Title:</b>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="inlineRadio1_A"
+                                                                                   ng-value="1" ng-model="SelectedQuestion.AnswerType" />
+                                                                            <span class="form-check-label" for="inlineRadio1_A">Text</span>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="inlineRadio2_A"
+                                                                                   ng-value="2" ng-model="SelectedQuestion.AnswerType" />
+                                                                            <span class="form-check-label" for="inlineRadio2_A">Image</span>
+                                                                        </div>
+
+                                                                        <div class="form-check form-check-inline">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="inlineRadio3_A"
+                                                                                   ng-value="3" ng-model="SelectedQuestion.AnswerType" />
+                                                                            <span class="form-check-label" for="inlineRadio3_A">Audio</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                                        <table id="main-table"
+                                                                               class="main-table table table-sm table-bordered bg-white">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width: 70px">S.No.</th>
+                                                                                    <th style="width: 300px">Answer</th>
+                                                                                    <th style="width: 150px">Preview</th>
+                                                                                    <th style="width: 100px">Right Answer</th>
+                                                                                    <th style="width: 90px">Action</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr ng-repeat="acDet in SelectedQuestion.AnswerColl">
+                                                                                    <td>
+                                                                                        {{$index+1}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div ng-show="SelectedQuestion.AnswerType==1">
+                                                                                            <input type="text" class="form-control form-control-sm" ng-model="acDet.AnswerContent">
+                                                                                        </div>
+                                                                                        <div ng-show="SelectedQuestion.AnswerType==2">
+                                                                                            <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="acDet.Files_TMP" fileread="acDet.ImageData" />
+                                                                                        </div>
+                                                                                        <div ng-show="SelectedQuestion.AnswerType==3">
+                                                                                            <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept="audio/mp3" file-model ng-model="acDet.Files_TMP" fileread="acDet.ImageData" />
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div ng-show="SelectedQuestion.AnswerType==1">
+                                                                                            {{acDet.AnswerContent}}
+                                                                                        </div>
+                                                                                        <div ng-show="SelectedQuestion.AnswerType==2">
+                                                                                            <img ng-src="{{acDet.ImageData || acDet.ContentPath}}" style="height: 50px;" alt="">
+                                                                                        </div>
+                                                                                        <div ng-show="SelectedQuestion.AnswerType==3">
+                                                                                            <iframe ng-src=" " name="iframe_a{{$index}}" style="height: 40px; width: 130px " title="Iframe Example{{$index}}"></iframe>
+                                                                                            <p><a ng-href="{{acDet.ImageData || acDet.ContentPath}}" target="iframe_a{{$index}}">Play Audio</a></p>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-check form-check-inline">
+                                                                                            <input class="form-check-input" type="radio" name="type" ng-value="$index+1" ng-model="SelectedQuestion.AnswerSNo" />
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <a class="p-1" ng-click="AddQuestionMode($index,acDet)">
+                                                                                            <i class="fas fa-plus text-info"></i>
+                                                                                        </a>
+                                                                                        <a class="p-1" ng-click="delQuestionMode($index)">
+                                                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+
+                                                                            </tbody>
+                                                                        </table>
+
+                                                                    </div>
+                                                                    <footer class="row align-items-center mx-0 mt-1 ">
+                                                                        <ul class="pagination pagination-sm">
+                                                                            <li class="page-item" ng-repeat="q in CurrentLessionTopic.Quiz.QuestionColl">
+                                                                                <a class="page-link" href="#" ng-click="ClickOnQuestionBtn(q)">{{q.SNo}}</a>
+                                                                            </li>
+                                                                        </ul>
+
+                                                                    </footer>
+                                                                </div>
+
+                                                                <div class="time-label">
+                                                                    <span class="d-block border-0 p-3 text-center">
+                                                                        <button type="button" class="btn btn-sm btn-info" id="backquiz" style="min-width: 90px">
+                                                                            Back to List
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;">Reset</button>
+                                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="CallSaveUpdateLessonTopicQuiz()">Accept</button>
+
+                                                                    </span>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <!--Preview Form Starts-->
+                                                        <div class="exam-details" id="exam-details">
+                                                            <div class="card card-default">
+                                                                <div class="card-body">
+                                                                    <h3 class="text-center p-3" style="font-size: 16px; font-weight: 600">
+                                                                        English Class Test
+                                                                    </h3>
+                                                                    <div class="introduction">
+                                                                        <h3 style="font-size: 16px; font-weight: 600">
+                                                                            Instructions:
+                                                                        </h3>
+                                                                        <p>
+                                                                            Lorem ipsum dolor sit amet consectetur
+                                                                            adipisicing elit. Dolore similique dolorem
+                                                                            recusandae eveniet, reiciendis, cumque, fugit
+                                                                            omnis non quos laboriosam rerum eum culpa odio
+                                                                            ab quisquam et quam esse quasi! Lorem ipsum
+                                                                            dolor, sit amet consectetur adipisicing elit.
+                                                                            Culpa ut nemo, quis dolorem sunt minus placeat,
+                                                                            illum ab odio, distinctio pariatur beatae
+                                                                            accusantium tempore repellendus in asperiores
+                                                                            officiis quasi exercitationem? Lorem ipsum,
+                                                                            dolor sit amet consectetur adipisicing elit.
+                                                                            Illum iusto nihil vero deleniti nostrum
+                                                                            nesciunt. Lorem ipsum, dolor sit amet
+                                                                            consectetur adipisicing elit. Atque minima sunt,
+                                                                            sapiente ab deleniti ut.
+                                                                        </p>
+                                                                    </div>
+                                                                    <div class="question-model bg-white p-3 pt-0 border rounded">
+
+                                                                        <div class="d-flex mb-2" style="font-size: 14px; font-weight: 600">
+                                                                            <div class="d-flex flex-column">
+                                                                                <span>
+                                                                                    Total Questions : &nbsp;
+                                                                                    <span class="text-gray">20</span>
+                                                                                </span>
+                                                                                <span>
+                                                                                    Quiz Time : &nbsp;
+                                                                                    <span class="text-gray">3 Hrs.</span>
+                                                                                </span>
+                                                                            </div>
+
+                                                                            <div class="d-flex flex-column ml-auto" style="font-size: 14px; font-weight: 600">
+                                                                                <span>
+                                                                                    Full Marks: &nbsp;
+                                                                                    <span class="text-gray">100</span>
+                                                                                </span>
+                                                                                <span>
+                                                                                    Pass Marks: &nbsp;
+                                                                                    <span class="text-gray">50</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="time-label">
+                                                                    <span class="d-block border-0 p-3 text-center">
+                                                                        <button type="button" class="btn btn-sm btn-info" id="back-main-page" style="min-width: 90px">
+                                                                            Back
+                                                                        </button>
+
+                                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" id="next-question">
+                                                                            Next
+                                                                        </button>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!--Preview Form Ends-->
+                                                        <!--Questions list-->
+                                                        <div id="exam-questions">
+                                                            <div class="card" style="background-color:#fff;border:1px solid #ccc">
+                                                                <div class="card-header py-1">
+                                                                    <div class="row">
+                                                                        <div class="col-md-10">
+                                                                            <label><strong><span class="mr-2">Q.1.</span>Lorem ipsum dolor sit amet ?</strong></label>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <label class="float-right">
+                                                                                <b>Marks-2</b>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="card-body ">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" checked disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            1. Option A
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            2. Option B
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            3. Option C
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            4. Option D
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="card" style="background-color:#fff;border:1px solid #ccc">
+                                                                <div class="card-header py-1">
+                                                                    <div class="row">
+                                                                        <div class="col-md-10">
+                                                                            <label><strong><span class="mr-2">Q.2.</span>Lorem ipsum dolor sit amet ?</strong></label>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <label class="float-right">
+                                                                                <b>Marks-2</b>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="card-body ">
+                                                                    <div class="custom-control custom-checkbox mb-2">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" checked disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            1.
+                                                                        </label>
+                                                                        <img src="~/wwwroot/dynamic/images/lms/car.png" style="height:90px;width:auto;">
+                                                                    </div>
+                                                                    <div class="custom-control custom-checkbox mb-2">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            2.
+                                                                        </label>
+                                                                        <img src="~/wwwroot/dynamic/images/lms/bus.png" style="height:90px;width:auto;">
+                                                                    </div>
+                                                                    <div class="custom-control custom-checkbox mb-2">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            3.
+                                                                        </label>
+                                                                        <img src="~/wwwroot/dynamic/images/lms/truck.png" style="height:90px;width:auto;">
+                                                                    </div>
+                                                                    <div class="custom-control custom-checkbox mb-2">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            4.
+                                                                        </label>
+                                                                        <img src="~/wwwroot/dynamic/images/lms/car.png" style="height:90px;width:auto;">
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="card" style="background-color:#fff;border:1px solid #ccc">
+                                                                <div class="card-header py-1">
+                                                                    <div class="row">
+                                                                        <div class="col-md-10">
+                                                                            <label><strong><span class="mr-2">Q.1.</span>Lorem ipsum dolor sit amet ?</strong></label>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <label class="float-right">
+                                                                                <b>Marks-2</b>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="card-body ">
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" checked disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            1.
+                                                                        </label>
+                                                                        <audio controls style="padding: 12px; border-radius: 23px">
+                                                                            <source src="horse.mp3" type="audio/mpeg">
+                                                                        </audio>
+                                                                    </div>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            2.
+                                                                        </label>
+                                                                        <audio controls style="padding: 12px; border-radius: 23px">
+                                                                            <source src="horse.mp3" type="audio/mpeg">
+                                                                        </audio>
+                                                                    </div>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            3.
+                                                                        </label>
+                                                                        <audio controls style="padding: 12px; border-radius: 23px">
+                                                                            <source src="horse.mp3" type="audio/mpeg">
+                                                                        </audio>
+                                                                    </div>
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input class="custom-control-input" type="checkbox"
+                                                                               id="customCheckbox1" value="option1" disabled>
+                                                                        <label for="customCheckbox1"
+                                                                               class="custom-control-label">
+                                                                            4.
+                                                                        </label>
+                                                                        <audio controls style="padding: 12px; border-radius: 23px">
+                                                                            <source src="horse.mp3" type="audio/mpeg">
+                                                                        </audio>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="time-label mt-4 mb-2">
+                                                                <span class="d-block border-0 text-center">
+                                                                    <button type="button"
+                                                                            class="btn btn-sm btn-info"
+                                                                            id="back-question-detail"
+                                                                            style="min-width: 100px">
+                                                                        Back
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="tab-pane" id="tabs-4" role="tabpanel">
+                                                        <div id="qstnlst">
+                                                            <header class="row">
+                                                                <div class="col-md-7">
+                                                                    <div class="clearfix">
+                                                                        <form class="form-inline">
+                                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                                <div class="input-group-prepend">
+                                                                                    <span class="input-group-text cstm">Show</span>
+                                                                                </div>
+                                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.QuestionList">
+                                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.QuestionList">{{pp.text}}</option>
+                                                                                </select>
+                                                                                <div class="input-group-append">
+                                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                                <input class="form-control form-control-navbar"
+                                                                                       type="search" placeholder="Search"
+                                                                                       aria-label="Search" ng-model="searchData.QuestionList">
+                                                                                <div class="input-group-append">
+                                                                                    <button class="btn btn-default border-left-0"
+                                                                                            type="submit">
+                                                                                        <i class="fas fa-search"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- end col-md-8 -->
+                                                                <div class="col-md-5 text-right">
+
+                                                                    <a href="#"
+                                                                       class="btn btn-secondary btn-light btn-sm"
+                                                                       data-toggle="tooltip"
+                                                                       data-placement="top"
+                                                                       title="Print">
+                                                                        <i class="fas fa-print"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </header>
+                                                            <div>
+                                                                <div class="table-scroll-x-y sales-main-table table-scroll" @*style="height: calc(100vh - 10rem) ;overflow-x:auto"*@>
+                                                                    <table id="main-table"
+                                                                           class="main-table table table-sm table-bordered bg-white table-head-fixed">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width: 70px" ng-click="sort('QNo')">S.No.</th>
+                                                                                <th style="width: 140px" ng-click="sort('ExamModal')">Model</th>
+                                                                                <th style="width: 150px" ng-click="sort('CategoryName')">Category</th>
+                                                                                <th style="width: 350px" ng-click="sort('Question')">Question</th>
+                                                                                <th style="width: 250px;">Options</th>
+                                                                                <th style="width: 100px" ng-click="sort('Marks')">Marks</th>
+                                                                                <th style="width: 200px" ng-click="sort('FileCount')">File</th>
+                                                                                <th style="width: 100px" ng-click="sort('TeacherName')">Teacher</th>
+                                                                                <th style="width: 100px">Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr dir-paginate="cl in QuestionList |orderBy:sortKey:reverse| filter:searchData.QuestionList | itemsPerPage: perPage.QuestionList" current-page="currentPages.QuestionList" pagination-id="QuestionListPagination">
+                                                                                <td>{{cl.SNo}}</td>
+                                                                                <td>
+                                                                                    <f ng-show="cl.ExamModal==1">
+                                                                                        Subjective
+                                                                                    </f>
+                                                                                    <f ng-show="cl.ExamModal==2">
+                                                                                        Objective
+                                                                                    </f>
+                                                                                </td>
+                                                                                <td>{{cl.CategoryName}}</td>
+                                                                                <td>
+                                                                                    <div compile class="card-body" ng-bind-html="cl.Question | unsafe">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div ng-repeat="qd in cl.DetailsColl">
+                                                                                        <div class="custom-control custom-checkbox">
+                                                                                            <input disabled class="custom-control-input" type="checkbox" name="type" ng-model="qd.IsRightAnswer" />
+                                                                                            <label for="customCheckbox1" class="custom-control-label">
+                                                                                                {{qd.SNo_Str}}. {{qd.Answer}}
+                                                                                                <a ng-show="qd.FileCount>0 && qd.FileType=='jpg'" class="card-title float-right" href="#" ng-click="DocumentAtt_Toggle(qd.FilePath)" data-toggle="modal" style="font-size:25px;">
+                                                                                                    <img src="{{qd.FilePath}}" class="img-fluid  ml-4" ng-click="DocumentAtt_Toggle(qd.FilePath)" data-toggle="modal" style="height:70px; width:140px;" />
+                                                                                                </a>
+                                                                                                <a ng-show="qd.FileCount>0 && qd.FileType=='pdf'" href="#" ng-click="DocumentAtt_Toggle(qd.FilePath)" data-toggle="modal" class="color-gray-darker c6 td-hover-none">
+                                                                                                    <img src="~/teacherloginFiles/dynamic/images/flaticons/pdf.png" style="max-height:50px;" />
+                                                                                                </a>
+                                                                                                <audio ng-show="qd.FileCount>0 && qd.FileType=='mp3'" controls preload="none">
+                                                                                                    <source src="{{qd.FilePath}}" type="audio/mp3">
+                                                                                                    <source src="{{qd.FilePath}}" type="audio/x-ms-wma">
+                                                                                                    <source src="{{qd.FilePath}}" type="audio/mp4">
+                                                                                                </audio>
+                                                                                            </label>
+
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>{{cl.Marks}}</td>
+                                                                                <td>
+                                                                                    <a ng-show="cl.FileCount>0 && cl.FileType=='jpg'" class="card-title" href="#" ng-click="DocumentAtt_Toggle(cl.QuestionPath)" data-toggle="modal" style="font-size:25px;">
+                                                                                        <img src="{{cl.QuestionPath}}" class="img-fluid" ng-click="DocumentAtt_Toggle(cl.QuestionPath)" data-toggle="modal" style="height:70px; width:140px;" />
+                                                                                    </a>
+                                                                                    <a ng-show="cl.FileCount>0 && cl.FileType=='pdf'" href="#" ng-click="DocumentAtt_Toggle(cl.QuestionPath)" data-toggle="modal" class="color-gray-darker c6 td-hover-none">
+                                                                                        <div class="ba-0 ds-1">
+                                                                                            <img src="~/teacherloginFiles/dynamic/images/flaticons/pdf.png" style="max-height:50px;" />
+                                                                                        </div>
+                                                                                    </a>
+                                                                                    <audio ng-show="cl.FileCount>0 && cl.FileType=='mp3'" controls preload="none">
+                                                                                        <source src="{{cl.QuestionPath}}" type="audio/mp3">
+                                                                                        <source src="{{cl.QuestionPath}}" type="audio/x-ms-wma">
+                                                                                        <source src="{{cl.QuestionPath}}" type="audio/mp4">
+                                                                                    </audio>
+                                                                                </td>
+                                                                                <td>{{cl.TeacherName}}</td>
+                                                                                <td>
+                                                                                    <a class="p-1" href="#" ng-click="DelQuestionListById(cl)">
+                                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <!-- table end -->
+                                                                </div>
+                                                            </div>
+                                                            <footer class="row align-items-center">
+                                                                <div class="col-md-12">
+                                                                    <dir-pagination-controls pagination-id="QuestionListPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                                    </dir-pagination-controls>
+                                                                </div>
+                                                            </footer>
+                                                        </div>
+
+                                                        <div id="addquestion">
+                                                            <div class="card p-0">
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group ">
+                                                                            <label>Model</label>
+                                                                            <input type="text" class="form-control form-control-sm" ng-model="newQuestionSetup.ExamModal" @*disabled*@ />
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group ">
+                                                                            <label>Category</label>
+                                                                            <select ng-model="SelectedCategory" class="form-control form-control-sm" ng-options="x.CategoryName for x in CategoryList" id="cboCategoryId" name="cboCategory" ng-change="GetCategoryData()"></select>
+
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <div class="form-group ">
+                                                                            <label>No of Questions</label>
+                                                                            <input type="number" class="form-control form-control-sm" ng-model="newQuestionSetup.NoOfQuestions" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <div class="form-group ">
+                                                                            <label>Marks</label>
+                                                                            <input type="number" class="form-control form-control-sm" ng-model="newQuestionSetup.Marks" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <hr class="my-0" />
+                                                                @*<div class="row">
+                                                                        <div class="col-md-4">
+                                                                            <div class="form-group">
+                                                                                <div class="col-md-row">
+                                                                                    <h6>Question No : {{SelectedQuestion.QNo}} </h6>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-4"></div>
+                                                                        <div class="col-md-4">
+                                                                            <div class="form-group form-inline">
+                                                                                <label for="">Marks</label>
+                                                                                <input type="number"
+                                                                                       class="form-control form-control-sm" style="width:89%;" disabled ng-model="newQuestionSetup.Marks"
+                                                                                       placeholder="" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>*@
+                                                                <div class="row">
+                                                                    <div class="col-md-5">
+                                                                        <div class="row">
+                                                                        </div>
+                                                                        <div class="select-button">
+                                                                            <b>Question Title:</b>
+                                                                            <div class="form-check form-check-inline">
+                                                                                <input class="form-check-input"
+                                                                                       type="radio"
+                                                                                       name="inlineRadio1"
+                                                                                       ng-value="1" ng-model="SelectedQuestion.QuestionTitle" />
+                                                                                <span class="form-check-label" for="inlineRadio1">Text</span>
+                                                                            </div>
+                                                                            <div class="form-check form-check-inline">
+                                                                                <input class="form-check-input"
+                                                                                       type="radio"
+                                                                                       name="inlineRadio2"
+                                                                                       ng-value="2" ng-model="SelectedQuestion.QuestionTitle" />
+                                                                                <span class="form-check-label" for="inlineRadio2">Image</span>
+                                                                            </div>
+
+                                                                            <div class="form-check form-check-inline">
+                                                                                <input class="form-check-input"
+                                                                                       type="radio"
+                                                                                       name="inlineRadio3"
+                                                                                       ng-value="3" ng-model="SelectedQuestion.QuestionTitle" />
+                                                                                <span class="form-check-label" for="inlineRadio3">Audio</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-6" ng-show="SelectedQuestion.QuestionTitle==2">
+                                                                        <img id="imgQuestion" ng-src="{{SelectedQuestion.ImageData || SelectedQuestion.QuestionPath}}" style="width: auto; height: 90px;" @*alt="Img"*@>
+                                                                    </div>
+                                                                    <div class="col-md-6" ng-show="SelectedQuestion.QuestionTitle==3">
+                                                                        @*<p>Listen  <a href="{{SelectedQuestion.ImageData || SelectedQuestion.QuestionPath}}" target="_blank">Audio</a>.</p>
+                                                                            <p>Listen  <a href="{{SelectedQuestion.ImageData || SelectedQuestion.TestPath}}" target="_blank">Audio</a>.</p>*@
+                                                                        <iframe ng-src=" " name="iframe_a" style="height:70px; width:auto " title="Iframe Example"></iframe>
+                                                                        <div class="row">
+                                                                            <p><a ng-href="{{SelectedQuestion.ImageData || SelectedQuestion.QuestionPath}}" target="iframe_a">Play Audio</a></p> @*&nbsp;&nbsp;&nbsp; <p ng-click="ClearImg()" style="color:red;cursor:pointer">Clear</p>*@
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                </div>
+
+
+                                                                <div class="col-md-5">
+                                                                    <div>
+                                                                        <div class="form-group">
+                                                                            <div ng-show="SelectedQuestion.QuestionTitle==2">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-6">
+                                                                                        <input id="flQuestion" class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="SelectedQuestion.Files_TMP" fileread="SelectedQuestion.ImageData" />
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            </div>
+                                                                            <div ng-show="SelectedQuestion.QuestionTitle==3">
+                                                                                <input class="form-control form-control-sm p-0" type="file" style="padding: 1px;width: 50%;" accept="audio/mp3" file-model ng-model="SelectedQuestion.Files_TMP" fileread="SelectedQuestion.ImageData" />
+
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <textarea class="textarea" placeholder="Place some text here" style="width: 100%; height: 200px; font-size: 14px;  line-height: 18px; border: 1px solid #dddddd;" html-editor ng-model="SelectedQuestion.Question"></textarea>
+
+
+                                                                <div ng-show="SelectedCategory.ExamModal==2">
+                                                                    <div class="select-button">
+                                                                        <b>Answer Title:</b>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="inlineRadio1_A"
+                                                                                   ng-value="1" ng-model="SelectedQuestion.AnswerTitle" />
+                                                                            <span class="form-check-label" for="inlineRadio1_A">Text</span>
+                                                                        </div>
+                                                                        <div class="form-check form-check-inline">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="inlineRadio2_A"
+                                                                                   ng-value="2" ng-model="SelectedQuestion.AnswerTitle" />
+                                                                            <span class="form-check-label" for="inlineRadio2_A">Image</span>
+                                                                        </div>
+
+                                                                        <div class="form-check form-check-inline">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="inlineRadio3_A"
+                                                                                   ng-value="3" ng-model="SelectedQuestion.AnswerTitle" />
+                                                                            <span class="form-check-label" for="inlineRadio3_A">Audio</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                                        <table id="main-table"
+                                                                               class="main-table table table-sm table-bordered bg-white">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width: 70px">S.No.</th>
+                                                                                    <th style="width: 300px">Answer</th>
+                                                                                    <th style="width: 250px">Preview</th>
+                                                                                    <th style="width: 100px">Right Answer</th>
+                                                                                    <th style="width: 90px">Action</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr ng-repeat="acDet in SelectedQuestion.DetailsColl">
+                                                                                    <td>
+                                                                                        {{getLetter($index)}}
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div ng-show="SelectedQuestion.AnswerTitle==1">
+                                                                                            <input type="text" class="form-control form-control-sm" ng-model="acDet.Answer">
+                                                                                        </div>
+                                                                                        <div ng-show="SelectedQuestion.AnswerTitle==2">
+                                                                                            <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="acDet.Files_TMP" fileread="acDet.ImageData" />
+                                                                                        </div>
+                                                                                        <div ng-show="SelectedQuestion.AnswerTitle==3">
+                                                                                            <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept="audio/mp3" file-model ng-model="acDet.Files_TMP" fileread="acDet.ImageData" />
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div ng-show="SelectedQuestion.AnswerTitle==1">
+                                                                                            {{acDet.Answer}}
+                                                                                        </div>
+                                                                                        <div ng-show="SelectedQuestion.AnswerTitle==2">
+                                                                                            <img ng-src="{{acDet.ImageData || acDet.FilePath}}" style="height: 50px;" alt="">
+                                                                                        </div>
+                                                                                        <div ng-show="SelectedQuestion.AnswerTitle==3">
+                                                                                            <iframe ng-src=" " name="iframe_a{{$index}}" style="height: 70px; width: auto " title="Iframe Example{{$index}}"></iframe>
+                                                                                            <p><a ng-href="{{acDet.ImageData || acDet.FilePath}}" target="iframe_a{{$index}}">Play Audio</a></p>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-check form-check-inline">
+                                                                                            <input class="form-check-input" type="radio" name="type" id="text-input-ans" ng-value="true" ng-model="acDet.IsRightAnswer" ng-click="ChangeAnswerSelection($index)" />
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <a class="p-1" ng-click="AddQuestionMode($index,acDet)">
+                                                                                            <i class="fas fa-plus text-info"></i>
+                                                                                        </a>
+                                                                                        <a class="p-1" ng-click="delQuestionMode($index)">
+                                                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+
+                                                                            </tbody>
+                                                                        </table>
+                                                                        <!-- table end -->
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <ul class="pagination pagination-sm m-0 float-right mt-2">
+                                                                        <li class="page-item" ng-repeat="qa in QuestionColl" ng-class="{ active : qa.QNo == SelectedQuestion.QNo}">
+                                                                            <a class="page-link" href="" ng-click="ChangeQuestion(qa)">{{qa.QNo}}</a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                                <div class="time-label">
+                                                                    <span class="d-block border-0 p-3 text-center">
+                                                                        <button type="button" class="btn btn-sm btn-info" id="backtoqstnlst" style="min-width: 90px;">Back to List</button>
+                                                                        <button type="button" class="btn btn-sm btn-success" ng-click="CallSaveUpdateQuestionSetup(SelectedQuestion,true)" style="min-width: 90px;">Accept</button>
+                                                                        <button type="button" class="btn btn-sm btn-default" ng-click="ClearQuestionSetup()" style="min-width: 90px;">Reset</button>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- lesson Content List -->
+                            <div class="tab-pane fade main-section" id="lms2" role="tabpanel" aria-labelledby="science-tab">
+                                <div id="lessonlist">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newLessonContentList.ClassId" ng-change="GetClassWiseSubjectListRpt(newLessonContentList.ClassId)">
+                                                    <option ng-value="0">**Select Class**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==newLessonContentList.ClassId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Subject</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newLessonContentList.SubjectId" ng-change="GetLessonPlanByClassSubjectRpt(newLessonContentList.ClassId,newLessonContentList.SubjectId)">
+                                                    <option ng-value="cl.id" ng-repeat="cl in SubjectListRpt" ng-selected="cl.id==newLessonContentList.SubjectId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card mb-1" ng-repeat="ld in newLessonContentList.DetailsColl">
+                                        <div class="card-header py-0 pr-0" data-card-widget="collapse" style="background-color: #63c3ec9c; border: 1px solid #dddddd ">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <h6 class="mt-2">
+                                                        {{ld.SNo}}. {{ld.LessonName}}
+                                                    </h6>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="float-right mt-1">
+                                                        @*<button class="btn btn-sm btn-success view-btn" id="view-content"><i class="far fa-eye"></i> Content</button>
+                                                            <button class="btn btn-sm btn-info view-btn" id="view-video"><i class="far fa-eye"></i> Video</button>
+                                                            <button class="btn btn-sm btn-warning view-btn" id="view-assignment"><i class="far fa-eye"></i> Quiz</button>*@
+                                                        <button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding: 3px 2px;">
+                                                            <i class="fas fa-minus"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" style="padding-left: 20px; border: 1px solid #dddddd; background-color: #e5f2ff;">
+                                            <div class="tab-pane active" id="tabs-1" role="tabpanel">
+                                                <ul class="topicsec pl-2">
+                                                    <li class="past_section" ng-repeat="tc in ld.TopicColl">
+                                                        <div class="row">
+                                                            <div class="col-md-9">
+                                                                <div class="horizontal_dotted_line">
+                                                                    <span>----</span> <a href="#">
+                                                                        {{ld.SNo}}.{{tc.SNo}}. {{tc.TopicName}}
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="float-right">
+                                                                    <button class="btn btn-sm btn-success view-btn" ng-click="DisplayContent(ld,tc)"><i class="far fa-eye"></i> Content</button>
+                                                                    <button class="btn btn-sm btn-info view-btn" ng-click="DisplayVideo(ld,tc)"><i class="far fa-eye"></i> Video</button>
+                                                                    <button class="btn btn-sm btn-warning view-btn" ng-click="DisplayQuiz(ld,tc)"><i class="far fa-eye"></i> Quiz</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <!-- /.card-body -->
+                                    </div>
+
+                                </div>
+
+                                <div id="content-form">
+                                    <div class="card mb-1">
+                                        <div class="card-header py-0" style="background-color: #63c3ec9c; border: 1px solid #dddddd ">
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    <h6 class="mt-2">
+                                                        {{SelectedLesson.SubjectName}}- <span class="ml-2">{{SelectedLesson.LessonName}} </span> - <span class="ml-2">{{SelectedTopic.TopicName}}</span>
+                                                    </h6>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="float-right">
+                                                        <div class="d-flex">
+                                                            <h6 class="px-2 py-1 mt-1"><button class="btn btn-sm btn-info view-btn" id="backcontent">Back To List</button></h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" style="padding-left: 20px; border: 1px solid #dddddd; background-color: #e5f2ff;">
+                                            <div class="tab-pane " id="tabs-1" role="tabpanel">
+                                                <div class="row">
+                                                    <div class="col-md-2" ng-repeat="cc in SelectedTopic.ContentsColl">
+                                                        <div class="text-center mb-3" ng-hide="cc.FileType=='pdf'">
+                                                            <img id="imgview" class="imgtoprevlist img-fluid" ng-src="{{cc.FilePath}}"><br />
+                                                            <label>{{cc.Name}}</label>
+                                                        </div>
+                                                        <div class="text-center mb-3" ng-show="cc.FileType=='pdf'">
+                                                            <a href="#" ng-click="DocumentAtt_Toggle(cc)" data-toggle="modal" class="color-gray-darker c6 td-hover-none">
+                                                                <div class="ba-0 ds-1">
+                                                                    <img src="~/wwwroot/dynamic/images/flaticons/pdf.png" style="max-height:50px;" />
+                                                                </div>
+                                                            </a>
+                                                            <label>{{cc.Name}}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="fullimg" class="text-center">
+                                                    <iframe src="~/wwwroot/dynamic/images/question-paper-sample.jpg" height="700" width="750"></iframe>
+                                                </div>
+                                                <div id="fullpdf">
+                                                    <iframe src="http://www.africau.edu/images/default/sample.pdf" style="width:100%;height:600px;" frameborder="0"></iframe>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /.card-body -->
+                                        <!-- /.card-body -->
+                                    </div>
+                                </div>
+
+                                <div id="video-form">
+                                    <div class="card-header py-0" style="background-color: #63c3ec9c; border: 1px solid #dddddd ">
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <h6 class="mt-2">
+                                                    {{SelectedLesson.SubjectName}}- <span class="ml-2">{{SelectedLesson.LessonName}} </span> - <span class="ml-2">{{SelectedTopic.TopicName}}</span>
+                                                </h6>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="float-right">
+                                                    <div class="d-flex">
+                                                        <h6 class="px-2 py-1 mt-1">
+                                                            <button class="btn btn-sm btn-info view-btn" id="backvideo">Back To List</button>
+                                                        </h6>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body" style="padding-left: 20px; border: 1px solid #dddddd; background-color: #e5f2ff;">
+                                        <div class="tab-pane " id="tabs-1" role="tabpanel">
+                                            <div class="video_section">
+                                                <div class="row text-center">
+                                                    <div class="col-md-4" ng-repeat="vt in SelectedTopic.VideoColl">
+                                                        <video controls>
+                                                            <source ng-src="{{vt.Link | trusted}}" type="video/mp4" />
+                                                        </video>
+                                                        <span>{{vt.Title}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="contentlistquiz-form">
+                                    <div class="card-header py-0" style="background-color: #63c3ec9c; border: 1px solid #dddddd ">
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <h6 class="mt-2">
+                                                    {{SelectedLesson.SubjectName}}- <span class="ml-4">{{SelectedLesson.LessonName}} </span> - <span class="ml-2">{{SelectedTopic.TopicName}}</span>
+                                                </h6>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="float-right">
+                                                    <div class="d-flex">
+                                                        <h6 class="px-2 py-1 mt-1"><button class="btn btn-sm btn-info view-btn" id="backassignment">Back To List</button></h6>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body" style="padding-left: 0px;padding-right: 0px; border: 1px solid #dddddd; background-color: #e5f2ff;">
+                                        <div class="tab-pane " id="tabs-1" role="tabpanel">
+                                            <div id="contentlistquizlist">
+                                                <div>
+                                                    <div class=" sales-main-table table-scroll-x-y table-scroll">
+                                                        <table class="main-table table table-sm table-bordered table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 300px;">Title</th>
+                                                                    <th style="width: 90px;">No.of Questions</th>
+                                                                    <th style="width: 100px;">Time Duration(min)</th>
+                                                                    <th style="width: 70px;">FM</th>
+                                                                    <th style="width: 70px;">PM</th>
+                                                                    <th style="width: 80px;">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr @*ng-repeat="q in SelectedTopic.Quiz.QuestionColl"*@>
+                                                                    <td>{{SelectedTopic.Quiz.Topic}}</td>
+                                                                    <td>{{SelectedTopic.Quiz.NoOfQuestion}}</td>
+                                                                    <td>{{SelectedTopic.Quiz.Duration}}</td>
+                                                                    <td>{{SelectedTopic.Quiz.FullMark}}</td>
+                                                                    <td>{{SelectedTopic.Quiz.PassMark}}</td>
+                                                                    <td>
+                                                                        <button class="btn btn-sm btn-info" href="#" id="LCpreviewquiz" style="padding:1px 8px">
+                                                                            <i class="fas fa-eye"></i> Preview
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <!--Lesson Content List Tab Quiz Button quiz section starts-->
+                                            <!--LEsson Content List Preview Form Starts-->
+                                            <div class="exam-details" id="lCexam-details">
+                                                <div class="card card-default">
+                                                    <div class="card-body">
+                                                        <h3 class="text-center p-3" style="font-size: 16px; font-weight: 600">
+                                                            English Class Test
+                                                        </h3>
+                                                        <div class="introduction">
+                                                            <h3 style="font-size: 16px; font-weight: 600">
+                                                                Instructions:
+                                                            </h3>
+                                                            <p>
+                                                                Lorem ipsum dolor sit amet consectetur
+                                                                adipisicing elit. Dolore similique dolorem
+                                                                recusandae eveniet, reiciendis, cumque, fugit
+                                                                omnis non quos laboriosam rerum eum culpa odio
+                                                                ab quisquam et quam esse quasi! Lorem ipsum
+                                                                dolor, sit amet consectetur adipisicing elit.
+                                                                Culpa ut nemo, quis dolorem sunt minus placeat,
+                                                                illum ab odio, distinctio pariatur beatae
+                                                                accusantium tempore repellendus in asperiores
+                                                                officiis quasi exercitationem? Lorem ipsum,
+                                                                dolor sit amet consectetur adipisicing elit.
+                                                                Illum iusto nihil vero deleniti nostrum
+                                                                nesciunt. Lorem ipsum, dolor sit amet
+                                                                consectetur adipisicing elit. Atque minima sunt,
+                                                                sapiente ab deleniti ut.
+                                                            </p>
+                                                        </div>
+                                                        <div class="question-model bg-white p-3 pt-0 border rounded">
+
+                                                            <div class="d-flex mb-2" style="font-size: 14px; font-weight: 600">
+                                                                <div class="d-flex flex-column">
+                                                                    <span>
+                                                                        Total Questions : &nbsp;
+                                                                        <span class="text-gray">20</span>
+                                                                    </span>
+                                                                    <span>
+                                                                        Quiz Time : &nbsp;
+                                                                        <span class="text-gray">3 Hrs.</span>
+                                                                    </span>
+                                                                </div>
+
+                                                                <div class="d-flex flex-column ml-auto" style="font-size: 14px; font-weight: 600">
+                                                                    <span>
+                                                                        Full Marks: &nbsp;
+                                                                        <span class="text-gray">100</span>
+                                                                    </span>
+                                                                    <span>
+                                                                        Pass Marks: &nbsp;
+                                                                        <span class="text-gray">50</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="time-label">
+                                                        <span class="d-block border-0 p-3 text-center">
+                                                            <button type="button" class="btn btn-sm btn-info" id="back-LCEL" style="min-width: 90px">
+                                                                Back
+                                                            </button>
+
+                                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" id="next-questionLC">
+                                                                Next
+                                                            </button>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!--LEsson Content List Preview Form Ends-->
+                                            <!--LEsson Content List Questions list-->
+                                            <div id="LCexam-questions" class="p-2">
+                                                <div class="card" style="background-color:#fff;border:1px solid #ccc">
+                                                    <div class="card-header">
+                                                        <div class="row">
+                                                            <div class="col-md-10">
+                                                                <label><strong><span class="mr-2">Q.1.</span>Lorem ipsum dolor sit amet ?</strong></label>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <label class="float-right">
+                                                                    <b>Marks-2</b>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body ">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" checked disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                1. Option A
+                                                            </label>
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                2. Option B
+                                                            </label>
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                3. Option C
+                                                            </label>
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                4. Option D
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="card" style="background-color:#fff;border:1px solid #ccc">
+                                                    <div class="card-header py-1">
+                                                        <div class="row">
+                                                            <div class="col-md-10">
+                                                                <label><strong><span class="mr-2">Q.2.</span>Lorem ipsum dolor sit amet ?</strong></label>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <label class="float-right">
+                                                                    <b>Marks-2</b>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body ">
+                                                        <div class="custom-control custom-checkbox mb-2">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" checked disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                1.
+                                                            </label>
+                                                            <img src="~/wwwroot/dynamic/images/lms/car.png" style="height:90px;width:auto;">
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox mb-2">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                2.
+                                                            </label>
+                                                            <img src="~/wwwroot/dynamic/images/lms/bus.png" style="height:90px;width:auto;">
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox mb-2">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                3.
+                                                            </label>
+                                                            <img src="~/wwwroot/dynamic/images/lms/truck.png" style="height:90px;width:auto;">
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox mb-2">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                4.
+                                                            </label>
+                                                            <img src="~/wwwroot/dynamic/images/lms/car.png" style="height:90px;width:auto;">
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="card" style="background-color:#fff;border:1px solid #ccc">
+                                                    <div class="card-header py-1">
+                                                        <div class="row">
+                                                            <div class="col-md-10">
+                                                                <label><strong><span class="mr-2">Q.1.</span>Lorem ipsum dolor sit amet ?</strong></label>
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <label class="float-right">
+                                                                    <b>Marks-2</b>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body ">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" checked disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                1.
+                                                            </label>
+                                                            <audio controls style="padding: 12px; border-radius: 23px">
+                                                                <source src="horse.mp3" type="audio/mpeg">
+                                                            </audio>
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                2.
+                                                            </label>
+                                                            <audio controls style="padding: 12px; border-radius: 23px">
+                                                                <source src="horse.mp3" type="audio/mpeg">
+                                                            </audio>
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                3.
+                                                            </label>
+                                                            <audio controls style="padding: 12px; border-radius: 23px">
+                                                                <source src="horse.mp3" type="audio/mpeg">
+                                                            </audio>
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" disabled>
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                4.
+                                                            </label>
+                                                            <audio controls style="padding: 12px; border-radius: 23px">
+                                                                <source src="horse.mp3" type="audio/mpeg">
+                                                            </audio>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="time-label mt-4 mb-2">
+                                                    <span class="d-block border-0 text-center">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-info"
+                                                                id="back-question-LCdetailLContent"
+                                                                style="min-width: 100px">
+                                                            Back
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+
+    <div class="modal fade" id="homeVideo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <button type="button" class="btn btn-default text-right" data-dismiss="modal" onclick="pauseVid()">X</button>
+                <div class="embed-responsive embed-responsive-16by9">
+                    <video id="gossVideo" class="embed-responsive-item" controls="controls" poster="http://www.gossettmktg.com/video/dangot.png">
+                        <source src="http://www.gossettmktg.com/video/dangot.mp4" type="video/mp4">
+                        <source src="http://www.gossettmktg.com/video/dangot.webm" type="video/webm">
+                        <source src="http://www.gossettmktg.com/video/dangot.ogv" type="video/ogg">
+                        <object type="application/x-shockwave-flash" data="https://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" width="353" height="190">
+                            <param name="movie" value="https://releases.flowplayer.org/swf/flowplayer-3.2.1.swf">
+                            <param name="allowFullScreen" value="true">   <param name="wmode" value="transparent">
+                            <param name="flashVars" value="config={'playlist':['http%3A%2F%2Fwww.gossettmktg.com%2Fvideo%2Fdangot.png',{'url':'http%3A%2F%2Fwww.gossettmktg.com%2Fvideo%2Fdangot.mp4','autoPlay':false}]}">
+                            <img alt="Big Buck Bunny" src="http://www.gossettmktg.com/video/dangot.png" width="353" height="190" title="No video playback capabilities, please download the video below">
+                        </object>
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalIMG" role="dialog" tabindex="-1" style="margin-top:30px;">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <iframe id="DocumentAtt_Iframe" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes' @*ng-src="https://localhost:44374/Student/Creation/Homework" style="width:100%; height: 70vh;"*@></iframe>
+                </div>
+                <div class="modal-footer">
+                    <div><a href=" {{CurDoc.FilePath}}" target="_blank" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Modal for Add Content Starts Added by suresh on 12 falgun-->
+    <div class="modal fade" id="addcontentform">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title mb-0" id="exampleModalLabel">Add Document Information</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group d-flex">
+                        <label class="mt-1" style="min-width:125px;">Document Title</label>
+                        <input type="text" class="form-control form-control-sm" />
+                    </div>
+                    <div class="form-group d-flex">
+                        <label class="mt-1" style="min-width:125px;">Document URL</label>
+                        <input type="text" class="form-control form-control-sm" />
+                    </div>
+
+                    <div class="form-group d-flex">
+                        <label class="mt-1" style="min-width:125px;">Desription</label>
+                        <textarea class="form-control form-control-sm" rows="2"></textarea>
+                    </div>
+                    <div class="form-group d-flex">
+                        <label class="mt-1" style="min-width:125px;">Document File</label>
+                        <input type="file" class="form-control form-control-sm p-0" />
+                    </div>
+                    <div class="row">
+
+                        <div class="col-md-4">
+                            <div class="switch-field">
+                                <input type="radio" id="all" name="switchplan" ng-value="true" checked ng-model="newAddLessonContent.plan" />
+                                <label for="all">Draft</label>
+                                <input type="radio" id="set" name="switchplan" ng-value="false" ng-model="newAddLessonContent.plan" />
+                                <label for="set">Publish</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5" ng-show="newAddLessonContent.plan==false">
+                            <div class="form-group d-flex">
+                                <label class="mt-1" style="width:130px;">Publish Date</label>
+                                <input type="date" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+                        <div class="col-md-3" ng-show="newAddLessonContent.plan==false">
+                            <div class="form-group d-flex">
+                                <label class="mt-1" style="display:none;">Time</label>
+                                <input type="time" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer p-2">
+
+                    <button type="button" class="btn btn-sm btn-success">Save</button>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+    <!--Video form-->
+    <div class="modal fade" id="addvideoform">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title mb-0" id="exampleModalLabel">Add Video Information</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group d-flex">
+                        <label class="mt-1" style="min-width:125px;">Video Title</label>
+                        <input type="text" class="form-control form-control-sm" />
+                    </div>
+                    <div class="form-group d-flex">
+                        <label class="mt-1" style="min-width:125px;">Video Link</label>
+                        <input type="text" class="form-control form-control-sm" />
+                    </div>
+
+                    <div class="form-group d-flex">
+                        <label class="mt-1" style="min-width:125px;">Desription</label>
+                        <textarea class="form-control form-control-sm" rows="2"></textarea>
+                    </div>
+                   
+                    <div class="row">
+
+                        <div class="col-md-4">
+                            <div class="switch-field">
+                                <input type="radio" id="draftvideo" name="switchvideo" ng-value="true" checked ng-model="newAddVideoContent.plan" />
+                                <label for="draftvideo">Draft</label>
+                                <input type="radio" id="publishvideo" name="switchvideo" ng-value="false" ng-model="newAddVideoContent.plan" />
+                                <label for="publishvideo">Publish</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5" ng-show="newAddVideoContent.plan==false">
+                            <div class="form-group d-flex">
+                                <label class="mt-1" style="width:130px;">Publish Date</label>
+                                <input type="date" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+                        <div class="col-md-3" ng-show="newAddVideoContent.plan==false">
+                            <div class="form-group d-flex">
+                                <label class="mt-1" style="display:none;">Time</label>
+                                <input type="time" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer p-2">
+
+                    <button type="button" class="btn btn-sm btn-success">Save</button>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+</div>
+<script>
+    on_load = () => {
+        document.getElementById('AddVideoBtn').style.display = "none";
+        document.getElementById('addquiz').style.display = "none";
+        document.getElementById('addqstn').style.display = "none";
+        document.getElementById('addquestion').style.display = "none";
+    }
+    window.onload = on_load();
+
+    //Phonecall Log section
+    document.getElementById('videos').onclick = function () {
+        document.getElementById('addcontent').style.display = "none";
+        document.getElementById('addquiz').style.display = "none";
+        document.getElementById('AddVideoBtn').style.display = "block";
+        document.getElementById('addqstn').style.display = "none";
+    }
+    document.getElementById('quiz').onclick = function () {
+        document.getElementById('addcontent').style.display = "none";
+        document.getElementById('addquiz').style.display = "block";
+        document.getElementById('AddVideoBtn').style.display = "none";
+        document.getElementById('addqstn').style.display = "none";
+    }
+    document.getElementById('content').onclick = function () {
+        document.getElementById('addcontent').style.display = "block";
+        document.getElementById('addquiz').style.display = "none";
+        document.getElementById('AddVideoBtn').style.display = "none";
+        document.getElementById('addqstn').style.display = "none";
+    }
+    document.getElementById('questions').onclick = function () {
+        document.getElementById('addcontent').style.display = "none";
+        document.getElementById('addquiz').style.display = "none";
+        document.getElementById('AddVideoBtn').style.display = "none";
+        document.getElementById('addqstn').style.display = "block";
+    }
+
+    document.getElementById('addqstn').onclick = function () {
+        document.getElementById('addquestion').style.display = "block";
+        document.getElementById('qstnlst').style.display = "none";
+    }
+    document.getElementById('backtoqstnlst').onclick = function () {
+        document.getElementById('addquestion').style.display = "none";
+        document.getElementById('qstnlst').style.display = "block";
+    }
+</script>

@@ -1,0 +1,902 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+
+<script>
+
+    var entityAbsentStudentForSMS = @Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.AbsentStudent);
+</script>
+<script src="/jslib/export/tableExport.js"></script>
+<script src="/jslib/export/jquery.base64.js"></script>
+<script src="/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="/jslib/export/jspdf/jspdf.js"></script>
+<script src="/jslib/export/jspdf/libs/base64.js"></script>
+<script src="~/jslib/Attendance/StudentBiometricAttendance.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="StudentBiometricController" @*ng-init="LoadData()"*@>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab" role="tablist">
+                                        <!--Student Manul Attendance/Daily-->
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="Daily-tab" data-toggle="tab" href="#Daily" role="tab"
+                                               aria-controls="Daily" aria-selected="true">Manual Attendance</a>
+                                        </li>
+
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                                               aria-controls="home" aria-selected="true">Biometric Attendance</a>
+                                        </li>
+
+
+                                        <!--Student Manul Attendance/Period Wise-->
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="period-tab" data-toggle="tab" href="#period" role="tab"
+                                               aria-controls="period" aria-selected="false">Period Wise Attendance</a>
+                                        </li>
+
+                                        <!--Student TypeWise Attendance/Period Wise-->
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="sudentTypesise-tab" data-toggle="tab" href="#sudentTypesise" role="tab"
+                                               aria-controls="sudentTypesise" aria-selected="false">Student Type Wise Att.</a>
+                                        </li>
+
+                                        @*<li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="student-tab" data-toggle="tab" href="#student" role="tab"
+                                                   aria-controls="student" aria-selected="false">Attendance Summary</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="medium-tab" data-toggle="tab" href="#medium" role="tab"
+                                                   aria-controls="medium" aria-selected="false">Student Attendance</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="class-tab" data-toggle="tab" href="#class" role="tab"
+                                                   aria-controls="class" aria-selected="false">ClassWise Summary</a>
+                                            </li>*@
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="absent-tab" data-toggle="tab" href="#absent" role="tab"
+                                               aria-controls="absent" aria-selected="false">Absent Students (Only)</a>
+                                        </li>
+                                        <li class="nav-item ml-3" role="presentation">
+                                            <a class="nav-link" id="PendingAttendance-tab" data-toggle="tab" href="#PendingAttendance" role="tab"
+                                               aria-controls="pendingAttendance" aria-selected="false">pending Attendance</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <!--Student Manul Attendance/Daily-->
+                            <div class="tab-pane fade show active main-section" id="Daily" role="tabpanel"
+                                 aria-labelledby="Daily-tab">
+                                <div class="tab-content">
+                                    <div id="day-book-section">
+                                        <div class="row mt-1">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>For Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="dailyAttendance.ForDate_TMP" date-detail="dailyAttendance.ForDateDet">
+                                                </div>
+                                            </div>
+                                            <!--Added on 17 Magh starts-->
+                                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                <div class="form-group">
+                                                    <label for="">Batch</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="dailyAttendance.BatchId">
+                                                        <option ng-value="0">**Select Batch**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==dailyAttendance.BatchId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Ends-->
+
+                                            <div class=" col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Class</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="dailyAttendance.SelectedClassSection">
+                                                        <option ng-value="0">All</option>
+                                                        <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList">{{cs.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Added on 17 Magh starts-->
+                                            <div class="col-md-2" ng-show="dailyAttendance.SelectedClassSection.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="dailyAttendance.ClassYearId">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==dailyAttendance.ClassYearId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-show="dailyAttendance.SelectedClassSection.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="dailyAttendance.SemesterId">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==dailyAttendance.SemesterId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Ends-->
+                                            <div class=" col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Attendance Type</label>
+                                                    <select class="form-control form-control-sm" ng-model="dailyAttendance.InOutMode">
+                                                        <option ng-value="cs.id" ng-repeat="cs in InOutModeColl" ng-selected="cs.id==dailyAttendance.InOutMode">{{cs.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 mt-4">
+                                                <div class="float-right">
+                                                    <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button" ng-click="GetDailyAttSummary()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                    @*<div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                             data-placement="top" title="Download File">
+                                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                    aria-haspopup="true" aria-expanded="false">
+                                                                <i class="fas fa-download"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu dropdown-menu-right"
+                                                                 aria-labelledby="dropdownMenuButton">
+                                                                <span class="dropdown-item">Choose an option:</span>
+                                                                <a class="dropdown-item" href="#">
+                                                                    <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                                    Excel
+                                                                </a>
+                                                                <a class="dropdown-item" href="#">
+                                                                    <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                                    CSV
+                                                                </a>
+
+                                                            </div>
+                                                        </div>*@
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card mb-0">
+                                            <div ui-grid="gridOptions"
+                                                 ui-grid-resize-columns
+                                                 ui-grid-move-columns
+                                                 ui-grid-selection
+                                                 ui-grid-exporter
+                                                 ui-grid-pinning
+                                                 ui-grid-filtering
+                                                 ui-grid-auto-resize
+                                                 ui-grid-save-state style="height: calc(100vh - 170px); max-width: 100%;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Daily Attendance ends -->
+                            <!-- Daily Biometric Attendance starts -->
+                            <div class="tab-pane fade  main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div class="tab-content">
+                                    <div id="day-book-section">
+                                        <div class="row mt-2">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label> For Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newDaily.ForDate_TMP" date-detail="newDaily.ForDateDet">
+                                                </div>
+                                            </div>
+
+                                            <!--Added on 17 Magh starts-->
+                                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                <div class="form-group">
+                                                    <label for="">Batch</label>
+                                                    <select class="form-control form-control-sm select2" multiple="multiple" ng-model="newDaily.BatchIdColl">
+                                                        <option ng-value="0">**Select Batch**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Ends-->
+                                            <div class=" col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Class</label>
+                                                    <select class="form-control form-control-sm select2" multiple="multiple" data-placeholder="**Select Class**" ng-model="newDaily.ClassIdColl">
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!--Added on 17 Magh starts-->
+                                            <div class="col-md-2" ng-show="AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Year</label>
+                                                    <select class="form-control form-control-sm select2" multiple="multiple" ng-model="newDaily.ClassYearIdColl">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-show="AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" multiple="multiple" ng-model="newDaily.SemesterIdColl">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Ends-->
+
+                                            <div class="col-md-2 mt-4">
+                                                <div class="float-right">
+                                                    <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button" ng-click="GetStudentDailyAttendance()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                    @*<div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                             data-placement="top" title="Download File">
+                                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                    aria-haspopup="true" aria-expanded="false">
+                                                                <i class="fas fa-download"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu dropdown-menu-right"
+                                                                 aria-labelledby="dropdownMenuButton">
+                                                                <span class="dropdown-item">Choose an option:</span>
+                                                                <a class="dropdown-item" href="#">
+                                                                    <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                                    Excel
+                                                                </a>
+                                                                <a class="dropdown-item" href="#">
+                                                                    <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                                    CSV
+                                                                </a>
+
+                                                            </div>
+                                                        </div>*@
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div ui-grid="gridOptions1"
+                                                 ui-grid-resize-columns
+                                                 ui-grid-move-columns
+                                                 ui-grid-selection
+                                                 ui-grid-exporter
+                                                 ui-grid-pinning
+                                                 ui-grid-filtering
+                                                 ui-grid-auto-resize
+                                                 ui-grid-save-state style="height: calc(100vh - 170px); max-width: 100%;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Daily Biometric Attendance ends -->
+                            <!-- Periodwise  Starts -->
+                            <div class="tab-pane fade main-section" id="period" role="tabpanel" aria-labelledby="period-tab">
+                                <div class="tab-content">
+                                    <div id="class-attendence-section">
+                                        <div class="row mt-2">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label class="mt-1">For Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="periodWise.ForDate_TMP" date-detail="periodWise.ForDateDet" @*confirm-action="GetDateWiseAttendance()"*@ after-days="0" before-days="360" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                <div class="form-group">
+                                                    <label for="">Batch</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="periodWise.BatchId">
+                                                        <option ng-value="0">**Select Batch**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==periodWise.BatchId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Class</label>
+                                                    <select class="select2 form-control-sm" data-placeholder="Select Section" style="width:100%" ng-model="periodWise.SelectedClass">
+                                                        <option ng-value="null">**Select Class**</option>
+                                                        <option ng-value="se" ng-repeat="se in ClassSection.SectionList">{{se.ClassName}} {{se.SectionName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2" ng-show="periodWise.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Class Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="periodWise.ClassYearId">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==periodWise.ClassYearId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-show="periodWise.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="periodWise.SemesterId">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==periodWise.SemesterId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2 mt-4">
+                                                <div class="form-group">
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 70px;" ng-click="GetPeriodWise()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card mb-0">
+                                            <header class="row">
+                                                <div class="col-md-7">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline">
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Show</span>
+                                                                </div>
+                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.periodWise">
+                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.periodWise">{{pp.text}}</option>
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                <input class="form-control form-control-navbar"
+                                                                       type="search" placeholder="Search"
+                                                                       aria-label="Search" ng-model="searchData.periodWise">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0"
+                                                                            type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <!-- end col-md-8 -->
+                                                <div class="col-md-5 text-right">
+                                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item wait" export-excel table-id="'#main-table-classwise'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item wait" onClick="$('#main-table-classwise').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                        </div>
+                                                    </div>
+                                                    <a print-tbl table-id="'#main-table-classwise'" class="btn btn-secondary btn-light btn-sm wait"
+                                                       data-toggle="tooltip" data-placement="bottom"
+                                                       title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                </div>
+                                            </header>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 14rem)">
+                                                <table id="main-table-classwise" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 0; z-index: 2; width: 70px;">S.No.</th>
+                                                            <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 70px; z-index: 2; width: 100px;">{{'REGDNO_LNG' | translate}}</th>
+                                                            <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 170px; z-index: 2; width: 200px;">Student Name</th>
+                                                            <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 370px; z-index: 2; width: 100px;">Roll NO.</th>
+                                                            <th colspan="1" class="text-center align-middle" style="width: 100px;" ng-repeat="sb in periodWise.SubjectList">Period {{sb.id}}</th>
+                                                            <th rowspan="2" class="text-center align-middle" style="width: 100px;">Total Period</th>
+                                                            <th rowspan="2" class="text-center align-middle" style="width: 100px;">Attendence</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-center align-middle" style="top:31px;" ng-repeat="sb in periodWise.SubjectList">{{sb.text}}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in periodWise.StudentList | filter:searchData.periodWise | itemsPerPage: perPage.periodWise" current-page="currentPages.periodWise" pagination-id="periodWisePagination">
+                                                            <td class="cstm-sticky" style="width: 70px; left: 0; z-index: 1;background-color: #fff">{{cl.SNo}}</td>
+                                                            <td class="cstm-sticky" style="width: 100px; left: 70px; z-index: 1; background-color: #fff">{{cl.RegNo}}</td>
+                                                            <td class="cstm-sticky" style="width: 200px; left: 170px; z-index: 1; background-color: #fff">{{cl.Name}}</td>
+                                                            <td class="cstm-sticky" style="width: 100px; left: 370px; z-index: 1; background-color: #fff">{{cl.RollNo}}</td>
+                                                            <td ng-repeat="sb in cl.SubjectDetailsColl">{{sb.Attendance}}</td>
+                                                            <td>{{cl.SubjectDetailsColl.length}}</td>
+                                                            <td>{{cl.TotalAttendance}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <!-- table end -->
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="periodWisePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Periodwise  Ends -->
+                            <!--  StudentTypewise attendance  Starts -->
+                            <!--  StudentTypewise attendance  Starts -->
+                            <div class="tab-pane fade main-section" id="sudentTypesise" role="tabpanel" aria-labelledby="sudentTypesise-tab">
+                                <div class="tab-content">
+                                    <div id="StudentType-section">
+                                        <div class="row mt-2">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>For Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newStudentType.ForDate_TMP" date-detail="newStudentType.ForDateDet" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>StudentType</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentType.StudentTypeId">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.StudentTypeId" ng-repeat="cl in StudentTypeList" ng-selected="newStudentType.StudentTypeId==cl.StudentTypeId">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                <div class="form-group">
+                                                    <label for="">Batch</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newStudentType.BatchId">
+                                                        <option ng-value="0">**Select Batch**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newStudentType.BatchId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Class</label>
+                                                    <select class="select2 form-control-sm" data-placeholder="Select Section" ng-model="newStudentType.ClassSection" style="width:100%">
+                                                        <option ng-value="null">**Select Class**</option>
+                                                        <option ng-value="se" ng-repeat="se in ClassSectionList.SectionList">{{se.ClassName}} {{se.SectionName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-2" ng-show="newStudentType.ClassSection.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group">
+                                                    <label for="">Class Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newStudentType.ClassYearId" ng-change="GetTypeWiseStudentList()">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newStudentType.ClassYearId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2" ng-show="newStudentType.ClassSection.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newStudentType.SemesterId" ng-change="GetTypeWiseStudentList()">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newStudentType.SemesterId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2" style="margin-top: 23px;">
+                                                <div class="float-right">
+                                                    <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button" ng-click="GetStudentTypeWiseAttendance()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div id="StudentTypeGrid" ui-grid="gridOptions3"
+                                                 ui-grid-resize-columns
+                                                 ui-grid-move-columns
+                                                 ui-grid-selection
+                                                 ui-grid-exporter
+                                                 ui-grid-pinning
+                                                 ui-grid-filtering
+                                                 ui-grid-auto-resize
+                                                 ui-grid-save-state
+                                                 style="height: calc(100vh - 170px);">
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- StudentTypewise attendance   Ends -->
+                            <!-- Absent Student(Only) Starts -->
+                            <div class="tab-pane fade main-section" id="absent" role="tabpanel" aria-labelledby="absent-tab">
+                                <div class="tab-content">
+                                    <div id="day-book-section">
+                                        <div class="row mt-2">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>For Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="absentOnly.ForDate_TMP" date-detail="absentOnly.ForDateDet">
+                                                </div>
+                                            </div>
+                                            <div class=" col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Shift</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.ClassShiftId">
+                                                        <option ng-value="0">All</option>
+                                                        <option ng-value="cs.ClassShiftId" ng-repeat="cs in ClassShiftList">{{cs.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Added on 17 Magh starts-->
+                                            <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                <div class="form-group">
+                                                    <label for="">Batch</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.BatchId">
+                                                        <option ng-value="0">**Select Batch**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==absentOnly.BatchId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Ends-->
+                                            <div class=" col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Class</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.SelectedClassSection">
+                                                        <option ng-value="0">All</option>
+                                                        <option ng-value="cs" ng-repeat="cs in ClassSectionList.ClassList">{{cs.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Added on 17 Magh starts-->
+                                            <div class="col-md-2" ng-show="absentOnly.SelectedClassSection.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Class Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.ClassYearId">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==absentOnly.ClassYearId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2" ng-show="absentOnly.SelectedClassSection.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.SemesterId">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==absentOnly.SemesterId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Ends-->
+                                            <div class="col-md-2 mt-4">
+                                                <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button" ng-click="GetAbsentStudentOnly()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search"
+                                                           aria-label="Search" ng-model="searchData.AbsentStudentOnly">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-10">
+                                                <div class="form-inline float-right">
+
+                                                    <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download py-1"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item wait" export-excel table-id="'#main-table-abs'" sheet-name="'AbsentStudentList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item wait" onClick="$('#main-table-abs').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                        </div>
+                                                    </div>
+                                                    <a print-tbl table-id="'#main-table-abs'" href="#" class="btn btn-secondary btn-light btn-sm ml-1"
+                                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                                        <i class="fas fa-print py-1"></i>
+                                                    </a>
+                                                    <a ng-click="SendSMSToAbsStudent()" class="btn btn-secondary btn-light btn-sm ml-1"
+                                                       data-toggle="tooltip" data-placement="bottom" title="SMS">
+                                                        <i class="fas fa-envelope py-1"></i>
+                                                    </a>
+                                                    <a ng-click="SendNoticeToAbsStudent()" class="btn btn-secondary btn-light btn-sm ml-1"
+                                                       data-toggle="tooltip" data-placement="bottom" title="Notification">
+                                                        <i class="fas fa-bell py-1"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="card mb-0 ">
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 13rem)">
+                                                <table id="main-table-abs" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:50px">S.No.</th>
+                                                            <th style="width:80px">{{'REGDNO_LNG' | translate}}</th>
+                                                            <th style="width:200px">Name</th>
+                                                            <th style="width:70px">Roll No.</th>
+                                                            <th style="width:100px">Contact No</th>
+                                                            <th style="width:200px">Father Name</th>
+                                                            <th style="width:100px">F_Contact No</th>
+                                                            <th style="width:100px">M_Contact No</th>
+                                                            <th style="width:100px">G_Contact No</th>
+                                                            <th style="width:120px">Remarks</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody ng-repeat="sg in AbsentStudentList">
+                                                        <tr>
+                                                            <td colspan="10">
+                                                                <b> {{sg.ClassSectionName}} ({{sg.DataColl.length}})</b>
+                                                            </td>
+                                                        </tr>
+                                                        <tr ng-repeat="d in sg.DataColl| filter:searchData.AbsentStudentOnly">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{d.RegdNo}}</td>
+                                                            <td>{{d.Name}}</td>
+                                                            <td>{{d.RollNo}}</td>
+                                                            <td>{{d.PersonalContactNo}}</td>
+                                                            <td>{{d.FatherName}}</td>
+                                                            <td>{{d.ContactNo}}</td>
+                                                            <td>{{d.M_Contact}}</td>
+                                                            <td>{{d.G_ContactNo}}</td>
+                                                            <td>{{d.Remarks}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Absent Student(Only) Ends -->
+                            <!-- Pending Attendance Starts -->
+                            <div class="tab-pane fade main-section" id="PendingAttendance" role="tabpanel"
+                                 aria-labelledby="PendingAttendance-tab">
+                                <div class="tab-content">
+                                    <div id="PendingAttendance-section" @*class="card py-2 mb-0"*@>
+                                        <div class="row mt-1">
+
+                                            <div class="col-sm-1 col-lg-1 col-md-1" ng-show="AcademicConfig.ActiveBatch==true">
+                                                <div class="form-group">
+                                                    <label for="">Batch</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="PendingAtt.BatchId">
+                                                        <option ng-value="0">**Select Batch**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==PendingAtt.BatchId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="PendingAtt.ClassId">
+                                                    <option ng-value="0">**All**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Section</label>
+                                                <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="PendingAtt.SectionId">
+                                                    <option ng-value="se.SectionId" ng-repeat="se in ClassSection.SectionList |  filter: { ClassId: PendingAtt.ClassId }:true">{{se.SectionName}}</option>
+                                                </select>
+                                            </div>
+                                            <!--<div class=" col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Class</label>
+                                                    <select class="form-control form-control-sm select2"
+                                                            ng-model="PendingAtt.SelectedClassSection"
+                                                            ng-change="onClassChange(PendingAtt.SelectedClassSection)">
+                                                        <option ng-value="0">All</option>
+                                                        <option ng-value="cs" ng-repeat="cs in ClassSectionList.ClassList">{{cs.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class=" col-md-1">
+                                                <div class="form-group">
+                                                    <label for="">Section</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="PendingAtt.SectionId">-->
+                                            @*<option ng-value="se.SectionId" ng-repeat="se in FilteredSections">{{se.SectionName}}</option>*@
+                                            <!--<option ng-value="se.SectionId" ng-repeat="se in FilteredSections">{{se.SectionName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>-->
+                                            <div class="col-md-2" ng-show="PendingAtt.SelectedClassSection.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Class Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="PendingAtt.ClassYearId">
+                                                        <option ng-value="0">**Select Year**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==PendingAtt.ClassYearId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2" ng-show="PendingAtt.SelectedClassSection.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                <div class="form-group mb-0">
+                                                    <label for="">Semester</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="PendingAtt.SemesterId">
+                                                        <option ng-value="0">**Select Semester**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==PendingAtt.SemesterId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>From Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="PendingAtt.FromDate_TMP" date-detail="PendingAtt.FromDateDet" confirm-action="validateDates('fromDate')">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>To Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="PendingAtt.ToDate_TMP" date-detail="PendingAtt.ToDateDet" confirm-action="validateDates('toDate')">
+                                                </div>
+                                            </div>
+                                            @*<div class=" col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Attendnace Category</label>
+                                                        <select class="form-control form-control-sm" ng-model="PendingAtt.For">
+                                                            <option ng-value="cs.id" ng-repeat="cs in AttCategoryColl" ng-selected="cs.id==PendingAtt.For">{{cs.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>*@
+                                            <div class="col-md-2">
+                                                <div class="mt-4">
+                                                    <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button" ng-click="GetStudentPendingAtt()"><i class="fas fa-sync-alt"></i> Load</button>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+
+                                        @*Grid UI Report type detail*@
+                                        <div>
+                                            <div id="PendingAttendanceGrid" ui-grid="gridOptions2"
+                                                 ui-grid-resize-columns
+                                                 ui-grid-move-columns
+                                                 ui-grid-selection
+                                                 ui-grid-exporter
+                                                 ui-grid-pinning
+                                                 ui-grid-filtering
+                                                 ui-grid-auto-resize
+                                                 ui-grid-save-state
+                                                 style="height: calc(100vh - 170px);">
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!--New  Code for sms and notification modal starts-->
+
+                            <div class="modal fade" id="modal-xl" style="margin-top: 35px;">
+                                <div class="modal-dialog modal-md" style="width:70%">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h6 class="modal-title">Send Notification</h6>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label for="">Title</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" placeholder="Title" ng-model="newNotice.Title" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" rows="5" ng-model="newNotice.Description" placeholder="Description"></textarea>
+                                            </div>
+                                            @*<div class="form-group">
+                                                    <label for="">Attach File</label>
+                                                    <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newNotice.AttachmentColl" fileread="newNotice.FilesData" />
+                                                </div>*@
+
+                                            @*<div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="alert-to-parents" ng-model="newNotice.FilterStudentOnly">
+                                                    <label for="alert-to-parents"
+                                                           class="custom-control-label">Filter Student Only</label>
+                                                </div>*@
+
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-success" ng-click="SendManualNoticeToStudent()" style="min-width: 90px;" ng-disabled="loadingstatus=='running'">Send</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /.modal-content -->
+                            </div>
+
+                            <div class="modal fade" id="modal-sms" style="margin-top: 35px;">
+                                <div class="modal-dialog modal-md" style="width:70%">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h6 class="modal-title">Send SMS</h6>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" rows="5" ng-model="newSMS.Description" placeholder="Description"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-success" ng-click="SendSMSToStudent1()" style="min-width: 90px;">Send</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /.modal-content -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- /.row -->
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

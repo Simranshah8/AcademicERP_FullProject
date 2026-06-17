@@ -1,0 +1,412 @@
+﻿
+
+<style>
+    .modal {
+        margin-top: 30px !important;
+    }
+
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+    .ag-filter-body-wrapper{
+        background-color:#ffffff!important;
+    }
+</style>
+<script src="~/jslib/frontdesk/transaction/AttendanceFollowUp.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<link rel="stylesheet" href="~/wwwroot/plugins/ag-grid/css/ag-grid.css">
+<link rel="stylesheet" href="~/wwwroot/plugins/ag-grid/css/ag-theme-alpine.css">
+<script src="~/wwwroot/plugins/ag-grid/js/ag-grid-community.min.noStyle.js"></script>
+<script src="~/wwwroot/js/aggrid-table.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/angular-ui-grid@4.10.1/ui-grid.min.css">
+<script src="https://cdn.jsdelivr.net/npm/angular-ui-grid@4.10.1/ui-grid.min.js"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AttendanceFollowUpController" ng-init="LoadData()">
+    <div class="wrapper1">
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper1">
+            <section class="content">
+                <div class="container-fluid">
+                    <section class="iframe-content-starts-here">
+                        <div class="tab-content">
+                            <!-- Third Tab Content -->
+                            <div id="root">
+                                <div class="card-primary card-tabs">
+                                    <header class="if-page-have-nav-tabs px-2">
+                                        <div class="row upper-tab">
+                                            <div class="col-md-12">
+                                                <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                                    role="tablist">
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link active" id="first-tab" data-toggle="tab"
+                                                           href="#first" role="tab" aria-controls="first"
+                                                           aria-selected="true"> Attendance Followup</a>
+                                                    </li>
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link" id="second-tab" data-toggle="tab"
+                                                           href="#second" role="tab" aria-controls="second"
+                                                           aria-selected="false">Report</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </header>
+                                    <div class="tab-content" id="myTabContent">
+                                        <div class="tab-pane fade show active main-section" id="first" role="tabpanel"
+                                             aria-labelledby="first-tab">
+                                            <div id="newAttendanceFollowup-content" class="card mb-0">
+                                                <div class="row">
+                                                    <div class="col-md-11">
+                                                        <div class="row mt-2">
+                                                            <div class="col-md-2">
+                                                                <div class="form-group">
+                                                                    <label>For Date</label>
+                                                                    <input type="text"
+                                                                           class="form-control form-control-sm" date-picker ng-model="absentOnly.ForDate_TMP" date-detail="absentOnly.ForDateDet">
+                                                                </div>
+                                                            </div>
+                                                            <div class=" col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="">Class Shift</label>
+                                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.ClassShiftId">
+                                                                        <option ng-value="" selected>All</option>
+                                                                        <option ng-value="cs.ClassShiftId" ng-repeat="cs in ClassShiftList">{{cs.Name}}</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <!--Added on 17 Magh starts-->
+                                                            <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                                <div class="form-group">
+                                                                    <label for="">Batch</label>
+                                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.BatchId">
+                                                                        <option ng-value="" selected>**Select Batch**</option>
+                                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==absentOnly.BatchId">{{cl.text}}</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <!--Ends-->
+                                                            <div class=" col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="">Class</label>
+                                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.SelectedClassSection">
+                                                                        <option ng-value="" selected>All</option>
+                                                                        <option ng-value="cs" ng-repeat="cs in ClassSectionList.ClassList">{{cs.text}}</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <!--Added on 17 Magh starts-->
+                                                            <div class="col-md-2" ng-show="absentOnly.SelectedClassSection.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                                <div class="form-group mb-0">
+                                                                    <label for="">Class Year</label>
+                                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.ClassYearId">
+                                                                        <option ng-value="0" selected>**Select Year**</option>
+                                                                        <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==absentOnly.ClassYearId">{{cl.text}}</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-2" ng-show="absentOnly.SelectedClassSection.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                                <div class="form-group mb-0">
+                                                                    <label for="">Semester</label>
+                                                                    <select class="form-control form-control-sm select2" ng-model="absentOnly.SemesterId">
+                                                                        <option ng-value="0" selected>**Select Semester**</option>
+                                                                        <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==absentOnly.SemesterId">{{cl.text}}</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-md-2">
+                                                                <div class="input-group input-group-sm mt-4">
+                                                                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                                    <div class="input-group-append">
+                                                                        <button type="submit" class="btn btn-default">
+                                                                            <i class="fas fa-search"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!--Ends-->
+                                                            <div class="col-md-2 ">
+                                                                <button class="btn btn-sm btn-success px-2 float-right mt-4" ng-click="GetAllAttendanceForFollowupList()"><i class="fas fa-sync mr-2"></i>Load</button>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+
+
+                                                <div class="card-body p-0">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div id="datatable" style="height: calc(100vh - 11rem);width: 100%;" class="ag-theme-alpine"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="tab-pane fade main-section" id="second" role="tabpanel"
+                                             aria-labelledby="second-tab">
+                                            <div class="card mb-0 py-2">
+                                                <div class="row">
+                                                    <div class="col-md-1">
+                                                        <div class="form-group">
+                                                            <label>From Date</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm px-1" style="font-size:11px;font-weight:500" date-picker ng-model="newFilter2.FromDate_TMP" date-detail="newFilter2.FromDateDet" confirm-action="validateDates('fromDate')">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-1">
+                                                        <div class="form-group">
+                                                            <label>To Date</label>
+                                                            <input type="text" class="form-control form-control-sm px-1" style="font-size:11px;font-weight:500" date-picker ng-model="newFilter2.ToDate_TMP" date-detail="newFilter2.ToDateDet" confirm-action="validateDates('toDate')">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class=" col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Class Shift</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newFilter2.ClassShiftId">
+                                                                <option ng-value="" selected>All</option>
+                                                                <option ng-value="cs.ClassShiftId" ng-repeat="cs in ClassShiftList">{{cs.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <!--Added on 17 Magh starts-->
+                                                    <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                        <div class="form-group">
+                                                            <label for="">Batch</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newFilter2.BatchId">
+                                                                <option ng-value="" selected>**Select Batch**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newFilter2.BatchId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <!--Ends-->
+                                                    <div class=" col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Class</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newFilter2.SelectedClassSection">
+                                                                <option ng-value="" selected>All</option>
+                                                                <option ng-value="cs" ng-repeat="cs in ClassSectionList.ClassList">{{cs.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <!--Added on 17 Magh starts-->
+                                                    <div class="col-md-2" ng-show="newFilter2.SelectedClassSection.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                        <div class="form-group mb-0">
+                                                            <label for="">Class Year</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newFilter2.ClassYearId">
+                                                                <option ng-value="0">**Select Year**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newFilter2.ClassYearId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2" ng-show="newFilter2.SelectedClassSection.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                        <div class="form-group mb-0">
+                                                            <label for="">Semester</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newFilter2.SemesterId">
+                                                                <option ng-value="0">**Select Semester**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newFilter2.SemesterId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="col-md-2 mt-4">
+                                                        <div class="float-right form-inline">
+                                                            <button class="btn btn-sm btn-success load" type="button" ng-click="GetAttFollowUpReport()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card p-0">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div ui-grid="gridOptionsR"
+                                                                 ui-grid-resize-columns
+                                                                 ui-grid-move-columns
+                                                                 ui-grid-selection
+                                                                 ui-grid-exporter
+                                                                 ui-grid-pinning
+                                                                 ui-grid-filtering
+                                                                 ui-grid-auto-resize
+                                                                 ui-grid-save-state style="height: calc(100vh - 180px);"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                    <!-- /.card -->
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </section>
+                    <!-- /.row -->
+                </div>
+                <!--/. container-fluid -->
+            </section>
+            <!-- /.content -->
+        </div>
+    </div>
+
+    <!--modal Starts from here-->
+    <div class="modal fade" id="followupClosed">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title">Attendance Followup</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="">FollowUp Date</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="newAttendanceFollowup.FollowUpDate_TMP" date-detail="newAttendanceFollowup.FollowUpDateDet">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>FollowUp To</label>
+                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newAttendanceFollowup.FollowUpTo" ng-change="onFollowUpToChange()">
+                                    <option ng-value="FT.id" ng-repeat="FT in FollowUpToList" ng-selected="FT.id == newAttendanceFollowup.FollowUpTo">{{FT.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Contact No</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="newAttendanceFollowup.ContactNo" readonly />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>FollowUp Status</label>
+                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newAttendanceFollowup.FollowUpStatus">
+                                    <option ng-value="FS.id" ng-repeat="FS in FollowStatusList" ng-selected="FS.id == newAttendanceFollowup.FollowUpStatus">{{FS.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>FollowUp Remarks</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="newAttendanceFollowup.FollowUpRemarks" />
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Adm. No.</label><br>
+                                <b> <span>{{newAttendanceFollowup.AdmNo}}</span></b>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Student Name</label><br>
+                                <b> <span>{{newAttendanceFollowup.Name}}</span></b>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Roll No.</label><br>
+                                <b> <span>{{newAttendanceFollowup.RollNo}}</span></b>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Class</label><br>
+                                <b> <span>{{newAttendanceFollowup.ClassName}}</span></b>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearFollowup()">Reset</button>
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveAttendanceFollowup()">Save</button>
+                        </span>
+                    </div>
+                    <hr class="p-1 m-1">
+                    <div class="card-tools mb-2" style="width: 250px;">
+                        <div class="input-group input-group-sm table-search-filed">
+                            <input class="form-control form-control-navbar" type="search"
+                                   placeholder="Search" aria-label="Search" ng-model="searchData.AttendanceFollowUp">
+                            <div class="input-group-append">
+                                <button class="btn btn-default border-left-0" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="sales-main-table table-scroll" style="max-height: 400px; overflow-y: auto;">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45px;">S.No.</th>
+                                    <th style="width: 128px;">FollowUp Date</th>
+                                    <th style="width: 94px;">FollowUp To</th>
+                                    <th style="width: 100px;">Contact No</th>
+                                    <th style="width: 151px;">Followup Status</th>
+                                    <th style="width: 300px;">FollowUp Remarks</th>
+                                    <th style="width: 200px;">FollowUp By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="h in newAttendanceFollowup.HistoryColl | filter:searchData.AttendanceFollowUp">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{h.FollowupMiti}}</td>
+                                    <td>{{h.FollowUpTo}}</td>
+                                    <td>{{h.ContactNo}}</td>
+                                    <td>{{h.FollowUpStatus}}</td>
+                                    <td>{{h.FollowUpRemarks}}</td>
+                                    <td>{{h.FollowupBy}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+</div>

@@ -1,0 +1,368 @@
+﻿
+<link href="~/Scripts/nepalidate/nepali.datepicker.v3.5.min.css" rel="stylesheet" />
+<script src="~/Scripts/nepalidate/nepali.datepicker.v3.5.min.js"></script>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+
+<script>
+    var entityForSMS = @Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.VisitorBook);
+</script>
+
+<script src="~/jslib/frontdesk/transaction/VisitorBook.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<link href="~/wwwroot/dynamic-erp/css/Tableresize.css" rel="stylesheet" />
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="VisitorController" ng-init="GetAllVisitorList()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:55px!important">
+                <div class="tab-content" id="table-listing">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group mb-1 d-flex">
+                                <label class="mt-1" style="min-width:63px">From Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newVisitor.FromDate_TMP" date-detail="newVisitor.FromDateDet" confirm-action="validateDates('fromDate')" @*confirm-action="GetAllVisitorList()"*@>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group mb-1 d-flex">
+                                <label class="mt-1" style="min-width:60px">To Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newVisitor.ToDate_TMP" date-detail="newVisitor.ToDateDet" confirm-action="validateDates('toDate')" @*confirm-action="GetAllVisitorList()"*@>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group input-group-sm mr-sm-2">
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 80px;" ng-click="GetAllVisitorList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- Second Tab Content -->
+                    <div class="card mb-0 p-0">
+                        <header class="row ">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Visitor">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Visitor">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.Visitor">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                </div>
+                                @*<a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"  data-toggle="tooltip" data-placement="bottom"  title="Print">
+                    <i class="fas fa-print"></i>
+                </a>*@
+                                <button type="button" class="btn btn-sm btn-success" id="open-form-btn" ng-click="open_form_btn()" style="min-width: 90px">
+                                    <i class="fas fa-plus w-t"></i> Add Visitor
+                                </button>
+                            </div>
+                        </header>
+                        <div class="table-scroll-x-y table-container flex-grow-1">
+                            <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                <div class="table-h-scrollbar-fix table-scroll-wrapper">
+                                    <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-resizetable border-0 dynamic-uiux-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="align-middle" style="width: 56px;">S.No.</th>
+                                                <th class="align-middle" style="width: 160px;" ng-click="sortVisitor('Name')">Visitor Name</th>
+                                                <th class="align-middle" style="width: 180px;" ng-click="sortVisitor('Address')">Address</th>
+                                                <th class="align-middle" style="width: 100px;" ng-click="sortVisitor('Contact')">Contact No.</th>
+                                                <th class="align-middle" style="width: 190px;" ng-click="sortVisitor('Email')">Email</th>
+                                                <th class="align-middle" style="width: 200px;">Meeting With</th>
+                                                <th class="align-middle" style="width: 130px;">Purpose</th>
+                                                <th class="align-middle" style="width: 100px;">In Time</th>
+                                                <th class="align-middle" style="width: 120px;">Validity Time</th>
+                                                <th class="align-middle" style="width: 100px;">Out Time</th>
+                                                <th class="align-middle" style="width: 150px;">Remarks</th>
+                                                <th class="align-middle" style="width: 100px;">Log Date</th>
+                                                <th class="align-middle" style="width: 100px;">Logged By</th>
+                                                <th rowspan="2" class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll py-1" style="width: 76px;">
+                                                    <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                        <option value="" disabled selected>Action</option>
+                                                        <option value="save">Save Layout</option>
+                                                        <option value="reset">Reset Layout</option>
+                                                    </select>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="cl in VisitorList | filter:searchData.Visitor | itemsPerPage: perPage.Visitor |orderBy:sortKeys.Visitor:reverses.Visitor track by $index" current-page="currentPages.Visitor" pagination-id="VisitorPagination">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{cl.Name}}</td>
+                                                <td>{{cl.Address}}</td>
+                                                <td>{{cl.Contact}}</td>
+                                                <td>{{cl.Email}}</td>
+                                                <td>
+                                                    {{cl.MeeTo}} -{{cl.OthersName}}
+                                                </td>
+                                                <td>
+                                                    {{cl.Purpose}}
+                                                </td>
+                                                <td>{{cl.InTime |timeFormat}}</td>
+                                                <td>{{cl.ValidityTime |timeFormat}}</td>
+                                                <td>{{cl.OutTime |timeFormat}}</td>
+                                                <td>{{cl.Remarks}}</td>
+                                                <td>{{cl.LogMiti}} {{cl.LogDateTime | timeFormat}}</td>
+                                                <td>
+                                                    {{cl.UserName}}                                                    
+                                                </td>
+                                                <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="z-index:3;">
+                                                    <a class="p-1" ng-click="ShowInTime(cl)">
+                                                        <i class="fas fa-save text-success"></i>
+                                                    </a>                                                   
+                                                    <a class="p-1" ng-click="DelVisitorById(cl)">
+                                                        <i class="fas fa-trash text-danger"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+                            </div>
+                        </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="VisitorPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                    </div>
+                <!-- form area starts -->
+                <div id="enquiry-form">
+                    <!-- The time line -->
+                    <div class="timeline registration-form">
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="" style="border:2px solid #ececec">Visitor Information</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Name<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newVisitor.Name" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Address<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newVisitor.Address" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Contact<span style="color:red">*</span></label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newVisitor.Contact" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Email</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newVisitor.Email" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Meeting With</label>
+                                                    <select ng-model-options="newVisitor.MeeTo"
+                                                            class="form-control form-control-sm select2"
+                                                            style="width: 100%" ng-model="newVisitor.MeeTo">
+                                                        <option ng-value="1"> Student </option>
+                                                        <option ng-value="2">  Employee </option>
+                                                        <option ng-value="3">Other</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!-- fields after clicking the radio button starts -->
+                                            <!-- meet to student field -->
+                                            <div class="col-sm-9 col-lg-9 col-md-9 mt-4"
+                                                 id="meet-student" ng-show="newVisitor.MeeTo==1">
+                                                <label class="sr-only"
+                                                       for="inlineFormInputGroup">Select Student</label>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px;  z-index: 1; " ng-model="newVisitor.SelectStudent">
+                                                        <option ng-repeat="ss in StudentSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newVisitor.SelectStudent}}">
+                                                            {{ss.text}}
+                                                        </option>
+                                                    </select>
+                                                    <select class="form-control select2 form-control-sm" all-student ng-model="newVisitor.StudentId" student-detail="newVisitor.StudentDetails" side-bar-data="newVisitor.SideBarData" search-by="newVisitor.SelectStudent">
+                                                    </select>
+
+                                                </div>
+                                            </div>
+
+                                            <!-- Field For meet Teacher -->
+                                            <div class="col-sm-8 col-lg-8 col-md-8 mt-4"
+                                                 id="meet-employee" ng-show="newVisitor.MeeTo==2">
+                                                <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px; z-index: 1; " ng-model="newVisitor.SelectEmployee">
+
+                                                        <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newVisitor.SelectEmployee}}">
+                                                            {{ss.text}}
+                                                        </option>
+                                                    </select>
+                                                    <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newVisitor.EmployeeId" employee-detail="newVisitor.EmployeeDetails" side-bar-data="newVisitor.EmpSideBarData" search-by="newVisitor.SelectEmployee">
+                                                    </select>
+                                                </div>
+
+                                            </div>
+                                            <!-- select for others -->
+                                            <div class="col-md-8" id="meet-others" ng-show="newVisitor.MeeTo==3">
+                                                <div class="form-group">
+                                                    <label for="">Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newVisitor.OthersName" />
+                                                </div>
+                                            </div>
+                                            <!-- fields after clicking radio button ends -->
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Purpose<span style="color:red">*</span></label>
+                                                    <textarea class="form-control form-control-sm" ng-model="newVisitor.Purpose" rows="1"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">In Time<span style="color:red">*</span></label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newVisitor.InTime_TMP" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Validity Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newVisitor.ValidityTime_TMP" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Out Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newVisitor.OutTime_TMP" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Remarks</label>
+                                                    <textarea class="form-control form-control-sm" ng-model="newVisitor.Remarks" rows="1"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="time-label1">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button"
+                                        class="btn btn-sm btn-info"
+                                        id="back-to-list" ng-click="back_to_list()"
+                                        style="min-width: 90px">
+                                    Back to List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearVisitor()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateVisitor()">{{newVisitor.Mode}}</button>
+                            </span>
+                        </div>
+                        <!-- /.timeline-label -->
+                    </div>
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- Main content -->
+    <!-- /.content -->
+    <!-- Modal -->
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Update In Time</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 200px;">Name</th>
+                                    <th style="width: 100px;">Address</th>
+                                    <th style="width: 100px;">Purpose</th>
+                                    <th style="width: 150px;">Out Time</th>
+                                    <th style="width: 150px;">In Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{CurVisitor.OthersName}}</td>
+                                    <td>{{CurVisitor.Address}}</td>
+                                    <td>{{CurVisitor.Purpose}}</td>
+                                    <td><input type="time" class="form-control form-control-sm" title="Update Out Time" style="border: 1px solid #dee2e6 " ng-model="CurVisitor.OutTime_TMP" /></td>
+                                    <td><input type="time" class="form-control form-control-sm" title="Update In Time" style="border: 1px solid #dee2e6 " ng-model="CurVisitor.InTime_TMP" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" ng-click="UpdateInTime()" style="min-width: 90px;">Update InTime</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+</div>

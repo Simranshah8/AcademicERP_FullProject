@@ -1,0 +1,1233 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<style>
+    .numericAlignment {
+        text-align: right;
+    }
+
+    .headerAligment {
+        text-align: center;
+    }
+
+    .dateAlignment {
+        text-align: center;
+    }
+</style>
+<link rel="stylesheet" href="~/wwwroot/dynamic/css/dropzone.css" />
+<script src="~/wwwroot/dynamic/js/dropzone.js"></script>
+
+<link rel="stylesheet" href="~/wwwroot/plugins/ag-grid/css/ag-grid.css">
+<link rel="stylesheet" href="~/wwwroot/plugins/ag-grid/css/ag-theme-alpine.css">
+<script src="~/wwwroot/plugins/ag-grid/js/ag-grid-community.min.noStyle.js"></script>
+<script src="~/jslib/fee/reporting/FeeSummary.js?v=20251115"></script>
+<script>
+    var entityFeeMappingStudent = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.FeeMappingStudentList)";
+    var entityFeeSummary = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.FeeSummary)";
+    var entityFeeSummaryClassWise = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.FeeSummaryClassWise)";
+    var entityFeeSummaryStudentWise = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.FeeSummaryStudentWise)";
+    var entityFeeSummarySMS = "@Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.FeeSummary)";
+</script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="FeeSummaryController" @*ng-init="LoadData()"*@>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-10">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                   href="#home" role="tab" aria-controls="home"
+                                                   aria-selected="true">Summary</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                   href="#profile" role="tab" aria-controls="profile"
+                                                   aria-selected="false">Classwise</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="Student-tab" data-toggle="tab"
+                                                   href="#Student" role="tab" aria-controls="Student"
+                                                   aria-selected="false">Studentwise</a>
+                                            </li>
+                                            @*<li class="nav-item" role="presentation">
+                                                    <a class="nav-link" id="feemapping-tab" data-toggle="tab"
+                                                       href="#feemapping" role="tab" aria-controls="feemapping"
+                                                       aria-selected="false">FeeMapping Student</a>
+                                                </li>*@
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="datewise-tab" data-toggle="tab"
+                                                   href="#datewise" role="tab" aria-controls="datewise"
+                                                   aria-selected="true">Date Wise Summary</a>
+                                            </li>
+                                            <!--New Tab Added By Suresh For Sibling -->
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="sibling-tab" data-toggle="tab"
+                                                   href="#sibling" role="tab" aria-controls="sibling"
+                                                   aria-selected="true">Sibling Fee Summary</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!--Summary Starts -->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div class="row ">
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Class</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="feeSummary.SelectedClass" ng-change="ChangeClassOfFeeSummary()">
+                                                <option ng-value="0">All</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassList.SectionListWithClass">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2" ng-show="feeSummary.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group">
+                                                <label for="">Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="feeSummary.ClassYearId">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList" ng-selected="cl.id==feeSummary.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="feeSummary.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="feeSummary.SemesterId">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList" ng-selected="cl.id==feeSummary.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <label for="">Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="feeSummary.BatchId">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==feeSummary.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Period</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm " ng-model="feeSummary.PeriodAs">
+                                                <option ng-value="cl.id" ng-repeat="cl in PeriodColl">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="feeSummary.PeriodAs==1">
+                                            <label>FromMonth</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="feeSummary.FromMonthId" ng-change="getFeeSummary()">
+                                                <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="feeSummary.PeriodAs==1">
+                                            <label>ToMonth</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm " ng-model="feeSummary.ToMonthId" ng-change="getFeeSummary()">
+                                                <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="feeSummary.PeriodAs==2">
+                                            <label>FromDate</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm ng-pristine ng-untouched ng-valid ng-isolate-scope ndp-nepali-calendar ng-not-empty"
+                                                   date-picker=""
+                                                   ng-model="feeSummary.DateFrom_TMP"
+                                                   date-detail="feeSummary.DateFromDet"
+                                                   autocomplete="off"
+                                                   inputmode="text" />
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="feeSummary.PeriodAs==2">
+                                            <label>ToDate</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm ng-pristine ng-untouched ng-valid ng-isolate-scope ndp-nepali-calendar ng-not-empty"
+                                                   date-picker=""
+                                                   ng-model="feeSummary.DateTo_TMP"
+                                                   date-detail="feeSummary.DateToDet"
+                                                   autocomplete="off"
+                                                   inputmode="text" />
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>ForStudent</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="feeSummary.ForStudent">
+                                                <option ng-value="0">All</option>
+                                                <option ng-value="1">Continue</option>
+                                                <option ng-value="2">Left</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>FeeItem</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="feeSummary.FeeItemIdColl" ng-change="getFeeSummary()">
+                                                <option ng-value="0">All</option>
+                                                <option ng-value="cl.FeeItemId" ng-repeat="cl in FeeItemList">{{cl.Name}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <div class="custom-control custom-checkbox mt-4">
+                                                <input class="custom-control-input"
+                                                       type="checkbox" id="chkCombine-6s" ng-model="feeSummary.CombinedSummary" ng-change="getFeeSummary()">
+                                                <label for="chkCombine-6s"
+                                                       class="custom-control-label">
+                                                    Combine
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 col-sm-2 col-lg-2">
+                                            <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="getFeeSummary()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="input-group input-group-sm mt-2">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-10">
+                                            <div class="float-right mt-2">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                            type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#" ng-click="ExportFeeSummaryAsexcel()"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#" ng-click="ExportFeeSummaryAsCSV()"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Notification" ng-click="SendNotification()">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="SMS" ng-click="SendSMS()">
+                                                    <i class="fas fa-sms"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="SMS From Mobile" ng-click="SendSMSFromMobile()">
+                                                    <i class="fas fa-mobile"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Send Email" ng-click="SendEmailToFiltered()">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintFeeSummary()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="card p-0 mt-1 mb-0">
+                                        <div id="datatable22" style="height: calc(100vh - 18rem);width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                                        <div id="myGridBottom" style="height: 50px;" class="ag-theme-alpine"></div>
+                                    </div>
+                                </div>
+                                <!-- Summary Ends -->
+                                <!-- Classwise Start -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    <div class="row ">
+
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>From Month</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="classWise.SelectedFromMonth">
+                                                <option ng-value="cl" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>To Month</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="classWise.SelectedToMonth">
+                                                <option ng-value="cl" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>For Student</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="classWise.ForStudent">
+                                                <option ng-value="0">All</option>
+                                                <option ng-value="1">Continue</option>
+                                                <option ng-value="2">Left</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Select Report </label>
+                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="classWise.RptTranId">
+                                                <option ng-value="0" ng-selected="true">Select Report</option>
+                                                <option ng-value="rt.RptTranId" ng-repeat="rt in classWise.TemplatesColl">{{rt.ReportName}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-1 col-sm-1 col-lg-1">
+                                            <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="getFeeSummaryClassWise()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                        </div>
+
+                                    </div>
+                                    <div class="card p-2 mt-2">
+                                        <div class="row mt-2" id="schedule-report-table">
+                                            <iframe id="frmRptClassWise" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Classwise Ends -->
+                                <!-- Studentwise Start -->
+                                <div class="tab-pane fade main-section" id="student" role="tabpanel"
+                                     aria-labelledby="student-tab">
+                                    <div class="row ">
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Class</label>
+                                            <select ng-model="studentWise.SelectedClass" class="form-control form-control-sm select2"
+                                                    ng-options="x.text for x in ClassList.SectionListWithClass"></select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>From Month</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="studentWise.SelectedFromMonth">
+                                                <option ng-value="cl" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>To Month</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="studentWise.SelectedToMonth">
+                                                <option ng-value="cl" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>For Student</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="studentWise.ForStudent">
+                                                <option ng-value="0">All</option>
+                                                <option ng-value="1">Continue</option>
+                                                <option ng-value="2">Left</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Select Report </label>
+                                            <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-model="studentWise.RptTranId">
+                                                <option ng-value="0" ng-selected="true">Select Report</option>
+                                                <option ng-value="rt.RptTranId" ng-repeat="rt in studentWise.TemplatesColl">{{rt.ReportName}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-1 col-sm-1 col-lg-1">
+                                            <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="getFeeSummaryStudentWise()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                        </div>
+
+                                    </div>
+                                    <div class="card p-2 mt-2">
+                                        <div class="row mt-2" id="schedule-report-table">
+                                            <iframe id="frmRptStudentWise" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Studentwise Ends -->
+                                <!--Fee Mapping Student -->
+                                <!--<div class="tab-pane fade main-section" id="feemapping" role="tabpanel"
+                                 aria-labelledby="feemapping-tab">
+                                <div class="row ">
+                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                        <label>Class</label>
+                                        <select name="class-group" class="form-control form-control-sm select2" ng-model="feeMappingStudent.ClassIdColl" multiple ng-change="getFeeMappingStudent()">
+                                            <option ng-value="cl.id" ng-repeat="cl in ClassList.ClassList">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-3 col-lg-3 col-md-1">
+                                        <label>For..</label>
+                                        <select name="class-group" id="" form="" class="form-control form-control-sm select2" ng-model="feeMappingStudent.For" ng-change="getFeeMappingStudent()">
+                                            <option ng-value="0">All</option>
+                                            <option ng-value="1">Not Applicable Fee</option>
+                                            <option ng-value="2">Extra Curricular</option>
+                                            <option ng-value="3">Day Boarders</option>
+                                            <option ng-value="4">Fixed Amount Student</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                        <label>FeeItem</label>
+                                        <select name="class-group" id="" form="" class="form-control form-control-sm select2" ng-model="feeMappingStudent.FeeItemIdColl" multiple ng-change="getFeeMappingStudent()">
+                                            <option ng-value="cl.FeeItemId" ng-repeat="cl in FeeItemList">{{cl.Name}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                        <label>Search</label>
+                                        <input type="text" name="table_search1" class="form-control form-control-sm" placeholder="Search" ng-model="search44" ng-change="onFilterTextBoxChanged44()">
+                                    </div>
+
+                                    <div class="col-md-1 col-sm-1 col-lg-1">
+                                        <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="getFeeMappingStudent()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                    </div>
+                                    <div class="col-md-2 col-sm-2 col-lg-2 mt-4">
+                                        <div class="float-right">
+                                            <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                        type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right mt-1"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item" href="#" ng-click="ExportFeeMappingAsCSV()"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                            </div>-->
+                                @*<a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Notification" ng-click="SendNotification()">
+                                        <i class="fas fa-bell"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="SMS" ng-click="SendSMS()">
+                                        <i class="fas fa-envelope"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="SMS From Mobile" ng-click="SendSMSFromMobile()">
+                                        <i class="fas fa-envelope"></i>
+                                    </a>*@
+                                <!--<a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintFeeMappingStudent()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="card p-0 mt-2 mb-0">
+                                        <div id="datatable44" style="height: calc(100vh - 10rem);width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions44"></div>
+                                    </div>
+                                </div>-->
+                                <!-- Summary Ends -->
+                                <!--Date wise Summary Starts -->
+                                <div class="tab-pane fade main-section" id="datewise" role="tabpanel"
+                                     aria-labelledby="datewise-tab">
+                                    <div class="row ">
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>From Date</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm ng-pristine ng-untouched ng-valid ng-isolate-scope ndp-nepali-calendar ng-not-empty"
+                                                   date-picker=""
+                                                   ng-model="feeSummaryDW.DateFrom_TMP"
+                                                   date-detail="feeSummaryDW.DateFromDet"
+                                                   autocomplete="off"
+                                                   inputmode="text" confirm-action="validateDates('fromDate')"/>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>To Date</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm ng-pristine ng-untouched ng-valid ng-isolate-scope ndp-nepali-calendar ng-not-empty"
+                                                   date-picker=""
+                                                   ng-model="feeSummaryDW.DateTo_TMP"
+                                                   date-detail="feeSummaryDW.DateToDet"
+                                                   autocomplete="off"
+                                                   inputmode="text" confirm-action="validateDates('toDate')"/>
+                                        </div>
+
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Search</label>
+                                            <input type="text" name="table_search" class="form-control form-control-sm" placeholder="Search" ng-model="searchDW" ng-change="onFilterTextBoxChangedDW()">
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>FeeItem</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="feeSummaryDW.FeeItemIdColl" @*ng-change="getFeeSummaryDW()"*@>
+                                                <option ng-value="0">All</option>
+                                                <option ng-value="cl.FeeItemId" ng-repeat="cl in FeeItemList">{{cl.Name}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-1 col-sm-1 col-lg-1">
+                                            <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="getFeeSummaryDW()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                        </div>
+                                        <div class="col-md-3 col-sm-3 col-lg-3 mt-4">
+                                            <div class="float-right">
+                                                <div class="dropdown dnld-file mt-1" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                            type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download py-1"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        @*<a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item" href="#" ng-click="ExportFeeSummaryAsCSV()"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>*@
+                                                        <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image">
+                                                            Excel
+                                                        </a>
+                                                        <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                                 class="img-fluid exports-icon">
+                                                            CSV
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                @*<a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Notification" ng-click="SendNotificationDW()">
+                                                        <i class="fas fa-bell"></i>
+                                                    </a>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="SMS" ng-click="SendSMSDW()">
+                                                        <i class="fas fa-envelope"></i>
+                                                    </a>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="SMS From Mobile" ng-click="SendSMSFromMobileDW()">
+                                                        <i class="fas fa-envelope"></i>
+                                                    </a>*@
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintFeeSummaryDW()">
+                                                    <i class="fas fa-print py-1"></i>
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="card p-0 mb-0 mt-2">
+                                        <div id="datatableDW" style="height: calc(100vh - 12.5rem);width: 100%;" class="ag-theme-alpine" ag-grid="gridOptionsDW"></div>
+                                        <div id="myGridBottomDW" style="height: 53px;" class="ag-theme-alpine"></div>
+                                    </div>
+                                </div>
+                                <!-- Summary Ends -->
+                                <!--Sibling Fee Sumary Starts Starts -->
+                                <div class="tab-pane fade main-section" id="sibling" role="tabpanel"
+                                     aria-labelledby="sibling-tab">
+                                    <div class="row ">
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>Period</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm " ng-model="SibfeeSummary.PeriodAs">
+                                                <option ng-value="cl.id" ng-repeat="cl in PeriodColl">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SibfeeSummary.PeriodAs==1">
+                                            <label>FromMonth</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="SibfeeSummary.FromMonthId" ng-change="getSiblingFeeSummary()">
+                                                <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SibfeeSummary.PeriodAs==1">
+                                            <label>ToMonth</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm " ng-model="SibfeeSummary.ToMonthId" ng-change="getSiblingFeeSummary()">
+                                                <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SibfeeSummary.PeriodAs==2">
+                                            <label>FromDate</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm ng-pristine ng-untouched ng-valid ng-isolate-scope ndp-nepali-calendar ng-not-empty"
+                                                   date-picker=""
+                                                   ng-model="SibfeeSummary.DateFrom_TMP"
+                                                   date-detail="feeSummary.DateFromDet"
+                                                   autocomplete="off"
+                                                   inputmode="text" />
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="SibfeeSummary.PeriodAs==2">
+                                            <label>ToDate</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm ng-pristine ng-untouched ng-valid ng-isolate-scope ndp-nepali-calendar ng-not-empty"
+                                                   date-picker=""
+                                                   ng-model="SibfeeSummary.DateTo_TMP"
+                                                   date-detail="feeSummary.DateToDet"
+                                                   autocomplete="off"
+                                                   inputmode="text" />
+                                        </div>
+                                        <div class="col-sm-1 col-lg-1 col-md-1">
+                                            <label>ForStudent</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="SibfeeSummary.ForStudent">
+                                                <option ng-value="0">All</option>
+                                                <option ng-value="1">Continue</option>
+                                                <option ng-value="2">Left</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2">
+                                            <label>FeeItem</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="SibfeeSummary.FeeItemIdColl" ng-change="getSiblingFeeSummary()">
+                                                <option ng-value="0">All</option>
+                                                <option ng-value="cl.FeeItemId" ng-repeat="cl in FeeItemList">{{cl.Name}}</option>
+                                            </select>
+                                        </div>
+
+
+                                        <div class="col-md-1 col-sm-1 col-lg-1">
+                                            <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="getSiblingFeeSummary()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="input-group input-group-sm mt-2">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="searchSib" ng-change="onFilterTextBoxChangedSib()">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-9 col-sm-9 col-lg-9 mt-3">
+                                            <div class="float-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                            type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#" ng-click="ExportFeeSummarySibAsexcel()"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#" ng-click="ExportFeeSummarySibAsCSV()"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Notification" ng-click="SendNotificationSFS()">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="SMS" ng-click="SendSMSSFS()">
+                                                    <i class="fas fa-sms"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="SMS From Mobile" ng-click="SendSMSFromMobileSFS()">
+                                                    <i class="fas fa-mobile"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintFeeSummarySFS()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="card p-0 mt-1 mb-0">
+                                        <div id="datatableSib" style="height: calc(100vh - 15rem);width: 100%;" class="ag-theme-alpine" ag-grid="gridOptionsSib"></div>
+                                        <div id="myGridBottomSib" style="height: 54px;" class="ag-theme-alpine"></div>
+                                    </div>
+                                </div>
+                                <!-- Summary Ends -->
+
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-notification-filtered" style="margin-top: 30px;">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification (Total filtered students : {{filteredStudentsCount}})</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Select Template</label>
+                        <select class="form-control form-control-sm"
+                                ng-model="selectedTemplate"
+                                ng-options="t as t.Name for t in templatesColl"
+                                ng-change="OnTemplateChange()">
+                            <option value="">-- Select Template --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Notification Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Title"
+                               ng-model="newNotice.Title"
+                               maxlength="200" />
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Description</label>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                Total Character : {{newNotice.Description ? newNotice.Description.length : 0}}
+                            </div>
+                        </div>
+                        <textarea class="form-control form-control-sm"
+                                  rows="5"
+                                  ng-model="newNotice.Description"
+                                  placeholder="Description"
+                                  maxlength="1000"></textarea>
+
+                    </div>
+                    <div class="form-group">
+                        <label for="">Attach File (Optional)</label>
+                        <input class="form-control form-control-sm p-0"
+                               type="file"
+                               style="padding: 1px"
+                               accept=".jpg,.jpeg,.pdf,.doc,.docx,.png"
+                               file-model
+                               ng-model="newNotice.AttachmentColl" />
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-default"
+                            ng-click="ResetNotification()"
+                            style="min-width: 70px;">
+                        Reset
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success"
+                            ng-click="SendManualNotificationFiltered()"
+                            style="min-width: 70px;"
+                            ng-disabled="loadingstatus=='running' || !newNotice.Title || !newNotice.Description">
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-sms-filtered" style="margin-top: 30px;">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">
+                        Send SMS (Total filtered students: {{filteredSMSStudentsCount}})
+                    </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Select Template</label>
+                        <select class="form-control form-control-sm"
+                                ng-model="selectedSMSTemplateFiltered"
+                                ng-options="t as t.Name for t in smsTemplatesCollFiltered"
+                                ng-change="OnSMSTemplateChangeFiltered()">
+                            <option value="">-- Select Template --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Title"
+                               ng-model="newSMSFiltered.Title" />
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Description</label>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                Total Character: {{newSMSFiltered.Description.length}}
+                            </div>
+                        </div>
+                        <textarea class="form-control form-control-sm"
+                                  rows="5"
+                                  ng-model="newSMSFiltered.Description"
+                                  placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Send To:</label><br>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToFiltered.StudentContact"> Student Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToFiltered.FatherContact"> Father Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToFiltered.MotherContact"> Mother Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToFiltered.GuardianContact"> Guardian Contact
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-success" ng-click="SendSMSToFilteredStudents()" style="min-width: 90px;">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-sms-mobile" style="margin-top: 30px;">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">
+                        Send SMS From Mobile (Total filtered students: {{filteredMobileSMSStudentsCount}})
+                    </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Select Template</label>
+                        <select class="form-control form-control-sm"
+                                ng-model="selectedMobileSMSTemplate"
+                                ng-options="t as t.Name for t in mobileSmsTemplatesColl"
+                                ng-change="OnMobileSMSTemplateChange()">
+                            <option value="">-- Select Template --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Title"
+                               ng-model="newMobileSMS.Title" />
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Description</label>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                Total Character: {{newMobileSMS.Description.length}}
+                            </div>
+                        </div>
+                        <textarea class="form-control form-control-sm"
+                                  rows="5"
+                                  ng-model="newMobileSMS.Description"
+                                  placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Send To:</label><br>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToMobile.StudentContact"> Student Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToMobile.FatherContact"> Father Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToMobile.MotherContact"> Mother Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToMobile.GuardianContact"> Guardian Contact
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-success" ng-click="SendMobileSMSToFilteredStudents()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sendemail" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="margin-top: 23px;">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title">Send Email (Total numbers of selected student: {{CurEmailSendFiltered.DataColl.length}})</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="form-group d-flex">
+                                    <label class="mr-2 mt-1" style="width: 135px;">Select Template: </label>
+                                    <select class="form-control form-control-sm select2" style="width: 100%" ng-model="CurEmailSendFiltered.Template" ng-change="EmailTemplateChanged(CurEmailSendFiltered.Template)">
+                                        <option ng-repeat="st in EmailTemplatesCollFiltered" ng-value="st">
+                                            {{st.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-7">
+                                <div class="form-group d-flex">
+                                    <label class="mr-2 mt-1" style="min-width:90px;">Send To</label>
+                                    <div class="checkbox-wrapper  d-flex">
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox211" ng-model="CurEmailSendFiltered.Primary">
+                                            <label for="customCheckbox211"
+                                                   class="custom-control-label">Student Email</label>
+                                        </div>
+
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox311" ng-model="CurEmailSendFiltered.Father">
+                                            <label for="customCheckbox311"
+                                                   class="custom-control-label">Father Email</label>
+                                        </div>
+
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox411" ng-model="CurEmailSendFiltered.Mother">
+                                            <label for="customCheckbox411"
+                                                   class="custom-control-label">Mother Email</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox511" ng-model="CurEmailSendFiltered.Guardian">
+                                            <label for="customCheckbox511"
+                                                   class="custom-control-label">Guardian Email</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="width: 110px;">CC </label>
+                                <select class="form-control form-control-sm select2" multiple ng-model="CurEmailSendFiltered.EmployeeColl" style="width:100%">
+                                    <option ng-value="st" ng-repeat="st in AllEmployeeColl">{{st.Name}}-{{st.EmployeeCode}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="width: 110px;">BCC </label>
+                                <select class="form-control form-control-sm select2" multiple ng-model="CurEmailSendFiltered.BCCEmployeeColl" style="width: 100%">
+                                    <option ng-value="st" ng-repeat="st in AllEmployeeColl">{{st.Name}}-{{st.EmployeeCode}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="width: 110px; ">Title/Subject <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" ng-model="CurEmailSendFiltered.Subject" />
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group mb-0">
+                                <label for="" class="mr-2">Description <span class="text-danger">*</span> </label>
+                                <textarea class="textarea" placeholder="Place some text here" style="
+                                                                          width: 100%;
+                                                                          height: 130px!important;
+                                                                          font-size: 14px;
+                                                                          line-height: 18px;
+                                                                          border: 1px solid #dddddd;
+                                                                          padding: 10px;
+                                                                        " ng-model="CurEmailSendFiltered.Description" html-editor></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <p class="text-secondary"><b>Attach File</b></p>
+                            <div class="card-body mt-0" id="add-file-area" style="background-color: #eff0ef;">
+
+                                <div id="actions" class="row">
+                                    <div class="col-md-1 mt-2">
+                                        <div class="btn-group">
+                                            <span class="btn-add-file col fileinput-button" style="border: 2px dashed #76be4e; padding: 35px; background-color: #76be4e30;">
+                                                <span><i class="fas fa-plus-circle" style="font-size: 27px; color: #025a58;"></i></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-11">
+                                        <div class="d-flex p-2" id="previews" style="overflow-x: auto;">
+                                            <div id="template">
+                                                <a data-dz-remove class="cancel float-right">
+                                                    <i class="fas fa-times-circle" style="  color:#28a745;font-size: 14px;"></i>
+                                                </a>
+                                                <span class="preview p-2 ml-2"><img style="height:110px;width:auto" src="data:," alt="" data-dz-thumbnail /></span>
+                                                <div class="align-items-center" style="width: 100%;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @*<div class="col-12 mt-2">
+                                <div class="form-group">
+                                    <label>Total numbers of selected student: {{CurEmailSend.DataColl.length}}</label>
+                                </div>
+                            </div>*@
+
+                    </div>
+                    <div class="text-center mb-3">
+                        <button type="button" class="btn btn-success  btn-sm" style="width:80px" ng-click="SendEmailToFilteredStudents()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Sibling/Filtered SMS -->
+    <div class="modal fade" id="modal-sms-sfs" style="margin-top: 30px;">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">
+                        Send SMS (Total filtered students: {{filteredSMSSFSStudentsCount}})
+                    </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Select Template</label>
+                        <select class="form-control form-control-sm"
+                                ng-model="selectedSMSTemplateSFS"
+                                ng-options="t as t.Name for t in smsTemplatesCollSFS"
+                                ng-change="OnSMSTemplateChangeSFS()">
+                            <option value="">-- Select Template --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Title"
+                               ng-model="newSMSSFS.Title" />
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Description</label>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                Total Character: {{newSMSSFS.Description.length}}
+                            </div>
+                        </div>
+                        <textarea class="form-control form-control-sm"
+                                  rows="5"
+                                  ng-model="newSMSSFS.Description"
+                                  placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Send To:</label><br>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToSFS.StudentContact"> Student Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToSFS.FatherContact"> Father Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToSFS.MotherContact"> Mother Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToSFS.GuardianContact"> Guardian Contact
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-success" ng-click="SendSMSToSFSStudents()" style="min-width: 90px;">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Sibling fee summary Notifications -->
+    <div class="modal fade" id="modal-notification-sfs" style="margin-top: 30px;">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification (Total filtered students : {{filteredNotificationSFSStudentsCount}})</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Select Template</label>
+                        <select class="form-control form-control-sm"
+                                ng-model="selectedNotificationTemplateSFS"
+                                ng-options="t as t.Name for t in notificationTemplatesCollSFS"
+                                ng-change="OnNotificationTemplateChangeSFS()">
+                            <option value="">-- Select Template --</option>
+                        </select>
+
+                    </div>
+                    <div class="form-group">
+                        <label for="">Notification Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Title"
+                               ng-model="newNotificationSFS.Title"
+                               maxlength="200" />
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Description</label>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                Total Character : {{newNotificationSFS.Description ? newNotificationSFS.Description.length : 0}}
+                            </div>
+                        </div>
+                        <textarea class="form-control form-control-sm"
+                                  rows="5"
+                                  ng-model="newNotificationSFS.Description"
+                                  placeholder="Description"
+                                  maxlength="1000"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Attach File (Optional)</label>
+                        <input class="form-control form-control-sm p-0"
+                               type="file"
+                               style="padding: 1px"
+                               accept=".jpg,.jpeg,.pdf,.doc,.docx,.png"
+                               file-model
+                               ng-model="newNotificationSFS.AttachmentColl" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-default"
+                            ng-click="ResetNotificationSFS()"
+                            style="min-width: 70px;">
+                        Reset
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success"
+                            ng-click="SendManualNotificationSFSFiltered()"
+                            style="min-width: 70px;"
+                            ng-disabled="loadingstatusSFS=='running' || !newNotificationSFS.Title || !newNotificationSFS.Description">
+                        <span ng-if="loadingstatusSFS=='running'">
+                            <i class="fas fa-spinner fa-spin"></i> Sending...
+                        </span>
+                        <span ng-if="loadingstatusSFS!='running'">
+                            Send
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Sibling fee summary SMS from mobile -->
+    <div class="modal fade" id="modal-sms-mobile-sfs" style="margin-top: 30px;">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">
+                        Send SMS From Mobile (Total filtered students: {{filteredMobileSMSStudentsCountSFS}})
+                    </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Select Template</label>
+                        <select class="form-control form-control-sm"
+                                ng-model="selectedMobileSMSTemplateSFS"
+                                ng-options="t as t.Name for t in mobileSmsTemplatesCollSFS"
+                                ng-change="OnMobileSMSTemplateChangeSFS()">
+                            <option value="">-- Select Template --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               placeholder="Title"
+                               ng-model="newMobileSMSSFS.Title" />
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Description</label>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                Total Character: {{newMobileSMSSFS.Description.length}}
+                            </div>
+                        </div>
+                        <textarea class="form-control form-control-sm"
+                                  rows="5"
+                                  ng-model="newMobileSMSSFS.Description"
+                                  placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Send To:</label><br>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToMobileSFS.StudentContact"> Student Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToMobileSFS.FatherContact"> Father Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToMobileSFS.MotherContact"> Mother Contact
+                        </label>
+                        <label class="mr-3">
+                            <input type="checkbox" ng-model="sendToMobileSFS.GuardianContact"> Guardian Contact
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-success" ng-click="SendMobileSMSToFilteredStudentsSFS()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    // DropzoneJS Demo Code Start
+    Dropzone.autoDiscover = false
+    // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+    var previewNode = document.querySelector("#template")
+    previewNode.id = ""
+    var previewTemplate = previewNode.parentNode.innerHTML
+    previewNode.parentNode.removeChild(previewNode)
+
+    var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+        url: "/target-url", // Set the url
+        thumbnailWidth: 130,
+        thumbnailHeight: 130,
+        parallelUploads: 20,
+        previewTemplate: previewTemplate,
+        autoQueue: false, // Make sure the files aren't queued until manually added
+        previewsContainer: "#previews", // Define the container to display the previews
+        clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+    })
+    document.querySelector("#actions .cancel").onclick = function () {
+        myDropzone.removeAllFiles(true)
+    }
+    // DropzoneJS Demo Code End
+</script>
+
+
+

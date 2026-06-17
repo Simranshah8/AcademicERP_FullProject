@@ -1,0 +1,826 @@
+﻿<script>
+    var entityManualBill =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.ManualBilling);
+    var entityFeeReceipt =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.FeeReceipt);
+    var EntityId=@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.AdmissionEnquiry);
+</script>
+
+ 
+<script src="~/jslib/frontdesk/transaction/admission-enquiry.js?v=20251012"></script>
+<style>
+    .numericAlignment {
+        text-align: right;
+    }
+
+    .headerAligment {
+        text-align: center;
+    }
+
+    .dateAlignment {
+        text-align: center;
+    }
+
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+</style>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="EnquiryController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="admission-section">
+                    <!-- Second Tab Content -->
+                    <form action="" style="margin-top: -10px;">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">From Date</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" date-picker ng-model="newEnquiry.FromDate_TMP" date-detail="newEnquiry.FromDateDet">
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">To Date</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" date-picker ng-model="newEnquiry.ToDate_TMP" date-detail="newEnquiry.ToDateDet">
+                                </div>
+                            </div>
+                            <div class="col-md-1 mt-4">
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="GetEnqSummaryList()">Load Data</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mt-4">
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-sm btn-success" id="add-admission-enquiry" style="min-width: 90px;">
+                                        <i class="fas fa-plus w-t"></i> Add
+                                        Enquiry
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- Table atrea starts -->
+                    <div class="card p-2 mt-2">
+                        <div class="row">
+                            <div ui-grid="gridOptions"
+                                 ui-grid-resize-columns
+                                 ui-grid-move-columns
+                                 ui-grid-selection
+                                 ui-grid-exporter
+                                 ui-grid-pinning
+                                 ui-grid-filtering
+                                 ui-grid-auto-resize
+                                 ui-grid-save-state style="height: calc(100vh - 200px);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Table Area Ends -->
+                </div>
+                <!-- form area starts -->
+                <div id="admission-enquiry-form">
+                    <div class="timeline registration-form">
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Student Information</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">First Name<span style="color:red">*</span></label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newEnquiry.FirstName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Middle Name</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newEnquiry.MiddleName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Last Name<span style="color:red">*</span></label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newEnquiry.LastName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Gender<span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newEnquiry.Gender">
+                                                        <option ng-value="gen.id" ng-repeat="gen in GenderColl" ng-selected="gen.id==newEnquiry.Gender">{{gen.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">{{'CAST_LNG' | translate}}</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newEnquiry.CasteId">
+                                                        <option ng-value="c.CasteId" ng-repeat="c in CasteList" ng-selected="c.CasteId==newEnquiry.CasteId">{{c.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Date of Birth</label>
+
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newEnquiry.DOB_TMP" date-detail="newEnquiry.DOBDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Nationality</label>
+                                                    <input type="text" class="form-control-sm form-control" data-ng-model="newEnquiry.Nationality" list="lstNationality">
+                                                    <datalist id="lstNationality">
+                                                        <option data-ng-repeat="ttl in CountryList" value="{{ttl}}">
+                                                    </datalist>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Religion</label>
+                                                    <input type="text" class="form-control-sm form-control" data-ng-model="newEnquiry.Religion" list="lstReligion">
+                                                    <datalist id="lstReligion">
+                                                        <option data-ng-repeat="ttl in ReligionList" value="{{ttl}}">
+                                                    </datalist>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Address<span style="color:red">*</span></label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newEnquiry.Address">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Contact No.</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newEnquiry.ContactNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Email</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newEnquiry.Email">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+
+                                                <label class="checkbox-wrap">
+                                                    Is Physical Disability ?
+                                                    <input type="checkbox" id="disabilityCheckbox" ng-model="newEnquiry.IsPhysicalDisability" />
+                                                    <span class="checkmark"></span>
+                                                </label>
+                                                <div id="disabilityCheckboxdiv" ng-hide="newEnquiry.IsPhysicalDisability==false">
+                                                    <input type="text" class="form-control-sm form-control" data-ng-model="newEnquiry.PhysicalDisability" list="lstPhysicalDisability">
+                                                    <datalist id="lstPhysicalDisability">
+                                                        <option data-ng-repeat="ttl in DisablityList" value="{{ttl}}">
+                                                    </datalist>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Class<span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newEnquiry.ClassId" ng-change="GetFeeItemList()">
+                                                        <option ng-value="0">**Select Class**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ClassList" ng-selected="cl.id==newEnquiry.ClassId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Medium</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newEnquiry.MediumId">
+                                                        <option ng-value="0">**Select Medium**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in MediumList" ng-selected="cl.id==newEnquiry.MediumId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            @*
+                                                    <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Department</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newEnquiry.FacultyId">
+                                                            <option ng-value="d.DepartmentId" ng-repeat="d in DepartmentList" ng-selected="d.DepartmentId==newEnquiry.FacultyId">{{d.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                            *@
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Shift</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newEnquiry.ClassShiftId">
+                                                        <option ng-value="0">**Select Medium**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ShiftList" ng-selected="cl.id==newEnquiry.ClassShiftId">{{cl.text}}</option>
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div>
+                                                    <label class="checkbox-wrap">
+                                                        Transport Faciltity Required ?
+                                                        <input type="checkbox" id="istrasnportation" ng-model="newEnquiry.IsTransport" />
+                                                        <span class="checkmark"></span>
+                                                    </label>
+                                                    <div id="otherfacilitydiv" ng-show="newEnquiry.IsTransport==true">
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newEnquiry.TransportFacility">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div>
+                                                    <label class="checkbox-wrap">
+                                                        Hostel Required ?
+                                                        <input type="checkbox" id="hostelFac" ng-model="newEnquiry.IsHostel" />
+                                                        <span class="checkmark"></span>
+                                                    </label>
+                                                    <div id="otherfacilitydiv" ng-show="newEnquiry.IsHostel==true">
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newEnquiry.HostelRequired">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div>
+                                                    <label class="checkbox-wrap">
+                                                        Other Faciltity Required ?
+                                                        <input type="checkbox" id="otherfacility" ng-model="newEnquiry.IsOtherfaciltity" />
+                                                        <span class="checkmark"></span>
+                                                    </label>
+                                                    <div id="otherfacilitydiv" ng-show="newEnquiry.IsOtherfaciltity==true">
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newEnquiry.Otherfaciltity">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- col-md-9 -->
+                                    <div class="col-md-3">
+                                        <label for="" class="invisible">Photo</label>
+                                        <div class="person-photo-attachment-wrap text-center">
+                                            <div class="img-wrap mx-auto">
+                                                <img ng-src="{{newEnquiry.PhotoData || newEnquiry.PhotoPath}}" class="img-fluid" alt="" id="imgPhoto1">
+                                            </div>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#updatePhoto">
+                                                <i class="fas fa-camera w-t"></i> Upload Photo
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Parent Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Father Name<span style="color:red">*</span></label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.FatherName">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Professsion</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.F_Profession">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Contact<span style="color:red">*</span></label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.F_ContactNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Email</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.F_Email">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Mother Name</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.MotherName">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Professsion</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.M_Profession">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Contact</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.M_ContactNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Email</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.M_Email">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Guardian Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <label>If Guradian Is</label>
+                                            </div>
+                                            <div class="col-md-6 ml-2">
+                                                <div class="form-group clearfix">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" id="rb-interest-calc-yes" name="r5" ng-value="1" ng-model="newEnquiry.IfGuradianIs" ng-change="LoadGuradianDet()">
+                                                        <label class="form-check-label" for="rb-interest-calc-yes">Father</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" id="rb-interest-cal-no" name="r5" ng-value="2" ng-model="newEnquiry.IfGuradianIs" ng-change="LoadGuradianDet()">
+                                                        <label class="form-check-label" for="rb-interest-cal-no">Mother</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" id="radio-third-option" name="r5" ng-value="3" ng-model="newEnquiry.IfGuradianIs" ng-change="LoadGuradianDet()">
+                                                        <label class="form-check-label" for="radio-third-option">Other</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Guardian Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.GuardianName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Relation</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.G_Relation">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Professsion</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.G_Professsion">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Contact</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.G_Contact">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Email</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.G_Email">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Address</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.G_Address">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Previous Academic Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="table-responsive">
+                                    <div class="">
+                                        <table id="" class="table table-hover table-bordered th-fixed-top bg-white w-100">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 90px">Class</th>
+                                                    <th style="width: 150px">Exam</th>
+                                                    <th style="width: 120px">Passout Year</th>
+                                                    <th style="width: 90px">Symbol No.</th>
+                                                    <th style="width: 120px">Obtained Marks</th>
+                                                    <th style="width: 120px">Obtained(%)</th>
+                                                    <th style="width: 110px">Division</th>
+                                                    <th style="width: 100px">GPA</th>
+                                                    <th style="width: 150px">School/College</th>
+                                                    <th style="width: 100px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="acDet in newEnquiry.AcademicDetailsColl">
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.ClassName"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.Exam"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.PassoutYear"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.SymbolNo"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm" ng-model="acDet.ObtainMarks"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm" ng-model="acDet.ObtainPer"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.Division"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm" ng-model="acDet.GPA"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="acDet.SchoolColledge"></td>
+                                                    <td>
+                                                        <a class="p-1" ng-click="AddAcademicDetails($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delAcademicDetails($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Attach  Document(s)</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="pb-3 add-more-than-one-form-block">
+                                    <form>
+                                        <article>
+                                            <div class="row">
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>Type Of Document</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="docType">
+                                                            <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-10">
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <div class="form-group">
+                                                                <label>Attach Document</label>
+                                                                <div class="form-group">
+                                                                    <input type="file" id="flMoreFiles" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Description</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                       ng-model="docDescription"
+                                                                       placeholder="">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div class="d-flex">
+                                                                <div>
+                                                                    <label class="invisible d-block">for height</label>
+                                                                    <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFiles(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </form>
+                                </div>
+                                <div class="pb-3">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover border bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" style="width: 20px">SN.</th>
+                                                    <th scope="col" style="width: 40%">Document Type</th>
+                                                    <th scope="col">File Name</th>
+                                                    <th scope="col">Description</th>
+                                                    <th scope="col" style="width: 130px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="ac in newEnquiry.AttachmentColl">
+                                                    <th scope="row">{{$index+1}}</th>
+                                                    <td>{{(DocumentTypeList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>
+                                                    <td>{{ac.Name}}</td>
+                                                    <td>{{ac.Description}}</td>
+                                                    <td>
+                                                        <div>
+                                                            <a ng-hide="ac.Path==null" class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                <i class="fas fa-eye text-secondary"></i>
+                                                            </a>
+                                                            @*<a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                    <i class="fas fa-eye text-secondary"></i>
+                                                                </a>
+                                                                <a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+                                                                    <i class="fas fa-download  text-info"></i>
+                                                                </a>*@
+                                                            <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END timeline item -->
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="">Enquiry Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div>
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Enquiry No.</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newEnquiry.AutoNumber" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Enquiry Date</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm" date-picker ng-model="newEnquiry.EnquiryDate_TMP" date-detail="newEnquiry.EnquiryDate_Det">
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Source</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newEnquiry.SourceId">
+                                                <option ng-value="ss.SourceId" ng-repeat="ss in SourceList" ng-selected="ss.SourceId==newEnquiry.SourceId">{{ss.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mt-4">
+                                            <label class="checkbox-wrap">
+                                                Is Follow Up required ?
+                                                <input type="checkbox" ng-model="newEnquiry.IsFollowupRequired" />
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3" ng-show="newEnquiry.IsFollowupRequired==true">
+                                        <div id="followUpReqdiv">
+                                            <label for="">Followup Due On</label>
+                                            <div class="row">
+                                                <div class="col-md-7">
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newEnquiry.FollowupDate_TMP" date-detail="newEnquiry.FollowupDateDet">
+
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <input type="time" class="form-control form-control-sm" name="" ng-model="newEnquiry.FollowUpTime_TMP">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Remarks</label>
+                                        <textarea class="form-control form-control-sm" ng-model="newEnquiry.Remarks"
+                                                  rows="1"
+                                                  placeholder=""></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- timeline time label -->
+                        <div class="time-label" ng-show="newEnquiry.UDFFeildsColl.length>0">
+                            <span class="">User Define Fields</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div ng-show="newEnquiry.UDFFeildsColl.length>0">
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-2" ng-repeat="uf in newEnquiry.UDFFeildsColl">
+                                        <div class="form-group">
+                                            <label for="udfC{$index}">{{uf.DisplayName}}<span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                            <input ng-show="uf.FieldType==1" type="text" class="form-control form-control-sm" ng-model="uf.UDFValue" onfocus="this.select()">
+                                            <input ng-show="uf.FieldType==2" type="number" class="form-control form-control-sm" ng-model="uf.UDFValue" onfocus="this.select()">
+                                            <input ng-show="uf.FieldType==3" type="text" number-input class="form-control form-control-sm" ng-model="uf.UDFValue" onfocus="this.select()" style="text-align:right">
+                                            <input ng-show="uf.FieldType==4" type="text" class="form-control form-control-sm" date-picker ng-model="uf.UDFValue_TMP" onfocus="this.select()" date-detail="uf.UDFValueDet">
+                                            <input id="udfC{$index}" ng-show="uf.FieldType==6" type="checkbox" class="form-control form-control-sm" ng-model="uf.UDFValue">
+                                            <textarea ng-show="uf.FieldType==7" class="form-control" ng-model="uf.UDFValue" onfocus="this.select()" rows="2">
+                                                            </textarea>
+                                            <select ng-show="uf.FieldType==8" class="form-control form-control-sm" ng-model="uf.UDFValue">
+                                                <option ng-repeat="ss in uf.SelectOptions | commaBreak" ng-value="ss" ng-selected="ss==uf.UDFValue">
+                                                    {{ss}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- timeline time label -->
+                        <div class="time-label" ng-show="newEnquiry.FeeItemColl.length>0">
+                            <span class="">Fee Details</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <div ng-show="newEnquiry.FeeItemColl.length>0">
+                            <div class="timeline-item">
+                                <div class="table-scroll-x-y mt-3">
+                                    <table id="main-table"
+                                           class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr class="text-center text-nowrap">
+                                                <th style="width: 60px">S.No.</th>
+                                                <th style="width: 200px">Fee Item</th>
+                                                <th style="width: 60px">Qty.</th>
+                                                <th style="width: 60px">Rate</th>
+                                                <th style="width: 60px" ng-show="newFeeConfiguration.AllowDiscountInRegistration==true">Dis. %</th>
+                                                <th style="width: 60px" ng-show="newFeeConfiguration.AllowDiscountInRegistration==true">Dis.Amt.</th>
+                                                <th style="width: 80px">Receivable Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-nowrap text-center">
+                                            <tr ng-repeat="cl in newEnquiry.FeeItemColl">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    {{cl.FeeItemName}}
+                                                </td>
+                                                <td>
+                                                    <input type="text" number-input
+                                                           class="form-control form-control-sm" ng-model="cl.Qty" ng-change="ChangeRate(cl,1)" readonly />
+                                                </td>
+                                                <td>
+                                                    <input type="text" number-input
+                                                           class="form-control form-control-sm" ng-model="cl.Rate" ng-change="ChangeRate(cl,2)" readonly />
+                                                </td>
+                                                <td ng-show="newFeeConfiguration.AllowDiscountInRegistration==true">
+                                                    <input type="text" number-input
+                                                           class="form-control form-control-sm" ng-model="cl.DiscountPer" ng-change="ChangeRate(cl,3)" />
+                                                </td>
+                                                <td ng-show="newFeeConfiguration.AllowDiscountInRegistration==true">
+                                                    <input type="text" number-input
+                                                           class="form-control form-control-sm" ng-model="cl.DiscountAmt" ng-change="ChangeRate(cl,4)" />
+                                                </td>
+                                                <td> {{cl.PayableAmt |number:2}}</td>
+
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="text-nowrap text-center">
+                                                <th colspan="2">TOTAL :-</th>
+                                                <th scope="col" class="cstm-sticky">{{newEnquiry.Qty |number:2}}</th>
+                                                <th scope="col" class="cstm-sticky">{{newEnquiry.Rate |number:2}}</th>
+                                                <th scope="col" class="cstm-sticky" ng-show="newFeeConfiguration.AllowDiscountInRegistration==true"></th>
+                                                <th scope="col" class="cstm-sticky" ng-show="newFeeConfiguration.AllowDiscountInRegistration==true">{{newEnquiry.DiscountAmt |number:2}}</th>
+                                                <th scope="col" class="cstm-sticky">{{newEnquiry.PayableAmt |number:2}}</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END timeline item -->
+                    <!-- timeline time label -->
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-info" id="admission-list-back-btn" style="min-width: 90px;">Back To List</button>
+                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearEnquiry()">Reset</button>
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateEnquiry()">{{newEnquiry.Mode}}</button>
+                        </span>
+                    </div>
+                    <!-- /.timeline-label -->
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newEnquiry.Photo_TMP" @*after-selected="AddEnquiryPhoto()"*@ fileread="newEnquiry.PhotoData">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newEnquiry.PhotoData}}" class="img-fluid" id="imgPhoto">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newEnquiry.Photo_TMP" @*after-selected="AddEnquiryPhoto()"*@ fileread="newEnquiry.PhotoData" />
+                    <a ng-click="ClearEnquiryPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAuthorImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

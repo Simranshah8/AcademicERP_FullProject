@@ -1,0 +1,184 @@
+﻿
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+@*<script src="~/jslib/export/html2canvas.js"></script>*@
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/Library/PrintBarcode.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="PrintBarcodeController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="book-entry-form" style="margin-top:-8px;">
+                        <div class="card card-default">
+                            <div class="card-body p-0">
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">From Accession No.</label>
+                                                    <input type="number" id="PBFromAccessionNo" class="form-control form-control-sm" ng-model="newPrintBarcode.fromAccessionNo" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>To Accession No.</label>
+                                                    <input type="number"  id="PBToAccessionNo" class="form-control form-control-sm" ng-model="newPrintBarcode.toAccessionNo" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 mt-4">
+                                                <button class="btn btn-sm btn-success" style="min-width:60px;" type="button" ng-click="LoadBookDetails()"><i class="fas fa-sync-alt mr-1"></i> Load</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PrintBarcode">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PrintBarcode">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search"
+                                                               placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.PrintBarcode" />
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file"
+                                                 data-toggle="tooltip"
+                                                 data-placement="top"
+                                                 title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                        type="button"
+                                                        id="dropdownMenuButton"
+                                                        data-toggle="dropdown"
+                                                        aria-haspopup="true"
+                                                        aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'PrintBarCode'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#PrintBarCode').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                </div>
+                                            </div>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success"
+                                                    id="open-form-btn"
+                                                    style="min-width: 90px" ng-click="PrintBarCodeOfBook()">
+                                                <i class="fas fa-print w-t"></i> Print Bar code
+                                            </button>
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table id="PrintBarCode" class="main-table table table-sm table-head-fixed table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 50px">S.No.</th>
+                                                        <th style="width: 100px">Accession No</th>
+                                                        <th style="width: 250px">Book Title</th>
+                                                        <th style="width: 250px">Publication</th>
+                                                        <th style="width: 130px">Subject</th>
+                                                        <th style="width: 80px">
+                                                            <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkbox-All" ng-model="newPrintBarcode.checkAll" ng-change="CheckAllData()" />
+                                                                <label class="custom-control-label"
+                                                                       for="checkbox-All">Action</label>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in BookList | filter:searchData.PrintBarcode | itemsPerPage: perPage.PrintBarcode" current-page="currentPages.PrintBarcode" pagination-id="PrintBarcodePagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.AccessionNo}}</td>
+                                                        <td>{{cl.BookTitle}}</td>
+                                                        <td>{{cl.Publication}}</td>
+                                                        <td>{{cl.SubjectName}}</td>
+                                                        <td>
+                                                            <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkbox-2-{{$index}}" ng-model="cl.IsChecked" />
+                                                                <label class="custom-control-label"
+                                                                       for="checkbox-2-{{$index}}"></label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="PrintBarcodePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+

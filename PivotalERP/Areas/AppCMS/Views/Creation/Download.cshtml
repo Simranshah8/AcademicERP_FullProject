@@ -1,0 +1,214 @@
+﻿<script src="~/jslib/appcms/Download.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="DownloadController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:50px!important">
+                <div class="tab-content" id="download-table">
+                    <div class="card py-2">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AddDownload">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AddDownload">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>  
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search" ng-model="searchData.AddDownload"
+                                                   aria-label="Search">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-5 d-flex gap-5 justify-content-end align-items-center">
+                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton"
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'Download'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+
+                                    </div>
+                                </div>
+                                <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait mx-2" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-success" id="add-download"
+                                        style="min-height: 28px; min-width: 90px;" ng-click="ClearDetails()">
+                                    <i class="fas fa-plus w-t"></i> Add Download
+                                </button>
+                            </div>
+                        </header>
+                        <div>
+                            @*Table*@
+                            <div class="table-scroll table-scroll-x-y sales-main-table">
+                                <table class="table table-bordered table-sm bg-white" id="main-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="width:50px">S.N</th>
+                                            <th style="width:350px">Title</th>
+                                            @*<th style="width:90px">Attachment</th>*@
+                                            <th class="text-center" style="width:80px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in DownloadDataList | filter:searchData.AddDownload | itemsPerPage: perPage.AddDownload" current-page="currentPages.AddDownload" pagination-id="AddDownloadPagination">
+                                            <td class="text-center">{{cl.OrderNo}}</td>
+                                            <td>{{cl.Title}}</td>
+                                            @*<td>{{cl.AttachmentPath}}</td>*@
+                                            @*<td>
+                                                <a ng-hide="cl.AttachmentPath == null" ng-click="ShowAttachment(cl)" data-toggle="tooltip" data-placement="top" title="View attachment">
+                                                    <i class="fas fa-eye text-secondary"></i>
+                                                </a>
+                                            </td>*@
+                                        <td class="text-center">
+                                            <a ng-hide="cl.AttachmentPath == null" ng-click="ShowAttachment(cl)" data-toggle="tooltip" data-placement="top" title="View attachment">
+                                                <i class="fas fa-eye text-secondary"></i>
+                                            </a>
+                                            <button ng-click="GetDownloadById(cl)" class="btn btn-link p-0"><i class="fas fa-edit p-1 text-info"></i></button>
+                                            @*<a ng-hide="cl.AttachmentPath==null" class="p-1" href="{{cl.AttachmentPath}}" download="" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+            <i class="fas fa-download  text-info"></i>
+        </a>*@
+                                            <button ng-click="DeleteDownload(cl)" class="btn btn-link p-0"><i class="fas fa-trash-alt text-danger"></i></button>
+                                        </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="modal fade" id="attachmentPreviewModal" tabindex="-1" aria-hidden="true" style="margin-top:30px;">
+                                <div class="modal-dialog" style="display: flex; justify-content: center; align-items: center; height: 100vh; width: auto; max-width: 90vw; padding: 3px;">
+                                    <div class="modal-content"
+                                         ng-style="{'width': viewAttachment.FileType === 'pdf' ? '90vw' : 'auto', 'display': 'inline-block', 'padding': '3px'}">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Attachment Preview</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+
+                                        <div class="modal-body p-0" style="padding: 3px; text-align: center;">
+
+                                            <!-- PDF Preview (Min width 90vw) -->
+                                            <iframe id="pdfViewer"
+                                                    ng-if="viewAttachment.FileType === 'pdf'"
+                                                    style="width: 100%; min-width: 88vw; height: 75vh; border: none; overflow: auto;"
+                                                    frameborder="0">
+                                            </iframe>
+
+                                            <!-- Image Preview -->
+                                            <img ng-if="viewAttachment.FileType === 'image'"
+                                                 ng-src="{{viewAttachment.ContentPath}}"
+                                                 alt="Attachment Preview"
+                                                 style="display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain;">
+
+                                            <!-- Other File Types -->
+                                            <div ng-if="viewAttachment.FileType === 'other'" class="text-center">
+                                                <p>Preview not available for this file type.</p>
+                                                <div class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center">
+                                                    <a ng-href="{{viewAttachment.ContentPath}}" download style="color:white; text-decoration:none;">Download the file</a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Footer (only for images) -->
+                                        <div ng-if="viewAttachment.FileType === 'image'" class="modal-footer p-2" style="display: flex; justify-content: flex-end; gap: 10px;">
+                                            <div class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center">
+                                                <a href="{{viewAttachment.ContentPath}}" download style="color:white; text-decoration:none;">Download</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="AddDownloadPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card" id="download-form">
+                            <div class="card-body p-2">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="Title" class="form-label">Title <span class="text-danger">*</span> </label>
+                                            <input type="text" ng-model="DownloadData.Title" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="OrderNo" class="form-label">Order No.</label>
+                                            <input type="number" ng-model="DownloadData.OrderNo" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label" for="isActive">Is Active?</label>
+
+                                            <div class="d-flex" style="gap:1rem;">
+                                                <div class="form-check">
+                                                    <label class="form-check-label form-label" style="font-size:0.95rem;">
+                                                        <input type="radio" ng-value="true" ng-model="DownloadData.IsActive" name="IsActive" value="Yes" class="form-check-input form-check-sm" />Yes
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <label class="form-check-label form-label" style="font-size:0.95rem;">
+                                                        <input type="radio" ng-value="false" ng-model="DownloadData.IsActive" name="IsActive" value="No" class="form-check-input form-check-sm" />No
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="d-flex">Attachment <span class="text-danger">*</span> </label>
+                                            <input id="attachment1" type="file" accept=".zip,.rar,.7z,.tar,.gz,.bz2,.jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="DownloadData.Attachment_TMP" fileread="DownloadData.AttachmentData" />
+                                            <img ng-src="{{DownloadData.Attachment ||DownloadData.AttachmentData||DownloadData.AttachmentPath}}" class="img-fluid mt-2" id="imgPhotoAttachment" style="max-height:100px; max-width:100px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center my-3 py-3">
+                                    <button class="btn btn-sm btn-info" id="download-back-btn">Back to List</button>
+                                    <button class="btn btn-sm btn-default" ng-click="ClearDetails()" style="min-width:70px">Reset</button>
+                                    <button class="btn btn-sm btn-success" ng-click="SaveUpdateAddDetails()" style="min-width:70px">Save</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

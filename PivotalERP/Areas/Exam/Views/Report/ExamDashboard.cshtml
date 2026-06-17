@@ -1,0 +1,569 @@
+﻿<style>
+    .card-strip {
+        display: flex;
+        gap: 15px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding-bottom: 5px;
+    }
+
+    .card {
+        border: 1px solid #dbeafe;
+    }
+
+    .card-strip::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .card-strip::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+    }
+
+    .exam-table {
+        border-collapse: separate;
+        border-spacing: 4px;
+        min-width: 900px;
+    }
+
+        .exam-table th,
+        .exam-table td {
+            border: none;
+            vertical-align: middle;
+        }
+
+    .head-left {
+        background: linear-gradient(135deg, #0f7a4a, #3ca84a);
+        color: #fff;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: 600;
+        min-width: 80px;
+    }
+
+    .class-name {
+        background: #007b5e;
+        color: white;
+        border-radius: 4px;
+        font-weight: 600;
+        padding-left: 12px;
+        min-width: 120px;
+    }
+
+    .date-head {
+        background: #79b944;
+        color: white;
+        text-align: center;
+        border-radius: 4px;
+        font-weight: 600;
+        min-width: 120px;
+    }
+
+    .exam-cell {
+        background: #f3fff0;
+        border: 1px solid #cdecc6;
+        border-radius: 4px;
+        padding: 8px 10px;
+        line-height: 1.2;
+    }
+
+        .exam-cell:nth-child(even) {
+            background: #ecfbff;
+        }
+
+    .exam-subject {
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .exam-teacher {
+        font-size: 12px;
+        color: #444;
+    }
+
+    .card-title-text {
+        font-weight: 600;
+        font-size: 15px;
+        color: #374151;
+    }
+
+    .title-css {
+        font-size: 14px;
+        font-weight: bold;
+        color: #1f2937;
+        border-bottom: 1px solid #D7E7F0;
+    }
+
+    .dashboard-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        padding: 16px;
+        height: 100%;
+    }
+
+    .card-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .slider {
+        --slider-padding: 1rem;
+        --slider-column-gap: 1rem;
+        --slide-width: 25%;
+        --slide-min-width: 10rem;
+        position: relative;
+        overflow: hidden;
+        background-color: #fff !important;
+    }
+
+    .slider__track {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-inline: var(--slider-padding);
+        scroll-behavior: smooth;
+        list-style-type: none;
+        padding: 0;
+        margin-right: calc(var(--slider-column-gap) * -1);
+    }
+
+        .slider__track > * {
+            flex: 0 0 var(--slide-width);
+            min-width: var(--slide-min-width);
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            padding-right: var(--slider-column-gap);
+        }
+
+        .slider__track::-webkit-scrollbar {
+            display: none;
+        }
+
+    .slider__button {
+        color: #000000;
+        border: 2px solid #00000033;
+    }
+
+    .slider__buttons [disabled] {
+        opacity: 0.5;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="~/jslib/Exam/Reporting/ExamDashboard.js"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ExamDashbardController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div class="root">
+                        <div class="card-primary px-0 card-tabs ">
+                            <div class="tab-content" id="myTabContent">
+                                <div class="tab-pane fade main-section active show" role="tabpanel" aria-labelledby="FromDate-tab">
+                                    <div id="HRDasboard-section">
+                                        <div class="container-fluid px-2">
+                                            <div style=" background: #f6fff9;max-height:125px;" class="my-3 card shadow-sm">
+                                                <div class="row align-items-center p-3" style="max-height:125px;">
+                                                    <div class="col-md-9" style="font-size: 15px; color: #005D59;">
+                                                        <span><strong>Good afternoon User !</strong></span>
+                                                        <div style="font-size:13px;color:#374151;">
+                                                            <p>{{DashboardData.QuoteDet.Title}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" style="max-height:125px;">
+                                                        <div style="display:flex;justify-content:flex-end;">
+                                                            <img ng-src={{DashboardData.QuoteDet.ImagePath}} style="height:105px;">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-4">
+                                                    <div class="card shadow-sm mb-0" style="background: #F2F9FF">
+                                                        <div class="card-body">
+                                                            <div class="title-css mb-3">
+                                                                Results Summary
+                                                            </div>
+                                                            <div class="row d-flex align-items-center">
+                                                                <div class="col-5">
+                                                                    <canvas id="ResultSumChart" class="w-100" height="140"></canvas>
+                                                                </div>
+
+                                                                <div class="col-7">
+                                                                    <div class="card shadow-sm m-0 p-2">
+                                                                        <div style="font-size:10px;color:#64748b;">Total Result</div>
+                                                                        <span><strong>{{DashboardData.ResultSumDet.RSTotalRes}}</strong></span>
+
+                                                                        <div style="display:flex; justify-content:space-between;">
+                                                                            <div style="color:#16a34a;">
+                                                                                <div style="font-size:10px;">Published</div>
+                                                                                <span><strong>{{DashboardData.ResultSumDet.RSPublished}}</strong></span>
+                                                                            </div>
+
+                                                                            <div style="color:#dc2626;">
+                                                                                <div style="font-size:10px;">Pending</div>
+                                                                                <span><strong>{{DashboardData.ResultSumDet.RSPending}}</strong></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card shadow-sm mb-0">
+                                                        <div class="card-body" style="background-color: #F6FDEB;">
+
+                                                            <div class="title-css mb-3">
+                                                                Upcoming Exam Results
+                                                            </div>
+                                                            <div class="row d-flex align-items-center">
+                                                                <div class="col-5">
+                                                                    <canvas id="UERChart" class="w-100" height="140"></canvas>
+                                                                </div>
+
+                                                                <div class="col-7">
+                                                                    <div style="border: 1px solid #dbeafe; background: #f4fff9;" class="card shadow-sm m-0 p-2">
+                                                                        <div style="font-size:10px;color:#64748b;">Total Upcoming Exam Results</div>
+                                                                        <span><strong>{{DashboardData.ResultSumDet.RSPending}}</strong></span>
+                                                                        <div style="display:flex; justify-content:space-between;">
+                                                                            <div style="color:#16a34a;">
+                                                                                <div style="font-size:10px;">This week</div>
+                                                                                <span><strong>{{DashboardData.ResultSumDet.UERThisWeek}}</strong></span>
+                                                                            </div>
+
+                                                                            <div style="color:#dc2626;">
+                                                                                <div style="font-size:10px;">This month</div>
+                                                                                <span><strong>{{DashboardData.ResultSumDet.UERThisMonth}}</strong></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card shadow-sm mb-0" style="background: #F2F9FF;">
+                                                        <div class="card-body">
+                                                            <div class="title-css mb-3">
+                                                                Re-Exam Results
+                                                            </div>
+
+                                                            <div class="row d-flex align-items-center">
+
+                                                                <div class="col-5">
+                                                                    <canvas id="REResultChart" class="w-100" height="140"></canvas>
+                                                                </div>
+                                                                <div class="col-7">
+                                                                    <div style="border:1px solid #dbeafe;background:#f8fbff;" class="card shadow-sm m-0 p-2">
+                                                                        <div style="font-size:10px;color:#64748b;"> Total Re-Exam Results</div>
+                                                                        <span><strong>{{DashboardData.ResultSumDet.RETotal}}</strong></span>
+                                                                        <div style="display:flex; justify-content:space-between;">
+                                                                            <div style="color:#16a34a;">
+                                                                                <div style="font-size:10px;">This Week</div>
+                                                                                <span><strong>{{DashboardData.ResultSumDet.REThisWeek}}</strong></span>
+                                                                            </div>
+
+                                                                            <div style="color:#dc2626;">
+                                                                                <div style="font-size:10px;">This Month</div>
+                                                                                <span><strong>{{DashboardData.ResultSumDet.REThisMonth}}</strong></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-4">
+                                                    <div class="card shadow-sm mb-0">
+                                                        <div class="card-body">
+                                                            <div class="title-css mb-3">
+                                                                Exam Complected vs Pending
+                                                            </div>
+                                                            <div style="height: 200px">
+                                                                <canvas id="examStatusChart" class="w-100 h-100"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card shadow-sm mb-0">
+                                                        <div class="card-body">
+                                                            <div class="title-css mb-3">
+                                                                Total Exams Scheduled
+                                                            </div>
+                                                            <div style="height: 200px">
+                                                                <canvas id="totalExamsscheduled" class="w-100 h-100"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="card shadow-sm mb-0">
+                                                        <div class="card-body">
+                                                            <div class="title-css mb-3">
+                                                                Marks Entry Status
+                                                            </div>
+                                                            <div style="height: 200px">
+                                                                <canvas id="marksChart" class="w-100 h-100"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-12">
+                                                    <div class="card shadow-sm mb-0">
+                                                        <div class="card-body">
+
+                                                            <div class="card-title-text border-bottom mb-2">
+                                                                Class-wise Attendance Summary
+                                                            </div>
+                                                            <div style="height:350px;">
+                                                                <canvas id="attendanceChart"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <div class="card shadow-sm  mb-0">
+                                                        <div class="p-3 card-title">
+                                                            <div class="title-css">
+                                                                class Wise Pending Re-Exam
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <canvas id="classChart" height="260"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="card shadow-sm mb-0">
+                                                        <div class="p-3 card-title">
+                                                            <div class="title-css">
+                                                                Subject-Wise Pending Re-exam
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <canvas id="subjectChart" height="260"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <div class="card shadow-sm p-2 mb-0">
+
+                                                        <div class="p-3 card-title">
+                                                            <div class="title-css">
+                                                                Upcoming Exams
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="table-responsive">
+                                                            <table class="table exam-table">
+                                                                <thead>
+                                                                    <tr id="examDatesRow">
+                                                                        <th class="head-left">Class / Date</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="examBody">
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <div class="card p-3 shadow-sm mb-1">
+                                                        <div class="slider" data-slider>
+                                                            <div class="slider__buttons text-right">
+                                                                <div class="row p-1" style="border-bottom:1px solid #D7E7F0;">
+                                                                    <div class="col-md-8 mb-1 text-left">
+                                                                        <p style="font: 16; font-weight: bold;" class="mb-0">Top Performers</p>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <button class="slider__button px-2 py-1" data-slider-prev disabled>
+                                                                            <i class="fas fa-chevron-left"></i>
+                                                                        </button>
+                                                                        <button class="slider__button px-2 py-1" data-slider-next>
+                                                                            <i class="fas fa-chevron-right"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="pt-2">
+                                                                <ul class="slider__track mb-0" style="height: 200px" data-slider-track>
+                                                                    <li ng-repeat="SB in TopPerformers" ng-init="$last && initTopPerformerSlider()">
+                                                                        <div class="slide rounded p-3 d-flex flex-column align-items-center card shadow-sm mb-1 h-100" style="border: 1px solid #AAC6DB; max-width: 150px; background: #EDFFF9; ">
+                                                                            <div class="card shadow-sm mb-1" style="border: 1px solid #AAC6DB; height: 100px; width: 110px; overflow: hidden">
+                                                                                <img ng-src="{{SB.PhotoPath}}"
+                                                                                     class="img-fluid mx-auto d-block"
+                                                                                     style="object-fit: contain; width: 100%; height: 100%">
+                                                                            </div>
+
+
+                                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                                <div class="text-center" style="font-size: 10px;">
+                                                                                    <p style="color: #077A56; margin: 0;"><b>{{SB.StudentName}}</b></p>
+                                                                                    <p class="card-text" style="margin: 0;">Class:  {{SB.ClassName}} "{{SB.SectionName}}"</p>
+                                                                                    <p class="card-text" style="margin: 0;">Remarks: {{SB.Remark}}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card p-3 shadow-sm mb-1">
+                                                        <div class="slider" data-slider>
+                                                            <div class="slider__buttons text-right">
+                                                                <div class="row p-1" style="border-bottom:1px solid #D7E7F0;">
+                                                                    <div class="col-md-8 mb-1 text-left">
+                                                                        <p style="font: 16; font-weight: bold;" class="mb-0">Awards</p>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <button class="slider__button px-2 py-1" data-slider-prev disabled>
+                                                                            <i class="fas fa-chevron-left"></i>
+                                                                        </button>
+                                                                        <button class="slider__button px-2 py-1" data-slider-next>
+                                                                            <i class="fas fa-chevron-right"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="pt-2">
+                                                                <ul class="slider__track mb-0" style="height: 200px" data-slider-track>
+                                                                    <li ng-repeat="SB in Awards">
+                                                                        <div class="slide rounded p-3 d-flex flex-column align-items-center card shadow-sm mb-1 h-100" style="border: 1px solid #9FB5D9; max-width: 150px; background: #EFF6FF; ">
+                                                                            <div class="card shadow-sm mb-1" style="border: 1px solid #9FB5D9; height: 100px; width: 110px; overflow: hidden">
+                                                                                <img ng-src="{{SB.PhotoPath}}"
+                                                                                     class="img-fluid mx-auto d-block"
+                                                                                     style="object-fit: contain; width: 100%; height: 100%">
+                                                                            </div>
+
+
+                                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                                <div class="text-center" style="font-size: 10px;">
+                                                                                    <p style="color: #436AAE; margin: 0;"><b>{{SB.StudentName}}</b></p>
+                                                                                    <p class="card-text" style="margin: 0;">Class:  {{SB.ClassName}} "{{SB.SectionName}}"</p>
+                                                                                    <p class="card-text" style="margin: 0;">Remarks: {{SB.Remark}}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="card shadow-sm">
+                                                        <div class="card-body">
+                                                            <div class="title-css mb-3">
+                                                                Class Tests Conducted
+                                                            </div>
+                                                            <div style="height: 210px">
+                                                                <canvas id="testChart" class="w-100 h-100"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card shadow-sm">
+                                                        <div class="card-body">
+                                                            <div class="title-css mb-3">
+                                                                CAS Marks Status
+                                                            </div>
+                                                            <div style="height: 210px">
+                                                                <canvas id="casChart" class="w-100 h-100"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card shadow-sm">
+                                                        <div class="card-body">
+                                                            <div class="title-css mb-3">
+                                                                Exam Result Status
+                                                            </div>
+                                                            <div style="height: 210px">
+                                                                <canvas id="resultChart" class="w-100 h-100"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>
+
+
+
+<script>
+
+    function initSliders() {
+        document.querySelectorAll("[data-slider]").forEach((slider) => {
+            const track = slider.querySelector("[data-slider-track]");
+            const prev = slider.querySelector("[data-slider-prev]");
+            const next = slider.querySelector("[data-slider-next]");
+
+            if (!track || !prev || !next) return;
+
+            const step = () => (track.firstElementChild ? track.firstElementChild.offsetWidth : 0);
+
+            function updateButtons() {
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                prev.disabled = track.scrollLeft <= 0;
+                next.disabled = track.scrollLeft >= maxScroll - 1;
+            }
+
+            prev.addEventListener("click", () => {
+                track.scrollBy({ left: -step(), behavior: "smooth" });
+                setTimeout(updateButtons, 250);
+            });
+
+            next.addEventListener("click", () => {
+                track.scrollBy({ left: step(), behavior: "smooth" });
+                setTimeout(updateButtons, 250);
+            });
+
+            track.addEventListener("scroll", updateButtons);
+
+            updateButtons();
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", initSliders);
+
+</script>

@@ -1,0 +1,559 @@
+﻿
+@{
+    ViewBag.Title = "CASMarkEntry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/AngularJs/Creation/CASMarkEntry.js?v=20221019"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="CASMarkEntryController" ng-init="LoadData()">
+    <div class="wrapper">
+        <div class="content-wrapper">
+            <section class="content">
+                <div class="container-fluid">
+                    <section class="iframe-content-starts-here">
+                        <div class="tab-content">
+                            <div id="root">
+                                <div class="card-primary card-tabs">
+                                    <header class="if-page-have-nav-tabs">
+                                        <div class="row upper-tab">
+                                            <div class="col-md-12">
+                                                <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                                    role="tablist">
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                           href="#home" role="tab" aria-controls="home"
+                                                           aria-selected="true">Marks Entry</a>
+                                                    </li>
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                           href="#profile" role="tab" aria-controls="profile"
+                                                           aria-selected="false">Classwise Summary</a>
+                                                    </li>
+                                                    <li class="nav-item" role="presentation">
+                                                        <a class="nav-link" id="ledger-tab" data-toggle="tab"
+                                                           href="#ledger" role="tab" aria-controls="ledger"
+                                                           aria-selected="false">Mark Ledger</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </header>
+                                    <div class="tab-content" id="myTabContent">
+                                        <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                            <div class="row px-2">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Class/Sec</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newClassWise.SelectedClass" ng-change="GetClassWiseSubMap()">
+                                                            <option ng-value="cl" ng-repeat="cl in ClassList.SectionListWithClass">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Subject</label>
+                                                        <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newClassWise.SubjectId">
+                                                            <option ng-value="0">**Select Subject**</option>
+                                                            <option ng-value="se.SubjectId" ng-repeat="se in newClassWise.SubjectList">{{se.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>CAS Type</label>
+                                                        <select class="form-control form-control-sm select2" data-placeholder="Select CASType" ng-model="newClassWise.CASTypeId">
+                                                            <option ng-value="se.CASTypeId" ng-repeat="se in CASTypeList">{{se.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Exam Date</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newClassWise.ExamDate_TMP" date-detail="newClassWise.ExamDateDet" confirm-action="GetStudentListForME()">
+                                                    </div>
+                                                </div>
+                                                @*<div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Teacher</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newClassWise.EmployeeId">
+                                                            <option ng-value="emp.EmployeeId" ng-selected="{{emp.EmployeeId==newClassWise.EmployeeId}}" ng-repeat="emp in newClassWise.EmployeeList">{{emp.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>*@
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Marks</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newClassWise.Mark" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card p-2">
+                                                <header class="row">
+                                                    <div class="col-md-7">
+                                                        <div class="clearfix">
+                                                            <form class="form-inline">
+                                                                <div class="input-group input-group-sm table-search-filed">
+                                                                    <input class="form-control form-control-navbar"
+                                                                           type="search" placeholder="Search"
+                                                                           aria-label="Search" ng-model="searchData.ClassWise">
+                                                                    <div class="input-group-append">
+                                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                                            <i class="fas fa-search"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-5 text-right">
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item wait" export-excel table-id="'#MarksEntry'" sheet-name="'MarksEntryList'"><img src="~/teacherloginFiles/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item wait" onClick="$('#MarksEntry').tableExport({type:'csv',escape:'false'});"><img src="~/teacherloginFiles/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                            <a class="dropdown-item wait" onClick="$('#MarksEntry').tableExport({type:'pdf',escape:'false'});"><img src="~/teacherloginFiles/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                            <a class="dropdown-item wait" onClick="$('#MarksEntry').tableExport({type:'doc',escape:'false'});"><img src="~/teacherloginFiles/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                            <a class="dropdown-item wait" onClick="$('#MarksEntry').tableExport({type:'json',escape:'false'});"><img src="~/teacherloginFiles/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                        </div>
+                                                        <a href="#MarksEntry" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom"
+                                                           title="Print">
+                                                            <i class="fas fa-print"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-success" style="min-width:70px;" ng-click="SaveUpdateMarksEntry()"> Save</button>
+                                                    </div>
+                                                </header>
+                                                <div class="table-scroll-x-y" style="max-height: 500px; overflow-x: auto;">
+                                                    <table id="MarksEntry" class="main-table table table-sm table-bordered bg-white" cellspacing="0"
+                                                           width="100%">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 80px;">S.No.</th>
+                                                                <th style="width: 90px;">Regd No.</th>
+                                                                <th style="width: 200px;">Name</th>
+                                                                <th style="width: 90px;">Section/Roll No.</th>
+                                                                <th style="width: 120px;">Obt. Marks</th>
+                                                                <th style="width: 230px;">Remarks</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="st in newClassWise.StudentColl  |orderBy:sortKeyClassWise:reverseClassWise | filter:searchData.ClassWise">
+                                                                <td>{{$index+1}}</td>
+                                                                <td>{{st.RegdNo}}</td>
+                                                                <td>{{st.Name}}</td>
+                                                                <td>{{st.SectionName}} {{(st.SectionName.length>0 ? '-':'')}} {{st.RollNo}}</td>
+                                                                <td><input type="text" style="text-align: right;" onfocus="this.select();" class="form-control input-sm serialCAS" ng-model="st.ObtainMark" ng-change="ChangeMarkEntry(st)"></td>
+                                                                <td><input type="text" class="form-control form-control-sm" ng-model="st.Remarks"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Marks Entry Ends -->
+                                        <!-- Summary Starts -->
+                                        <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                            <div id="listsection">
+                                                <div class="row px-2">
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Class/Sec</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newClasswiseSummary.SelectedClass" ng-change="GetAllClasswiseSummaryList()">
+                                                                <option ng-value="cl" ng-repeat="cl in ClassList.SectionListWithClass">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Date From</label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newClasswiseSummary.DateFrom_TMP" date-detail="newClasswiseSummary.DateFromDet" confirm-action="GetAllClasswiseSummaryList()">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Date To</label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newClasswiseSummary.TestTo_TMP" date-detail="newClasswiseSummary.DateToDet" confirm-action="GetAllClasswiseSummaryList()">
+                                                        </div>
+                                                    </div>
+
+                                                    @*<div class="col-md-2">
+                        <button type="button" class="btn btn-sm btn-success float-right mt-4" style="min-width:70px;"> Load</button>
+                    </div>*@
+                                                </div>
+                                                <div class="card p-2">
+                                                    <div class="mb-3" ng-repeat="cm in ClasswiseSummaryList">
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <label><b>{{cm.SubjectName}} ({{cm.TotalCount}})</b></label>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="float-right">
+                                                                    <label><b>Marks: {{cm.Mark}}</b></label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white" cellspacing="0"
+                                                                   width="100%">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 80px;">S.No.</th>
+                                                                        <th style="width: 220px;">CAS Type Name</th>
+                                                                        <th style="width: 120px;">Exam Date</th>
+                                                                        <th style="width: 100px;">Marks</th>
+                                                                        <th style="width: 100px;">Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr ng-repeat="ct in cm.DataColl">
+                                                                        <td>{{$index+1}}</td>
+                                                                        <td>{{ct.CASTypeName}}</td>
+                                                                        <td>{{ct.ExamMiti}}</td>
+                                                                        <td>{{ct.Mark}}</td>
+                                                                        <td>
+                                                                            <button type="button" class="btn btn-sm btn-info" @*id="detailbtn"*@
+                                                                                    style="min-width:70px;padding: 1px 5px;" ng-click="ShowMarkDetails(cm,ct)">
+                                                                                Detail
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="detailsection">
+                                                <div class="card p-2">
+                                                    <div class="p-2" style="border: 1px solid #ccc;background-color: #76be4e29;">
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <label><b>Class : {{CurMarkDetails.ClassName}} {{CurMarkDetails.SectionName}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label><b>Subject : {{CurMarkDetails.SubjectName}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label><b>Teacher : {{CurMarkDetails.EmployeeName}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label><b>CAS Type Name : {{CurMarkDetails.CASTypeName}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label><b>Exam Date : {{CurMarkDetails.ExamMiti}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label><b>Marks : {{CurMarkDetails.Mark}}</b></label>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                    <header class="row my-1">
+                                                        <div class="col-md-7">
+                                                            <div class="clearfix">
+                                                                <form class="form-inline">
+                                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                                        <div class="input-group-prepend">
+                                                                            <span class="input-group-text cstm">Show</span>
+                                                                        </div>
+                                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ClasswiseSummary">
+                                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ClasswiseSummary">{{pp.text}}</option>
+                                                                        </select>
+                                                                        <div class="input-group-append">
+                                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="input-group input-group-sm table-search-filed">
+                                                                        <input class="form-control form-control-navbar"
+                                                                               type="search" placeholder="Search"
+                                                                               aria-label="Search" ng-model="searchData.ClasswiseSummary">
+                                                                        <div class="input-group-append">
+                                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                                <i class="fas fa-search"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                        <!-- end col-md-8 -->
+                                                        <div class="col-md-5 text-right">
+                                                            <div class="dropdown-menu dropdown-menu-right"
+                                                                 aria-labelledby="dropdownMenuButton">
+                                                                <span class="dropdown-item">Choose an option:</span>
+                                                                <a class="dropdown-item wait" export-excel table-id="'#ClasswiseSummary'" sheet-name="'ClasswiseSummaryList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                                <a class="dropdown-item wait" onClick="$('#ClasswiseSummary').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                                <a class="dropdown-item wait" onClick="$('#ClasswiseSummary').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                                <a class="dropdown-item wait" onClick="$('#ClasswiseSummary').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                                <a class="dropdown-item wait" onClick="$('#ClasswiseSummary').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                            </div>
+                                                            <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom"
+                                                               title="Print">
+                                                                <i class="fas fa-print"></i>
+                                                            </a>
+                                                            <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom"
+                                                               title="Notification">
+                                                                <i class="fas fa-bell"></i>
+                                                            </a>
+                                                        </div>
+                                                    </header>
+                                                    <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                        <table id="ClasswiseSummary" class="main-table table table-sm table-bordered bg-white" cellspacing="0"
+                                                               width="100%">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 80px;">S.No.</th>
+                                                                    <th style="width: 90px;">Regd No.</th>
+                                                                    <th style="width: 200px;">Name</th>
+                                                                    <th style="width: 90px;">Roll No.</th>
+                                                                    <th style="width: 120px;">Obt. Marks</th>
+                                                                    <th style="width: 230px;">Remarks</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr dir-paginate="cl in CurMarkDetails.DataColl | filter:searchData.ClasswiseSummary | itemsPerPage: perPage.ClasswiseSummary" current-page="currentPages.ClasswiseSummary" pagination-id="ClasswiseSummaryPagination">
+                                                                    <td>{{$index+1}}</td>
+                                                                    <td>{{cl.RegdNo}}</td>
+                                                                    <td>{{cl.Name}}</td>
+                                                                    <td>{{cl.RollNo}}</td>
+                                                                    <td>{{cl.ObtainMark}}</td>
+                                                                    <td>{{cl.Remarks}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <footer class="row align-items-center">
+                                                        <div class="col-md-12">
+                                                            <dir-pagination-controls pagination-id="ClasswiseSummaryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                            </dir-pagination-controls>
+                                                        </div>
+                                                    </footer>
+                                                    <div class="text-center mt-4">
+                                                        <button class="btn btn-sm btn-info" id="backlist" style="width: 100px;">Back to list</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Summary Ends -->
+                                        <!-- Mark Ledger Starts -->
+                                        <div class="tab-pane fade main-section" id="ledger" role="tabpanel" aria-labelledby="ledger-tab">
+                                            <div class="row px-2">
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>Class/Sec</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newMarkLedger.SelectedClass" ng-change="GetClassWiseSubMapML()">
+                                                            <option ng-value="cl" ng-repeat="cl in ClassList.SectionListWithClass">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>Subject</label>
+                                                        <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newMarkLedger.SubjectId" ng-click="GetMarkLedger()">
+                                                            <option ng-value="0">**Select Subject**</option>
+                                                            <option ng-value="se.SubjectId" ng-repeat="se in newMarkLedger.SubjectList">{{se.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Date From</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newMarkLedger.DateFrom_TMP" date-detail="newMarkLedger.DateFromDet" confirm-action="GetMarkLedger()">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Date To</label>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newMarkLedger.DateTo_TMP" date-detail="newMarkLedger.DateToDet" confirm-action="GetMarkLedger()">
+                                                    </div>
+                                                </div>
+                                                @*<div class="col-md-2">
+                    <button type="button" class="btn btn-sm btn-success float-right mt-4" style="min-width:70px;"> Load</button>
+                </div>*@
+                                            </div>
+                                            <div class="card p-2">
+                                                <header class="row">
+                                                    <div class="col-md-7">
+                                                        <div class="clearfix">
+                                                            <form class="form-inline">
+                                                                <div class="input-group input-group-sm table-search-filed">
+                                                                    <input class="form-control form-control-navbar"
+                                                                           type="search" placeholder="Search"
+                                                                           aria-label="Search" ng-model="searchData.MarkLedger">
+                                                                    <div class="input-group-append">
+                                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                                            <i class="fas fa-search"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    <!-- end col-md-8 -->
+                                                    <div class="col-md-5 text-right">
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item wait" export-excel table-id="'#MarkLedger'" sheet-name="'MarkLedgerList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item wait" onClick="$('#MarkLedger').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                            <a class="dropdown-item wait" onClick="$('#MarkLedger').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                            <a class="dropdown-item wait" onClick="$('#MarkLedger').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                            <a class="dropdown-item wait" onClick="$('#MarkLedger').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                        </div>
+                                                        <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom"
+                                                           title="Print">
+                                                            <i class="fas fa-print"></i>
+                                                        </a>
+                                                    </div>
+                                                </header>
+                                                <div id="option1" class="subject">
+                                                    <div class="table-scroll-x-y sales-main-table table-scroll mb-2">
+                                                        <table id="MarkLedger" class="main-table table table-sm table-bordered bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th class="text-center align-middle cstm-sticky"
+                                                                        style="width: 70px; left: 0; z-index: 2; background-color: #fff">S.No.</th>
+                                                                    <th class="text-center align-middle cstm-sticky"
+                                                                        style="width: 90px; left: 70px; z-index: 2; background-color: #fff;">Regd. No</th>
+                                                                    <th class="text-center align-middle cstm-sticky"
+                                                                        style="width: 150px; left: 160px; z-index: 2; background-color: #fff">Name</th>
+                                                                    <th class="text-center align-middle cstm-sticky"
+                                                                        style="width: 90px; left: 310px; z-index: 2; background-color: #fff">Roll No</th>
+                                                                    <th class="text-center align-middle cstm-sticky" style="width: 150px" ng-repeat="ct in MarkLedgerCASTypeColl">{{ct}}</th>
+                                                                    <th class="text-center align-middle cstm-sticky"
+                                                                        style="width: 110px; right: 0px; z-index: 2; background-color: #fff">
+                                                                        Total(sum of F.M of all
+                                                                        subjects)
+                                                                    </th>
+                                                                </tr>
+
+
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="ml in MarkLedgerColl">
+                                                                    <td class="text-center cstm-sticky"
+                                                                        style="width: 70px; left: 0px; z-index: 1; background-color: #fff">
+                                                                        {{ml.SNo}}
+                                                                    </td>
+                                                                    <td class="text-center cstm-sticky"
+                                                                        style="width: 90px; left: 70px; z-index: 1; background-color: #fff">
+                                                                        {{ml.RegdNo}}
+                                                                    </td>
+                                                                    <td class="cstm-sticky" style="width: 150px; left: 160px; z-index: 1; background-color: #fff">
+                                                                        {{ml.Name}}
+                                                                    </td>
+                                                                    <td class="cstm-sticky" style="width: 90px; left: 310px; z-index: 1; background-color: #fff">
+                                                                        {{ml.RollNo}}
+                                                                    </td>
+                                                                    <td class="text-center" ng-repeat="dc in ml.DataColl">{{dc.ObtainMark}}</td>
+
+                                                                    <td class="cstm-sticky text-center"
+                                                                        style="width: 70px; right: 0px; z-index: 1; background-color: #fff">
+                                                                        {{ml.ObtainMark}} / {{ml.Mark}}
+                                                                    </td>
+                                                                </tr>
+
+                                                            </tbody>
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div id="option2" class="subject">
+                                                    <div class="table-scroll-x-y sales-main-table table-scroll mb-2">
+                                                        <table id="SalaryDetail" class="main-table table table-sm table-bordered bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th rowspan="2" class="text-center align-middle cstm-sticky"
+                                                                        style="width: 70px; left: 0; z-index: 2; background-color: #fff">S.No.</th>
+                                                                    <th rowspan="2" class="text-center align-middle cstm-sticky"
+                                                                        style="width: 90px; left: 70px; z-index: 2; background-color: #fff;">Regd. No</th>
+                                                                    <th rowspan="2" class="text-center align-middle cstm-sticky"
+                                                                        style="width: 150px; left: 160px; z-index: 2; background-color: #fff">Name</th>
+                                                                    <th rowspan="2" class="text-center align-middle cstm-sticky"
+                                                                        style="width: 90px; left: 310px; z-index: 2; background-color: #fff">Roll No</th>
+                                                                    <th colspan="1" class="text-center align-middle cstm-sticky" style="width: 150px">
+                                                                        CAS Type Name
+                                                                        (100)
+                                                                    </th>
+                                                                    <th colspan="1" class="text-center align-middle cstm-sticky" style="width: 150px">
+                                                                        CAS Type Name
+                                                                        (100)
+                                                                    </th>
+                                                                    <th colspan="1" class="text-center align-middle cstm-sticky" style="width: 150px">
+                                                                        CAS Type Name
+                                                                        (100)
+                                                                    </th>
+                                                                    <th colspan="1" class="text-center align-middle cstm-sticky" style="width: 150px">
+                                                                        CAS Type Name
+                                                                        (100)
+                                                                    </th>
+                                                                    <th rowspan="2" class="text-center align-middle cstm-sticky"
+                                                                        style="width: 70px; right: 0px; z-index: 2; background-color: #fff">Total</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th scope="col" class="cstm-sticky text-center" style="top: 35px;">12-09-2022</th>
+                                                                    <th scope="col" class="cstm-sticky text-center" style="top: 35px;">12-09-2022</th>
+                                                                    <th scope="col" class="cstm-sticky text-center" style="top: 35px;">12-09-2022</th>
+                                                                    <th scope="col" class="cstm-sticky text-center" style="top: 35px;">12-09-2022</th>
+                                                                </tr>
+
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td class="text-center cstm-sticky"
+                                                                        style="width: 70px; left: 0px; z-index: 1; background-color: #fff">
+                                                                        12132
+                                                                    </td>
+                                                                    <td class="text-center cstm-sticky"
+                                                                        style="width: 90px; left: 70px; z-index: 1; background-color: #fff">
+                                                                        12132
+                                                                    </td>
+                                                                    <td class="cstm-sticky" style="width: 150px; left: 160px; z-index: 1; background-color: #fff">
+                                                                        Suresh Paudel
+                                                                    </td>
+                                                                    <td class="cstm-sticky" style="width: 90px; left: 310px; z-index: 1; background-color: #fff">
+                                                                        12
+                                                                    </td>
+                                                                    <td class="text-center">75</td>
+                                                                    <td class="text-center">87</td>
+                                                                    <td class="text-center">75</td>
+                                                                    <td class="text-center">87</td>
+
+                                                                    <td class="cstm-sticky text-center"
+                                                                        style="width: 70px; right: 0px; z-index: 1; background-color: #fff">
+                                                                        100
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Mark Ledger Ends -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $(".subject").hide();
+        $("#option1").show();
+        $("#options").change(function () {
+            $('.subject').hide();
+            $('#' + $(this).val()).show();
+        });
+    });
+</script>
+
+

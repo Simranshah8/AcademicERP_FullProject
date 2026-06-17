@@ -1,0 +1,237 @@
+﻿<style>
+    .tinput td{
+        padding:0.25rem;
+    }
+</style>
+<script src="~/jslib/Exam/Transaction/HeightAndWeight.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="HeightAndWeightController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Height & Weight </a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">Height & Weight Transfer</a>
+                                        </li>                                       
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <div class="tab-content" id="myTabContent">
+                            <!-- Height and Weight Tab Starts -->
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="height-weight-section">
+                                    <div class="card" id="height-weight-form">
+                                        <div class="card-body py-2 px-0">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label>Class/Sec</label>
+                                                        <select class="form-control form-control-sm select2" data-placeholder="Select Class" ng-model="newHeightAndWeight.SelectedClass" ng-change="GetClassWiseStudentHW()">
+                                                            <option ng-value="0">**Select Section**</option>
+                                                            <option ng-value="se" ng-repeat="se in ClassSection.SectionList ">{{se.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>Exam</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newHeightAndWeight.ExamTypeId" ng-change="GetClassWiseStudentHW()">
+                                                            <option ng-value="0">**Select ExamType**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newHeightAndWeight.ExamTypeId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6 mt-4">
+                                                    <div class="form-inline float-right">
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.HeightAndWeight">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <button type="button" class="btn btn-sm btn-default mx-2" style="min-width: 70px;" ng-click="ClearHeightAndWeight()">Reset</button>
+                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 70px;" ng-click="SaveUpdateHeightAndWeight()">{{newHeightAndWeight.Mode}}</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 11rem)">
+                                                <table class="table table-bordered table-head-fixed tinput text-nowrap">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th style="width: 120px">Id</th>
+                                                            <th style="width: 120px">Regd. No.</th>
+                                                            <th style="width: 120px">Roll No</th>
+                                                            <th style="width: 250px">Name</th>
+                                                            <th style="width: 150px">Height</th>
+                                                            <th style="width: 150px">Weight</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="hw in newHeightAndWeight.StudentList|filter:searchData.HeightAndWeight">
+                                                            <td>{{hw.AutoNumber}}</td>
+                                                            <td>{{hw.RegdNo}}</td>
+                                                            <td>{{hw.RollNo}}</td>
+                                                            <td>{{hw.Name}}</td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="hw.Height"></td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="hw.Weight"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Height and Weight tab Ends -->
+                            <!-- Height and Weight Transfer tab Starts -->
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="examschedule-section">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label>From Exam Type</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newHeightAndWeightTransfer.FromExamTypeId">
+                                                    <option ng-value="0">**Select ExamType**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newHeightAndWeightTransfer.ExamTypeId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>To Exam Type</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newHeightAndWeightTransfer.ToExamTypeId" ng-change="GetTranforHeightWeight()">
+                                                    <option ng-value="0">**Select ExamType**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ExamTypeList| filter:SelectedExamType" ng-selected="cl.id==newHeightAndWeightTransfer.ExamTypeId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2 mt-4">
+                                            <div class="time-label">
+                                                <span class="d-block border-0">
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="TransforHeightWeight()">Transfer</button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- List Table Starts -->
+                                    <div class="card p-0 ">
+                                        <header class="row ">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.HeightAndWeightTransfer">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.HeightAndWeightTransfer">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.HeightAndWeightTransfer">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'HeightAndWeightTransfer'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+
+                                            </div>
+                                        </header>
+
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 90px">S.No.</th>
+                                                        <th style="width:200px">From Exam</th>
+                                                        <th style="width:200px">To Exam</th>
+                                                        <th style="width:150px">Transfer Date</th>
+                                                        <th style="width:150px">Transfer By</th>
+                                                        @*<th style="width:100px">Action</th>*@
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="sn in HeightAndWeightTransferList | filter:searchData.HeightAndWeightTransfer ">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{sn.FromExamType}}</td>
+                                                        <td>{{sn.ToExamType}}</td>
+                                                        <td>{{sn.TransferDate}}</td>
+                                                        <td>{{sn.UserName}}</td>
+                                                        @*<td>
+                                    <a class="p-1" ng-click="DelTransforHW(sn)">
+                                        <i class="fas fa-trash-alt text-danger"></i>
+                                    </a>
+                                </td>*@
+
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!-- table end -->
+                                        </div>
+                                        <!-- List Table Ends -->
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- Height and Weight Transfer tab Ends -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>
+

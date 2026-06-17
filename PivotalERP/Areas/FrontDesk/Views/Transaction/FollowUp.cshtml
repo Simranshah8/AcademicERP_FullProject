@@ -1,0 +1,839 @@
+﻿<script src="~/jslib/frontdesk/transaction/Followup.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="FollowupController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs">
+                                <div class="row upper-tab">
+                                    <div class="col-md-12">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="first-tab" data-toggle="tab"
+                                                   href="#first" role="tab" aria-controls="first"
+                                                   aria-selected="true">Followup({{FollowupList.length}})</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="second-tab" data-toggle="tab"
+                                                   href="#second" role="tab" aria-controls="second"
+                                                   aria-selected="false">Today's Followup({{TodaysFollowupList.length}})</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="third-tab" data-toggle="tab"
+                                                   href="#third" role="tab" aria-controls="third"
+                                                   aria-selected="false">Pending Followup({{PendingFollowupList.length}})</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="fourth-tab" data-toggle="tab"
+                                                   href="#fourth" role="tab" aria-controls="fourth"
+                                                   aria-selected="false">Upcoming Followup({{UpcomingFollowupList.length}})</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="fifth-tab" data-toggle="tab"
+                                                   href="#fifth" role="tab" aria-controls="fifth"
+                                                   aria-selected="false">Followup({{FollowupNotRequiredList.length}}) Not Required</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+
+                                <div class="tab-pane fade show active main-section" id="first" role="tabpanel"
+                                     aria-labelledby="first-tab">
+                                    <div id="followup-content" class="card p-2">
+                                        <header class="row mb-3">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Followup">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Followup">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Followup">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 100px">Enquiry Id.</th>
+                                                            <th style="width: 150px">Enquiry Date</th>
+                                                            <th style="width: 250px">Student Name</th>
+                                                            <th style="width: 150px">Contact No.</th>
+                                                            <th style="width: 150px">Class</th>
+                                                            <th style="width: 250px">Father's Name</th>
+                                                            <th style="width: 250px">Father's Contact</th>
+                                                            <th style="width: 250px">Followup Date</th>
+                                                            <th style="width: 250px">Remarks</th>
+                                                            <th style="width: 220px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in FollowupList |orderBy:sortKey:reverse| filter:searchData.Followup | itemsPerPage: perPage.Followup" current-page="currentPages.Followup" pagination-id="FollowupPagination">
+                                                            <td>{{cl.AutoNumber}}</td>
+                                                            <td>{{cl.EntryMiti}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.ContactNo}}</td>
+                                                            <td>{{cl.ClassName}}</td>
+                                                            <td>{{cl.FatherName}}</td>
+                                                            <td>{{cl.F_ContactNo}}</td>
+                                                            <td>{{cl.EnquiryMiti}}</td>
+                                                            <td>{{cl.EnqRemarks}}</td>
+                                                            <td style="padding: 4px;">
+                                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" @*data-target="#followup"*@ style="font-size: 11px; padding:1px 2px;" ng-click="openFollowup(cl)">
+                                                                    Followup
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" @*data-target="#followup"*@ style="font-size: 11px; padding:1px 2px;" ng-click="closeFollowup(cl)">
+                                                                    Closed
+                                                                </button>
+                                                                <a href="/Academic/Transaction/AddStudent?AdmissionEnquiryId={{cl.TranId}}" class="btn btn-sm btn-info" style="font-size: 11px; padding:1px 2px;">
+                                                                    Proceed to admission
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="FollowupPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="tab-pane fade main-section" id="second" role="tabpanel"
+                                     aria-labelledby="second-tab">
+                                    <div id="todays-followup-content" class="card p-2">
+                                        <header class="row mb-3">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.TodaysFollowup">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.TodaysFollowup">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.TodaysFollowup">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                           
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+
+                                            </div>
+                                        </header>
+                                        <div>
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 100px">Enquiry Id.</th>
+                                                            <th style="width: 250px">Enquiry Date</th>
+                                                            <th style="width: 150px">Student Name</th>
+                                                            <th style="width: 150px">Contact No.</th>
+                                                            <th style="width: 150px">Class</th>
+                                                            <th style="width: 250px">Father's Name</th>
+                                                            <th style="width: 250px">Father's Contact</th>
+                                                            <th style="width: 250px">Followup Date</th>
+                                                            <th style="width: 250px">Remarks</th>
+                                                            <th style="width: 180px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in TodaysFollowupList |orderBy:sortKey:reverse| filter:searchData.TodaysFollowup | itemsPerPage: perPage.TodaysFollowup" current-page="currentPages.TodaysFollowup" pagination-id="TodaysFollowupPagination">
+                                                            <td>{{cl.AutoNumber}}</td>
+                                                            <td>{{cl.EntryMiti}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.ContactNo}}</td>
+                                                            <td>{{cl.ClassName}}</td>
+                                                            <td>{{cl.FatherName}}</td>
+                                                            <td>{{cl.F_ContactNo}}</td>
+                                                            <td>{{cl.EnquiryMiti}}</td>
+                                                            <td>{{cl.EnqRemarks}}</td>
+                                                            <td style="padding: 4px;">
+                                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" @*data-target="#followup"*@ style="font-size: 11px; padding:1px 2px;" ng-click="openFollowup(cl)">
+                                                                    Followup
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" @*data-target="#followup"*@ style="font-size: 11px; padding:1px 2px;" ng-click="closeFollowup(cl)">
+                                                                    Closed
+                                                                </button>
+                                                                <a href="/Academic/Transaction/AddStudent?AdmissionEnquiryId={{cl.TranId}}" class="btn btn-sm btn-info" style="font-size: 11px; padding:1px 2px;">
+                                                                    Proceed to admission
+                                                                </a>
+                                                            </td>
+                                                        </tr>                                                    
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="TodaysFollowupPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                </div>
+                                <div class="tab-pane fade main-section" id="third" role="tabpanel"
+                                     aria-labelledby="third-tab">
+                                    <div id="pending-followup-content" class="card p-2">
+                                        <header class="row mb-3">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PendingFollowup">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PendingFollowup">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.PendingFollowup">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                               
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 100px">Enquiry Id.</th>
+                                                            <th style="width: 250px">Enquiry Date</th>
+                                                            <th style="width: 150px">Student Name</th>
+                                                            <th style="width: 150px">Contact No.</th>
+                                                            <th style="width: 150px">Class</th>
+                                                            <th style="width: 250px">Father's Name</th>
+                                                            <th style="width: 250px">Father's Contact</th>
+                                                            <th style="width: 250px">Followup Date</th>
+                                                            <th style="width: 250px">Remarks</th>
+                                                            <th style="width: 180px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in PendingFollowupList |orderBy:sortKey:reverse| filter:searchData.PendingFollowup | itemsPerPage: perPage.PendingFollowup" current-page="currentPages.PendingFollowup" pagination-id="classPagination">
+                                                            <td>{{cl.AutoNumber}}</td>
+                                                            <td>{{cl.EntryMiti}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.ContactNo}}</td>
+                                                            <td>{{cl.ClassName}}</td>
+                                                            <td>{{cl.FatherName}}</td>
+                                                            <td>{{cl.F_ContactNo}}</td>
+                                                            <td>{{cl.EnquiryMiti}}</td>
+                                                            <td>{{cl.EnqRemarks}}</td>
+                                                            <td style="padding: 4px;">
+                                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" @*data-target="#followup"*@ style="font-size: 11px; padding:1px 2px;" ng-click="openFollowup(cl)">
+                                                                    Followup
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" @*data-target="#followup"*@ style="font-size: 11px; padding:1px 2px;" ng-click="closeFollowup(cl)">
+                                                                    Closed
+                                                                </button>
+                                                                <a href="/Academic/Transaction/AddStudent?AdmissionEnquiryId={{cl.TranId}}" class="btn btn-sm btn-info" style="font-size: 11px; padding:1px 2px;">
+                                                                    Proceed to admission
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="classPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+
+                                    </div>
+                                </div>
+                                <!-- Upcoming followup tab starts -->
+                                <div class="tab-pane fade main-section" id="fourth" role="tabpanel"
+                                     aria-labelledby="fourth-tab">
+                                    <div id="upcoming-followup-content" class="card p-2">
+                                        <header class="row mb-3">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.UpcomingFollowup">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.UpcomingFollowup">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.UpcomingFollowup">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                               
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 100px">Enquiry Id.</th>
+                                                            <th style="width: 250px">Enquiry Date</th>
+                                                            <th style="width: 150px">Student Name</th>
+                                                            <th style="width: 150px">Contact No.</th>
+                                                            <th style="width: 150px">Class</th>
+                                                            <th style="width: 250px">Father's Name</th>
+                                                            <th style="width: 250px">Father's Contact</th>
+                                                            <th style="width: 250px">Followup Date</th>
+                                                            <th style="width: 250px">Remarks</th>
+                                                            <th style="width: 180px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in UpcomingFollowupList |orderBy:sortKey:reverse| filter:searchData.UpcomingFollowup | itemsPerPage: perPage.UpcomingFollowup" current-page="currentPages.UpcomingFollowup" pagination-id="UpcomingFollowupPagination">
+                                                            <td>{{cl.AutoNumber}}</td>
+                                                            <td>{{cl.EntryMiti}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.ContactNo}}</td>
+                                                            <td>{{cl.ClassName}}</td>
+                                                            <td>{{cl.FatherName}}</td>
+                                                            <td>{{cl.F_ContactNo}}</td>
+                                                            <td>{{cl.EnquiryMiti}}</td>
+                                                            <td>{{cl.EnqRemarks}}</td>
+                                                            <td style="padding: 4px;">
+                                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" @*data-target="#followup"*@ style="font-size: 11px; padding:1px 2px;" ng-click="openFollowup(cl)">
+                                                                    Followup
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" @*data-target="#followup"*@ style="font-size: 11px; padding:1px 2px;" ng-click="closeFollowup(cl)">
+                                                                    Closed
+                                                                </button>
+                                                                <a href="/Academic/Transaction/AddStudent?AdmissionEnquiryId={{cl.TranId}}" class="btn btn-sm btn-info" style="font-size: 11px; padding:1px 2px;">
+                                                                    Proceed to admission
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="UpcomingFollowupPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+
+                                    </div>
+                                </div>
+                                <!-- upcoming followup tab ends -->
+                                <!-- Followup Not required starts -->
+                                <div class="tab-pane fade main-section" id="fifth" role="tabpanel"
+                                     aria-labelledby="fifth-tab">
+                                    <div id="follow-up-not-required section" class="card p-2">
+                                        <header class="row mb-3">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.FollowupNotRequired">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.FollowupNotRequired">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.FollowupNotRequired">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                        
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item" href="#"><img src="./dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 100px">Enquiry Id.</th>
+                                                            <th style="width: 250px">Enquiry Date</th>
+                                                            <th style="width: 150px">Student Name</th>
+                                                            <th style="width: 150px">Contact No.</th>
+                                                            <th style="width: 150px">Class</th>
+                                                            <th style="width: 250px">Father's Name</th>
+                                                            <th style="width: 250px">Father's Contact</th>
+                                                            <th style="width: 250px">Followup Date</th>
+                                                            <th style="width: 180px">Remarks</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in FollowupNotRequiredList |orderBy:sortKey:reverse| filter:searchData.FollowupNotRequired | itemsPerPage: perPage.FollowupNotRequired" current-page="currentPages.FollowupNotRequired" pagination-id="FollowupNotRequiredPagination">
+                                                            <td>{{cl.AutoNumber}}</td>
+                                                            <td>{{cl.EntryMiti}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.ContactNo}}</td>
+                                                            <td>{{cl.ClassName}}</td>
+                                                            <td>{{cl.FatherName}}</td>
+                                                            <td>{{cl.F_ContactNo}}</td>
+                                                            <td>{{cl.EnquiryMiti}}</td>
+                                                            <td>{{cl.EnqRemarks}}</td>                                                            
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="FollowupNotRequiredPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+    <!-- Followup Modal Starts -->
+    <div class="modal fade" id="followup">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title">Payment Followup</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="">Enquiry Followup</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="newFollowup.PaymentDueDate_TMP" date-detail="newFollowup.PaymentDueDateDet">
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Followup Remarks</label>
+                                <textarea class="form-control form-control-sm" ng-model="newFollowup.Remarks" rows="1"
+                                          placeholder=""></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Next Followup Required</label>
+                            <div class="form-group clearfix mb-0 pb-0">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="required" name="r5" ng-value="true" ng-model="newFollowup.NextFollowupRequired">
+                                    <label class="form-check-label" for="required">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="not-required" name="r5" ng-value="false" ng-model="newFollowup.NextFollowupRequired">
+                                    <label class="form-check-label" for="not-required">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8" ng-show="newFollowup.NextFollowupRequired==true || newFollowup.NextFollowupRequired=='true'">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">Next Followup Date</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm" date-picker ng-model="newFollowup.NextFollowupDate_TMP" date-detail="newFollowup.NextFollowupDateDet">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">Next Followup Time</label>
+                                        <input type="time" class="form-control form-control-sm" ng-model="newFollowup.NextFollowupTime_TMP">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <hr class="p-1 m-1">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="">Student Name/Enq.No : {{newFollowup.ClassSection}} </label><br />
+                            <label><b>{{newFollowup.Name}} / {{newFollowup.AutoNumber}}</b></label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="">Father Name :</label><br />
+                            <label><b>{{newFollowup.FatherName}}</b></label>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="">Contact :</label><br />
+                            <label><b>{{newFollowup.F_ContactNo}}</b></label>
+                        </div>
+                        @*<div class="col-md-2">
+                            <label for="">Total Dues :</label><br />
+                            <label><b>{{newFollowup.TotalDues |number:2}}</b></label>
+                        </div>*@
+                    </div>
+                    <hr class="p-1 m-1">
+
+                    <div class="card-tools mb-2" style="width: 250px;">
+                        <div class="input-group input-group-sm table-search-filed">
+                            <input class="form-control form-control-navbar" type="search"
+                                   placeholder="Search" aria-label="Search">
+                            <div class="input-group-append">
+                                <button class="btn btn-default border-left-0" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">S.No.</th>
+                                    <th style="width: 120px;">Followup Date</th>
+                                    <th style="width: 140px;">Next Date</th>
+                                    <th style="width: 200px;">Remarks</th>
+                                    <th style="width: 150px;">Followup By</th>
+                                    <th style="width: 150px;">Closed Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="h in newFollowup.HistoryColl">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{h.FollowupMiti}}</td>
+                                    <td>{{h.PaymentDueMiti}}</td>
+                                    <td>{{h.Remarks}}</td>
+                                    <td>{{h.FollowupBy}}</td>
+                                    <td>{{h.ClosedRemarks}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearFollowup()">Reset</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateFollowup()">Save</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- Followup Modal Ends -->
+
+    <!-- Followup Modal Starts -->
+    <div class="modal fade" id="followupClosed">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title">Payment Followup Closed</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Close Remarks</label>
+                                <textarea class="form-control form-control-sm" ng-model="newFollowup.ClosedRemarks" rows="1"
+                                          placeholder=""></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="p-1 m-1">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="">Student Name/Regd.No : {{newFollowup.ClassSection}} </label><br />
+                            <label><b>{{newFollowup.Name}} / {{newFollowup.RegdNo}}</b></label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="">Father Name :</label><br />
+                            <label><b>{{newFollowup.FatherName}}</b></label>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="">Contact :</label><br />
+                            <label><b>{{newFollowup.F_ContactNo}}</b></label>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="">Total Dues :</label><br />
+                            <label><b>{{newFollowup.TotalDues |number:2}}</b></label>
+                        </div>
+                    </div>
+                    <hr class="p-1 m-1">
+
+
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">S.No.</th>
+                                    <th style="width: 120px;">Followup Date</th>
+                                    <th style="width: 140px;">Next Date</th>
+                                    <th style="width: 200px;">Remarks</th>
+                                    <th style="width: 150px;">Followup By</th>
+                                    <th style="width: 150px;">Closed Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="h in newFollowup.HistoryColl">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{h.FollowupMiti}}</td>
+                                    <td>{{h.PaymentDueMiti}}</td>
+                                    <td>{{h.Remarks}}</td>
+                                    <td>{{h.FollowupBy}}</td>
+                                    <td>{{h.ClosedRemarks}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearFollowup()">Reset</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveFollowupClosed()">Save</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- Followup Modal Ends -->
+</div>

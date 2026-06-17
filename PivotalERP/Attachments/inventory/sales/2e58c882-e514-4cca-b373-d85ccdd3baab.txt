@@ -1,0 +1,596 @@
+<script src="~/jslib/global/fixedColumnTable.directive.js"></script>
+@*<script src="~/jslib/global/gridviewscroll.js"></script>*@
+<script src="~/jslib/Exam/Transaction/MarkEntry.js"></script>
+<style>
+    .container {
+        border: 2px solid #ccc;
+        max-width: 100%;
+        margin: 10px;
+    }
+
+    td {
+        padding: 0px 10px;
+        font-size: 12px;
+    }
+
+    th {
+        text-align: inherit;
+        padding: 10px;
+    }
+</style>
+
+<style>
+
+
+    .container {
+        width: 100%;
+        height: 550px;
+        border: 2px solid #444444;
+        overflow: scroll;
+        position: relative;
+    }
+
+    table {
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+        position: absolute;
+        width: 100%;
+    }
+
+    th,
+    td {
+        border-right: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        padding: 5px 10px;
+        width: 100px;
+        box-sizing: border-box;
+        margin: 0;
+    }
+
+    td {
+        background: #fff;
+    }
+
+    th,
+    .fixed-cell {
+        background: #eee;
+    }
+
+    .cross {
+        position: relative;
+        z-index: 1;
+    }
+
+    .col1 {
+        width: 10%;
+        text-align: center;
+        min-width: 80px;
+    }
+
+    .col2 {
+        width: 20%;
+        text-align: center;
+        min-width: 120px;
+    }
+
+    .col3 {
+        text-align: center;
+        width: 15%;
+        min-width: 60px;
+    }
+
+    .col4 {
+        width: 30%;
+        text-align: center;
+        min-width: 200px;
+    }
+
+    .col5 {
+        width: 15%;
+        text-align: center;
+        min-width: 80px;
+    }
+</style>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="MarkEntryController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Class Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">Subject Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="contact-tab" data-toggle="tab"
+                                               href="#contact" role="tab" aria-controls="contact"
+                                               aria-selected="false">Student Wise</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="board-tab" data-toggle="tab"
+                                               href="#board" role="tab" aria-controls="board"
+                                               aria-selected="false">Mark Submitted Status</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <!-- Class Wise TAb Starts -->
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div class="row">
+                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                        <div class="form-group">
+                                            <label>Class</label>
+                                            <select ng-model="newClassWise.SelectedClass" class="form-control form-control-sm select2"
+                                                    ng-options="x.text for x in ClassList.SectionList" ng-change="GetClassWiseSubMap()"></select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3 col-lg-3 col-md-3">
+                                        <div class="form-group">
+                                            <label>Exam</label>
+
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassWise.ExamTypeId" ng-change="GetClassWiseSubMap()">
+                                                    <option ng-value="0">**Select ExamType**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newClassWise.ExamTypeId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2 col-lg-2 col-md-2 mt-4">
+                                        <div class="form-group">
+                                            <div class="input-group input-group-sm">
+
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search"
+                                                           aria-label="Search" ng-model="searchData.ClassWise">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1 col-lg-1 col-md-1 mt-4">
+                                        <button type="button" class="btn btn-secondary btn-sm">Import</button>
+                                    </div>
+                                    <div class="col-sm-1 col-lg-1 col-md-1 mt-4">
+                                        <button type="button" class="btn btn-sm btn-default btn-sm" ng-click="ClearClassWise()">Reset</button>
+                                    </div>
+                                    <div class="col-sm-1 col-lg-1 col-md-1 mt-4">
+                                        <button type="button" class="btn btn-sm btn-success btn-sm" ng-click="SaveUpdateClassWise()">Save</button>
+                                    </div>
+                                    <div class="col-sm-2 col-lg-2 col-md-2 mt-4">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input"
+                                                   id="chkColumnFocus" ng-model="newClassWise.ColumnWiseFocus">
+                                            <label for="chkColumnFocus"
+                                                   class="custom-control-label">Column Wise Focus</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" id="tblPart">
+                                    <div class="container mt-2" fixed-column-table fixed-columns="4">
+                                        <table cellspacing="0" id="gvMain">
+                                            <thead class="text-nowrap">
+                                                <tr>
+                                                    <th style="width: 100px;" ng-click="sortClassWise('SymbolNo')">Symbol No.</th>
+                                                    <th style="width: 100px;" ng-click="sortClassWise('RegdNo')">Regd. No.</th>
+                                                    <th style="width: 100px;" ng-click="sortClassWise('RollNo')">Roll No.</th>
+                                                    <th style="width: 200px;" ng-click="sortClassWise('Name')">Student Name</th>
+                                                    <th style="width: 160px;text-align:center" rowspan="{{ (sub.PaperType==3 ? 1 : 2) }}" colspan="{{ (sub.PaperType==3 ? 2 : 1) }}" ng-repeat="sub in newClassWise.SubjectList">{{ sub.Name }}</th>
+
+                                                    <th style="width: 150px;">Total Obtain Mark</th>
+                                                    <th style="width: 250px;">Remarks</th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="col1">
+                                                        <span ng-show="false"></span>
+                                                    </th>
+                                                    <th class="col1">
+                                                        <span ng-show="false"></span>
+                                                    </th>
+                                                    <th class="col1">
+                                                        <span ng-show="false"></span>
+                                                    </th>
+                                                    <th class="col4">
+                                                        <span ng-show="false"></span>
+                                                    </th>
+                                                    <th style="min-width:120px" class="col1" ng-repeat-start="sub in newClassWise.SubjectList | filter: { PaperType:3 } " align="center">
+                                                        TH
+                                                    </th>
+                                                    <th class="col1" ng-repeat-end style="text-align:center;min-width:120px">
+                                                        PR
+                                                    </th>
+                                                    <th class="col1">
+                                                        <span ng-show="false"></span>
+                                                    </th>
+                                                    <th class="col1">
+                                                        <span ng-show="false"></span>
+                                                    </th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="cw in newClassWise.StudentColl  |orderBy:sortKeyClassWise:reverseClassWise | filter:searchData.ClassWise">
+                                                    <td>{{cw.SymbolNo}}</td>
+                                                    <td>{{cw.RegdNo}}</td>
+                                                    <td>{{cw.RollNo}}</td>
+                                                    <td>{{cw.Name}}</td>
+                                                    <td class="col1" ng-repeat-start="det in cw.ObtMarkColl" ng-hide="det.PaperType==2">
+                                                        <span ng-show="false">{{det.ObtainMarkTH}}</span>
+                                                        <input type="text" style="text-align:right;border:none" onfocus="this.select();" class="form-control input-sm serial" ng-model="det.ObtainMarkTH" ng-change="ChangeMarkEntry(det,1,cw)" ng-disabled="det.SubjectId==0" ng-style="det.IsFailTH && det.IsFailTH==true && { 'color' : 'red' }" />
+                                                    </td>
+                                                    <td class="col1" ng-repeat-end ng-hide="det.PaperType==1 || det.PaperType==4">
+                                                        <span ng-show="false">{{det.ObtainMarkPR}}</span>
+                                                        <input type="text" style="text-align: right; border: none" onfocus="this.select();" class="form-control input-sm serial" ng-model="det.ObtainMarkPR" ng-change="ChangeMarkEntry(det,2,cw)" ng-disabled="det.SubjectId==0" ng-style="det.IsFailPR && det.IsFailPR==true && { 'color' : 'red' }" />
+                                                    </td>
+                                                    <td>{{cw.TotalObtainMark}}</td>
+                                                    <td>                                                     
+                                                        <input type="text" style="text-align: left; border: none" onfocus="this.select();" class="form-control input-sm serial" ng-model="cw.Remarks"  />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- table end -->
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <!-- Class Wise Tab Ends -->
+                            <!-- Subject Wise Tab Starts -->
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div class="row">
+                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                        <div class="form-group">
+                                            <label>Class</label>
+                                            <select ng-model="newSubjectWise.SelectedClass" class="form-control form-control-sm select2"
+                                                    ng-options="x.text for x in ClassList.SectionList" ng-change="GetClassWiseSubMapSME()"></select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                        <div class="form-group">
+                                            <label>Exam</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newSubjectWise.ExamTypeId">
+                                                    <option ng-value="0">**Select ExamType**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newSubjectWise.ExamTypeId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                        <div class="form-group">
+                                            <label>Subject</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="newSubjectWise.SubjectId" ng-change="GetMarkEntrySubjectWise()">
+                                                <option ng-value="s.SubjectId" ng-repeat="s in newSubjectWise.SubjectList">{{s.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2 col-lg-2 col-md-2 mt-4">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox4" value="option1">
+                                            <label for="customCheckbox4"
+                                                   class="custom-control-label">Column Wise Focus</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card p-2">
+
+                                    <!-- Table Starts -->
+                                    <div class="card p-2 mt-2">
+                                        <div class="container card p-2 mt-2" fixed-column-table fixed-columns="4">
+                                            <table cellspacing="0" id="gvMainS">
+                                                <thead class="text-nowrap">
+                                                    <tr>
+                                                        <th class="text-center align-middle" style="width: 100px;" ng-click="sortSubjectWise('SymbolNo')">Symbol No.</th>
+                                                        <th class="text-center align-middle" style="width: 100px;" ng-click="sortSubjectWise('RegdNo')">Regd.No.</th>
+                                                        <th class="text-center align-middle" style="width: 100px;" ng-click="sortSubjectWise('RollNo')">Roll No.</th>
+                                                        <th class="text-center align-middle" style="width: 200px;" ng-click="sortSubjectWise('Name')">Student Name</th>
+                                                        <th colspan="2" scope="colgroup" class="text-center" style="width: 180px;">Obtained Mark</th>
+                                                        <th colspan="2" scope="colgroup" class="text-center" style="width: 180px;">Grace Mark</th>
+
+                                                    </tr>
+                                                    <tr class="text-center">
+                                                        <th class="col1">
+                                                            <span ng-show="false"></span>
+                                                        </th>
+                                                        <th class="col1">
+                                                            <span ng-show="false"></span>
+                                                        </th>
+                                                        <th class="col1">
+                                                            <span ng-show="false"></span>
+                                                        </th>
+                                                        <th class="col1">
+                                                            <span ng-show="false"></span>
+                                                        </th>
+                                                        <th scope="col" style="top: 35px;width: 90px;">TH</th>
+                                                        <th scope="col" style="top: 35px;width: 90px;">PR</th>
+                                                        <th scope="col" style="top: 35px;width: 90px;">TH</th>
+                                                        <th scope="col" style="top: 35px;width: 90px;">PR</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="sw in newSubjectWise.StudentColl  |orderBy:sortKeySubjectWise:reverseSubjectWise">
+                                                        <td>{{sw.SymbolNo}}</td>
+                                                        <td>{{sw.RegdNo}}</td>
+                                                        <td>{{sw.RollNo}}</td>
+                                                        <td>{{sw.Name}}</td>
+                                                        <td><input type="text" style="text-align: right; border: none" onfocus="this.select();" class="form-control form-control-sm" ng-model="sw.ObtainMarkTH" ng-change="ChangeMarkEntrySW(sw,1)" ng-style="sw.IsFailPR && sw.IsFailPR==true && { 'color' : 'red' }" ></td>
+                                                        <td><input type="text" style="text-align: right; border: none" onfocus="this.select();" class="form-control form-control-sm" ng-model="sw.ObtainMarkPR" ng-change="ChangeMarkEntrySW(sw,2)" ng-style="sw.IsFailPR && sw.IsFailPR==true && { 'color' : 'red' }" ></td>
+                                                        <td><input type="text" style="text-align: right; border: none" onfocus="this.select();" class="form-control form-control-sm" ng-model="sw.GraceMarkTH" ng-change="ChangeMarkEntrySW(sw,3)"></td>
+                                                        <td><input type="text" style="text-align: right; border: none" onfocus="this.select();" class="form-control form-control-sm" ng-model="sw.GraceMarkPR" ng-change="ChangeMarkEntrySW(sw,4"></td>
+
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearSubjectWise()">Reset</button>
+                                            @*<button type="button" class="btn btn-sm btn-danger" style="min-width: 90px;" ng-click="DelSubjectWise()">Delete</button>*@
+                                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateSubjectWise()">{{newSubjectWise.Mode}}</button>
+
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- Subject Wise Tab Ends -->
+                            <!-- Student Wise Tab Starts -->
+                            <div class="tab-pane fade main-section" id="contact" role="tabpanel"
+                                 aria-labelledby="contact-tab">
+                                <div class="row">
+                                    <div class="col-sm-2 col-lg-2 col-md-2">
+                                        <div class="form-group">
+                                            <label>Class</label>
+                                            <select ng-model="newStudentWise.SelectedClass" class="form-control form-control-sm select2"
+                                                    ng-options="x.text for x in ClassList.SectionList" ng-change="GetStudentListForME()"></select>
+                                        </div>
+                                    </div>                                   
+                                    <div class="col-sm-3 col-lg-3 col-md-3">
+                                        <div class="form-group">
+                                            <label>Exam</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.ExamTypeId">
+                                                    <option ng-value="0">**Select ExamType**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ExamTypeList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-4 col-lg-4 col-md-4">
+                                        <div class="form-group">
+                                            <label>Student</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newStudentWise.StudentId" ng-change="GetSubjectForSWME()">
+                                                    <option ng-value="0">**Select Student**</option>
+                                                    <option ng-value="cl.StudentId" ng-repeat="cl in newStudentWise.StudentList">{{cl.Name}}-{{cl.RollNo}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card p-2">
+                                    <!-- Table Starts -->
+                                    <div class="card p-2 mt-2">
+                                        <div class="container card p-2 mt-2">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th rowspan="2" class="text-center align-middle" style="width: 120px;">Subject</th>
+                                                        <th colspan="2" class="text-center" style="width: 180px;">Obtained Mark</th>
+                                                        <th colspan="2"  class="text-center" style="width: 180px;">Grace Mark</th>
+                                                    </tr>
+                                                    <tr class="text-center">
+                                                        <th scope="col" style="top: 35px;width: 90px;">TH</th>
+                                                        <th scope="col" style="top: 35px;width: 90px;">PR</th>
+                                                        <th scope="col" style="top: 35px;width: 90px;">TH</th>
+                                                        <th scope="col" style="top: 35px;width: 90px;">PR</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="sw in newStudentWise.Student.MarkColl">
+                                                        <td>{{sw.SubjectName}}</td>
+                                                        <td><input type="text" style="text-align: right; border: none" onfocus="this.select();" class="form-control form-control-sm" ng-model="sw.ObtainMarkTH" ng-readonly="sw.PaperType==2" ng-change="CalculateStudentTOM(sw,1)"></td>
+                                                        <td><input type="text" style="text-align: right; border: none" onfocus="this.select();" class="form-control form-control-sm" ng-model="sw.ObtainMarkPR" ng-readonly="sw.PaperType==1 || sw.PaperType==4" ng-change="CalculateStudentTOM(sw,2)"></td>
+                                                        <td><input type="text" style="text-align: right; border: none" onfocus="this.select();" class="form-control form-control-sm" ng-model="sw.GraceMarkTH" ng-readonly="sw.PaperType==2" ng-change="CalculateStudentTOM(sw,1)"></td>
+                                                        <td><input type="text" style="text-align: right; border: none" onfocus="this.select();" class="form-control form-control-sm" ng-model="sw.GraceMarkPR" ng-readonly="sw.PaperType==1  || sw.PaperType==4" ng-change="CalculateStudentTOM(sw,2)"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                           </div>
+                                     </div>
+
+                                        <div class="row">
+                                            <div class="col-md-12 mb-4">
+                                                <label for="name">Remarks</label>
+                                                <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="newStudentWise.Student.Remarks"></textarea>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="name">Full Marks : {{ (newStudentWise.Student.FMTH+newStudentWise.Student.FMPR) |number:2 }}</label>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="name">Pass Marks : {{ (newStudentWise.Student.PMTH+newStudentWise.Student.PMPR) |number:2 }}</label>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="name">Obtain Marks : {{newStudentWise.Student.TotalObtainMark |number:2}}</label>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="name">Obtain % : {{newStudentWise.Student.ObtainPer |number:2}}</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="time-label mt-2">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearStudentWise()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-danger" style="min-width: 90px;" ng-click="DelStudentWise()">Delete</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateStudentWise()">Save</button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                            </div>
+                            <!-- Student Wise Tab Ends -->
+                            <!-- Mark Submitted Status Starts -->
+                            <div class="tab-pane fade main-section" id="board" role="tabpanel"
+                                 aria-labelledby="board-tab">
+                                <div class="row">
+                                    <div class="col-sm-3 col-lg-3 col-md-3">
+                                        <div class="form-group">
+                                            <label>Exam</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newMarkSubmittedStatus.ExamTypeId" ng-change="GetAllMarkSubmittedStatusList()">
+                                                    <option ng-value="0">**Select ExamType**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newMarkSubmittedStatus.ExamTypeId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card card-primary card-tabs">
+                                    <div class="card-header with-gradient-bg p-0 pt-2">
+                                        <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                            <li class="nav-item">
+                                                <a class="nav-link active" id="custom-tabs-one-home-tab"
+                                                   data-toggle="pill" href="#custom-tabs-one-home" role="tab"
+                                                   aria-controls="custom-tabs-one-home" aria-selected="true" style="padding-left: 3rem;
+                                                            padding-right: 3rem;">Completed</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                                   href="#custom-tabs-one-profile" role="tab"
+                                                   aria-controls="custom-tabs-one-profile"
+                                                   aria-selected="false" style="padding-left: 3rem;
+                                                            padding-right: 3rem;">Pending</a>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tab-content" id="custom-tabs-one-tabContent">
+                                            <div class="tab-pane fade show active" id="custom-tabs-one-home"
+                                                 role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                                                <div>
+                                                    <div>
+                                                        <table id="dt-basic-example"
+                                                               class="table-hover table-bordered table-sm bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width:90px">S.No.</th>
+                                                                    <th style="width:100px">Class/Sec.</th>
+                                                                    <th style="width:150px">Subject</th>
+                                                                    <th style="width:150px">Submitted Date</th>
+                                                                    <th style="width:150px">Submitted By</th>
+                                                                    <th style="width:150px">Class Teacher</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr dir-paginate="ms in SubmitMarkList | filter:searchData.MarkSubmittedStatus | itemsPerPage: perPage.MarkSubmittedStatus" current-page="currentPages.MarkSubmittedStatus" pagination-id="submitPagination">
+                                                                    <td>{{$index+1}}</td>
+                                                                    <td>{{ms.ClassName}}-{{ms.SectionName}}</td>
+                                                                    <td>{{ms.SubjectName}}</td>
+                                                                    <td>{{ms.SubmitDate_BS}} {{ms.SubmitDateTime_AD | timeFormat}}</td>
+                                                                    <td>{{ms.UserName}}</td>
+                                                                    <td>{{ms.ClassTeacher}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <!-- table end -->
+
+                                                    </div>
+                                                </div>
+                                                <footer class="row align-items-center">
+                                                    <div class="col-md-12">
+                                                        <dir-pagination-controls pagination-id="submitPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                                    </div>
+                                                </footer>
+                                            </div>
+                                            
+                                            <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel"
+                                                 aria-labelledby="custom-tabs-one-profile-tab">
+                                                <div class="pt-3">
+
+                                                    <table id="dt-basic-example1"
+                                                           class="table table-hover table-bordered table-sm bg-white">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:90px">S.No.</th>
+                                                                <th style="width:100px">Class/Sec.</th>
+                                                                <th style="width:150px">Subject</th>
+                                                                <th style="width:150px">Class Teacher</th>
+
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr dir-paginate="ms in PendingMarkList | filter:searchData.MarkSubmittedStatusPending | itemsPerPage: perPage.MarkSubmittedStatusPending" current-page="currentPages.MarkSubmittedStatusPending" pagination-id="pendingPagination">
+                                                                <td>{{$index+1}}</td>
+                                                                <td>{{ms.ClassName}}-{{ms.SectionName}}</td>
+                                                                <td>{{ms.SubjectName}}</td>
+                                                                <td>{{ms.ClassTeacher}}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <!-- table end -->
+                                                </div>
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="pendingPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                    </div>
+                                    <!-- /.card -->
+                                </div>
+
+                            </div>
+                            <!-- Mark Submitted Status Ends -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+            <!-- /.row -->
+
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+

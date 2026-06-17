@@ -1,0 +1,919 @@
+﻿<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/printThis/1.15.0/printThis.min.js"></script>
+<script src="~/jslib/infrastructure/GeneralInformation.js"></script>
+<div ng-app="myApp" ng-controller="GeneralInformationController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+
+                <div class="timeline registration-form" id="preview-table">
+
+                    <div class="time-label">
+                        <span class="" style="border:1px solid #ececec">Basic Information</span>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="row ml-5">
+                            <div class="col-md-8">
+                                <label for="Name" class="form-label">Name </label>
+                                <label> <b> : {{newCompanyDet.Name}}</b></label>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="YearOfEstablishment" class="form-label">Year Of Establishment</label>
+                                <label> <b> : {{newCompanyDet.Established}}</b></label>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Email  <b> :  {{ newCompanyDet.EmailId.includes(':') ? newCompanyDet.EmailId.split(':')[1].trim() : newCompanyDet.EmailId }}</b></label>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Contact No <b> :  {{ newCompanyDet.PhoneNo.includes(':') ? newCompanyDet.PhoneNo.split(':')[1].trim() : newCompanyDet.PhoneNo }}</b></label>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>AffiliatedTo <b> : {{newCompanyDet.Affiliated}}</b></label>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="time-label">
+                        <span style="border:1px solid #ececec">Location Details</span>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="row ml-5">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="province">Province</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newGeneralInfoDet.ProvinceId" id="cboProvince">
+                                        <option ng-repeat="cl in ProvinceColl" ng-value="cl.id" ng-selected="cl.id==newGeneralInfoDet.ProvinceId">
+                                            {{cl.text}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="district">District</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newGeneralInfoDet.DistrictId" id="cboDistrict">
+                                        <option ng-repeat="dc in DistrictColl | filter:{stateId:newGeneralInfoDet.ProvinceId}:true" ng-value="dc.id" ng-selected="dc.id==newGeneralInfoDet.DistrictId">{{dc.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="locallevel">LocalLevel</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newGeneralInfoDet.LocalLevelId" id="cboArea">
+                                        <option ng-repeat="ll in LocalLevelColl | filter:{ districtId: newGeneralInfoDet.DistrictId}:true" ng-value="ll.id" ng-selected="ll.id==newGeneralInfoDet.LocalLevelId">{{ll.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="wardno">WardNo</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="newGeneralInfoDet.WardNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="tole">Tole</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="newGeneralInfoDet.Tole" />
+                                </div>
+                            </div>
+                            @*<div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="distancefromnearestcity">Distance from nearest city <b>(km)</b></label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newGeneralInfoDet.DistanceFromNearestCity" />
+                                    </div>
+                                </div>*@
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="majorlandmarks">Major Landmarks <b>(if any)</b></label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="newGeneralInfoDet.MajorLandmarks" />
+                                </div>
+                            </div>
+                            @*<div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="distancefromheadquarter">Distance from headquarter <b>(km)</b></label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newGeneralInfoDet.DistanceFromHeadquarter" />
+                                    </div>
+                                </div>*@
+
+                            <div class="col-md-3">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <button type="button" class="btn btn-sm btn-success mt-4" data-toggle="modal" data-target="#exampleModalCenter"
+                                                ng-click="initMap()">
+                                            GPS Location
+                                        </button>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="form-group">
+                                            <label class="mt-1 mr-2" style="width:110px;">Latitude</label>
+                                            <input type="text" placeholder="" ng-model="newGeneralInfoDet.Latitude" class="form-control form-control-sm" style="width:100%" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="mt-1 mr-2" style="width:110px;">Longitude</label>
+                                    <input type="text" placeholder="" ng-model="newGeneralInfoDet.Longitude" class="form-control form-control-sm" style="width:100%" />
+                                </div>
+                            </div>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal-dialog" role="document" style="max-width: 1000px; margin-top: 10vh; transform: translateY(-10%);">
+                                    <div class="modal-content" style="max-height: 500px;">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLongTitle">Choose Location</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body" style="overflow-y: auto;">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Latitude: {{newGeneralInfoDet.Latitude}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Longitude: {{newGeneralInfoDet.Longitude}}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="padding:10px">
+                                                <div id="map" style="width:100%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <div class="time-label">
+                        <span style="border:1px solid #ececec">Academic Program Offering Records</span>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="row ml-5">
+                            <div class="table-responsive" style="max-height:300px">
+                                <table class="table table-sm table-bordered table-head-fixed bg-white w-100">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 45px;">S.N.</th>
+                                            <th style="width: 147px;">Level</th>
+                                            <th style="width:150px">Faculty</th>
+                                            <th style="width:150px">Program</th>
+                                            <th style="width: 157px;">Academic Session</th>
+                                            <th style="width: 164px;">Affiliating University View</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>      
+                                        <tr ng-repeat="cl in ClassList">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.LevelName}}</td>
+                                            <td>{{cl.FacultyName}}</td>
+                                            <td>{{cl.Name}}</td>
+                                            <td>{{ cl.ClassType == 1 ? 'None' : cl.ClassType == 2 ? 'Year Wise' : cl.ClassType == 3 ? 'Semester Wise' : '' }}</td>
+                                            <td>{{cl.Board}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="time-label">
+                        <span style="border:1px solid #ececec">Campus Chief Information </span>
+                    </div>
+
+
+                    <div class="timeline-item">
+                        <div class="row ml-5">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="CampusChiefName" class="form-label">Name</label>
+
+                                    <select class="form-control select2 form-control-sm" all-employee
+                                            ng-model="newGeneralInfoDet.CampusChiefId" employee-detail="newGeneralInfoDet.EmployeeDetails"
+                                            side-bar-data="newGeneralInfoDet.SideBarData" search-by="newGeneralInfoDet.SelectEmployee" confirm-action="ChangeCollegeChief()"></select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="CampusChiefAppointmentDate" class="form-label">Appointment Date</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newGeneralInfoDet.CCAppointmentDate_TMP" date-detail="newGeneralInfoDet.CCAppointmentDateDet">
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="p-2" style="border: 1px solid #ececec; background-color: #f9fdf4">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefContactNo" class="form-label">Contact No.</label><br />
+                                                <label><b>{{newChief.OfficeContactNo}}</b></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefEmail" class="form-label">Email</label><br />
+                                                <label><b>{{newChief.OfficeEmailId}}</b></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefQualification" class="form-label">Qualification</label><br />
+                                                <label><b>{{newChief.Qualification}}</b></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefGender" class="form-label">Gender</label><br />
+                                                <label><b>{{ newChief.Gender == 1 ? 'Male' : (newChief.Gender == 2 ? 'Female' : '') }}</b></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefCaste" class="form-label">Caste Ethinicity</label><br />
+                                                <label><b>{{newChief.Caste}}</b></label>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="isCampusChiefTeaching">Is Teaching</label><br />
+                                            <label><b>{{newChief.IsTeaching}}</b></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="time-label">
+                        <span style="border:1px solid #ececec">Campus IT/EMIS Focal Person Detail information</span>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="row ml-5">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="CampusITName" class="form-label">Name</label>
+
+                                    <select class="form-control select2 form-control-sm" all-employee
+                                            ng-model="newGeneralInfoDet.CampusITId" employee-detail="newGeneralInfoDet.EmployeeDetails"
+                                            side-bar-data="newGeneralInfoDet.SideBarData" search-by="newGeneralInfoDet.SelectEmployee" confirm-action="ChangeCollegeIT()"></select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="CampusITAppointmentDate" class="form-label">Appointment Date</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newGeneralInfoDet.CampusITAppointmentDate_TMP" date-detail="newGeneralInfoDet.CampusITAppointmentDateDet">
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="p-2" style="border: 1px solid #ececec; background-color: #f9fdf4">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefContactNo" class="form-label">Contact No.</label><br />
+                                                <label><b>{{newIT.OfficeContactNo}}</b></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefEmail" class="form-label">Email</label><br />
+                                                <label><b>{{newIT.OfficeEmailId}}</b></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefQualification" class="form-label">Qualification</label><br />
+                                                <label><b>{{newIT.Qualification}}</b></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefGender" class="form-label">Gender</label><br />
+                                                <label><b>{{ newIT.Gender == 1 ? 'Male' : (newIT.Gender == 2 ? 'Female' : '') }}</b></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="CampusChiefCaste" class="form-label">Caste Ethinicity</label><br />
+                                                <label><b>{{newIT.Caste}}</b></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="isCampusChiefTeaching">Is Teaching</label><br />
+                                            <label><b>{{newIT.IsTeaching}}</b></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="time-label">
+                        <span style="border:1px solid #ececec">Facilities</span>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="ml-5">
+                            <div class="table-scroll-x-y table-scroll">
+                                <table id="Class" class="main-table table table-sm table-bordered bg-white" style="height: auto;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;" class="text-center">S.No</th>
+                                            <th style="width: 200px;">Facility Name</th>
+                                            <th style="width: 100px;" class="text-center">Is Available?</th>
+
+                                            <th style="width: 200px;" class="text-center">Source</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="A in newGeneralInfoDet.GeneralInfoFacilitiesColl">
+                                            <td class="text-center">{{$index+1}}</td>
+                                            <td>{{A.Name}}</td>
+                                            <td class="text-center">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox" id="chkbox{{$index+1}}" ng-model="A.IsAvailable"
+                                                           ng-change="handleFacilityChange(A)">
+                                                    <label for="chkbox{{$index+1}}" class="custom-control-label"></label>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <select class="form-control form-control-sm" ng-model="A.SourceName" ng-disabled="!A.IsAvailable">
+                                                    <option ng-repeat="S in A.SourceList" ng-value="S.Name">{{S.Name}}</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="time-label">
+                        <span style="border:1px solid #ececec">More Details</span>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="row ml-5">
+                            <div class="col-md-3">
+                                <label class="form-label" for="isLandOwnershipCertificate">Land Ownership Certificate</label>
+                                <div class="form-group clearfix">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" id="land-ownership-yes" type="radio" ng-value="true" ng-model="newGeneralInfoDet.IsLandOwnershipCertificate">
+                                        <label class="form-check-label" for="land-ownership-yes">Yes</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" id="land-ownership-no" type="radio" ng-value="false" ng-model="newGeneralInfoDet.IsLandOwnershipCertificate">
+                                        <label class="form-check-label" for="land-ownership-no">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="landownershiptype">Land Ownership Type</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newGeneralInfoDet.LandOwnershipTypeId"  ng-change="ChangeLandOwnershipType()">
+                                        <option ng-repeat="cl in LandOwnershipTypeColl" ng-value="cl.id" ng-selected="cl.id==newGeneralInfoDet.LandOwnershipTypeId">
+                                            {{cl.text}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label" for="landareasqm">Land Area <b>(Sqm.)</b></label>
+                                    <input class="form-control form-control-sm" type="number" ng-model="newGeneralInfoDet.LandAreaSqm" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label" for="landarearopani">Land Area <b>(Ropani)</b></label>
+                                    <input class="form-control form-control-sm" type="number" ng-model="newGeneralInfoDet.LandAreaRopani" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="landareabigha" class="form-label">Land Area <b>(Bigha)</b></label>
+                                    <input class="form-control form-control-sm" type="number" ng-model="newGeneralInfoDet.LandAreaBigha" />
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Site Orientation W.R.T main entrance</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newGeneralInfoDet.SiteOrientationId"  ng-change="ChangeSiteOrientation()">
+                                        <option ng-repeat="cl in SiteOrientationColl" ng-value="cl.id" ng-selected="cl.id==newGeneralInfoDet.SiteOrientationId">
+                                            {{cl.text}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="checkbox-wrap">
+                                    All Weather Road
+                                    <input type="checkbox" ng-model="newGeneralInfoDet.IsAllWeatherRoad" />
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label" for="isVehicleAccessibility">Vehicle Accessibility</label>
+                                <div class="form-group clearfix">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" id="vehicle-accessibility-yes" type="radio" ng-value="true" ng-model="newGeneralInfoDet.IsVehicleAccessibility">
+                                        <label class="form-check-label" for="vehicle-accessibility-yes">Yes</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" id="vehicle-accessibility-no" type="radio" ng-value="false" ng-model="newGeneralInfoDet.IsVehicleAccessibility">
+                                        <label class="form-check-label" for="vehicle-accessibility-no">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3" ng-show="newGeneralInfoDet.IsVehicleAccessibility===true">
+                                <div class="form-group">
+                                    <label class="form-label">Type of Road</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newGeneralInfoDet.RoadTypeId">
+                                        <option ng-repeat="cl in RoadTypeColl" ng-value="cl.id" ng-selected="cl.id==newGeneralInfoDet.RoadTypeId">
+                                            {{cl.text}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="roadwidth" class="form-label">Road Width <b>(ft)</b></label>
+                                    <input class="form-control form-control-sm" type="number" ng-model="newGeneralInfoDet.RoadWidth" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3" ng-show="newGeneralInfoDet.IsVehicleAccessibility===false">
+                                <label for="walkingdistance" class="form-label pl-2">Walking distance from main road</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group d-flex">
+                                            <input style="width:80px" class="form-control form-control-sm" type="number" ng-model="newGeneralInfoDet.WalkingDistanceMeter" />
+                                            <span class="mt-1 ml-1">Meter</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group d-flex">
+                                            <input style="width:80px" class="form-control form-control-sm" type="number" ng-model="newGeneralInfoDet.WalkingDistanceMin" />
+                                            <span class="ml-1 mt-1">Min</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearGeneralInfo()">Reset</button>
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateGeneralInfo()">Save</button>
+                            <button type="button" class="btn btn-sm btn-info" style="min-width: 90px;" id="add-preview" ng-click="PrintData()">Print</button>
+                        </span>
+                    </div>
+                </div>
+
+
+
+                <div id="preview-form">
+                    <div id="printcard">
+
+                        <div class="row ">
+                            <div class="col-md-2 text-center">
+                                <img ng-src="{{ Logo.LogoPath}}" class="img-fluid" style="height:120px; width:auto;" />
+                            </div>
+
+                            <div class="col-md-8 text-center">
+                                <h3 class="mb-3 text-secondary" style="font-family: 'Cambria', serif; font-weight: bold; letter-spacing: 1px; font-size: 32px">
+                                    {{newCompanyDet.Name}}
+                                </h3>
+                                <h6 style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+                                    Affiliated to {{newCompanyDet.Affiliated}} - {{newCompanyDet.Established}}
+                                </h6>
+                                <h6 style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+                                    {{newCompanyDet.Address}}
+                                </h6>
+
+                                <p class="mb-0" style="font-family: 'Times New Roman', serif; font-size: 20px; font-weight: bold;">
+                                    {{newCompanyDet.PhoneNo}}
+                                </p>
+                                <p style="font-family: 'Times New Roman', serif; font-size: 20px; font-weight: bold;">
+                                    {{newCompanyDet.EmailId}}
+                                </p>
+                            </div>
+
+                            <div class="col-md-2 text-center">
+                                <img ng-src="{{ Logo.AffiliatedLogo}}" class="img-fluid" style="height:120px; width:auto;" />
+                            </div>
+                        </div>
+
+                        @*<div class="row">
+                            <div class="col-md-12 ">
+                                <div class="card mb-2" style=" border: 1px solid #ececec;">
+                                    <div class="card-header p-2" style="background-color: #f1f1f1;">
+                                        <h3 class="card-title" style="float: none; color: #025A58!important">Basic Information</h3>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="Name" style="width: 150px;">Name<span style="color:red">*</span></label>
+                                                    <label><b> : {{newCompanyDet.Name}}</b></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="ContactNo." style="width: 150px;">Contact No.<span style="color:red">*</span></label>
+                                                    <label><b> : {{newCompanyDet.PhoneNo}}</b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="Established" style="width: 150px;">Year Of Establishment<span style="color:red">*</span></label>
+                                                    <label><b> : {{newCompanyDet.Established}}</b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="Email" style="width: 150px;">Email<span style="color:red">*</span></label>
+                                                    <label><b> : {{newCompanyDet.EmailId}} </b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="AffiliatedTo" style="width: 150px;">Affiliated To<span style="color:red">*</span></label>
+                                                    <label><b> :  {{newCompanyDet.Affiliated}} </b></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
+
+
+                        <div class="card mb-2" style=" border: 1px solid #ececec;">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-header p-2" style="background-color: #f1f1f1;">
+                                        <h3 class="card-title" style="float: none; color: #025A58!important">Location Detail</h3>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="District" style="width: 100px;">District</label>
+                                                    <label><b> :  {{newGeneralInfoDet.District}} </b></label>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="Province" style="width: 100px;">Province</label>
+                                                    <label><b> :  {{newGeneralInfoDet.Province}} </b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="LocalLevel" style="width: 100px;">Local Level</label>
+                                                    <label><b> : {{newGeneralInfoDet.LocalLevel}} </b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="WardNo" style="width: 100px;">Ward No</label>
+                                                    <label><b> : {{newGeneralInfoDet.WardNo}} </b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="Tole" style="width: 100px;">Tole</label>
+                                                    <label><b> : {{newGeneralInfoDet.Tole}} </b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="MajorLandmarks" style="width: 100px;">Landmarks</label>
+                                                    <label><b> : {{newGeneralInfoDet.MajorLandmarks}} </b></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="Latitude" style="width: 100px;">Latitude</label>
+                                                    <label><b> : {{newGeneralInfoDet.Latitude}} </b></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="Longitude" style="width: 100px;">Longitude</label>
+                                                    <label><b> : {{newGeneralInfoDet.Longitude}} </b></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="card mb-2" style=" border: 1px solid #ececec;">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-header p-2" style="background-color: #f1f1f1;">
+                                        <h3 class="card-title" style="float: none; color: #025A58!important">Academic Program Offering Records</h3>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered table-head-fixed bg-white w-100">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 45px;">S.N.</th>
+                                                        <th style="width: 147px;">Level</th>
+                                                        <th style="width:150px">Faculty</th>
+                                                        <th style="width:150px">Program</th>
+                                                        <th style="width: 157px;">Academic Session</th>
+                                                        <th style="width: 164px;">Affiliating University View</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cl in ClassList">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.LevelName}}</td>
+                                                        <td>{{cl.FacultyName}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{ cl.ClassType == 1 ? 'None' : cl.ClassType == 2 ? 'Year Wise' : cl.ClassType == 3 ? 'Semester Wise' : '' }}</td>
+                                                        <td>{{cl.Board}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="card mb-2" style=" border: 1px solid #ececec;">
+                            <div class="card-header  p-2" style="background-color: #f1f1f1;">
+                                <h3 class="card-title" style="float: none; color: #025A58!important">Campus Cheif Information</h3>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="row">
+
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label for="CampusCheifName" style="width: 120px;">Name<span style="color:red">*</span></label>
+                                            <label><b> : {{newChief.Name}} </b></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label for="CampusCheifContactNo" style="width: 120px;">Contact No<span style="color:red">*</span></label>
+                                            <label><b> : {{newChief.OfficeContactNo}} </b></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label for="CampusCheifEmail" style="width: 120px;">Email<span style="color:red">*</span></label>
+                                            <label><b> : {{newChief.OfficeEmailId}} </b></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label for="CampusCheifQualification" style="width: 120px;">Qualification<span style="color:red">*</span></label>
+                                            <label><b> : {{newChief.Qualification}} </b></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label for="CampusCheifGender" style="width: 120px;">Gender</label>
+                                            <label><b> : {{ newChief.Gender == 1 ? 'Male' : (newChief.Gender == 2 ? 'Female' : '') }}</b></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label for="CampusCheifCasteEthnicity" style="width: 120px;">Caste Ethnicity</label>
+                                            <label><b> : {{newChief.Caste}} </b></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label for="IsTeaching" style="width: 120px;">Is Teaching ?</label>
+                                        <label><b> : {{newChief.IsTeaching}}</b></label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label for="CampusCheifAppointmentDate" style="width: 120px;">Appointment Date</label>
+                                            <label><b> : {{newGeneralInfoDet.CCAppointmentDate_TMP | dateFormat}} </b></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="card mb-2" style=" border: 1px solid #ececec; ">
+                            <div class="card-header  p-2" style="background-color: #f1f1f1; ">
+                                <h3 class="card-title" style="float: none; color: #025A58!important">Campus IT/EMIS Focal Person Detail information</h3>
+                            </div>
+                            <div class="card-body  p-2">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="CampusITName" style="width: 120px;">Name<span style="color:red">*</span></label>
+                                            <label><b> : {{newIT.Name}} </b></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="CampusITContactNo" style="width: 120px;">Contact No<span style="color:red">*</span></label>
+                                            <label><b> : {{newIT.OfficeContactNo}} </b></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="CampusITEmail" style="width: 120px;">Email<span style="color:red">*</span></label>
+                                            <label><b> : {{newIT.OfficeEmailId}} </b></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="CampusITQualification" style="width: 120px;">Qualification<span style="color:red">*</span></label>
+                                        <label><b> : {{newIT.Qualification}} </b></label>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="CampusITGender" style="width: 120px;">Gender<span style="color:red">*</span></label>
+                                            <label><b> : {{ newIT.Gender == 1 ? 'Male' : (newIT.Gender == 2 ? 'Female' : '') }}</b></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="CampusITCasteEthnicity" style="width: 120px;">Caste Ethnicity</label>
+                                            <label><b> : {{newIT.Caste}} </b></label>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                        <div class="form-group clearfix">
+                                            <label for="IsCampusITTeaching" style="width: 120px;">Is Teaching ?</label>
+                                            <label><b> : {{newIT.IsTeaching}}</b></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="CampusITAppointmentDate" style="width: 120px;">Appointment Date</label>
+                                            <label><b> : {{newGeneralInfoDet.CampusITAppointmentDate_TMP | dateFormat}} </b></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="card mb-2" style=" border: 1px solid #ececec;">
+                            <div class="card-header p-2" style="background-color: #f1f1f1;">
+                                <h3 class="card-title" style="float: none; color: #025A58!important">Utilities And Facilities</h3>
+                            </div>
+
+                            <div class="card-body p-2">
+                                <div class="table-scroll-x-y table-scroll">
+                                    <table id="Class" class="main-table table table-sm table-bordered bg-white" style="height: auto;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;" class="text-center">S.No</th>
+                                                <th style="width: 200px;">Facility Name</th>
+                                                <th style="width: 100px;" class="text-center">Is Available?</th>
+
+                                                <th style="width: 200px;" class="text-center">Source</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="A in newGeneralInfoDet.GeneralInfoFacilitiesColl">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{A.Name}}</td>
+                                                <td> {{A.IsAvailable}}</td>
+                                                <td>
+                                                    {{A.SourceName}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="card mb-2" style=" border: 1px solid #ececec;">
+                            <div class="card-header  p-2" style="background-color: #f1f1f1;">
+                                <h3 class="card-title" style="float: none; color: #025A58!important">More Details</h3>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="LandOwnershipCertificate" style="width: 160px;">Land Ownership Certificate</label>
+                                        <label><b> : {{ newGeneralInfoDet.IsLandOwnershipCertificate }}</b></label>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="LandOwnershipType" style="width: 136px;">Land Ownership Type</label>
+                                        <label><b> : {{newGeneralInfoDet.LandOwnershipType}} </b></label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="LandAreaSqkm" style="width: 221px;">LandArea <b>( Sqkm )</b></label>
+                                            <label><b> : {{newGeneralInfoDet.LandAreaSqm}} </b></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="LandAreaRopani" style="width: 160px;">LandArea <b>( Ropani )</b></label>
+                                            <label><b> : {{newGeneralInfoDet.LandAreaRopani}} </b></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="LandAreaBigha" style="width: 136px; ">LandArea <b>( Bigha )</b></label>
+                                            <label><b> : {{newGeneralInfoDet.LandAreaBigha}} </b></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label for="SiteOrientationWRTmainentrance" style="width: 221px;">Site Orientation W.R.T main entrance</label>
+                                        <label><b> : {{newGeneralInfoDet.SiteOrientation}} </b></label>
+                                    </div>
+
+                                    <div class="col-md-4">
+
+                                        <label for="AllWeatherRoad" style="width: 160px;">All Weather Road</label>
+                                        <label><b> : {{ newGeneralInfoDet.IsAllWeatherRoad}} </b></label>
+                                    </div>
+                                    <div class="col-md-4">
+
+                                        <label for="VechileAccessibility" style="width: 136px; ">Vechile Accessibility</label>
+                                        <label><b> : {{ newGeneralInfoDet.IsVehicleAccessibility }} </b></label>
+
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="RoadWidth" style="width: 221px;"> RoadWidth <b>( ft )</b></label>
+                                            <label><b> : {{newGeneralInfoDet.RoadWidth}} </b></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="RoadWidth" style="width: 158px;"> Walking Distance </label><br />
+                                        <label for="Meter" style="width: 100px;">Meter<b> : {{newGeneralInfoDet.WalkingDistanceMeter}} </b></label>
+                                        <label for="Meter" style="width: 100px;">Min<b> : {{newGeneralInfoDet.WalkingDistanceMin}} </b></label>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                        @*<div class="time-label">
+            <span class="d-block border-0 p-3 text-center">
+
+                <button type="button" class="btn btn-sm btn-info" id="previewback-btn" style="min-width: 90px;">Back to List</button>
+                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" id="add-preview" ng-click="PrintData()">Print</button>
+            </span>
+        </div>*@
+                    </div>
+            </section>
+        </div>
+    </section>
+</div>

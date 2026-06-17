@@ -1,0 +1,564 @@
+﻿<script src="~/jslib/library/BookEntry.js?v=20251115"></script>
+<script>
+    var TranId = "@ViewBag.TranId";
+</script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BookEntryController" ng-init="LoadData()">
+    <div class="wrapper">
+        <section class="content">
+            <div class="container-fluid">
+                <section class="iframe-content-starts-here" style="padding-top:50px!important">
+                    <div class="tab-content">
+                        <div id="book-entry-form">
+                            <div class="card card-default">
+                                <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                                <div class="card-body py-2 px-0">
+                                    <div class="row">
+                                        <div class="col-md-10">
+                                            <div class="row">
+                                                <!-- select for others -->
+                                                <div class="col-md-2" id="meet-others">
+                                                    <div class="form-group">
+                                                        <label for="">Accession No.</label>
+                                                        <input type="number" id="BEAccessionNo" class="form-control form-control-sm" ng-model="newBookEntry.AccessionNo" disabled/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2" id="meet-others">
+                                                    <div class="form-group">
+                                                        <label for="">Book No.</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newBookEntry.BookNo" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2" id="meet-others">
+                                                    <div class="form-group">
+                                                        <label for="">Call No.</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newBookEntry.CallNo" />
+                                                    </div>
+                                                </div>
+                                                <!-- fields after clicking radio button ends -->
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Barcode</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newBookEntry.BarCode" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Book Title<span style="color:red">*</span></label>
+                                                        <select id="cboBookTitle" class="form-control form-control-sm select2" ng-model="newBookEntry.BookTitleId" ng-change="ChangeBookTitle()" style="width:100%">
+                                                            <option value="">**Select Book Title**</option>
+                                                            <option ng-value="bt.id" ng-repeat="bt in BookTitleList" ng-selected="bt.id==newBookEntry.BookTitleId">{{bt.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Author</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.AuthorIdColl" multiple ng-change="ChangeBookTitle()" style="width:100%">
+                                                            <option value="">**Select Author**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in AuthorList" ng-selected="cl.id==newBookEntry.AuthorId">{{cl.text}}</option>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Subject<span style="color:red">*</span></label>
+                                                        <select id="BESubject" class="form-control form-control-sm select2" ng-model="newBookEntry.SubjectId" style="width:100%">
+                                                            <option value="">**Select Subject**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SubjectList" ng-selected="cl.id==newBookEntry.SubjectId">{{cl.text}}</option>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Publication<span style="color:red">*</span></label>
+                                                        <select id="BEPublication" class="form-control form-control-sm select2" ng-model="newBookEntry.PublicationId" ng-change="ChangeBookTitle()" style="width:100%">
+                                                            <option value="">**Select Publication**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in PublicationList" ng-selected="cl.id==newBookEntry.PublicationId">{{cl.text}}</option>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Edition</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.EditionId" ng-change="ChangeBookTitle()" style="width:100%">
+                                                            <option value="">**Select Edition**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in EditionList" ng-selected="cl.id==newBookEntry.EditionId">{{cl.text}}</option>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Year</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newBookEntry.Year" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Category</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.CategoryId" style="width:100%">
+                                                            <option value="">**Select Category**</option>
+                                                            <option ng-value="cl.BookCategoryId" ng-repeat="cl in BookCategoryList" ng-selected="cl.BookCategoryId==newBookEntry.CategoryId">{{cl.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Material Type</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.MaterialTypeId" style="width:100%">
+                                                            <option value="">**Select MaterialType**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in MaterialTypeList" ng-selected="cl.id==newBookEntry.MaterialTypeId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">ISBN No.</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newBookEntry.ISBNNo" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Volume</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newBookEntry.Volume" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Pages</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newBookEntry.Pages" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Language</label>
+                                                        <select name="" id="" class="form-control form-control-sm select2" ng-model="newBookEntry.Language" style="width:100%">
+                                                            <option ng-value="">** Select Lang**</option>
+                                                            <option ng-repeat="ln in LanguageColl" ng-value="ln.text">{{ln.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Donor</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.DonarId" style="width:100%">
+                                                            <option value="">**Select Donor**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in DonorList" ng-selected="cl.id==newBookEntry.DonarId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Department<span style="color:red">*</span></label>
+                                                        <select id="BEDepartment" class="form-control form-control-sm select2" ng-model="newBookEntry.DepartmentId" style="width:100%">
+                                                            <option value="">**Select Department**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in DepartmentList" ng-selected="cl.id==newBookEntry.DepartmentId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Class</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.ClassId" style="width:100%" ng-change="ChangeClass()">
+                                                            <option value="">**Select Class**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in ClassList" ng-selected="cl.id==newBookEntry.ClassId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4" ng-show="AcademicConfig.ActiveFaculty==true">
+                                                    <div class="form-group">
+                                                        <label for="">Faculty </label>
+                                                        <label class="form-control form-control-sm" for="">{{SelectedClass.FacultyName}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4" ng-show="AcademicConfig.ActiveLevel==true">
+                                                    <div class="form-group">
+                                                        <label for="">Level </label>
+                                                        <label class="form-control form-control-sm" for="">{{SelectedClass.LevelName}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4" ng-show="SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                    <div class="form-group">
+                                                        <label for="">Semester</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.SemesterId">
+                                                            <option value="">**Select Semester**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList" ng-selected="cl.id==newBookEntry.SemesterId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4" ng-show="SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                    <div class="form-group">
+                                                        <label for="">Class Year</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.ClassYearId">
+                                                            <option value="">**Select Year**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList" ng-selected="cl.id==newBookEntry.ClassYearId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Medium</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.MediumId" style="width:100%">
+                                                            <option value="">**Select Medium**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in MediumList" ng-selected="cl.id==newBookEntry.MediumId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Academic Year</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.AcademicYearId" style="width:100%">
+                                                            <option value="">**Select AcademicYear**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in AcademicYearList" ng-selected="cl.id==newBookEntry.AcademicYearId">{{cl.text}}</option>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Rack</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.RackId" ng-change="ChangeBookTitle()" style="width:100%">
+                                                            <option value="">**Select Rack**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in RackList" ng-selected="cl.id==newBookEntry.RackId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Location</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newBookEntry.Location" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Status</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBookEntry.Status" style="width:100%">
+                                                            <option ng-value="cl.id" ng-repeat="cl in StatusList" ng-selected="cl.id==newBookEntry.Status">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Purchase Date</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" date-picker ng-model="newBookEntry.PurchaseDate_TMP" date-detail="newBookEntry.PurchaseDateDet">
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Vendor</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newBookEntry.Vendor" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Bill No.</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newBookEntry.BillNo" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Book Price</label>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm" ng-model="newBookEntry.BookPrice" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Credit Days</label>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm" ng-model="newBookEntry.CreditDays" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Fix FineAmt.<span style="color:red">*</span></label>
+                                                        <input type="text" number-input id="BEFixFineAmount" class="form-control form-control-sm" ng-model="newBookEntry.FixFineAmount" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">FineAmt. PerDay<span style="color:red">*</span></label>
+                                                        <input type="text" number-input id="BELateFineAmountPerDay" class="form-control form-control-sm" ng-model="newBookEntry.LateFineAmountPerDay" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="">Description</label>
+                                                        <textarea name="" id="" cols="30" rows="1" class="form-control form-control-sm" ng-model="newBookEntry.Description"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">No. Of Books<span style="color:red">*</span></label>
+                                                        <input type="text" number-input id="BENoOfBooks" class="form-control form-control-sm" ng-model="newBookEntry.NoOfBooks" ng-change="ChangeNoOfBooks(newBookEntry.NoOfBooks)" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Started Accession No.</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newBookEntry.StartedAccessionNo" ng-change="ChangeStartEnd(newBookEntry.StartedAccessionNo,newBookEntry.EndedAccesionNo)" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Ended Accession No.</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newBookEntry.EndedAccessionNo" ng-change="ChangeStartEnd(newBookEntry.StartedAccessionNo,newBookEntry.EndedAccesionNo)" readonly />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- col-md-9 -->
+                                        <div class="col-md-2">
+                                            <label for="" class="invisible">Photo</label>
+                                            <div class="person-photo-attachment-wrap text-center">
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{newBookEntry.PhotoData || newBookEntry.FrontCoverPath}}" class="img-fluid" alt="" id="imgPhoto1">
+                                                </div>
+                                                <!-- Button trigger modal -->
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#updatePhoto">
+                                                    <i class="fas fa-camera w-t"></i>  Front Cover
+                                                </button>
+                                            </div>
+
+                                            <label for="" class="invisible">Photo</label>
+                                            <div class="person-photo-attachment-wrap text-center">
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{newBookEntry.PhotoData2  || newBookEntry.BackCoverPath}}" class="img-fluid" alt="" id="imgPhoto1-back">
+                                                </div>
+                                                <!-- Button trigger modal -->
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#updatePhoto-back">
+                                                    <i class="fas fa-camera w-t"></i> Back Cover
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="">
+                                        <div class="time-label">
+                                            <span class="text-secondary"><b>Book Details</b> </span>
+                                        </div>
+
+                                        <header class="row pt-2">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search"
+                                                                   placeholder="Search"
+                                                                   aria-label="Search" />
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file"
+                                                     data-toggle="tooltip"
+                                                     data-placement="top"
+                                                     title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                            type="button"
+                                                            id="dropdownMenuButton"
+                                                            data-toggle="dropdown"
+                                                            aria-haspopup="true"
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'BookEntry'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#BookEntry').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        id="open-form-btn"
+                                                        style="min-width: 90px" ng-click="PrintBarCodeOfBook()">
+                                                    <i class="fas fa-print w-t"></i> Print Bar code
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:500px;">
+                                                <table id="BookEntry"
+                                                       class="main-table table table-sm table-head-fixed table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 50px">S.No.</th>
+                                                            <th style="width: 150px">Book Title</th>
+                                                            <th style="width: 150px">Author</th>
+                                                            <th style="width: 150px">Publication</th>
+                                                            <th style="width: 100px">Edition</th>
+                                                            <th style="width: 100px">Rack</th>
+                                                            <th style="width: 80px">Accession No.</th>
+                                                            <th style="width: 80px">Bar Code</th>
+
+                                                            <th style="width: 90px;z-index:2;">
+                                                                Action
+                                                                <input type="checkbox" ng-model="newBookEntry.CheckAll" ng-change="CheckedAllForBarCode()">
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="cl in newBookEntry.BookEntryDetailsColl">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{cl.BookTitle}}</td>
+                                                            <td>{{cl.Authors}}</td>
+                                                            <td>{{cl.Publication}}</td>
+                                                            <td>{{cl.Edition}}</td>
+                                                            <td>
+                                                                <select class="form-control form-control-sm select2" ng-model="cl.RackId">
+                                                                    <option value="">**Select Rack**</option>
+                                                                    <option ng-value="r.id" ng-repeat="r in RackList" ng-selected="r.id==cl.RackId">{{r.text}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input class="form-control form-control-sm" ng-model="cl.AccessionNo" />
+                                                            </td>
+                                                            <td>
+                                                                <input class="form-control form-control-sm" ng-model="cl.BarCode" />
+                                                            </td>
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                                    <input type="checkbox"
+                                                                           class="custom-control-input"
+                                                                           id="checkbox-{{$index}}" ng-model="cl.PrintBarCode" />
+                                                                    <label class="custom-control-label"
+                                                                           for="checkbox-{{$index}}"></label>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <!-- table end -->
+                                            </div>
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <a href="/Library/Master/LibraryReport" class="btn btn-sm btn-secondary" ng-show="newBookEntry.BookEntryId">Back to List</a>
+                                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearBookEntry()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateBookEntry()">{{newBookEntry.Mode}}</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+            <!--/. container-fluid -->
+        </section>
+        <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <i class="flaticon-close"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                         data-max-file-size="3" ng-model="newBookEntry.Photo_TMP" @*after-selected="AddVisitorPhoto()"*@ fileread="newBookEntry.PhotoData">
+                        <div class="photo-upload-wrap">
+                            <span class="static-content">
+                                <img ng-src="{{newBookEntry.PhotoData || newBookEntry.FrontCoverPath}}" class="img-fluid" id="imgPhoto">
+                                <span>Drag & Drop your<br>image here</span>
+                            </span>
+                        </div>
+                        <div class="text-muted pb-3">or</div>
+                        <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                        <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newBookEntry.Photo_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newBookEntry.PhotoData" />
+                        <a ng-click="ClearPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                        @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAuthorImage()">Save</button>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*Back Photo Covor*@
+        <div class="modal fade" id="updatePhoto-back" tabindex="-1" aria-labelledby="updatePhotoLabel-back" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updatePhotoLabel-back">Upload Photo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <i class="flaticon-close"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                         data-max-file-size="3" ng-model="newBookEntry.Photo_TMP2" @*after-selected="AddVisitorPhoto()"*@ fileread="newBookEntry.PhotoData2">
+                        <div class="photo-upload-wrap">
+                            <span class="static-content">
+                                <img ng-src="{{newBookEntry.PhotoData2 || newBookEntry.BackCoverPath}}" class="img-fluid" id="imgPhoto">
+                                <span>Drag & Drop your<br>image here</span>
+                            </span>
+                        </div>
+                        <div class="text-muted pb-3">or</div>
+                        <label for="choose-file-back" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                        <input id="choose-file-back" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newBookEntry.Photo_TMP2" @*after-selected="AddStudentPhoto()"*@ fileread="newBookEntry.PhotoData2" />
+                        <a ng-click="ClearBookEntryPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                        @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAuthorImage()">Save</button>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+

@@ -1,0 +1,280 @@
+﻿
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/OnlineClass/Employeeattendance.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="EmployeeAttendanceController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div id="daily-attendence-section">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="">From Date</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="newPeriodAttendence.FromDate_TMP" date-detail="newPeriodAttendence.FromDateDet" confirm-action="validateDates('fromDate')">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="">To Date</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="newPeriodAttendence.ToDate_TMP" date-detail="newPeriodAttendence.ToDateDet" confirm-action="validateDates('toDate')">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button class="btn btn-sm btn-success mt-4" style="min-width:90px;" ng-click="GetDateWiseAttendance()">Load</button>
+                        </div>
+                    </div>
+                    <div class="card p-2">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PeriodAttendance">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PeriodAttendence">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.PeriodAttendence">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+
+                            <div class="col-md-5 text-right">
+
+                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                     data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                    </div>
+                                </div>
+                                <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                   data-toggle="tooltip" data-placement="bottom"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                            </div>
+                        </header>
+                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 0; z-index: 2; width: 70px;">S.No.</th>
+                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 70px; z-index: 2; width: 100px;">Emp.Code</th>
+                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 170px; z-index: 2; width: 200px;">Name</th>
+                                        <th rowspan="2" class="text-center align-middle cstm-sticky" style="left: 370px; z-index: 2; width: 140px;">Designation</th>
+                                        <th colspan="1" class="text-center align-middle" style="width: 70px;" ng-repeat="sb in newPeriodAttendence.DateList">{{sb.shorttext}}</th>
+                                        <th rowspan="2" class="text-center align-middle" style="width: 110px;">Total Attendance</th>
+                                        <th rowspan="2" class="text-center align-middle" style="width: 110px;">Attendence %</th>
+                                        <th rowspan="2" class="text-center align-middle" style="width: 110px;">Abesnt %</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center align-middle" ng-repeat="sb in newPeriodAttendence.DateList">{{sb.forDate | date:'EEE'}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="cl in newPeriodAttendence.StudentList  | filter:searchData.PeriodAttendence | itemsPerPage: perPage.PeriodAttendance" current-page="currentPages.PeriodAttendance" pagination-id="PeriodAttendencePagination">
+                                        <td class="align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 1;">{{cl.SNo}}</td>
+                                        <td class="align-middle cstm-sticky" style="width: 100px; left: 70px; z-index: 1; background-color: #fff">{{cl.Code}}</td>
+                                        <td class="align-middle cstm-sticky" style="width: 200px; left: 170px; z-index: 1; background-color: #fff">{{cl.Name}}</td>
+                                        <td class="align-middle cstm-sticky" style="width: 100px; left: 370px; z-index: 1; background-color: #fff">{{cl.Designation}}</td>
+                                        <td class="text-center" ng-repeat="sb in cl.SubjectDetailsColl">
+                                            ({{sb.NoOfClassHosted}}/{{sb.ScheduleClass}})
+                                            <a class="p-1" ng-click="ShowDetails(cl)">
+                                                <i class="fas fa-eye text-secondary"></i>
+                                            </a>
+                                        </td>
+                                        <td>{{cl.NoOfClassHosted}}/{{cl.ScheduleClass}}</td>
+                                        <td>{{cl.AttendancePer |number:2}}</td>
+                                        <td>{{cl.AbsentPer |number:2}}</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            <!-- table end -->
+                        </div>
+
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="PeriodAttendencePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- Detail starts -->
+                <div id="detail-of-employee">
+                    <div class="card p-3 mb-0" style="background-color: #e9f2ee">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>Employee Code : <b>{{CurDetails.Code}}</b></label>
+                            </div>
+
+                            <div class="col-md-5">
+                                <label>Employee Name : <b>{{CurDetails.Name}}</b></label>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Designation : <b>{{CurDetails.Designation}}</b></label>
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div>
+                    </div>
+
+                    <div class="card p-2">
+                        <div class="">
+                            <header class="row">
+                                <div class="col-md-7">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.DailyAttendance">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.DailyAttendance">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search" placeholder="Search"
+                                                       aria-label="Search" ng-model="searchData.PeriodAttendence">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <!-- end col-md-8 -->
+                                <div class="col-md-5 text-right">
+
+                                    <div class="dropdown dnld-file" data-toggle="tooltip"
+                                         data-placement="top" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#main-table-det'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table-det').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table-det').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table-det').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table-det').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                        </div>
+                                    </div>
+                                    <a print-tbl table-id="'#main-table-det'" class="btn btn-secondary btn-light btn-sm wait"
+                                       data-toggle="tooltip" data-placement="bottom"
+                                       title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+
+                                </div>
+                            </header>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                            <table class="table table-bordered table-head-fixed text-nowrap" id="main-table-det">
+                                <thead class=" text-nowrap">
+                                    <tr>
+                                        <th style="width: 70px;">S.No.</th>
+                                        <th style="width: 150px;">Subject</th>
+                                        <th style="width: 200px;">Note</th>
+                                        <th style="width: 180px;">Host Time- End Time</th>
+                                        <th style="width: 120px;">Total Students</th>
+                                        <th style="width: 90px;">Present</th>
+                                        <th style="width: 90px;">Absent</th>
+                                        <th style="width: 90px;">Present %</th>
+                                        <th style="width: 90px;">Absent %</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="cc in CurDetailsColl  | filter:searchData.DailyAttendance | itemsPerPage: perPage.DailyAttendance" current-page="currentPages.DailyAttendance" pagination-id="DetAttendencePagination">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{cc.SubjectName}}</td>
+                                        <td>{{cc.Notes}}</td>
+                                        <td>{{cc.StartDateTime_AD | timeFormat}} To {{cc.EndDateTime_AD | timeFormat}}</td>
+                                        <td>{{cc.NoOfStudent}}</td>
+                                        <td>{{cc.NoOfPresent}}</td>
+                                        <td>{{cc.NoOfStudent-cc.NoOfPresent}}</td>
+                                        <td>{{cc.NoOfPresent/cc.NoOfStudent*100 | number:2}}</td>
+                                        <td>{{(cc.NoOfStudent-cc.NoOfPresent)/cc.NoOfStudent*100 | number:2}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="DetAttendencePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                        <!-- end pagination -->
+
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button"
+                                        class="btn btn-sm btn-info"
+                                        id="back-btn"
+                                        style="min-width: 90px">
+                                    Back to List
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Details end -->
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

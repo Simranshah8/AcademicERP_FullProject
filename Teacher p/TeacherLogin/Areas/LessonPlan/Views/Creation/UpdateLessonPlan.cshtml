@@ -1,0 +1,325 @@
+﻿
+@{ ViewBag.Title = "Notice";
+    Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+@*<link href="~/teacherloginFiles/dynamic/css/lms.css" rel="stylesheet" />*@
+<link href="~/teacherloginFiles/dynamic/css/lessonplan.css" rel="stylesheet" />
+<script src="~/AngularJs/Creation/UpdateLessonPlan.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="UpdateLessonPlanController" ng-init="LoadData()">
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="container-fluid">
+                <section class="iframe-content-starts-here">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group d-flex">
+                                <label class="mt-1 mr-2">Class</label>
+                                <select class="form-control form-control-sm select2" ng-model="newUpdateLessonPlan.ClassId" ng-change="GetClassWiseSubjectList(newUpdateLessonPlan.ClassId)">
+                                    <option ng-value="0">**Select Class**</option>
+                                    <option ng-value="cl.ClassId" ng-repeat="cl in ClassSection">{{cl.Name}}</option>
+                                </select>                                
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group d-flex">
+                                <label class="mt-1 mr-2">Subject</label>
+                                <select class="form-control form-control-sm select2" ng-model="newUpdateLessonPlan.SubjectId" ng-change="GetLessonPlanByClassSubject(newUpdateLessonPlan.ClassId,newUpdateLessonPlan.SubjectId)">
+                                    <option ng-value="cl.SubjectId" ng-repeat="cl in SubjectList" >{{cl.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                      
+                    </div>
+
+                    <div class="tree">
+                        <ul class="card p-0" style="padding-left: 0px;margin-bottom: 6px;">
+
+                            <li ng-repeat="ld in newUpdateLessonPlan.DetailsColl">
+                                <span data-toggle="collapse" style=" background-color: #ccecc4;">
+                                    <div style="color:#000; text-decoration:none;" data-toggle="collapse"
+                                         href="#topic-{{ld.SNo}}" aria-expanded="true" aria-controls="topic-{{ld.SNo}}">
+                                        <i class="collapsed"><i class="fas fa-folder"></i></i>
+                                        <i class="expanded"><i class="far fa-folder-open"></i></i>
+                                        {{ld.SNo}}. {{ld.LessonName}}<label class="updateDate"><b>&rarr;</b><i> ({{ld.PlanStartDate_BS}} - {{ld.PlanEndDate_BS}})</i></label>
+                                        <label class="float-right px-2 statusgreen"><b>{{ld.CompletedPer}} complete</b></label>
+                                        @*<button class="btn btn-sm btn-success float-right mr-2" style="padding:1px 8px" ng-show="ld.StatusValue==1" ng-click="UpdateLessonStatus(ld)">
+                                            Start Now <i class="fas fa-angle-double-right"></i>
+                                        </button>
+                                        <label class="text-success float-right" ng-show="ld.StatusValue==3">
+                                            <b> Completed By :- {{ld.EmpName}} On {{ld.EndDate_BS}}<i class="fas fa-check-double"></i></b>
+                                        </label>
+                                        <label class="text-warning float-right" ng-show="ld.StatusValue==2" ng-click="UpdateLessonStatus(ld)">
+                                            <b><i class="fas fa-spinner"></i> In Progress :- {{ld.EmpName}} On {{ld.StartDate_BS}} </b>
+                                        </label>*@
+                                    </div>
+                                </span>
+                                <div id="topic-{{ld.SNo}}" class="collapse show">
+                                    <div>
+                                        <ul class="pb-3">
+                                            <li ng-repeat="CTTL in ld.ContentsColl">
+                                                <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style="width: 100px;">{{CTTL.ForDateBS}}</td>
+                                                                <td>
+                                                                    <div class="card-body" ng-bind-html="CTTL.Contents | unsafe">
+                                                                    </div>
+                                                                </td>
+
+                                                                <td style="width:114px">
+                                                                    <label class="text-success"><i class="fas fa-circle"></i>{{CTTL.Status}}</label><br />
+                                                                    <br />
+                                                                    <label><i><i class="fas fa-user"></i>{{CTTL.EmpName}}</i></label><br />
+                                                                    <label><i>{{CTTL.EndDate_BS}}</i> </label>
+                                                                </td>
+
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                    <ul class="pb-3">
+                                        <li ng-repeat="tc in ld.TopicColl">
+                                            <span data-toggle="collapse" style=" background-color: #e7f0e6;">
+                                                <a style="color:#000; text-decoration:none;" data-toggle="collapse"
+                                                   href="#subtopic-{{ld.SNo}}-{{tc.SNo}}" aria-expanded="false"
+                                                   aria-controls="subtopic-{{ld.SNo}}-{{tc.SNo}}">
+                                                    <i class="collapsed"><i class="fas fa-folder"></i></i>
+                                                    <i class="expanded"><i class="far fa-folder-open"></i></i>
+                                                    {{ld.SNo}}.{{tc.SNo}} {{tc.TopicName}} <label class="updateDate"><b>&rarr;</b><i> ({{tc.PlanStartDate_BS}} - {{tc.PlanEndDate_BS}})</i></label>
+                                                </a>
+                                                <button class="btn btn-sm btn-success float-right mr-2" style="padding:1px 8px" ng-show="tc.StatusValue==1" ng-click="UpdateTopicStatus(ld,tc)">
+                                                    Start Now <i class="fas fa-angle-double-right"></i>
+                                                </button>
+                                                <label class="text-success mr-2 float-right" ng-show="tc.StatusValue==3">
+                                                    <b> Completed By :- {{tc.EmpName}} On {{tc.EndDate_BS}} <i class="fas fa-check-double"></i></b>
+                                                </label>
+                                                <label class="text-warning mr-2 float-right" ng-show="tc.StatusValue==2" ng-click="UpdateTopicStatus(ld,tc)">
+                                                    <b><i class="fas fa-spinner"></i> In Progress :- {{ld.EmpName}} On {{ld.StartDate_BS}} </b>
+                                                </label>
+                                            </span>
+                                            <div id="subtopic-{{ld.SNo}}-{{tc.SNo}}" class="collapse">
+                                                <ul class="pb-3">
+                                                    <li ng-repeat="CTTL in tc.ContentsColl">
+                                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                            <table class="main-table table table-sm table-bordered bg-white">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td style="width: 100px;">{{CTTL.ForDateBS}}</td>
+                                                                        <td>
+                                                                            <div class="card-body" ng-bind-html="CTTL.Contents | unsafe">
+                                                                            </div>
+                                                                        </td>
+
+                                                                        <td style="width:114px">
+                                                                            <button class="btn btn-sm btn-success float-right mr-2" style="padding:1px 8px" ng-show="CTTL.StatusValue==1" ng-click="UpdateTopicContentStatus(ld,tc,CTTL)">
+                                                                                Start Now <i class="fas fa-angle-double-right"></i>
+                                                                            </button>
+                                                                            <label class="text-warning mr-2 float-right" ng-show="CTTL.StatusValue==2" ng-click="UpdateTopicContentStatus(ld,tc,CTTL)">
+                                                                                <b><i class="fas fa-spinner"></i> In Progress </b>
+                                                                            </label>
+                                                                            <label class="text-success mr-2 float-right" ng-show="CTTL.StatusValue==3">
+                                                                                <b> Completed <i class="fas fa-check-double"></i></b>
+                                                                            </label>
+                                                                            <label><i><i class="fas fa-user"></i> {{CTTL.EmpName}}</i></label><br />
+                                                                            <label ng-show="CTTL.StatusValue==2"><i>{{CTTL.StartDate_BS}}</i> </label>
+                                                                            <label ng-show="CTTL.StatusValue==3"><i>{{CTTL.EndDate_BS}}</i> </label>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </li>
+
+                                                </ul>
+                                            </div>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!--Status Modal Starts-->
+                    <div class="modal fade" id="modal-xl">
+                        <div class="modal-dialog modal-md">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title">Update Lesson Status</h6>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="">Status : {{CurrentLesson.NewStatus}}</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="CurrentLesson.NewStatus" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="">Date</label>
+                                                <input type="text" ng-show="CurrentLesson.StatusValue==1"
+                                                       class="form-control form-control-sm" date-picker ng-model="CurrentLesson.StartDate_TMP" date-detail="CurrentLesson.StartDateDet">
+                                                <input type="text" ng-show="CurrentLesson.StatusValue==2"
+                                                       class="form-control form-control-sm" date-picker ng-model="CurrentLesson.EndDate_TMP" date-detail="CurrentLesson.EndDateDet">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Remarks</label>
+                                                <textarea ng-show="CurrentLesson.StatusValue==1" class="form-control form-control-sm" rows="2" placeholder="" ng-model="CurrentLesson.StartRemarks"></textarea>
+                                                <textarea ng-show="CurrentLesson.StatusValue==2" class="form-control form-control-sm" rows="2" placeholder="" ng-model="CurrentLesson.EndRemarks"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px">
+                                                Reset
+                                            </button>
+                                            <button ng-show="CurrentLesson.StatusValue==1" type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="StartLesson()">
+                                                Save
+                                            </button>
+                                            <button ng-show="CurrentLesson.StatusValue==2" type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="EndLesson()">
+                                                Save
+                                            </button>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+
+
+                    <div class="modal fade" id="modal-xl-1">
+                        <div class="modal-dialog modal-md">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title">Update Topic Status</h6>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="">Status : {{CurrentTopic.NewStatus}}</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="CurrentTopic.NewStatus" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="">Date</label>
+                                                <input type="text" ng-show="CurrentTopic.StatusValue==1"
+                                                       class="form-control form-control-sm" date-picker ng-model="CurrentTopic.StartDate_TMP" date-detail="CurrentTopic.StartDateDet">
+                                                <input type="text" ng-show="CurrentTopic.StatusValue==2"
+                                                       class="form-control form-control-sm" date-picker ng-model="CurrentTopic.EndDate_TMP" date-detail="CurrentTopic.EndDateDet">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Remarks</label>
+                                                <textarea ng-show="CurrentTopic.StatusValue==1" class="form-control form-control-sm" rows="2" placeholder="" ng-model="CurrentTopic.StartRemarks"></textarea>
+                                                <textarea ng-show="CurrentTopic.StatusValue==2" class="form-control form-control-sm" rows="2" placeholder="" ng-model="CurrentTopic.EndRemarks"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px">
+                                                Reset
+                                            </button>
+                                            <button ng-show="CurrentTopic.StatusValue==1" type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="StartTopic()">
+                                                Save
+                                            </button>
+                                            <button ng-show="CurrentTopic.StatusValue==2" type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="EndTopic()">
+                                                Save
+                                            </button>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+
+                    <div class="modal fade" id="modal-xl-2">
+                        <div class="modal-dialog modal-md">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title">Update Topic Content Status</h6>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="">Status : {{CurrentTopicContent.NewStatus}}</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="CurrentTopicContent.NewStatus" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="">Date</label>
+                                                <input type="text" ng-show="CurrentTopicContent.StatusValue==1"
+                                                       class="form-control form-control-sm" date-picker ng-model="CurrentTopicContent.StartDate_TMP" date-detail="CurrentTopicContent.StartDateDet">
+                                                <input type="text" ng-show="CurrentTopicContent.StatusValue==2"
+                                                       class="form-control form-control-sm" date-picker ng-model="CurrentTopicContent.EndDate_TMP" date-detail="CurrentTopicContent.EndDateDet">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Remarks</label>
+                                                <textarea ng-show="CurrentTopicContent.StatusValue==1" class="form-control form-control-sm" rows="2" placeholder="" ng-model="CurrentTopicContent.StartRemarks"></textarea>
+                                                <textarea ng-show="CurrentTopicContent.StatusValue==2" class="form-control form-control-sm" rows="2" placeholder="" ng-model="CurrentTopicContent.EndRemarks"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px">
+                                                Reset
+                                            </button>
+                                            <button ng-show="CurrentTopicContent.StatusValue==1" type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="StartTopicContent()">
+                                                Save
+                                            </button>
+                                            <button ng-show="CurrentTopicContent.StatusValue==2" type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="EndTopicContent()">
+                                                Save
+                                            </button>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+
+                </section>
+                <!-- /.row -->
+
+            </div>
+            <!--/. container-fluid -->
+        </section>
+    </div>
+
+</div>
+ 

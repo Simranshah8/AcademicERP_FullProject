@@ -1,0 +1,537 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<script>
+    var entityRemiderSlip = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.FeeReminderSlip)";
+    var entityReminderForSMS = @Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.ReminderSlip);
+</script>
+<script src="~/jslib/Fee/billprint.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BillPrintController" @*ng-init="LoadData()"*@>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active"
+                         id="pills-second"
+                         role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                        id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active"
+                                               id="home-tab"
+                                               data-toggle="tab"
+                                               href="#home"
+                                               role="tab"
+                                               aria-controls="home"
+                                               aria-selected="true">Bill Print</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link"
+                                               id="profile-tab"
+                                               data-toggle="tab"
+                                               href="#profile"
+                                               role="tab"
+                                               aria-controls="profile"
+                                               aria-selected="false">Reminder slip</a>
+                                        </li>
+                                        @*<li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="printlog-tab"
+                                                   data-toggle="tab"
+                                                   href="#printlog"
+                                                   role="tab"
+                                                   aria-controls="printlog"
+                                                   aria-selected="false">Bill Print Log</a>
+                                            </li>*@
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section"
+                                 id="home"
+                                 role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="bill-print-section " class="card">
+                                    <div class="card-body py-2 px-0">
+                                        <form action="">
+                                            <div class="row">
+
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>Class/Sec</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newBillPrint.SelectedClass" ng-change="getClassWiseSemester()">
+                                                        <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2" ng-show="StudentTypeList.length>0">
+                                                    <div class="form-group">
+                                                        <label for="">StudentType</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBillPrint.StudentTypeId">
+                                                            <option>**Select StudentType**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in StudentTypeList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2" ng-show="MediumList.length>0">
+                                                    <div class="form-group">
+                                                        <label for="">Medium</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBillPrint.MediumId">
+                                                            <option>**Select Medium**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in MediumList">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-2" ng-show="newBillPrint.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                    <div class="form-group">
+                                                        <label for="">Year</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBillPrint.ClassYearId">
+                                                            <option ng-value="0">**Select Year**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList" ng-selected="cl.id==newBillPrint.ClassYearId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2" ng-show="newBillPrint.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                    <div class="form-group">
+                                                        <label for="">Semester</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBillPrint.SemesterId">
+                                                            <option ng-value="0">**Select Semester**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList" ng-selected="cl.id==newBillPrint.SemesterId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                    <label for="">Batch</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newBillPrint.BatchId">
+                                                        <option ng-value="0">**Select Batch**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newBillPrint.BatchId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <div class="form-group">
+                                                        <label>From Month</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBillPrint.FromMonthId">
+                                                            <option ng-value="0">**Select Month**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newBillPrint.MonthId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <div class="form-group">
+                                                        <label>To Month</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newBillPrint.ToMonthId">
+                                                            <option ng-value="0">**Select Month**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newBillPrint.MonthId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <div class="form-group">
+                                                        <label>From BillNo.</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newBillPrint.FromBillNo" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <div class="form-group">
+                                                        <label>To BillNo.</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newBillPrint.ToBillNo" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <div class="form-group">
+                                                        <input type="checkbox" name="ShowZeroBalance"
+                                                               id="chkShowZeroBalance" class="mr-2" ng-model="newBillPrint.ShowZeroBalance">
+                                                        <label for="chkShowZeroBalance">
+                                                            Show Zero Balance
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                               
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>Select Report</label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="ClassWiseBillPrint()" ng-model="newBillPrint.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in newBillPrint.TemplatesColl">{{rt.ReportName}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-1 col-lg-1 col-md-1">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm  mt-4" ng-click="SendEmail()" id="start-camera">
+                                                        <i class="fas fa-envelope mr-2"></i>Email
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-7 col-lg-67 col-md-7 mt-4">
+                                                    <label class="sr-only"
+                                                           for="inlineFormInputGroup">Select Student</label>
+                                                    <div class="input-group-prepend">
+                                                        <select class="input-group-text dropdown-toggle p-0"
+                                                                style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newBillPrint.SelectStudent">
+
+                                                            <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newBillPrint.SelectStudent">
+                                                                {{ss.text}}
+                                                            </option>
+                                                        </select>
+
+                                                        <select class="form-control select2 form-control-sm" all-student ng-model="newBillPrint.StudentId" student-detail="newBillPrint.StudentDetails" side-bar-data="newBillPrint.SideBarData" search-by="newBillPrint.SelectStudent" confirm-action="StudentWiseBillPrint()">
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                           
+                                            <div class="row mt-2" id="schedule-report-table">
+                                                <iframe id="frmRptBillPrint" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+
+
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section"
+                                 id="profile"
+                                 role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="reminder-slip-section">
+
+                                    <div class="row mb-2">
+                                        <div class="col-sm-2 col-lg-3 col-md-3">
+                                            <label>Class/Sec</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newReminderSlip.SelectedClass" ng-change="ChangeReminderSlipClass()">
+                                                <option ng-value="0">**All**</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newBillPrint.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group">
+                                                <label for="">Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newReminderSlip.ClassYearId">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassClassYearList" ng-selected="cl.id==newBillPrint.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newBillPrint.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newReminderSlip.SemesterId">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SelectedClassSemesterList" ng-selected="cl.id==newReminderSlip.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <label for="">Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newReminderSlip.BatchId">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newReminderSlip.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2 col-sm-2 col-lg-2">
+                                            <label for="name">Upto Month</label>
+                                            <select class="form-control form-control-sm" ng-model="newReminderSlip.UptoMonthId">
+                                                <option ng-value="0">**Select Month**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in MonthList_RS" ng-selected="cl.id==newReminderSlip.UptoMonthId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-2 col-lg-2">
+                                            <label for="name">For</label>
+                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="newReminderSlip.ForStudent">
+                                                <option ng-value="1">All</option>
+                                                <option ng-value="2">Continue</option>
+                                                <option ng-value="3">Left</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <div class="custom-control custom-checkbox mt-4">
+                                                <input class="custom-control-input"
+                                                       type="checkbox" id="chkCombine-6s" ng-model="newReminderSlip.CombinedSummary" ng-change="getReminderSlip()">
+                                                <label for="chkCombine-6s"
+                                                       class="custom-control-label">
+                                                    Combine
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1 col-sm-1 col-lg-1">
+                                            <button type="button" class="btn btn-sm btn-success mt-4" style="min-width:70px;" ng-click="getReminderSlip()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                        </div>
+                                    </div>
+                                        <div class="row mb-2">
+                                        <div class="col-md-12 col-sm-12 col-lg-12">
+                                            <div class="float-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                            type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Notification" ng-click="SendNoticeToStudent()">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="SMS" ng-click="SendSMSToStudent()">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintReminderSlip()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Send Email" ng-click="SendEmailReminderSlip()">
+                                                    <i class="fas fa-envelope-open"></i>
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div ui-grid="gridOptions"
+                                         ui-grid-auto-resize
+                                         ui-grid-resize-columns
+                                         ui-grid-move-columns
+                                         ui-grid-selection
+                                         ui-grid-exporter
+                                         ui-grid-pinning
+                                         ui-grid-filtering
+                                         ui-grid-save-state style="height:calc(100vh - 12rem);max-width:100%;"></div>
+
+                                </div>
+                            </div>
+
+
+                            <!--Bill Print Log Tab Starts(Added by suresh on Bhadra 24) Starts-->
+                            <div class="tab-pane fade main-section"
+                                 id="printlog"
+                                 role="tabpanel"
+                                 aria-labelledby="printlog-tab">
+                                <div>
+
+                                    <div class="card p-2">
+                                        <header class="row mb-2 mt-2">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <label class="input-group-text cstm">Show</label>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0"
+                                                                    id="exampleFormControlSelect1">
+                                                                <option>10</option>
+                                                                <option>25</option>
+                                                                <option>50</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search"
+                                                                   placeholder="Search"
+                                                                   aria-label="Search" />
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item" href="#"><img src="~/wwwroot/dynamic/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> Mail</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y sales-main-table table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 80px;">S.No.</th>
+                                                        <th style="width: 150px;">class/Sec</th>
+                                                        <th style="width: 140px;">From Month</th>
+                                                        <th style="width: 140px;">To Month</th>
+                                                        <th style="width: 150px;">Bill Date</th>
+                                                        <th style="width: 150px;">Print Date</th>
+                                                        <th style="width: 150px;">Print By</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td>1</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <footer class="row align-items-center mt-2">
+                                            <div class="col-md-5">
+                                                <p class="mb-0">Showing 1 to 10 of 200 Entries</p>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <ul class="pagination pagination-sm m-0 float-right">
+                                                    <li class="page-item"><a class="page-link" href="#">«</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">»</a></li>
+                                                </ul>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--Bill Print Log Tab Starts(Added by suresh on Bhadra 24) ends-->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal-xl" style="margin-top: 0px;">
+        <div class="modal-dialog modal-md" style="width:70%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm" placeholder="Title" ng-model="newNotice.Title" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="5" ng-model="newNotice.Description" placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Attach File</label>
+                        <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newNotice.AttachmentColl" />
+                    </div>
+
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="SendManualNoticeToStudent()" style="min-width: 90px;" ng-disabled="loadingstatus=='running'">Send</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+</div>
+
+
+

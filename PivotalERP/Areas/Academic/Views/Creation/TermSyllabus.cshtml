@@ -1,0 +1,482 @@
+﻿<style>
+    p img {
+        width: auto !important;
+        max-height: 400px !important;
+    }
+</style>
+<script src="/jslib/export/tableExport.js"></script>
+<script src="/jslib/export/jquery.base64.js"></script>
+
+<script src="/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="/jslib/export/jspdf/jspdf.js"></script>
+<script src="/jslib/export/jspdf/libs/base64.js"></script>
+<script src="/jslib/Assets/Assets.js"></script>
+<script src="~/jslib/academic/creation/TermSyllabus.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="TermSyllabusController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:55px!important">
+                <div class="tab-content">
+                    <div class="card " id="table-section">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search" ng-model="searchData.SyllabusList"
+                                                   aria-label="Search">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-5 text-right">
+                                <button type="button" class="btn btn-sm btn-success" id="add-Syllabus"
+                                        style="min-width: 90px" ng-click="ClearDetails()">
+                                    <i class="fas fa-plus w-t"></i> Add Term Syllabus
+                                </button>
+                            </div>
+                        </header>
+
+                        @*Table*@
+                        <div class="card-body p-0">
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                    <div class="card" ng-if="GroupedSyllabusList.length == 0">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-exclamation-triangle text-warning mr-2"></i>
+                                            <span>No syllabus data found.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2" ng-repeat="cb in GroupedSyllabusList | filter:searchData.SyllabusList">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <label><b>Exam Type : {{cb.ExamName}}</b></label>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label><b>Class : {{cb.ClassName}}</b></label>
+                                            </div>
+                                            <div class="col-md-3" ng-show="cb.Semester">
+                                                <label><b>Semester : {{cb.Semester}}</b></label>
+                                            </div>
+                                            <div class="col-md-3" ng-show="cb.ClassYear">
+                                                <label><b>Class Year : {{cb.ClassYear}}</b></label>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-scroll table-scroll-x-y sales-main-table">
+                                            <table class="table table-bordered table-sm bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:50px">S.N</th>
+                                                        <th style="width:200px">Subject Name</th>
+                                                        <th style="width:200px">Total Lessons</th>
+                                                        <th style="width:200px">Total Topics</th>
+                                                        <th style="width:100px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Use cb.Subjects instead of cb.Records -->
+                                                    <tr ng-repeat="det in cb.Subjects">
+                                                        <td>{{$index + 1}}</td>
+                                                        <td>{{det.SubjectName}}</td>
+                                                        <td>{{det.LessonCount}}</td>
+                                                        <td>{{det.TopicCount}}</td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-info p-0" style="min-width:60PX;" ng-click="ShowClasswiseSyllabus(det, cb)">
+                                                                Details
+                                                            </button>
+                                                            <button class="btn btn-sm btn-default" ng-click="PrintSyllabus(det, cb)">
+                                                                <i class="fas fa-print"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="add-Syllabus-form">
+
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="row">
+                                    <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                        <div class="form-group">
+                                            <label for="">Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSyllabus.BatchId" ng-change="GetClassWiseSubjectList()">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newSyllabus.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Class</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSyllabus.SelectedClass" ng-change="GetClassWiseSubjectList()">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==newSyllabus.ClassId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newSyllabus.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group mb-0">
+                                            <label for="">Class Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSyllabus.ClassYearId" ng-change="GetClassWiseStudentList()">
+                                                <option ng-value="cl.ClassYearId" ng-repeat="cl in ClassYearList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2 col-lg-2 col-md-2" ng-show="newSyllabus.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label for="">Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSyllabus.SemesterId" ng-change="GetClassWiseSubjectList()">
+                                                <option ng-value="cl.SemesterId" ng-repeat="cl in SemesterList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>ExamType</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSyllabus.ExamTypeId" ng-change="GetClassSubjectWiseTermSyllabus()">
+                                                <option ng-value="0">**Select ExamType**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newSyllabus.ExamTypeId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Subject</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSyllabus.SubjectId" ng-change="GetClassSubjectWiseTermSyllabus()">
+                                                <option ng-value="cl.id" ng-repeat="cl in SubjectList" ng-selected="cl.id==newSyllabus.SubjectId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    @*<div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Lessons/Themes</label>
+                                                <select class="form-control form-control-sm select2"
+                                                        ng-model="S.LessonId"
+                                                        ng-change="GetLessonTopicDetailsWise(S)">
+                                                    <option ng-value="cl.LessonId" ng-repeat="cl in SubjectLessonWiseList">{{cl.LessonName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>*@
+                                </div>
+                                <div class="table-scroll mt-2">
+                                    <table class="table table-sm table-bordered th-fixed-top bg-white w-100">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-2 align-middle" style="width:50px">SNO</th>
+                                                <th class="align-middle" style="width:250px"> Lessons</th>
+                                                <th class="align-middle" style="width:350px"> Topics</th>
+                                                <th class="align-middle" style="width:70px">Content</th>
+                                                <th class="align-middle" style="width:80px">Teaching Period</th>
+                                                <th class="align-middle" style="width:80px">Teaching Methods</th>
+                                                <th class="align-middle" style="width:90px">Teaching Material</th>
+                                                <th class="align-middle" style="width:90px">Objective</th>
+                                                <th class="align-middle" style="width:150px">Remarks</th>
+                                                <th class="align-middle px-2" style="width:70px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="S in newSyllabus.AddSyllabusColl">
+                                                <td class="px-2">{{$index + 1}}</td>
+
+                                                <td>
+                                                    <select class="form-control form-control-sm select2"
+                                                            ng-model="S.LessonId"
+                                                            ng-change="GetLessonTopicDetailsWise(S)">
+                                                        <option ng-value="cl.LessonId" ng-repeat="cl in SubjectLessonWiseList">{{cl.LessonName}}</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-control form-control-sm select2" select multiple="multiple" ng-model="S.TopicId" style="width:100%">
+                                                        <option ng-value="cl.TopicId" ng-repeat="cl in S.LessonTopicDetailsWiseList">{{cl.TopicName}}</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#Content{{$index}}">Update</button>
+                                                    <div class="modal fade" id="Content{{$index}}" style="margin-top:28px">
+                                                        <div class="modal-dialog modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    Content for :  <b> {{ getLessonAndTopicNames(S) }} </b>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body p-2">
+                                                                    <textarea class="textarea" placeholder="Place some text here" style=" width: 100%; height: 183.062px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px; " ng-model="S.Content" html-editor></textarea>
+
+                                                                </div>
+                                                                <div class="time-label">
+                                                                    <span class="d-block border-0 p-3 text-center">
+                                                                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><input ng-model="S.TeachingPeriod" type="text" class="form-control form-control-sm" /></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#TeachingMethod{{$index}}">Update</button>
+                                                    <div class="modal fade" id="TeachingMethod{{$index}}" style="margin-top:28px">
+                                                        <div class="modal-dialog modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    Teaching Method for :  <b>  {{ getLessonAndTopicNames(S) }} </b>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body p-2">
+                                                                    <textarea class="textarea" placeholder="Place some text here" style=" width: 100%; height: 183.062px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px; " ng-model="S.TeachingMethods" html-editor></textarea>
+                                                                </div>
+                                                                <div class="time-label">
+                                                                    <span class="d-block border-0 p-3 text-center">
+                                                                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#TeachingMaterials{{$index}}">Update</button>
+                                                    <div class="modal fade" id="TeachingMaterials{{$index}}" style="margin-top:28px">
+                                                        <div class="modal-dialog modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    Teaching Materials for :  <b>  {{ getLessonAndTopicNames(S) }}</b>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body p-2">
+                                                                    <textarea class="textarea" placeholder="Place some text here" style=" width: 100%; height: 183.062px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px; " ng-model="S.TeachingMaterials" html-editor></textarea>
+
+                                                                </div>
+                                                                <div class="time-label">
+                                                                    <span class="d-block border-0 p-3 text-center">
+                                                                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td>
+                                                    <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#Evaluation{{$index}}">Update</button>
+                                                    <div class="modal fade" id="Evaluation{{$index}}" style="margin-top:28px">
+                                                        <div class="modal-dialog modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    Objective for :  <b> {{ getLessonAndTopicNames(S) }}</b>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body p-2">
+                                                                    <textarea class="textarea" placeholder="Place some text here" style=" width: 100%; height: 183.062px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px; " ng-model="S.Evaluation" html-editor></textarea>
+
+                                                                </div>
+                                                                <div class="time-label">
+                                                                    <span class="d-block border-0 p-3 text-center">
+                                                                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <textarea class="form-control form-control-sm" ng-model="S.Remarks" rows="1"></textarea>
+                                                </td>
+                                                <td class="px-2">
+                                                    <button ng-click="AddSyllabus($index)" class="btn btn-link p-0">
+                                                        <i class="fas fa-plus text-secondary"></i>
+                                                    </button>
+                                                    <button ng-click="DeleteSyllabus($index)" class="btn btn-link p-0">
+                                                        <i class="p-1 fas fa-trash-alt text-danger"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex justify-content-center mt-3" style="gap:0.5rem; ">
+                            <button class="btn btn-sm btn-info" style="min-width: 90px;" id="Syllabusback-btn">Back to List</button>
+                            <button class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearDetails()">Reset</button>
+                            <button class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateSyllabus()">Save</button>
+                        </div>
+
+
+                    </div>
+
+                    <div id="preview-form">
+                        <div id="printcard">
+                            <div class="row " style="border-bottom:2px solid #000000">
+                                <div class="col-md-2 text-center">
+                                    <img ng-src="{{ Logo.LogoPath}}" class="img-fluid" style="height:120px; width:auto;" />
+                                </div>
+
+                                <div class="col-md-8 text-center mb-2">
+                                    <h3 class="text-secondary" style="font-family: 'Cambria', serif; font-weight: bold; letter-spacing: 1px; font-size: 32px">
+                                        {{newCompanyDet.Name}}
+                                    </h3>
+                                    <h6 style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+                                        Affiliated to {{newCompanyDet.Affiliated}}
+                                    </h6>
+                                    <h6 style="font-family: 'Times New Roman', serif; font-weight: bold; font-size: 20px;">
+                                        {{newCompanyDet.Address}}
+                                    </h6>
+
+                                    <p class="mb-0" style="font-family: 'Times New Roman', serif; font-size: 20px; font-weight: bold;">
+                                        {{newCompanyDet.PhoneNo}} ,   {{newCompanyDet.EmailId}}
+                                    </p>
+
+                                </div>
+
+                                <div class="col-md-2 text-center">
+                                    <img ng-src="{{ Logo.AffiliatedLogo}}" class="img-fluid" style="height:120px; width:auto;" />
+                                </div>
+                            </div>
+                            <div class="card p-2 mb-2 mt-2" style="background-color: aliceblue; border: 2px solid #d2e5f5">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <p class="mb-0">Exam Type</p>
+                                        <p class="mb-0"><b>{{SelectedExamType}}</b></p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <p class="mb-0">Class</p>
+                                        <p class="mb-0"><b>{{SelectedClass}} <span ng-if="ClassYear">- {{ClassYear}}</span> <span ng-if="Semester">- {{Semester}}</span></b></p>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <p class="mb-0">Subject</p>
+                                        <p class="mb-0"><b>{{SelectedSubjectName}}</b></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class=" sales-main-table table-scroll">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">S.No.</th>
+                                            <th style="width: 200px;">Lesson</th>
+                                            <th style="width: 200px;">Topics</th>
+                                            <th style="width: 200px;">Content</th>
+                                            <th style="width: 50px;">Teaching Period</th>
+                                            <th style="width: 150px;">Teaching Methods</th>
+                                            <th style="width: 150px;">Teaching Materials</th>
+                                            <th style="width: 150px;">Objective</th>
+                                            <th style="width: 100px;">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="fi in ContentSyllabusList">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{fi.LessonName}}</td>
+                                            <td>{{fi.TopicNames}}</td>
+                                            <td><label class="mb-0" ng-bind-html="fi.Content | unsafe"></label></td>
+                                            <td>{{fi.TeachingPeriod}}</td>
+                                            <td><label class="mb-0" ng-bind-html="fi.TeachingMethods | unsafe"></label></td>
+                                            <td><label class="mb-0" ng-bind-html="fi.TeachingMaterials | unsafe"></label></td>
+                                            <td><label class="mb-0" ng-bind-html="fi.Evaluation | unsafe"></label></td>
+                                            <td>{{fi.Remarks}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--form add syllabus-->
+
+            </section>
+            <div class="modal fade" id="ModalList" tabindex="-1" style="margin-top: 25px;">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            Term Syllabus
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-2">
+                            <div class="card p-2 mb-2" style="background-color: aliceblue; border: 2px solid #d2e5f5">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <p class="mb-0">Exam Type</p>
+                                        <p class="mb-0"><b>{{SelectedExamType}}</b></p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <p class="mb-0">Class</p>
+                                        <p class="mb-0"><b>{{SelectedClass}} <span ng-show="ClassYear">- {{ClassYear}}</span> <span ng-show="Semester">- {{Semester}}</span></b></p>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <p class="mb-0">Subject</p>
+                                        <p class="mb-0"><b>{{SelectedSubjectName}}</b></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class=" sales-main-table table-scroll">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">S.No.</th>
+                                            <th style="width: 200px;">Lesson</th>
+                                            <th style="width: 200px;">Topics</th>
+                                            <th style="width: 200px;">Content</th>
+                                            <th style="width: 50px;">Teaching Period</th>
+                                            <th style="width: 150px;">Teaching Methods</th>
+                                            <th style="width: 150px;">Teaching Materials</th>
+                                            <th style="width: 150px;">Objective</th>
+                                            <th style="width: 100px;">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="fi in ContentSyllabusList">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{fi.LessonName}}</td>
+                                            <td>{{fi.TopicNames}}</td>
+                                            <td><label class="mb-0" ng-bind-html="fi.Content | unsafe"></label></td>
+                                            <td>{{fi.TeachingPeriod}}</td>
+                                            <td><label class="mb-0" ng-bind-html="fi.TeachingMethods | unsafe"></label></td>
+                                            <td><label class="mb-0" ng-bind-html="fi.TeachingMaterials | unsafe"></label></td>
+                                            <td><label class="mb-0" ng-bind-html="fi.Evaluation | unsafe"></label></td>
+                                            <td>{{fi.Remarks}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

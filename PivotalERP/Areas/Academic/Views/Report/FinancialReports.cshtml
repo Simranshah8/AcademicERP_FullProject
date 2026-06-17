@@ -1,0 +1,400 @@
+﻿
+<style>
+    .row {
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+
+    .col-md-4 {
+        padding-left: 5px;
+        padding-right: 5px;
+        margin-bottom: -15px;
+    }
+
+    .report-card {
+        border-radius: 12px;
+        border: 1px solid #ececec;
+        cursor: pointer;
+        height: 80px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .payment-report-title {
+        margin-top: -25px; /* adjust as needed */
+    }
+
+        .report-card:hover {
+            background-color: #d4edc9; /* slightly darker on hover */
+            transform: translateY(-4px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+        }
+
+    .report-search {
+        width: 50%;
+        height: 42px;
+        border-radius: 25px;
+        padding-left: 20px;
+        font-size: 14px;
+    }
+
+    .star-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        z-index: 10;
+    }
+
+    .report-card.note-style .card-body {
+        display: flex;
+        padding: 0;
+        height: 100%;
+    }
+
+    /* Left vertical strip */
+    .note-strip {
+        width: 7px;
+        background: #76BE4E;
+        border-radius: 12px 0 0 12px;
+    }
+
+    /* Content area */
+    .note-content {
+        flex: 1;
+        background: #E6FFE6;
+        padding: 12px 18px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Keep height aligned */
+    .report-card.note-style {
+        height: 80px;
+        overflow: hidden;
+    }
+
+
+</style>
+
+<script src="~/jslib/Govplanning/Sip/FinancialReports.js"></script>
+
+!-- Font Awesome (for star icon) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="FinancialReportsController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" >
+                <div class="tab-content">
+                    <!---Practice-->
+                    <div>
+                        <div id="practice-section" class="card" style="margin-top:-28px">
+                            <header class="row mb-1">
+                              @*  <div class="col-md-12">
+                                    <h6 class="font-weight-bold mb-2">Financial Reports</h6>
+                                </div>*@
+
+                                <div class="col-md-12 d-flex justify-content-center">
+                                    <input type="text"
+                                           class="form-control report-search"
+                                           placeholder="Search reports, summaries, or categories"
+                                           ng-model="searchText" />
+                                </div>
+                            </header>
+                        </div>
+                        <div class="row payment-report-title">
+                            <div class="col-md-12">
+                                <h6 class="font-weight-bold">Payment-Centric Reports</h6>
+                            </div>
+                        </div>
+                        <div id="practice-form" class="card p-0 mb-0">
+                            <div class=" card-body px-0 py-2">
+                                <div class="row">
+                                    <!-- Payment -->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <!-- Left green strip -->
+                                               <div class="note-strip"></div>
+                                                <!-- Content -->
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('Payment')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.Payment ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">Payment</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        View student payment data fee-wise
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Payment Summary -->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('PaymentSummary')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.PaymentSummary ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">Payment Summary</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        Receipt-focused view analyzed fee-wise, student-wise, or transaction-wise
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- FeeWise Payment -->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                               <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('FeeWisePayment')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.FeeWisePayment ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">Feewise Payment</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        View fee-wise receipt data
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Transaction Summary -->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('TransactionSummary')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.TransactionSummary ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">Transaction Summary</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        View the overall Payment
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Payment Method Daybook -->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('PaymentMethodDaybook')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.PaymentMethodDaybook ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">Payment Method Daybook</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        View the data of payment payment method wise
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- All Bills -->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('AllBills')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.AllBills ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">All Bills</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        Receipt-focused view that can be analyzed fee-wise,student-wise or transaction-wise
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Void Payment -->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('VoidPayment')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.VoidPayment ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">Void Payment</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        Lists voided payment receipts details and void metadata(void date,remarks)
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Tender Payment -->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('TenderPayment')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.TenderPayment ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">Tender Payment</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        Shows tender based receipts transaction wise within a fiscal year
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Payment Refund Report -->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('PaymentRefundReport')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.PaymentRefundReport ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">Payment Refund Report</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        View the date of payment refund and rectify
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Payment Change Logs-->
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('PaymentChangeLogs')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.PaymentChangeLogs ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>
+                                                    <h6 class="font-weight-bold mb-1">Payment Change Logs</h6>
+                                                    <p class="text-muted mb-0 small">
+                                                        View the changes made in payment after generating receipt
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ================= INVOICE CENTRIC REPORT ================= -->
+                            <div class="row mb-2">
+                                <div class="col-md-12">
+                                    <h6 class="font-weight-bold">Invoice-Centric Reports</h6>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('InvoiceStatement')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.InvoiceStatement ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>                             
+                                                        <h6 class="font-weight-bold mb-1">Invoice Statement</h6>
+                                                        <p class="text-muted mb-0 small">
+                                                            Grade-wise invoice summary for the academic year
+                                                        </p>                                                 
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('MonthlyIS')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.MonthlyIS ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>                                                   
+                                                        <h6 class="font-weight-bold mb-1">Monthly Invoice Statement</h6>
+                                                        <p class="text-muted mb-0 small">
+                                                            Shows invoice trends period-wise or date-wise
+                                                        </p>                                                   
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="card shadow-sm report-card note-style position-relative">
+                                            <div class="card-body">
+                                                <div class="note-strip"></div>
+                                                <div class="note-content">
+                                                    <button class="star-btn"
+                                                            ng-click="toggleStar('YearlyIS')">
+                                                        <i class="fa"
+                                                           ng-class="starStatus.YearlyIS ? 'fa-star text-warning' : 'fa-star-o text-warning'">
+                                                        </i>
+                                                    </button>                                                   
+                                                        <h6 class="font-weight-bold mb-1">Yearly Invoice Statement</h6>
+                                                        <p class="text-muted mb-0 small">
+                                                            Compares invoice data between two academic years
+                                                        </p>                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>

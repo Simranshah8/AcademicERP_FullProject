@@ -1,0 +1,408 @@
+﻿
+<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+
+<script>
+    var entityBooksList = 465 @*@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.BooksList);*@
+    var entityBooksIssuedRegister = 466 @*@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.BooksIssuedRegister);*@
+    var entityBooksReceivedRegister = 467 @*@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.BooksReceivedRegister);*@
+    var entityBooksLedger = 468 @*@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.BooksLedger);*@
+    var entityStudent_EmployeeLedger = 469 @*@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.Student_EmployeeLedger);*@
+</script>
+
+<script src="~/jslib/Library/Report.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ReportController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="book-section">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel" aria-labelledby="pills-second-tab">
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Books List</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">Books Issued Register</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="edition-tab" data-toggle="tab"
+                                               href="#edition" role="tab" aria-controls="edition"
+                                               aria-selected="false">Books Received Register</a>
+                                        </li>
+
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="ledger-tab" data-toggle="tab"
+                                               href="#ledger" role="tab" aria-controls="ledger"
+                                               aria-selected="false">Books Ledger</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="student-tab" data-toggle="tab"
+                                               href="#student" role="tab" aria-controls="student"
+                                               aria-selected="false">Student/Employee Ledger</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <div class="tab-content" id="myTabContent">
+                            <!--Books List Starts-->
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                <div id="booktitle-section">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <span for="">Material Type</span>
+                                                <select class="form-control form-control-sm select2" ng-model="bookList.MaterialTypeId">
+                                                    <option ng-value="0" selected>**All**</option>
+                                                    <option ng-value="mt.MaterialTypeId" ng-repeat="mt in MaterialTypeList">{{mt.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7 mt-4">
+                                            <!-- <div class="select-button"> -->
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input"
+                                                       type="radio"
+                                                       name="inlineRadioOptions"
+                                                       id="inlineRadio1"
+                                                       ng-value="1" ng-model="bookList.ForType" />
+                                                <label class="form-check-label" for="inlineRadio1">Available</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input"
+                                                       type="radio"
+                                                       name="inlineRadioOptions"
+                                                       id="inlineRadio3"
+                                                       ng-value="2" ng-model="bookList.ForType" />
+                                                <label class="form-check-label" for="inlineRadio3">Issued</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input"
+                                                       type="radio"
+                                                       name="inlineRadioOptions"
+                                                       id="inlineRadio2"
+                                                       ng-value="0" ng-model="bookList.ForType" />
+                                                <label class="form-check-label" for="inlineRadio2">All</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mt-4 text-right">
+                                            <button type="button" class="btn btn-sm btn-success" ng-click="GetBookDetailsList()"><i class="fas fa-sync-alt mr-1"></i>Load</button>
+                                            <a class="btn btn-secondary btn-light btn-sm wait" data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintBookList()"><i class="fas fa-print"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <div id="grid1" ui-grid="gridOptions1"
+                                             ui-grid-auto-resize
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-save-state style="height: calc(100vh - 170px);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Books List ends-->
+                            <!--Books Issued Register Starts-->
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <div id="issued-book-section">
+                                    <div class="row mt-2">
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1" style="width:100px">Date From</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="issueRegister.DateFrom_TMP" date-detail="issueRegister.DateFromDet" confirm-action="validateDates('fromDate',issueRegister)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1" style="width:80px">Date To</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="issueRegister.DateTo_TMP" date-detail="issueRegister.DateToDet" confirm-action="validateDates('toDate',issueRegister)">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 text-right mt-2">
+                                            <button type="button" class="btn btn-sm btn-success" ng-click="GetBookIssueRegister(false)"><i class="fas fa-sync-alt mr-1"></i>Load</button>
+                                            <button type="button" class="btn btn-sm btn-success" ng-click="GetBookIssueRegister(true)"><i class="fas fa-sync-alt mr-1"></i>Load Pending For Receive</button>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="top" title="Print" ng-click="PrintBooksIssuedRegister()"><i class="fas fa-print"></i></a>
+                                        </div>
+
+                                    </div>
+                                    <div class="card p-0">
+                                        <div id="grid2" ui-grid="gridOptions2"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-auto-resize
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-save-state style="height: calc(100vh - 140px);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Books Issued Register Ends-->
+                            <!--Books Received Register Starts-->
+                            <div class="tab-pane fade main-section" id="edition" role="tabpanel"
+                                 aria-labelledby="edition-tab">
+                                <div id="received-book-section">
+                                    <div class="row mt-2">
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1" style="width:90px">Date From</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="receivedRegister.DateFrom_TMP" date-detail="receivedRegister.DateFromDet" confirm-action="validateDates('fromDate',receivedRegister)">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1" style="width:90px">Date To</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="receivedRegister.DateTo_TMP" date-detail="receivedRegister.DateToDet" confirm-action="validateDates('toDate',receivedRegister)">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 text-right mt-2">
+                                            <button type="button" class="btn btn-sm btn-success" ng-click="GetBookReceivedRegister()"><i class="fas fa-sync-alt mr-1"></i>Load</button>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="top" title="Print" ng-click="PrintBooksReceivedRegister()"><i class="fas fa-print"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <div id="grid3" ui-grid="gridOptions3"
+                                             ui-grid-resize-columns
+                                             ui-grid-auto-resize
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-save-state style="height: calc(100vh - 140px);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Books Received Register ends-->
+                            <!--Books Ledger Starts-->
+                            <div class="tab-pane fade main-section" id="ledger" role="tabpanel" aria-labelledby="ledger-tab">
+                                <div id="received-book-section">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">Date From</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="bookRegister.DateFrom_TMP" date-detail="bookRegister.DateFromDet" confirm-action="validateDates('fromDate',bookRegister)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">Date To</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="bookRegister.DateTo_TMP" date-detail="bookRegister.DateToDet" confirm-action="validateDates('toDate',bookRegister)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label>Book Selection</label>
+                                            <div class="input-group-prepend">
+                                                <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="bookRegister.SelectBook">
+
+                                                    <option ng-repeat="ss in BookSearchOptions" ng-value="ss.value" ng-selected="ss.value==bookRegister.SelectBook">
+                                                        {{ss.text}}
+                                                    </option>
+
+                                                </select>
+
+                                                <select class="form-control select2 form-control-sm" all-book ng-model="bookRegister.BookEntryId" book-detail="bookRegister.BookDetails" side-bar-data="bookRegister.SideBarData" search-by="bookRegister.SelectBook" for-report="true" confirm-action="GetBookRegister()" showdetails="true">
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 text-right mt-4">
+                                            <button type="button" class="btn btn-sm btn-success" ng-click="GetBookRegister()"><i class="fas fa-sync-alt mr-1"></i>Load</button>
+                                            <a class="btn btn-secondary btn-light btn-sm wait" data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintBooksLedger()"><i class="fas fa-print"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label><b>Book Title: {{bookRegister.BookDetails.BookTitle}}</b></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label><b>Subject: {{bookRegister.BookDetails.Subject}}</b></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label><b>Publication: {{bookRegister.BookDetails.Publication}}</b></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label><b>Author: {{bookRegister.BookDetails.Authors}}</b></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label><b>Category: {{bookRegister.BookDetails.BookCategory}}</b></label>
+                                        </div>
+                                    </div>
+                                    <div class="card p-0">
+                                        <div id="grid4" ui-grid="gridOptions4"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-auto-resize
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-save-state style="height: calc(100vh - 190px);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Books Ledger ends-->
+                            <!--Student/Employee Ledger Starts-->
+                            <div class="tab-pane fade main-section" id="student" role="tabpanel"
+                                 aria-labelledby="student-tab">
+                                <div id="student-book-section">
+                                    <div class="row">
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Issue To</label>
+                                                <select class="form-control form-control-sm" ng-model="newStudent.IssueTo">
+                                                    <option ng-value="it.id" ng-repeat="it in IssueToList" ng-selected="it.id==newStudent.IssueTo">{{it.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-6 col-md-6 mt-4" ng-show="newStudent.IssueTo==2" id="selectEmp">
+                                            <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+
+                                            <div class="input-group-prepend">
+                                                <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="newStudent.SelectEmployee">
+
+                                                    <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newStudent.SelectEmployee">
+                                                        {{ss.text}}
+                                                    </option>
+
+                                                </select>
+
+                                                <select class="form-control select2 form-control-sm" all-employee ng-model="newStudent.EmployeeId" employee-detail="newStudent.EmployeeDetails" side-bar-data="newStudent.EmpSideBarData" search-by="newStudent.SelectEmployee" style="width: 100%;" confirm-action="GetEmpBookRegister()">
+                                                </select>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-6 col-md-6 mt-4" ng-show="newStudent.IssueTo==1" id="selectStu">
+
+                                            <label class="sr-only"
+                                                   for="inlineFormInputGroup">Select Student</label>
+                                            <div class="input-group-prepend">
+                                                <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="newStudent.SelectStudent">
+
+                                                    <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newStudent.SelectStudent">
+                                                        {{ss.text}}
+                                                    </option>
+
+                                                </select>
+
+                                                <select class="form-control select2 form-control-sm" all-student ng-model="newStudent.StudentId" student-detail="newStudent.StudentDetails" side-bar-data="newStudent.SideBarData" search-by="newStudent.SelectStudent" confirm-action="GetStudentBookRegister()">
+                                                </select>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 text-right mt-4">
+                                            <button type="button" class="btn btn-sm btn-success" ng-click="GetStudentBookRegister()" ng-show="newStudent.IssueTo==1"><i class="fas fa-sync-alt mr-1"></i>Load</button>
+                                            <button type="button" class="btn btn-sm btn-success" ng-click="GetEmpBookRegister()" ng-show="newStudent.IssueTo==2"><i class="fas fa-sync-alt mr-1"></i>Load</button>
+                                            <a class="btn btn-secondary btn-light btn-sm wait" data-toggle="tooltip" data-placement="bottom" title="Print" ng-click="PrintStudentEmployeeLedger()"><i class="fas fa-print"></i></a>
+                                        </div>
+                                    </div>
+                                    @*<div class="row">
+                        <div class="col-md-3">
+                            <label><b>Book Title: {{bookRegister.BookDetails.BookTitle}}</b></label>
+                        </div>
+                        <div class="col-md-3">
+                            <label><b>Subject: {{bookRegister.BookDetails.Subject}}</b></label>
+                        </div>
+                        <div class="col-md-3">
+                            <label><b>Publication: {{bookRegister.BookDetails.Publication}}</b></label>
+                        </div>
+                        <div class="col-md-3">
+                            <label><b>Author: {{bookRegister.BookDetails.Authors}}</b></label>
+                        </div>
+                    </div>*@
+                                    <div class="card p-0">
+                                        <div id="grid5" ui-grid="gridOptions5"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-auto-resize
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-save-state style="height: calc(100vh - 170px);">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Books Ledger ends-->
+                        </div>
+                        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>

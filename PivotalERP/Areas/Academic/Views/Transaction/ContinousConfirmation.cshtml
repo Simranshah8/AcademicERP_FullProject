@@ -1,0 +1,243 @@
+﻿<style>
+    .modal {
+        margin-top: 30px !important;
+    }
+
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+</style>
+<script src="~/jslib/academic/transaction/ContinuousConfirmation.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="UtilitiesController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:45px!important">
+                <div class="tab-content" >
+                    <div class="card py-2"id="tablesection">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mr-2 mt-1">Class</label>
+                                    <select ng-model="newFilter.SelectedClassId" class="form-control form-control-sm select2">
+                                        <option ng-value="0">All</option>
+                                        <option ng-repeat="x in ClassList.ClassList" ng-value="x.ClassId">{{x.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mr-2 mt-1">Section</label>
+                                    <select class="select2 form-control form-control-sm"
+                                            data-placeholder="Select Section"
+                                            ng-model="newFilter.SectionId"
+                                            style="width:100%">
+                                        <option ng-value="0">All</option>
+                                        <option ng-value="se.SectionId"
+                                                ng-repeat="se in ClassSection.SectionList | filter: { ClassId: newFilter.SelectedClassId }">
+                                            {{se.SectionName}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-left">
+                                <button type="button"
+                                        class="btn btn-sm btn-success"
+                                        style="min-width: 70px;margin:0px" ng-click="GetAllContinuousConfirmationList()">
+                                    <i class="fas fa-sync-alt w-t"></i> Load
+                                </button>
+
+                            </div>
+
+                            <div class="col-md-4 text-right">
+                                <button type="button" class="btn btn-sm btn-success" id="add-form"
+                                        style="min-width: 100px" ng-click="ClearContinuousConfirmation()">
+                                    <i class="fas fa-plus w-t"></i> Add Continuous Confirmation
+                                </button>
+                            </div>
+
+                        </div>
+                        <div class="card mb-1">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div ui-grid="gridOptions"
+                                         ui-grid-resize-columns
+                                         ui-grid-move-columns
+                                         ui-grid-selection
+                                         ui-grid-exporter
+                                         ui-grid-pinning
+                                         ui-grid-filtering
+                                         ui-grid-auto-resize
+                                         ui-grid-save-state style="height: calc(100vh - 113px);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="form-section">
+                        <div class="card">
+                            <div class="row mt-2">
+                                <div class="col-sm-9 col-lg-9 col-md-9">
+                                    <label for="inlineFormInputGroup">Select Student<span class="text-danger">*</span></label>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                              margin-right: -3px;  z-index: 1; " ng-model="newDet.SelectStudent">
+                                            <option ng-repeat="ss in StudentSearchOptions" value="{{ss.value}}" ng-selected="{{ss.value==newDet.SelectStudent}}">
+                                                {{ss.text}}
+                                            </option>
+                                        </select>
+                                        <select class="form-control select2 form-control-sm" all-student ng-model="newDet.StudentId" student-detail="newDet.StudentDetails" side-bar-data="newDet.SideBarData" search-by="newDet.SelectStudent" confirm-action="ChangeStudent()">
+                                        </select>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="py-2 mt-2" style="border: 1px solid #ccc; background: #e7f0e6 ">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <img ng-src="{{bedata.PhotoPath}}"
+                                                     class="img-fluid ml-3"
+                                                     style="max-width: 108px" /><br />
+
+                                            </div>
+                                            <div class="col-md-10">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <h5 class="mb-0">{{bedata.Name}}</h5><span></span>
+                                                    </div>
+                                                    <div class="col-md-12 mt-2">
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <label for="">Admission No: <b>{{bedata.RegNo}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+
+
+                                                                <span>
+                                                                    Class: <b>
+                                                                        {{bedata.ClassName}} {{bedata.SectionName}}
+                                                                       
+                                                                    </b>
+                                                                </span>
+
+
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Roll No.: <b>{{bedata.RollNo}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">DOB: <b>{{bedata.DOB_BS }}BS ({{bedata.DOB_AD | dateFormat}} AD)</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Age: <b>{{bedata.Age}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Primary Contact No: <b>{{bedata.ContactNo}}</b></label>
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <label for="">Address: <b>{{bedata.Address}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Father Name: <b>{{bedata.FatherName}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Father Contact No: <b>{{bedata.F_ContactNo}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Father Email: <b>{{bedata.F_ContactNo}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Mother Name: <b>{{bedata.MotherName}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Mother Contact No: <b>{{bedata.M_Contact}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Mother Email: <b>{{bedata.M_Email}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Guardian Name: <b>{{bedata.GuardianName}}</b></label>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label for="">Guardian Contact No: <b>{{bedata.G_ContactNo}} - {{bedata.G_Email}}</b></label>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 mt-2">
+                                    <h6>Please tick (<i class="fas fa-check"></i>) the appropriate box <span class="text-danger">*</span></h6>
+                                    <div>
+                                        <label class="checkbox-wrap">
+                                            Yes, I will continue at this Institution for the upcoming academic session.
+                                            <input type="checkbox" ng-model="newDet.ContinueYes" ng-change="selectContinueOption('yes')" />
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="checkbox-wrap">
+                                            No, I will not continue at this Institution for the upcoming academic session.
+                                            <input type="checkbox" ng-model="newDet.ContinueNo" ng-change="selectContinueOption('no')" />
+                                            <span class="checkmark"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mt-2" ng-show="newDet.ContinueNo">
+                                    <h6>If you are not continuing, please select the reason: <span class="text-danger">*</span></h6>
+                                    <div>
+                                        <select class="form-control form-control-sm select2" ng-model="newDet.NotContinueReasonId">
+                                            <option ng-repeat="C in NotContinueReasonList" ng-value="C.id" ng-selected="newDet.NotContinueReasonId==C.id">{{C.text}}</option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 mt-2" ng-show="newDet.NotContinueReasonId==7">
+                                    <div class="form-group">
+                                        <label for="">Please specify other reason <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newDet.OtherReason" />
+                                    </div>
+                                </div>
+                                <div class="col-md-9 mt-2">
+                                    <h6>Feedback(Optional)</h6>
+                                    <p>We value your feedback. Please share any comments or suggestions to help us improve our services:</p>
+                                    <textarea type="text" class="form-control form-control-sm" rows="2" ng-model="newDet.Feedback"></textarea>
+                                </div>
+
+                            </div>
+                            <div class="time-label1 mt-4">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button"
+                                            class="btn btn-sm btn-info"
+                                            id="back-to-list" ng-click="back_to_list()"
+                                            style="min-width: 90px">
+                                        Back to List
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearContinuousConfirmation()">Reset</button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateContinuousConfirmation()">{{newDet.Mode}}</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

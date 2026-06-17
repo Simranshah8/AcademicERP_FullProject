@@ -1,0 +1,43 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AcademicLib.RE.Exam
+{
+    public class TeacherWiseSubjectAnalysis
+    {
+        public string Teacher { get; set; }
+        public string StudentName { get; set; }
+        public string ClassName { get; set; }
+        public string Section { get; set; }
+        public int RollNo { get; set; }
+        public string Subject { get; set; }
+        public string PaperType { get; set; }
+        public double OM { get; set; }
+        public string OM_Str { get; set; }
+        public double OP { get; set; }
+        public string Grade { get; set; }
+        public string Result { get; set; }
+        public int NoOfStudent { get; set; }
+        public string SymbolNo { get; set; }
+        public string RegNo { get; set; }
+        public string BoardRegNo { get; set; }
+        public double FM { get; set; }
+        public double PM { get; set; }
+
+        public string GP_Grade { get; set; }
+        public double GP { get; set; }
+        public string SubCode { get; set; }
+        public string CH { get; set; }
+        public bool IsFail { get; set; }
+        public bool IsFailTH { get; set; }
+        public bool IsFailPR { get; set; }
+    }
+    public class TeacherWiseSubjectAnalysisCollections : System.Collections.Generic.List<TeacherWiseSubjectAnalysis>
+    {
+        public string ResponseMSG { get; set; }
+        public bool IsSuccess { get; set; }
+    }
+}

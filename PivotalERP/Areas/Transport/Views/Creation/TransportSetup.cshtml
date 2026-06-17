@@ -1,0 +1,956 @@
+﻿<script>
+    var API_KEY="@ViewBag.API_KEY";
+</script>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/Transport/transport-setup.js?v=20251115"></script>
+<style>
+    #map {
+        height: 300px;
+        width: 600px;
+    }
+</style>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="TransportSetupController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-10">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                            id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Vehicle Details</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false" ng-click="LoadRoutesTab()">Transport Route</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false" ng-click="LoadPointsTab()">Transport Point</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Vehicle Details Starts -->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                    <div id="driver-section" class="card mb-0 py-2">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.VehicleDetails">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.VehicleDetails">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.VehicleDetails">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit"><i class="fas fa-search"></i></button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table-vd'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-vd').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                </div>
+
+                                                <a print-tbl table-id="'#main-table-vd'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-success" id="add-driver" style="min-width: 90px" ng-click="ClearVehicleDetails()">
+                                                    <i class="fas fa-plus w-t"></i> Add Vehicle
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table-vd"
+                                                       class="main-table table table-sm table-bordered bg-white">
+                                                    <thead class="text-nowrap">
+                                                        <tr>
+                                                            <th style="width: 80px">S.No.</th>
+                                                            <th style="width: 150px">Vehicle Name</th>
+                                                            <th style="width: 130px">Vehicle No.</th>
+                                                            <th style="width: 130px">Total Capacity</th>
+                                                            <th style="width: 200px">Driver</th>
+                                                            <th style="width: 120px">Renewal Miti</th>
+                                                            <th style="width: 120px">Jachpass Miti</th>
+                                                            <th style="width: 150px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in VehicleDetailsList | filter:searchData.VehicleDetails | itemsPerPage: perPage.VehicleDetails" current-page="currentPages.VehicleDetails" pagination-id="VehicleDetailsPagination">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{cl.VehicleName}}</td>
+                                                            <td>{{cl.VehicleNumber}}</td>
+                                                            <td>{{cl.SeatCapacity}}</td>
+                                                            <td>{{cl.Driver}}</td>
+                                                            <td>{{cl.RenewalDate_BS}}</td>
+                                                            <td>{{cl.JPValidityTo_BS}}</td>
+                                                            <td>
+                                                                <a class="p-1" href="#" ng-click="GetVehicleDetailsById(cl)">
+                                                                    <i class="fas fa-edit text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#" ng-click="DelVehicleDetailsById(cl)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="VehicleDetailsPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                    @*Vehicle Details Form Starts*@
+                                    <div id="driver-form">
+                                        <div class="card py-2">
+                                            <div class="row">
+                                                <div class="col-md-9">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Vehicle Name<samp class="text-danger">*</samp></label>
+                                                                <input type="text" id="VDVehicleName" class="form-control form-control-sm" ng-model="newVehicleDetails.VehicleName">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Vehicle Number<samp class="text-danger">*</samp></label>
+                                                                <input type="text" id="VDVehicleNumber" class="form-control form-control-sm" ng-model="newVehicleDetails.VehicleNumber">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Seat Capacity</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newVehicleDetails.SeatCapacity">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Engine No.</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.EngineNo">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Chasis No.</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.ChassisNo">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Fuel Engine Type</label>
+                                                                <select class="form-control form-control-sm select2" id="VDFuelEngineType" ng-model="newVehicleDetails.FuelEngineType">
+                                                                    <option value="">--Select Fuel Engine Type--</option>
+                                                                    <option ng-value="m" ng-repeat="m in FuleTypes">{{m}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Naamsari Miti</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm" date-picker ng-model="newVehicleDetails.NaamsariMiti_TMP" date-detail="newVehicleDetails.NaamsariMitiDet" confirm-action="validateDateRange('NaamsariMiti_TMP', newVehicleDetails, 'NaamsariMitiDet', 'RenewalMitiDet', 'NaamsariMiti_TMP', 'RenewalMiti_TMP', 'Naamsari Miti', 'Renewal Miti')">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Renewal Miti</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm" date-picker ng-model="newVehicleDetails.RenewalMiti_TMP" date-detail="newVehicleDetails.RenewalMitiDet" confirm-action="validateDateRange('RenewalMiti_TMP', newVehicleDetails, 'NaamsariMitiDet', 'RenewalMitiDet', 'NaamsariMiti_TMP', 'RenewalMiti_TMP', 'Naamsari Miti', 'Renewal Miti')">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Manufacturing Year</label>
+                                                                <input type="number"
+                                                                       class="form-control form-control-sm" ng-model="newVehicleDetails.MFGYear">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="" class="invisible">Photo</label>
+                                                    <div class="person-photo-attachment-wrap text-center">
+                                                        <div class="img-wrap mx-auto" style="width:100%;">
+                                                            <img ng-src="{{newVehicleDetails.PhotoData || newVehicleDetails.ImagePath}}" class="img-fluid" alt="" id="imgPhoto1">
+                                                        </div>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#updatePhoto">
+                                                            <i class="fas fa-camera w-t"></i> Vehicle Photo
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Jachpass No</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.JachpassNo">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Validity From</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" date-picker ng-model="newVehicleDetails.ValidFrom_TMP" date-detail="newVehicleDetails.ValidFromDet" confirm-action="validateDateRange('ValidFrom_TMP', newVehicleDetails, 'ValidFromDet', 'ValidToDet', 'ValidFrom_TMP', 'ValidTo_TMP')">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Validity To</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" date-picker ng-model="newVehicleDetails.ValidTo_TMP" date-detail="newVehicleDetails.ValidToDet" confirm-action="validateDateRange('ValidTo_TMP', newVehicleDetails, 'ValidFromDet', 'ValidToDet', 'ValidFrom_TMP', 'ValidTo_TMP')">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label>Remarks</label>
+                                                        <textarea class="form-control form-control-sm" rows="1" ng-model="newVehicleDetails.JPRemarks"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Insurance No</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.InsuranceNo">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Validity From</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" date-picker ng-model="newVehicleDetails.InsuranceValidFrom_TMP" date-detail="newVehicleDetails.InsuranceValidFromDet" confirm-action="validateDateRange('InsuranceValidFrom_TMP', newVehicleDetails, 'InsuranceValidFromDet', 'InsuranceValidToDet', 'InsuranceValidFrom_TMP', 'InsuranceValidTo_TMP')" >
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Validity To</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" date-picker ng-model="newVehicleDetails.InsuranceValidTo_TMP" date-detail="newVehicleDetails.InsuranceValidToDet" confirm-action="validateDateRange('InsuranceValidTo_TMP', newVehicleDetails, 'InsuranceValidFromDet', 'InsuranceValidToDet', 'InsuranceValidFrom_TMP', 'InsuranceValidTo_TMP')">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label>Remarks</label>
+                                                        <textarea class="form-control form-control-sm" rows="1" ng-model="newVehicleDetails.IRemarks"></textarea>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Incharge</label>
+                                                        <select class="form-control select2bs4 form-control-sm" id="cboIncharge" all-employee ng-model="newVehicleDetails.InchargeId" employee-detail="newVehicleDetails.InchargeDetails" side-bar-data="newVehicleDetails.InchargeSideBarData" search-by="newVehicleDetails.EmployeeSearchBy">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Driver</label>
+                                                        <select class="form-control select2bs4 form-control-sm" id="cboDriver" all-employee ng-model="newVehicleDetails.DriverId" employee-detail="newVehicleDetails.DriverDetails" side-bar-data="newVehicleDetails.DriverSideBarData" search-by="newVehicleDetails.EmployeeSearchBy">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Conductor</label>
+                                                        <select class="form-control select2bs4 form-control-sm" id="cboConductor" all-employee ng-model="newVehicleDetails.ConductorId" employee-detail="newVehicleDetails.ConductorDetails" side-bar-data="newVehicleDetails.ConductorSideBarData" search-by="newVehicleDetails.EmployeeSearchBy">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">GPS Device</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.GPSDevice">
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Url</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.Url">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">User</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.User">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Password</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.Pwd">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Authentication</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.Authentication">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Token</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newVehicleDetails.Token">
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <hr>
+                                            <div class="add-more-than-one-form-block">
+                                                <label><b>Attach  Document(s)</b></label>
+                                                <form>
+                                                    <article>
+                                                        <div class="row">
+                                                            <div class="col-sm-2">
+                                                                <div class="form-group">
+                                                                    <label>Type Of Document</label>
+                                                                    <select class="form-control form-control-sm select2" ng-model="docType">
+                                                                        <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-10">
+                                                                <div class="row">
+                                                                    <div class="col-sm-4">
+                                                                        <div class="form-group">
+                                                                            <label>Attach Document</label>
+                                                                            <div class="form-group">
+                                                                                <input type="file" id="flMoreFiles" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label>Description</label>
+                                                                            <input type="text" class="form-control form-control-sm"
+                                                                                   ng-model="docDescription"
+                                                                                   placeholder="">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-sm-2">
+                                                                        <div class="d-flex">
+                                                                            <div>
+                                                                                <label class="invisible d-block">for height</label>
+                                                                                <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFiles(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </article>
+                                                </form>
+                                            </div>
+                                            <div class="pb-3">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover border bg-white">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col" style="width: 20px">SN.</th>
+                                                                <th scope="col" style="width: 40%">Document Type</th>
+                                                                <th scope="col">File Name</th>
+                                                                <th scope="col">Description</th>
+                                                                <th scope="col" style="width: 130px">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="ac in newVehicleDetails.AttachmentColl">
+                                                                <th scope="row">{{$index+1}}</th>
+                                                                <td>{{ac.DocumentTypeName}}</td>
+                                                                <td>{{ac.Name}}</td>
+                                                                <td>{{ac.Description}}</td>
+                                                                <td>
+                                                                    <div>
+                                                                        <a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                            <i class="fas fa-eye text-secondary"></i>
+                                                                        </a>
+                                                                        <a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+                                                                            <i class="fas fa-download  text-info"></i>
+                                                                        </a>
+                                                                        <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="time-label">
+                                                <span class="d-block border-0 p-3 text-center">
+                                                    <button type="button" class="btn btn-sm btn-info" id="back-driver-list"
+                                                            style="min-width: 90px">
+                                                        Back to List
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearVehicleDetails()">Reset</button>
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateVehicleDetails()">{{newVehicleDetails.Mode}}</button>
+                                                </span>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Vehicle Details Ends -->
+                                <!-- Transport Route Starts -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                    <div id="transport-route-section" class="card mb-0 py-2">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.TransportRoute">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.TransportRoute">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.TransportRoute">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table-tR'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-tR').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#main-table-tR'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-success" id="add-transport-route" style="min-width: 90px" ng-click="ClearTransportRoute()">
+                                                    <i class="fas fa-plus w-t"></i> Add Transport Route
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table-tR"
+                                                       class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 80px">S.No.</th>
+                                                            <th style="width: 280px">Route Name</th>
+                                                            <th style="width: 150px">Vehicle Name</th>
+                                                            <th style="width: 150px">Vehicle Number</th>
+                                                            <th style="width: 100px">Fuel Consumption</th>
+                                                            <th style="width: 120px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in TransportRouteList | filter:searchData.TransportRoute | itemsPerPage: perPage.TransportRoute" current-page="currentPages.TransportRoute" pagination-id="TransportRoutePagination">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.VehicleName}}</td>
+                                                            <td>{{cl.VehicleNumber}}</td>
+                                                            <td>{{cl.FuelConsume}}</td>
+                                                            <td>
+                                                                <a class="p-1" href="#" ng-click="GetTransportRouteById(cl)">
+                                                                    <i class="fas fa-edit text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#" ng-click="DelTransportRouteById(cl)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="TransportRoutePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                    <!-- Transport Route form starts -->
+                                    <!--Form labels edited by suresh on 8 mangsir starts-->
+                                    <div id="transport-route-form">
+                                        <div class="card py-2">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Route Name <samp class="text-danger">*</samp></label>
+                                                        <input type="text" class="form-control form-control-sm" id="TRRouteName" ng-model="newTransportRoute.Name">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Vehicle Name<samp class="text-danger">*</samp></label>
+                                                        <select class="form-control form-control-sm select2" id="TRVehicle" ng-model="newTransportRoute.VehicleId">
+                                                            <option value="">-- Select Vehicle --</option>
+                                                            <option ng-value="v.VehicleId" ng-repeat="v in VehicleDetailsList">{{v.VehicleName}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">In Litre</label>
+                                                        <input type="text" class="form-control form-control-sm" id="TRFuelConsume" ng-model="newTransportRoute.FuelConsume">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Radious(In.Meter)</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newTransportRoute.Radious">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Pickup Start Time<span class="text-danger" ng-if="newTransportRoute.RouteId">*</span> </label>
+                                                        <input type="time" id="TRArrivalTime" class="form-control form-control-sm" ng-model="newTransportRoute.ArrivalTime_TMP">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Pickup End time<span class="text-danger" ng-if="newTransportRoute.RouteId">*</span> </label>
+                                                        <input type="time" id="TRDepartureTime" class="form-control form-control-sm" ng-model="newTransportRoute.DepartureTime_TMP">
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <button class="btn btn-sm btn-info" ng-click="ShowMap(1)">Pickup Start Point (GPS Location)</button><br />
+                                                        <div class="input-group input-group-sm mr-sm-2 my-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lat:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="27.7172453" id="TRLat" ng-model="newTransportRoute.Lat" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm mr-sm-2 my-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lng:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="85.3239605" id="TRLan" ng-model="newTransportRoute.Lan" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <button class="btn btn-sm btn-info" ng-click="ShowMap(2)">Pickup End Point (GPS Location)</button><br />
+                                                        <div class="input-group input-group-sm mr-sm-2 my-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lat:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="27.7172453" id="TREndLat" ng-model="newTransportRoute.EndLat" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lng:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="85.3239605" id="TREndLan" ng-model="newTransportRoute.EndLan" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Dropoff Start Time <span class="text-danger" ng-if="newTransportRoute.RouteId">*</span> </label>
+                                                        <input type="time" id="TRDArrivalTime" class="form-control form-control-sm" ng-model="newTransportRoute.D_ArrivalTime_TMP">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Dropoff End Time<span class="text-danger" ng-if="newTransportRoute.RouteId">*</span> </label>
+                                                        <input type="time" id="TRDDepartureTime" class="form-control form-control-sm" ng-model="newTransportRoute.D_DepartureTime_TMP">
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <button class="btn btn-sm btn-info" ng-click="ShowMap(4)">Dropoff Start Point (GPS Location)</button><br />
+                                                        <div class="input-group input-group-sm mr-sm-2 my-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lat:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="27.7172453" id="TRD_Lat" ng-model="newTransportRoute.D_Lat" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lng:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="85.3239605" id="TRD_Lan" ng-model="newTransportRoute.D_Lan" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <button class="btn btn-sm btn-info" ng-click="ShowMap(5)">Dropoff End Point (GPS Location)</button><br />
+                                                        <div class="input-group input-group-sm mr-sm-2 my-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lat:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="27.7172453" id="TRD_EndLat" ng-model="newTransportRoute.D_EndLat" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lng:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="85.3239605" id="TRD_EndLan" ng-model="newTransportRoute.D_EndLan" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="time-label">
+                                                <span class="d-block border-0 p-3 text-center">
+                                                    <button type="button" class="btn btn-sm btn-info" id="back-transport-route"
+                                                            style="min-width: 90px">
+                                                        Back to List
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearTransportRoute()">Reset</button>
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateTransportRoute()">{{newTransportRoute.Mode}}</button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--Form label edited by suresh on 8 mangsir ends-->
+                                    <!--Transport Route Form form ends -->
+                                </div>
+                                <!-- Transport Route Ends -->
+                                <!-- Transport Point Starts -->
+                                <div class="tab-pane fade main-section" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                                    <div id="transport-point-section" class="card mb-0 py-2">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.TransportPoint">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.TransportPoint">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.TransportPoint">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table-tp'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table-tp').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                </div>
+                                                <a print-tbl table-id="'#main-table-tp'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-success" id="add-transport-point" style="min-width: 90px" ng-click="ClearTransportPoint()">
+                                                    <i class="fas fa-plus w-t"></i> Add Transport Point
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table-tp"
+                                                       class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 80px">S.No.</th>
+                                                            <th style="width: 280px">Point Name</th>
+                                                            <th style="width: 150px">Route Name</th>
+                                                            <th style="width: 150px">Pickup Rate</th>
+                                                            <th style="width: 150px">Drop Off Rate</th>
+                                                            <th style="width: 150px">Both Rate</th>
+                                                            <th style="width: 120px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in TransportPointList | filter:searchData.TransportPoint | itemsPerPage: perPage.TransportPoint" current-page="currentPages.TransportPoint" pagination-id="TransportPointPagination">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.RouteName}}</td>
+                                                            <td>{{cl.InRate |number:2}}</td>
+                                                            <td>{{cl.OutRate |number:2}}</td>
+                                                            <td>{{cl.BothRate |number:2}}</td>
+                                                            <td>
+                                                                <a class="p-1" ng-click="GetTransportPointById(cl)"><i class="fas fa-edit text-info"></i></a>
+                                                                <a class="p-1" ng-click="DelTransportPointById(cl)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- table end -->
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="TransportPointPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                    <!-- Transport Point Form Starts -->
+                                    <div id="transport-point-form">
+                                        <div class="card py-2">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="">Point Name<span class="text-danger">*</span> </label>
+                                                        <input type="text" id="TPPointName" class="form-control form-control-sm" ng-model="newTransportPoint.Name">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Route<span class="text-danger">*</span> </label>
+                                                        <select id="cboPointRoutes" class="form-control form-control-sm select2" ng-model="newTransportPoint.RouteIdColl" multiple data-placeholder="**select route**">
+                                                            <option value="{{tr.RouteId}}" ng-repeat="tr in TransportRouteList  track by tr.RouteId" ng-selected="{{newTransportPoint.RouteIdColl.containt(tr.RouteId)}}">{{tr.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Order No</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newTransportPoint.OrderNo">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Pickup Rate</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newTransportPoint.InRate">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Drop Off Rate</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newTransportPoint.OutRate">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Both Rate</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newTransportPoint.BothRate">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 mt-4">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="chkUpdateInMapping" ng-model="newTransportPoint.UpdateInMapping">
+                                                        <label for="chkUpdateInMapping"
+                                                               class="custom-control-label">
+                                                            Update In Mapping Student
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <button class="btn btn-sm btn-info" ng-click="ShowMap(3)">Pickup At (GPS Location) </button><br />
+                                                        @*<label for="">Lat : {{newTransportPoint.Lat}}</label><br />
+                                                            <label for="">Lng : {{newTransportPoint.Lan}}</label>*@
+
+                                                        <div class="input-group input-group-sm mr-sm-2 my-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lat:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="" ng-model="newTransportPoint.Lat" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm mr-sm-2 my-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Lng:</span>
+                                                            </div>
+                                                            <input type="text" placeholder="" ng-model="newTransportPoint.Lan" class="form-control form-control-sm" style="max-width:60%" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control form-control-sm" rows="1" ng-model="newTransportPoint.Description"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="time-label">
+                                                <span class="d-block border-0 p-3 text-center">
+                                                    <button type="button" class="btn btn-sm btn-info" id="back-transport-point"
+                                                            style="min-width: 90px">
+                                                        Back to List
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearTransportPoint()">Reset</button>
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateTransportPoint()">{{newTransportPoint.Mode}}</button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Transport Point Ends -->
+                                </div>
+                                <!-- /.card -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+    <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newVehicleDetails.Photo_TMP" @*after-selected="AddVehicleDetailsPhoto()"*@ fileread="newVehicleDetails.PhotoData">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newVehicleDetails.PhotoData || newVehicleDetails.ImagePath}}" class="img-fluid" id="imgPhoto">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newVehicleDetails.Photo_TMP" @*after-selected="AddVehicleDetailsPhoto()"*@ fileread="newVehicleDetails.PhotoData" />
+                    <a ng-click="ClearVehicleDetailsPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAuthorImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- model form for table input -->
+    <div class="modal fade"
+         id="modal-map"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true"
+         style="margin-top: 100px;">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        Choose Location of <i><u>{{getMapTitle(newTransportRoute.MapType)}}</u></i>
+                    </h5>
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close">
+                        <div aria-hidden="true">&times;</div>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            Lat : {{CurLatLng.Lat}}
+                        </div>
+                        <div class="col-md-6">
+                            Lng : {{CurLatLng.Lng}}
+                        </div>
+                    </div>
+                    <div style="padding:10px">
+                        <div id="map" style="width:100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal form for table input close -->
+
+</div>

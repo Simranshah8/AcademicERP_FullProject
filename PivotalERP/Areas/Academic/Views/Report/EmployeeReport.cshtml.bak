@@ -1,0 +1,691 @@
+﻿
+<link rel="stylesheet" href="~/wwwroot/dynamic/css/dropzone.css" />
+<script src="~/wwwroot/dynamic/js/dropzone.js"></script>
+<script src="~/jslib/Academic/EmployeeReport.js?v=202210201"></script>
+@*<style>
+        .third-level-scroll-only {
+            height: 100px !important;
+            overflow: unset;
+        }
+    </style>*@
+<style>
+    .numericAlignment {
+        text-align: right;
+    }
+
+    .headerAligment {
+        text-align: center;
+    }
+
+    .dateAlignment {
+        text-align: center;
+    }
+
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+
+    .modal {
+        margin-top: 30px !important;
+    }
+
+    .modal-dialog {
+        margin-bottom: 40px !important;
+    }
+
+</style>
+<script>
+    var entityEmployeeBirthday = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.EmployeeBirthDay)";
+    var entityEmpSummary = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.EmployeeProfile)"
+    var entityEmpSummaryForSMS = @Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.EmployeeReport);
+    var entityEmployeeBirthdayForSMS = @Convert.ToInt32(AcademicLib.BE.Global.ENTITIES.EMPLOYEE_BIRTHDAY);
+</script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="EmployeeReportController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                         aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                        role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                               href="#home" role="tab" aria-controls="home"
+                                               aria-selected="true">Employee Summary</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                               href="#profile" role="tab" aria-controls="profile"
+                                               aria-selected="false">Identity Card</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="student-tab" data-toggle="tab"
+                                               href="#student" role="tab" aria-controls="student"
+                                               aria-selected="false">left employee</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="student-birthday-tab" data-toggle="tab"
+                                               href="#student-birthday" role="tab" aria-controls="student-birthday"
+                                               aria-selected="false">Birthday List</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="employee-summery-section">
+
+                                    <header class="row mt-1 mb-2">
+                                        <div class="col-md-6">
+                                            <div class="clearfix">
+                                                <form class="form-inline mb-0">
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.EmployeeSummary">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <button type="button" class="btn btn-sm btn-default ml-3" style="min-width: 90px;" ng-click="GetEmpSummaryList()">Load Data</button>
+                                                    </div>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mt-2">
+                                            <div class="float-right">
+                                                <a @*print-tbl table-id="'#grdEmp'"*@ class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print" ng-click="PrintEmpSummary()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send SMS" data-toggle="modal" data-target="#modal-sms">
+                                                    <i class="fas fa-sms"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send Email"  ng-click="ShowEmailDialog()">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send Notification" @*data-toggle="modal" data-target="#modal-xl"*@ ng-click="SendNoticeToEmployee()">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Save Report State" ng-click="saveRptListState()">
+                                                    <i class="fas fa-save"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                    </header>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div ui-grid="gridOptions" id="grdEmp"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-auto-resize
+                                             ui-grid-save-state style="height: calc(100vh - 200px);"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                 aria-labelledby="profile-tab">
+                                <div id="employee-identity-section" class="card">
+                                    <div class="card-body">
+                                        <form action="">
+                                            <div class="row">
+                                                <div class="col-sm-3 col-lg-3 col-md-3">
+                                                    <label>Department</label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintNormalIdCard()" ng-model="newIdentityCard.DepartmentId">
+                                                        <option ng-value="0" ng-selected="true">All</option>
+                                                        <option ng-value="rt.DepartmentId" ng-repeat="rt in DepartmentList">{{rt.Name}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-3 col-lg-3 col-md-3">
+                                                    <label>Designation</label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintNormalIdCard()" ng-model="newIdentityCard.DesignationId">
+                                                        <option ng-value="0" ng-selected="true">All</option>
+                                                        <option ng-value="rt.DesignationId" ng-repeat="rt in DesignationList">{{rt.Name}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>Issue Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm"
+                                                           placeholder="Issue Date" ng-model="newIdentityCard.IssueDate_TMP" date-picker date-detail="newIdentityCard.IssueDateDet" after-days="1500" before-days="1500" />
+                                                </div>
+                                                <div class="col-sm-2 col-lg-2 col-md-2">
+                                                    <label>Valid Upto</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm"
+                                                           placeholder="Valid Date" ng-model="newIdentityCard.ValidUpto_TMP" date-picker date-detail="newIdentityCard.ValidUptoDet" after-days="1500" before-days="1500" />
+                                                </div>
+                                                <div class="col-sm-1 col-lg-1 col-md-1">
+                                                    <label>Generate QR</label>
+                                                    <div class="cstm-switch-btn-wrap">
+                                                        <button type="button" ng-class="newIdentityCard.GenerateQR==true ? 'btn btn-sm btn-toggle active' : 'btn btn-sm btn-toggle'"
+                                                                ng-aria-pressed="newIdentityCard.GenerateQR==true ? 'true' : 'false' "
+                                                                autocomplete="off" ng-click="TestClick(newIdentityCard)">
+                                                            <div class="handle"></div>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3 col-lg-3 col-md-3">
+                                                    <label>Select Report</label>
+                                                    <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintNormalIdCard()" ng-model="newIdentityCard.RptTranId">
+                                                        <option ng-value="0" ng-selected="true">Select Report</option>
+                                                        <option ng-value="rt.RptTranId" ng-repeat="rt in newIdentityCard.TemplatesColl">{{rt.ReportName}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-1 col-lg-1 col-md-1 mt-4">
+                                                    <a class="btn btn-secondary btn-sm ml-4" download="{{newIdentityCard.DepartmentId}}.zip" href="~/Academic/Report/DownloadEmpQrImage?DepartmentId={{newIdentityCard.DepartmentId}}&DesignationId={{newIdentityCard.DesignationId}}">
+                                                        <i class="fa fa-download"></i>Download QR
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-11 col-lg-11 col-md-11">
+                                                    <label>Select Employee(s)</label>
+                                                    <select multiple class="form-control form-control-sm select2" ng-change="PrintStudentIdCard()" ng-model="newIdentityCard.EmployeeIdColl">
+                                                        <option ng-value="0" ng-selected="true">** Select Employee **</option>
+                                                        <option ng-value="st.EmployeeId" ng-repeat="st in EmpListForSelectionColl">{{st.Name}}-{{st.Code}}-{{st.MobileNo}}</option>
+                                                    </select>
+                                                </div>
+
+                                            </div>
+                                            <div class="row mt-2" id="schedule-report-table">
+                                                <iframe id="frmRptTabulation" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                            <div class="tab-pane fade main-section" id="student" role="tabpanel"
+                                 aria-labelledby="student-tab">
+                                <div id="left-employee-section">
+                                    <header class="row mb-2 ">
+                                        <div class="col-md-8">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.LeftEmployee">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <button type="button" class="btn btn-sm btn-default ml-3" style="min-width: 90px;" ng-click="GetEmpLeftSummaryList()">Load Data</button>
+                                                    </div>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <a print-tbl table-id="'#grdEmpLeft'" class="btn btn-secondary float-right  btn-light btn-sm wait"
+                                               data-toggle="tooltip" data-placement="bottom"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            @*<a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send SMS" data-toggle="modal" data-target="#modal-sms">
+                                                    <i class="fas fa-sms"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send Notification"  ng-click="SendNoticeToEmployee()">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Save Report State" ng-click="saveRptListState()">
+                                                    <i class="fas fa-save"></i>
+                                                </a>*@
+                                        </div>
+
+                                    </header>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div ui-grid="gridOptionsLeft" id="grdEmpLeft"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-auto-resize
+                                             ui-grid-save-state style="height: calc(100vh - 200px);"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="tab-pane fade main-section" id="student-birthday" role="tabpanel"
+                                 aria-labelledby="student-birthday-tab">
+                                <div id="left-student-birthday-list-section">
+                                    <div class="row px-2 mt-1">
+                                        <div class="col-sm-3 col-lg-3 col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1" style="width:90px;">From Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newBirthday.DateFrom_TMP" date-detail="newBirthday.DateFromDet" confirm-action="LoadDOB()">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mt-1" style="width:80px;">To Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newBirthday.DateTo_TMP" date-detail="newBirthday.DateToDet" confirm-action="LoadDOB()">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mt-1">
+                                            <div class="float-right">
+                                                <a class="btn btn-secondary btn-light btn-sm wait"
+                                                   data-toggle="tooltip" data-placement="bottom"
+                                                   title="Print" ng-click="PrintEmployeeBirthday()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send SMS" ng-click="SendSMSToStudentBirthday()">
+                                                    <i class="fas fa-sms"></i>
+                                                </a>
+                                                <a class="btn btn-secondary btn-light btn-sm"
+                                                   data-placement="top" title="Send Notification" ng-click="SendNoticeToStudentBirthday()">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="card p-2" style="min-width:800px">
+                                        <div class="col-md-12">
+                                            <div ui-grid="gridOptions4" id="stLeftDiv"
+                                                 ui-grid-resize-columns
+                                                 ui-grid-move-columns
+                                                 ui-grid-selection
+                                                 ui-grid-exporter
+                                                 ui-grid-pinning
+                                                 ui-grid-filtering
+                                                 ui-grid-auto-resize
+                                                 ui-grid-save-state style="height: calc(100vh - 200px); ">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+
+
+    <div class="modal fade" id="modal-xl" style="margin-top: 0px;">
+        <div class="modal-dialog modal-md" style="width:70%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm" placeholder="Title" ng-model="newNotice.Title" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="5" ng-model="newNotice.Description" placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Attach File</label>
+                        <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newNotice.AttachmentColl" />
+                    </div>
+
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="SendManualNoticeToEmployee()" style="min-width: 90px;" ng-disabled="loadingstatus=='running'">Send</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+    <div class="modal fade" id="modal-birthday-xl" style="margin-top: 0px;">
+        <div class="modal-dialog modal-md" style="width:70%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send Notification</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Title</label>
+                        <input type="text"
+                               class="form-control form-control-sm" placeholder="Title" ng-model="newNotice.Title" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="5" ng-model="newNotice.Description" placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Attach File</label>
+                        <input class="form-control form-control-sm p-0" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newNotice.AttachmentColl" />
+                    </div>
+
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="SendManualNoticeToStudentBirthday()" style="min-width: 90px;" ng-disabled="loadingstatus=='running'">Send</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+    <div class="modal fade" id="modal-sms" style="margin-top: 0px;">
+        <div class="modal-dialog modal-md" style="width:70%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Send SMS</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="5" ng-model="newSMS.Description" placeholder="Description"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="SendSMSToEmp()" style="min-width: 90px;">Send</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+    <div class="modal fade" id="modal-xl2" style="margin-top: 0px;">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Remarks</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="">Remarks Type</label>
+                        <select class="form-control form-control-sm select2" ng-model="newRemarks.RemarksTypeId">
+                            <option ng-repeat="ct in RemarkTypeColl" value="{{ ct.RemarksTypeId }}" ng-selected="ct.ClassId==newRemarks.RemarksTypeId">
+                                {{ct.Name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="text"
+                               class="form-control form-control-sm" date-picker ng-model="newRemarks.forDate" date-detail="newRemarks.forDateDet">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control form-control-sm" rows="2" ng-model="newRemarks.description" placeholder="Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Attach File</label>
+                        <input type="file" onchange="angular.element(this).scope().uploadFiles(this)"
+                               class="form-control form-control-sm"
+                               ng-model="newRemarks.File"
+                               style="padding: 1px" />
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-success" ng-click="SaveRemarksToStudent()" style="min-width: 90px;">Send</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Email modal Starts-->
+    <div class="modal fade" id="sendemail" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title">Send Email</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="form-group d-flex">
+                                    <label class="mr-2 mt-1" style="min-width:98px;">SMS Template: </label>
+                                    <select class="form-control form-control-sm select2" style="width: 100%" ng-model="CurEmailSend.Template" ng-change="EmailTemplateChanged(CurEmailSend.Template)">
+                                        <option ng-repeat="st in EmailTemplatesColl" ng-value="st">
+                                            {{st.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-7">
+                                @*<div class="form-group d-flex">
+                                    <label class="mr-2 mt-1" style="min-width:90px;">Email Send To</label>
+                                    <div class="checkbox-wrapper  d-flex">
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox211" ng-model="CurEmailSend.Primary">
+                                            <label for="customCheckbox211"
+                                                   class="custom-control-label">Primary No.</label>
+                                        </div>
+
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox311" ng-model="CurEmailSend.Father">
+                                            <label for="customCheckbox311"
+                                                   class="custom-control-label">Father No.</label>
+                                        </div>
+
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox411" ng-model="CurEmailSend.Mother">
+                                            <label for="customCheckbox411"
+                                                   class="custom-control-label">Mother No.</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox mr-2">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox511" ng-model="CurEmailSend.Guardian">
+                                            <label for="customCheckbox511"
+                                                   class="custom-control-label">Mother No.</label>
+                                        </div>
+                                    </div>
+                                </div>*@
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="min-width:90px;">CC Employee </label>
+                                <select class="form-control form-control-sm select2" multiple ng-model="CurEmailSend.EmployeeColl" style="width:99%">
+                                    <option ng-value="st" ng-repeat="st in AllEmployeeColl">{{st.Name}}-{{st.EmployeeCode}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="min-width:90px;">Subject <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" ng-model="CurEmailSend.Subject" />
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group mb-0">
+                                <label for="" class="mr-2">Message <span class="text-danger">*</span> </label>
+                                <textarea class="textarea" placeholder="Place some text here" style="
+                                                                          width: 100%;
+                                                                          height: 130px!important;
+                                                                          font-size: 14px;
+                                                                          line-height: 18px;
+                                                                          border: 1px solid #dddddd;
+                                                                          padding: 10px;
+                                                                        " ng-model="CurEmailSend.Description" html-editor></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card-body mt-0" id="add-file-area" style="background-color: #eff0ef;">
+                                <label><b>Attach File</b></label>
+                                <div id="actions" class="row">
+                                    <div class="col-md-1 mt-4">
+                                        <div class="btn-group">
+                                            <span class="btn-add-file col fileinput-button">
+                                                <span><i class="fas fa-plus-circle"></i></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-11">
+                                        <div class="d-flex p-2" id="previews" style="overflow-x: auto;">
+                                            <div id="template">
+                                                <a data-dz-remove class="cancel float-right">
+                                                    <i class="fas fa-times-circle" style="  color:#28a745;font-size: 14px;"></i>
+                                                </a>
+                                                <span class="preview p-2 ml-2"><img style="height:150px;width:auto" src="data:," alt="" data-dz-thumbnail /></span>
+                                                <div class="align-items-center" style="width: 100%;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <div class="form-group">
+                                <label>Total numbers of selected student: {{CurEmailSend.DataColl.length}}</label>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="text-center mb-3">
+                        <button type="button" class="btn btn-success  btn-sm" style="width:80px" ng-click="SendEmail()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    // DropzoneJS Demo Code Start
+    Dropzone.autoDiscover = false
+    // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+    var previewNode = document.querySelector("#template")
+    previewNode.id = ""
+    var previewTemplate = previewNode.parentNode.innerHTML
+    previewNode.parentNode.removeChild(previewNode)
+
+    var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+        url: "/target-url", // Set the url
+        thumbnailWidth: 130,
+        thumbnailHeight: 130,
+        parallelUploads: 20,
+        previewTemplate: previewTemplate,
+        autoQueue: false, // Make sure the files aren't queued until manually added
+        previewsContainer: "#previews", // Define the container to display the previews
+        clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+    })
+    document.querySelector("#actions .cancel").onclick = function () {
+        myDropzone.removeAllFiles(true)
+    }
+    // DropzoneJS Demo Code End
+</script>

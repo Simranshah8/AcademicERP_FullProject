@@ -1,0 +1,248 @@
+﻿<script src="~/jslib/Academic/ParentTeacherMeeting.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="PTMController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:52px!important">
+                <div class="tab-content">
+                    <div class="PTM-section card p-0 mb-2" id="PTM-section">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline mb-2">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PTM">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PTM">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search" ng-model="searchData.PTM"
+                                                   aria-label="Search">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'PTMList'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="bottom" title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+
+                                <button type="button" class="btn btn-sm btn-success" id="add-PTM" style="min-width: 90px" ng-click="ClearPTM()">
+                                    <i class="fas fa-plus w-t"></i> Add PTM
+                                </button>
+                            </div>
+                        </header>
+                        <div>
+                            <!-- Table PTM  start here -->
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="#main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead class="text-nowrap">
+                                        <tr>
+                                            <th style="width: 50px">S.No.</th>
+                                            <th style="width: 90px">Class/Section</th>
+                                            <th style="width: 72px">PTM Date</th>
+                                            <th style="width: 200px">PTM By</th>
+                                            <th style="width: 200px">Description</th>
+                                            <th style="width: 50px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in PTMList | filter:searchData.PTM | itemsPerPage: perPage.PTM" current-page="currentPages.PTM" pagination-id="PTMPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.ClassSection}}</td>
+                                            <td>{{cl.PTMDateBS}}</td>
+                                            <td>{{cl.PTMByName}}</td>
+                                            <td>{{cl.Description}}</td>
+                                            <td>
+                                                <button ng-click="GetPTMById(cl)" class="btn btn-link p-0"><i class="p-1 fas fa-edit text-info"></i></button>
+                                                <button ng-click="DelPTMById(cl)" class="btn btn-link p-0"><i class="p-1 fas fa-trash-alt text-danger"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- table end -->
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="PTMPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+
+                <!-- form area starts -->
+                <div id="PTM-form">
+                    <div class="card card-default">
+                        <div class="card-body p-0">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Class/Section</label>
+                                        <select name="class-group" id="" form="" class="form-control form-control-sm select2" ng-model="newPTM.SelectedClass" ng-change="GetAllStudentPTM()">
+                                            @*<option ng-value="0">All</option>*@
+                                            <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">PTM Date</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm" date-picker ng-model="newPTM.PTMDate_TMP" date-detail="newPTM.PTMDateDet" before-days="0" confirm-action="GetAllStudentPTM()">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="">PTM By</label>
+                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newPTM.EmployeeId" employee-detail="newPTM.EmployeeDetails" side-bar-data="newPTM.EmpSideBarData" search-by="newPTM.EmployeeSearchBy" confirm-action="GetAllStudentPTM()">
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="">Description</label>
+                                        <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="newPTM.Description"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                    <div class="col-md-7">
+                                        <div class="clearfix">
+                                            <form class="form-inline mb-2">
+
+                                                @*<div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Sort by</span>
+                                                    </div>
+                                                    <select class="form-control pr-0" id="exampleFormControlSelect1">
+                                                        <option>Admission No</option>
+                                                        <option>Roll No</option>
+                                                        <option>Name</option>
+                                                    </select>
+
+                                                </div>*@
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.Student"/>
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default mr-2 border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5 text-right">
+                                        <button type="button" class="btn btn-sm btn-info" id="back-to-list-PTM"
+                                                style="min-width: 90px">
+                                            Back To List
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px" ng-click="ClearPTM()">
+                                            Reset
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="SaveUpdatePTM()">
+                                          Save
+                                        </button>
+
+                                    </div>
+                                </div>
+                            <!-- form table start here -->
+                            <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 12rem)!important;">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead class="text-nowrap">
+                                        <tr>
+                                            <th style="width: 50px">S.No.</th>
+                                            <th style="width: 200px">Student Name</th>
+                                            <th style="width: 150px">PTM Attend By</th>
+                                            <th style="width: 160px;">Teacher Remarks</th>
+                                            <th style="width: 160px;">Parent Remarks</th>
+                                            <th style="width: 160px;">Recommendation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="row in newPTM.StudentPTMColl | filter:searchData.Student">
+                                            <td>{{$index+1}}</td>
+                                            <td>
+                                                <p class="mb-0"><b>{{row.StudentName}}</b></p>
+                                                <label>Adm.No : {{row.AdmNo}}</label><label class="ml-3">Roll No: <i>{{row.RollNo}}</i></label><label ng-show="row.SectionName">Section :{{row.SectionName}}</label>
+                                            </td>
+                                            <td class="align-middle" style="width: 250px;">
+                                                @*<select class="form-control form-control-sm select2" style="width: 100%;" multiple>
+                                                        <option>None</option>
+                                                        <option>Father</option>
+                                                        <option>Mother</option>
+                                                        <option>Guardian</option>
+                                                    </select>*@
+                                                <select name="class-group" class="form-control form-control-sm select2" ng-model="row.PTMAttendBy" placeholder="select ptm attend by">
+                                                    <option ng-value="cl.text" ng-repeat="cl in PTMAttendByList" ng-selected="cl.text == row.PTMAttendBy">{{cl.text}}</option>
+                                                </select>
+                                            </td>
+                                            <td class="text-center align-middle" style="width: 200px;">
+                                                <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="row.TeacherRemarks" ></textarea>
+                                            </td>
+                                            <td class="text-center align-middle" style="width: 200px;">
+                                                <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="row.ParentRemarks"></textarea>
+                                            </td>
+                                            <td class="text-center align-middle px-2" style="width: 200px;">
+                                                <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="row.Recommendation"></textarea>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+                            <!-- timeline time label -->
+                            @*<div class="time-label pb-3 mt-3">
+                                <span class="d-block border-0 p-1 text-center">
+                                    <button type="button" class="btn btn-sm btn-info" id="back-to-list-PTM"
+                                            style="min-width: 90px">
+                                        Back To List
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px" ng-click="ClearPTM()">
+                                        Reset
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="SaveUpdatePTM()">
+                                        Save
+                                    </button>
+                                </span>
+                            </div>*@
+                            <!-- /.timeline-label -->
+                        </div>
+                    </div>
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+</div>

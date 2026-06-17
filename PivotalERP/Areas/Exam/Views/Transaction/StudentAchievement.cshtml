@@ -1,0 +1,143 @@
+﻿<style>
+    .selected-row {
+        background-color: green;
+        color: white; /* Optional: to make text readable on green background */
+    }
+</style>
+<script src="~/jslib/exam/transaction/StudentAchievement.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="StudentAchievementController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:48px!important">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Class/Sec</label>
+                            <select class="form-control form-control-sm select2" data-placeholder="Select Class" ng-model="newDet.SelectedClass" ng-change="GetClassWiseStudent()">
+                                <option ng-value="0">**Select Class/Section**</option>
+                                <option ng-value="cl" ng-repeat="cl in ClassSection.SectionListWithClass">{{cl.text}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Exam</label>
+                        <div class="form-group">
+                            <select class="form-control form-control-sm select2" ng-model="newDet.ExamTypeId" ng-change="checkAndGetPreviousAchievement()">
+                                <option ng-value="0">**Select ExamType**</option>
+                                <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newDet.ExamTypeId">{{cl.text}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Remarks Type</label>
+                        <select class="select2 form-control-sm"
+                                data-placeholder="Select Source" ng-model="newDet.RemarksTypeId"
+                                style="width: 100%" >
+                            <option ng-value="0">**All**</option>
+                            <option ng-value="rl.RemarksTypeId" ng-repeat="rl  in RemarksTypeList">{{rl.Name}}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5" style="border-right:2px dashed #a1a1a1;">
+                        <div class="table-scroll-x-y sales-main-table table-scroll mt-2" style="max-height: calc(100vh - 8rem) !important">
+                            <table id="Routine" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">S.No.</th>
+                                        <th style="width: 70px;">Regd No</th>
+                                        <th style="width: 70px;">Roll No</th>
+                                        <th style="width: 200px;">Name</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="A in StudentForAchievementColl"
+                                        ng-click="AddAchievementDet(A, $index)"
+                                        ng-class="{'selected-row': selectedRowIndex === $index}">
+                                        <td>{{$index + 1}}</td>
+                                        <td>{{A.RegdNo}}</td>
+                                        <td>{{A.RollNo}}</td>
+                                        <td>
+                                            <a>{{A.Name}}</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-7" ng-if="selectedRowIndex < 0">
+                        <h5 class="mt-4 text-success"> Please select the student first for achievement entry!</h5>
+                    </div>
+                    <div class="col-md-7" ng-if="selectedRowIndex !== -1">
+                        <label>Name: <b>{{newDet.Name}}</b> <span class="mx-3">Class: <b>{{newDet.ClassName}}-{{newDet.SectionName}}</b></span><span class="mx-3">Roll No: <b>{{newDet.RollNo}}</b></span></label>
+                        <div class="table-scroll-x-y sales-main-table table-scroll mt-2" >
+                            <table id="Routine" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;">S.No.</th>
+                                        <th style="width: 350px;">Achievements</th>
+                                        <th style="width: 70px;">Point</th>
+                                        <th style="width: 70px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="P in newDet.RemarksColl" >
+                                        <td>{{$index+1}}</td>
+                                        <td><textarea class="form-control form-control-sm" rows="1" ng-model="P.Remarks"> </textarea></td>
+                                        <td> <input type="number"  class="form-control form-control-sm" ng-model="P.Point" /></td>
+                                        <td>
+                                            <a class="p-1" ng-click="AddRemarks($index)">
+                                                <i class="fas fa-plus text-secondary"></i>
+                                            </a>
+                                            <a class="p-1" ng-click="delRemarks($index)">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12 text-center">
+                                <button class="btn btn-sm btn-success" style="width:60px" ng-click="SaveUpdateStudentAchievement()">Update</button>
+                            </div>
+                        </div>
+                        <h6 class="py-2 text-info">Previous Records</h6>
+                        <div class="table-scroll-x-y sales-main-table table-scroll mt-2">
+                            <table id="Routine" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 35px;">S.No.</th>
+                                        <th style="width: 300px;">Achievements</th>
+                                        <th style="width: 50px;">Point</th>
+                                        <th class="text-center" style="width: 50px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="A in PrevAchievementlist">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{A.Remarks}} </td>
+                                        <td> {{A.Point}}</td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" ng-click="DelStudentAchievementById(A)">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+               
+
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+

@@ -1,0 +1,795 @@
+﻿
+<style>
+    .avatar {
+        width: 5em;
+        height: 5em;
+        font-family: sans-serif;
+        background: #f0f0f0;
+        border: 1px dashed #76be4e;
+        position: relative;
+    }
+
+        .avatar input {
+            width: 100%;
+            height: 100%;
+            opacity: 0; /* Hide the button */
+            cursor: pointer;
+        }
+
+    .cross-btn {
+        position: absolute;
+        right: 0;
+        top: -29px;
+        background: #76be4e;
+        border: 2px solid #fff;
+        color: #fff;
+        border-radius: 100px;
+        width: 19px;
+        height: 19px;
+        transition: all .5s;
+        cursor: pointer;
+        outline: none;
+    }
+
+        .cross-btn:hover {
+            background: #dc3545;
+        }
+
+    .previewimg {
+        width: 100px;
+        height: 80px;
+    }
+
+    .user-img-box {
+        position: relative;
+        width: 100px;
+        height: 80px;
+        transition: all .5s;
+    }
+
+    div.attachpreview {
+        margin: 5px;
+        border-radius: 10px;
+        float: left;
+    }
+
+    .crossicon {
+        margin-left: 4px !important;
+        margin-top: 0px;
+        position: absolute;
+        font-size: 12px;
+    }
+
+    .menuopt {
+        z-index: 2;
+    }
+
+
+    .modal {
+        margin-top: 30px !important;
+    }
+
+    .modal-dialog {
+        margin-bottom: 40px !important;
+    }
+</style>
+<script>
+    var ReceiptEntityId =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.FeeReceipt);
+
+</script>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<link rel="stylesheet" href="~/wwwroot/dynamic/css/dropzone.css" />
+<script src="~/wwwroot/dynamic/js/dropzone.js"></script>
+<script src="~/jslib/admission/RegistrationCouncelling.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="RegistrationCouncellingController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:53px!important">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <!--Admission Confirmation table starts-->
+                    <div id="admissionconfirmationtable">
+                        <!-- Second Tab Content -->
+                        <header class="row">
+                            <div class="col-md-6">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AdmissionReceipt">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AdmissionReceipt">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.AdmissionReceipt">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-6 text-right">
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="GetStudentForReceipt()">
+                                    <i class="fas fa-sync-alt mr-2"></i>
+                                    Load
+                                </button>
+                                <button type="button" class="btn btn-sm btn-info" ng-click="ShowSMSDialog()" style="min-width: 90px;">
+                                    <i class="fas fa-sms w-t"></i>
+                                    Send SMS
+                                </button>
+                                <button type="button" class="btn btn-sm btn-info" ng-click="ShowEmailDialog()" style="min-width: 90px;">
+                                    <i class="fas fa-envelope w-t"></i>
+                                    Send Email
+                                </button>
+
+                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#tblAdmissionReceipt'" sheet-name="'admissionconfirm'" file-type="'excel'" report-name="'Student List'" ignore-column="'0'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" export-excel table-id="'#tblAdmissionReceipt'" sheet-name="'admissionconfirm'" file-type="'csv'" report-name="'Student List'" ignore-column="'0'"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                       
+                                    </div>
+                                </div>
+                                <a print-tbl table-id="'#tblAdmissionReceipt'" class="btn btn-secondary btn-light btn-sm wait"
+                                   data-toggle="tooltip" data-placement="bottom"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                            </div>
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 9rem);">
+                                <table id="tblAdmissionReceipt"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 65px;z-index:2">Action</th>
+                                            <th style="width: 70px; z-index: 2">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="customCheckbox1" ng-model="chkCheckAll" ng-change="CheckUnCheckAll()">
+                                                    <label for="customCheckbox1"
+                                                           class="custom-control-label">
+                                                        S.No
+                                                    </label>
+                                                </div>
+                                            </th>
+                                            <th class="text-center" style="width: 170px">Status</th>
+                                            <th style="width: 130px">Registration No</th>
+                                            <th style="width: 150px">Registration Date</th>
+                                            <th style="width: 200px">Name</th>
+                                            <th style="width: 150px">Class/Section</th>
+                                            <th style="width: 130px">Admission No</th>
+                                            <th style="width: 120px">Receipt No</th>
+                                            <th style="width: 150px">CommunicateType</th>                                            
+                                            <th style="width: 125px">Student Type</th>                                            
+                                            <th style="width: 150px">Contact No</th>
+                                            <th style="width: 200px">Father Name</th>
+                                            <th style="width: 150px">Father Contact No</th>
+                                            <th style="width: 250px">Address</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="st in StudentForReceiptColl |orderBy:sortKey:reverse| filter:searchData.AdmissionReceipt | itemsPerPage: perPage.AdmissionReceipt" current-page="currentPages.AdmissionReceipt" pagination-id="AdmissionReceiptPagination">
+                                            <td class="text-center">
+                                                <div class="dropdown dnld-file">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-clipboard-list"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right p-2"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item pb-0" href="#" ng-click="admissionReceiptGen(st)" ng-hide="st.ReceiptTranId>0">Admission Receipt</a>
+                                                        <a class="dropdown-item pb-0" data-toggle="modal" data-target="#granted">Admission Granted</a>
+                                                        <a class="dropdown-item pb-0" href="#" ng-click="openFollowup(st)">Followup</a>
+                                                        <a class="dropdown-item pb-0" ng-click="closeFollowup(st,3)">Hold</a>
+                                                        <a class="dropdown-item mb-0" href="#" ng-click="closeFollowup(st,4)"> Registration Resume</a>
+                                                        <a class="dropdown-item mb-0" href="#" ng-click="closeFollowup(st,5)"> Registration Rejection</a>
+                                                        <a class="dropdown-item pb-0" href="#" ng-show="st.ReceiptTranId>0" ng-click="DownloadReceipt(st.ReceiptTranId)">Download Receipt</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="chkIsSelected{{$index}}" ng-model="st.IsSelected">
+                                                    <label for="chkIsSelected{{$index}}" class="custom-control-label"> {{st.SNo}} </label>
+                                                </div>
+                                            </td>
+                                            <td>{{st.EligibleStatus}}</td>
+
+                                            <td>{{st.AutoManualNo}}</td>
+                                            <td> {{st.EnqDate_BS}}</td>
+                                            <td>{{st.Name}}</td>
+                                            <td>{{st.EligibleClassPreferredFor}}</td>
+                                            <td>{{st.RegNo}}</td>
+                                            <td>{{st.ReceiptNo}}</td>
+                                            <td>{{st.CommunicationType}}</td>                                        
+                                            <td>{{st.StudentType}}</td>                                           
+                                            <td>{{st.ContactNo}}</td>
+                                            <td>{{st.FatherName}}</td>
+                                            <td>{{st.F_ContactNo}}</td>
+                                            <td>{{st.Address}}</td>
+
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="AdmissionReceiptPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                    <!--Admission Confirmation table ends -->
+
+
+                </div>
+            </section>
+        </div>
+    </section>
+    <!-- Followup Modal Starts -->
+    <div class="modal fade" id="followup">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title">Admission Registration Followup</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        @*<div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="">Registration Followup</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" date-picker ng-model="newFollowup.PaymentDueDate_TMP" date-detail="newFollowup.PaymentDueDateDet">
+                                </div>
+                            </div>*@
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Followup Remarks</label>
+                                <textarea class="form-control form-control-sm" ng-model="newFollowup.Remarks" rows="1"
+                                          placeholder=""></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="">Communication Type</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFollowup.CommunicationTypeId">
+                                    <option ng-value="ct.CommunicationTypeId" ng-selected="ct.CommunicationTypeId==newFollowup.CommunicationTypeId" ng-repeat="ct in CommunicationTypeList">{{ct.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Next Followup Required</label>
+                            <div class="form-group clearfix mb-0 pb-0">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="required" name="r5" ng-value="true" ng-model="newFollowup.NextFollowupRequired">
+                                    <label class="form-check-label" for="required">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="not-required" name="r5" ng-value="false" ng-model="newFollowup.NextFollowupRequired">
+                                    <label class="form-check-label" for="not-required">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" ng-show="newFollowup.NextFollowupRequired==true || newFollowup.NextFollowupRequired=='true'">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">Next Followup Date</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm" date-picker ng-model="newFollowup.NextFollowupDate_TMP" date-detail="newFollowup.NextFollowupDateDet">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="">Next Followup Time</label>
+                                        <input type="time" class="form-control form-control-sm" ng-model="newFollowup.NextFollowupTime_TMP">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <hr class="p-1 m-1">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="">Student Name/Enq.No/Class </label><br />
+                            <label><b>{{newFollowup.Name}} / {{newFollowup.AutoNumber}} /  {{newFollowup.ClassSection}}</b></label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="">Father Name :</label><br />
+                            <label><b>{{newFollowup.FatherName}}</b></label>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="">Contact :</label><br />
+                            <label><b>{{newFollowup.F_ContactNo}}</b></label>
+                        </div>
+                        @*<div class="col-md-2">
+                                <label for="">Total Dues :</label><br />
+                                <label><b>{{newFollowup.TotalDues |number:2}}</b></label>
+                            </div>*@
+                    </div>
+                    <hr class="p-1 m-1">
+
+                    <div class="card-tools mb-2" style="width: 250px;">
+                        <div class="input-group input-group-sm table-search-filed">
+                            <input class="form-control form-control-navbar" type="search"
+                                   placeholder="Search" aria-label="Search">
+                            <div class="input-group-append">
+                                <button class="btn btn-default border-left-0" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">S.No.</th>
+                                    <th style="width: 120px;">Followup Date</th>
+                                    <th style="width: 140px;">Next Date</th>
+                                    <th style="width: 200px;">Remarks</th>
+                                    <th style="width: 150px;">Followup By</th>
+                                    @*<th style="width: 150px;">Closed Remarks</th>*@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="h in newFollowup.HistoryColl">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{h.PaymentDueMiti}}</td>
+                                    <td>{{h.NextFollowupMiti}}</td>
+                                    <td>{{h.Remarks}}</td>
+                                    <td>{{h.FollowupBy}}</td>
+                                    @*<td>{{h.ClosedRemarks}}</td>*@
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearFollowup()">Reset</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateFollowup()">Save</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- Followup Modal Ends -->
+    <!-- Followup Modal Starts -->
+    <div class="modal fade" id="followupClosed">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title">Registration {{newFollowup.StatusStr}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>{{newFollowup.StatusStr}} Remarks</label>
+                                <textarea class="form-control form-control-sm" ng-model="newFollowup.StatusRemarks" rows="1"
+                                          placeholder=""></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="p-1 m-1">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="">Student Name/{{'REGDNO_LNG' | translate}} / Class </label><br />
+                            <label><b>{{newFollowup.Name}} / {{newFollowup.RegdNo}} /  {{newFollowup.ClassSection}}</b></label>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="">Father Name :</label><br />
+                            <label><b>{{newFollowup.FatherName}}</b></label>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="">Contact :</label><br />
+                            <label><b>{{newFollowup.F_ContactNo}}</b></label>
+                        </div>
+                        @*<div class="col-md-2">
+                                <label for="">Total Dues :</label><br />
+                                <label><b>{{newFollowup.TotalDues |number:2}}</b></label>
+                            </div>*@
+                    </div>
+                    <hr class="p-1 m-1">
+
+
+                    <!-- /.card-header -->
+                    <div class=" sales-main-table table-scroll">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">S.No.</th>
+                                    <th style="width: 120px;">Followup Date</th>
+                                    <th style="width: 140px;">Next Date</th>
+                                    <th style="width: 200px;">Remarks</th>
+                                    <th style="width: 150px;">Followup By</th>
+                                    @*<th style="width: 150px;">Closed Remarks</th>*@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="h in newFollowup.HistoryColl">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{h.PaymentDueMiti}}</td>
+                                    <td>{{h.NextFollowupMiti}}</td>
+                                    <td>{{h.Remarks}}</td>
+                                    <td>{{h.FollowupBy}}</td>
+                                    @*<td>{{h.ClosedRemarks}}</td>*@
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearFollowup()">Reset</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveFollowupClosed()">Save</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- Followup Modal Ends -->
+    <!--Upcoming Followup Modal Ends -->
+    <!--SMS modal Starts-->
+    <div class="modal fade" id="sendsms" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title">Send SMS</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-2">
+                    <div class="card-body">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="" class="mr-2">SMS Template: </label>
+                                <select class="form-control form-control-sm select2" style="width: 100%" ng-model="CurSMSSend.Template" ng-change="SMSTemplateChanged(CurSMSSend.Template)">
+                                    <option ng-repeat="st in SMSTemplatesColl" ng-value="st">
+                                        {{st.Name}}
+                                    </option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="" class="mr-2">Message: </label>
+                                <textarea class="form-control form-control-sm" rows="3"
+                                          placeholder="Enter ..." ng-model="CurSMSSend.Description"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-flex">
+                            <div class="custom-control custom-checkbox mr-2">
+                                <input class="custom-control-input" type="checkbox"
+                                       id="customCheckbox2" ng-model="CurSMSSend.Primary">
+                                <label for="customCheckbox2"
+                                       class="custom-control-label">Primary No.</label>
+                            </div>
+
+                            <div class="custom-control custom-checkbox mr-2">
+                                <input class="custom-control-input" type="checkbox"
+                                       id="customCheckbox3" ng-model="CurSMSSend.Father">
+                                <label for="customCheckbox3"
+                                       class="custom-control-label">Father No.</label>
+                            </div>
+
+                            <div class="custom-control custom-checkbox mr-2">
+                                <input class="custom-control-input" type="checkbox"
+                                       id="customCheckbox4" ng-model="CurSMSSend.Mother">
+                                <label for="customCheckbox4"
+                                       class="custom-control-label">Mother No.</label>
+                            </div>
+                            <div class="custom-control custom-checkbox mr-2">
+                                <input class="custom-control-input" type="checkbox"
+                                       id="customCheckbox5" ng-model="CurSMSSend.Guardian">
+                                <label for="customCheckbox5"
+                                       class="custom-control-label">Mother No.</label>
+                            </div>
+                        </div>
+
+
+                        <div class="col-12 mt-4">
+                            <div class="form-group">
+                                <label>Total numbers of selected student: {{CurSMSSend.DataColl.length}}</label>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="text-center mb-2">
+
+                    <button type="button" class="btn btn-success  btn-sm" style="width:70px;" ng-click="SendSMS()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!---->
+    <!--Email modal Starts-->
+    <div class="modal fade" id="sendemail" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title">Send Email</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-2">
+                    <div class="card-body">
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="min-width:90px;">SMS Template: </label>
+                                <select class="form-control form-control-sm select2" style="width: 100%" ng-model="CurEmailSend.Template" ng-change="EmailTemplateChanged(CurEmailSend.Template)">
+                                    <option ng-repeat="st in EmailTemplatesColl" ng-value="st">
+                                        {{st.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="min-width:90px;">Email Send To</label>
+                                <div class="checkbox-wrapper  d-flex">
+                                    <div class="custom-control custom-checkbox mr-2">
+                                        <input class="custom-control-input" type="checkbox"
+                                               id="customCheckbox211" ng-model="CurEmailSend.Primary">
+                                        <label for="customCheckbox211"
+                                               class="custom-control-label">Primary Email.</label>
+                                    </div>
+
+                                    <div class="custom-control custom-checkbox mr-2">
+                                        <input class="custom-control-input" type="checkbox"
+                                               id="customCheckbox311" ng-model="CurEmailSend.Father">
+                                        <label for="customCheckbox311"
+                                               class="custom-control-label">Father Email</label>
+                                    </div>
+
+                                    <div class="custom-control custom-checkbox mr-2">
+                                        <input class="custom-control-input" type="checkbox"
+                                               id="customCheckbox411" ng-model="CurEmailSend.Mother">
+                                        <label for="customCheckbox411"
+                                               class="custom-control-label">Mother Email</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox mr-2">
+                                        <input class="custom-control-input" type="checkbox"
+                                               id="customCheckbox511" ng-model="CurEmailSend.Guardian">
+                                        <label for="customCheckbox511"
+                                               class="custom-control-label">Guardian Email</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="min-width:90px;">CC Employee </label>
+                                <select class="form-control form-control-sm select2" multiple ng-model="CurEmailSend.EmployeeColl" style="width:99%">
+                                    <option ng-value="st" ng-repeat="st in AllEmployeeColl">{{st.Name}}-{{st.EmployeeCode}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1" style="min-width:90px;">Subject <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" ng-model="CurEmailSend.Subject" />
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group mb-0">
+                                <label for="" class="mr-2">Message <span class="text-danger">*</span> </label>
+                                <textarea class="textarea" placeholder="Place some text here" style="
+                                                                          width: 100%;
+                                                                          height: 130px!important;
+                                                                          font-size: 14px;
+                                                                          line-height: 18px;
+                                                                          border: 1px solid #dddddd;
+                                                                          padding: 10px;
+                                                                        " ng-model="CurEmailSend.Description" html-editor></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card-body mt-0" id="add-file-area" style="background-color: #eff0ef;">
+                                <label><b>Attach File</b></label>
+                                <div id="actions" class="row">
+                                    <div class="col-md-1 mt-4">
+                                        <div class="btn-group">
+                                            <span class="btn-add-file col fileinput-button">
+                                                <span><i class="fas fa-plus-circle"></i></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-11">
+                                        <div class="d-flex p-2" id="previews" style="overflow-x: auto;">
+                                            <div id="template">
+                                                <a data-dz-remove class="cancel float-right">
+                                                    <i class="fas fa-times-circle" style="  color:#28a745;font-size: 14px;"></i>
+                                                </a>
+                                                <span class="preview p-2 ml-2"><img style="height:150px;width:auto" src="data:," alt="" data-dz-thumbnail /></span>
+                                                <div class="align-items-center" style="width: 100%;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <div class="form-group">
+                                <label>Total numbers of selected student: {{CurEmailSend.DataColl.length}}</label>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="text-center mb-3">
+                        <button type="button" class="btn btn-success  btn-sm" style="width:80px" ng-click="SendEmail()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hold Modal Starts-->
+    <div class="modal fade" id="hold" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title" id="exampleModalLabel">Admission Hold</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Hold Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="3"></textarea>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" class="btn btn-sm btn-success float-right">Save</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- Rejection Modal Starts-->
+    <div class="modal fade" id="rejection" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title" id="exampleModalLabel">Admission Rejection</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Rejection Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="3"></textarea>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" class="btn btn-sm btn-success float-right">Save</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Granted Modal Starts-->
+    <div class="modal fade" id="granted" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title" id="exampleModalLabel">Admission Granted</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="3"></textarea>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" class="btn btn-sm btn-success float-right">Save</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    // DropzoneJS Demo Code Start
+    Dropzone.autoDiscover = false
+    // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+    var previewNode = document.querySelector("#template")
+    previewNode.id = ""
+    var previewTemplate = previewNode.parentNode.innerHTML
+    previewNode.parentNode.removeChild(previewNode)
+
+    var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+        url: "/target-url", // Set the url
+        thumbnailWidth: 130,
+        thumbnailHeight: 130,
+        parallelUploads: 20,
+        previewTemplate: previewTemplate,
+        autoQueue: false, // Make sure the files aren't queued until manually added
+        previewsContainer: "#previews", // Define the container to display the previews
+        clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+    })
+    document.querySelector("#actions .cancel").onclick = function () {
+        myDropzone.removeAllFiles(true)
+    }
+    // DropzoneJS Demo Code End
+</script>
+

@@ -1,0 +1,548 @@
+﻿
+<style>
+    .text-danger {
+        color: red;
+    }
+
+    @@media print {
+        /* Hide everything except the #table-print section */
+        body * {
+            visibility: hidden;
+        }
+
+        #table-print, #table-print * {
+            visibility: visible;
+        }
+
+        #table-print {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    }
+</style>
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+
+<script src="~/jslib/Exam/Transaction/ClassTest.js?v=20251115"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ClassTestController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-10">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                   href="#home" role="tab" aria-controls="home"
+                                                   aria-selected="true">Marks Entry</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                   href="#profile" role="tab" aria-controls="profile"
+                                                   aria-selected="false">Summary</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Marks Entry Starts -->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <label>Class/Sec</label>
+                                            @*<div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassMarkEntry.SelectedClass" ng-change="GetClassWiseSubMap()">
+                                                    <option ng-repeat="cl in ClassList.SectionListWithClass" ng-value="cl">{{cl.text}}</option>
+                                                </select>
+                                            </div>*@
+
+                                            <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newClassMarkEntry.SelectedClass" ng-change="GetClassWiseSubMap()">
+                                                <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList">{{cs.text}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true && newClassMarkEntry.SelectedClass.ClassType!=1">
+                                            <label for="">Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newClassMarkEntry.BatchId">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newClassMarkEntry.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-2" ng-show="newClassMarkEntry.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group">
+                                                <label for="">Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newClassMarkEntry.ClassYearId">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newClassMarkEntry.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newClassMarkEntry.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newClassMarkEntry.SemesterId">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newClassMarkEntry.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="col-md-2">
+                                            <label>Subject</label>
+                                            <select class="form-control form-control-sm select2" data-placeholder="Select Section" ng-model="newClassMarkEntry.SubjectId" ng-change="GetEmpListForClassTeacher()">
+                                                <option ng-value="0">**Select Subject**</option>
+                                                <option ng-repeat="se in newClassMarkEntry.SubjectList" ng-value="se.SubjectId">{{se.Name}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Teacher</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassMarkEntry.EmployeeId">
+                                                    <option ng-repeat="emp in newClassMarkEntry.EmployeeList" ng-value="emp.EmployeeId" ng-selected="{{emp.EmployeeId==newClassMarkEntry.EmployeeId}}">{{emp.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="col-md-2">
+                                            <label>Lesson/Theme</label>
+                                            <div class="form-group">
+                                                <select class="form-control form-control-sm select2" ng-model="newClassMarkEntry.LessonSNo" ng-change="GetStudentsDetailsClassWise()">
+                                                    <option ng-value="cl.LessonSno" ng-repeat="cl in CSubjectWiseLessonList" ng-selected="cl.LessonSno==newClassMarkEntry.LessonSNo">{{cl.LessonName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-2">
+                                            <label>Test Date</label>
+                                            <div class="form-group">
+                                                <input type="text" placeholder="" class="form-control form-control-sm" date-picker ng-model="newClassMarkEntry.TestDate_TMP" date-detail="newClassMarkEntry.TestDateDet" confirm-action="GetStudentsDetailsClassWise()">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label>Full Marks</label>
+                                            <input type="number"
+                                                   class="form-control form-control-sm" ng-model="newClassMarkEntry.FullMarks" />
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label>Pass Marks</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="newClassMarkEntry.PassMarks" ng-change="CheckPMFM()" />
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="input-group input-group-sm table-search-filed mt-4">
+                                                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.ClassTestMarkEntry" />
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @*<div class="col-md-2">
+                                            <div class="custom-control custom-checkbox checkbox-lg mt-4">
+                                                <input type="checkbox" class="custom-control-input bg-light" id="checkbox-1" value=""
+                                                       style="background-color: #fff" />
+                                                &nbsp;
+                                                <label class="custom-control-label" for="checkbox-1">Column wise Focus</label>
+                                            </div>
+                                        </div>*@
+
+
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-1 float-right mt-4">
+                                                <button type="button" class="btn btn-sm btn-info btn-sm px-1" style="width: 80px;" ng-click="GetStudentsDetailsClassWise()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                <button type="button" class="btn btn-sm btn-default btn-sm px-1" style="width: 80px" ng-click="ClearClassMarkEntry()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success btn-sm px-1" style="width: 80px" ng-click="SaveClassTestMarkEntry(me)">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Table Starts -->
+                                    <div class="">
+                                        <div class="table-scroll-x-y sales-main-table table-scroll mb-3" style="max-height: calc(100vh - 16rem)!important; overflow-x: auto;">
+                                            <table id="main-table3" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-center align-middle" style="width: 90px;" ng-click="sortMarkEntry('RegdNo')">RegdNo</th>
+                                                        <th class="text-center align-middle" style="width: 105px;" ng-click="sortMarkEntry('BoardRegdNumber')">Board Regd No.</th>
+                                                        <th class="text-center align-middle" style="width: 190px;" ng-click="sortMarkEntry('RollNumber')">Sec/Roll No.</th>
+                                                        <th class="text-center align-middle" style="width: 200px;" ng-click="sortMarkEntry('StudentName')">Student Name</th>
+                                                        <th scope="colgroup" class="text-center" style="width: 90px; z-index:4;">Is Absent?</th>
+                                                        <th class="text-center" style="width: 120px;">Obt.Marks</th>
+                                                        <th class="text-center" style="width: 200px;">Remarks</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="me in StudentsDetailsClassWiseList| filter:searchData.ClassTestMarkEntry |orderBy:sortKeys.MarkEntry:reverses.MarkEntry track by $index">
+                                                        <td>{{me.RegdNo}}</td>
+                                                        <td>{{me.BoardRegdNumber}}</td>
+                                                        <td>{{me.SectionName}}<label ng-if="me.SectionName && me.RollNumber">/</label>{{me.RollNumber}}</td>
+                                                        <td>{{me.StudentName}}</td>
+                                                        <td class="text-center">
+                                                            <label class="checkbox-wrap mx-0 d-flex justify-content-center align-items-center">
+                                                                <input type="checkbox" id="rankCheckbox-{{me.RegdNo}}" ng-model="me.IsAbsent" ng-change="onAbsentChange(me)" />
+                                                                <span class="checkmark"></span>
+                                                            </label>
+                                                        </td>
+                                                        <td><input type="text" class="form-control form-control-sm serialCAS" onfocus="this.select();" ng-model="me.ObtainMarks" ng-disabled="me.IsAbsent" ng-change="ChangeMarkEntry(me)"></td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="me.RemarksType"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Marks Entry Ends -->
+                                <!-- Summary Starts -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    <div id="ClassSummarySection">
+                                        <div class="card">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <label>Class/Sec</label>
+                                                            @*<select class="form-control form-control-sm select2" ng-model="newSummary.ClassId" ng-change="GetClassSummaryClassWiseSubject(newSummary.ClassId)">
+                                                                <option ng-value="0">**Select Class**</option>
+                                                                <option ng-value="cl.ClassId" ng-repeat="cl in ClassSectionList.SectionList" ng-selected="cl.ClassId==newSummary.ClassId">{{cl.text}}</option>
+                                                            </select>*@
+                                                            <select class="form-control form-control-sm select2" style="width: 100%" ng-model="newSummary.SelectedClass" ng-change="GetClassSummaryClassWiseSubject()">
+                                                                <option ng-value="cs" ng-repeat="cs in ClassSectionList.SectionList">{{cs.text}}</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true && newSummary.SelectedClass.ClassType!=1">
+                                                            <label for="">Batch</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newSummary.BatchId">
+                                                                <option ng-value="0">**Select Batch**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newSummary.BatchId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="col-md-2" ng-show="newSummary.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                            <div class="form-group">
+                                                                <label for="">Year</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newSummary.ClassYearId">
+                                                                    <option ng-value="0">**Select Year**</option>
+                                                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newSummary.ClassYearId">{{cl.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2" ng-show="newSummary.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                            <div class="form-group">
+                                                                <label for="">Semester</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newSummary.SemesterId">
+                                                                    <option ng-value="0">**Select Semester**</option>
+                                                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newSummary.SemesterId">{{cl.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-2">
+                                                            <div class="form-group mb-1">
+                                                                <label>Subject</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newSummary.SubjectId">
+                                                                    <option ng-value="cl.SubjectId" ng-repeat="cl in SubjectList" ng-selected="cl.SubjectId==newSummary.SubjectId">{{cl.SubjectName}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-3">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label> Date From</label>
+                                                                        <input type="text" class="form-control form-control-sm" value="" date-picker ng-model="newFilter.FromDate_TMP" date-detail="newFilter.FromDateDet" confirm-action="validateDates('fromDate')">
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label> Date To</label>
+                                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newFilter.ToDate_TMP" date-detail="newFilter.ToDateDet" confirm-action="validateDates('toDate')">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-1">
+                                                            <button type="button" class="btn btn-sm btn-success btn-sm px-1 mt-4" style="min-width: 80px;" ng-click="GetViewClassSummaryDetails()"> <i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <header class="row">
+                                                <div class="col-md-7">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline mb-2">
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Show</span>
+                                                                </div>
+                                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ClassSummary">
+                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.HealthIssue">{{pp.text}}</option>
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.ClassSummary" />
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </header>
+                                            <!-- Table Starts -->
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 15rem); overflow-x: auto;">
+                                                <table id="main-table1" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 40px;">S.No</th>
+                                                            <th style="width: 90px;">Test Date</th>
+                                                            <th style="width: 110px;"> Lesson/Theme</th>
+                                                            <th style="width: 110px;">Teacher</th>
+                                                            <th style="width: 90px;">FM</th>
+                                                            <th style="width: 90px;">PM</th>
+                                                            <th style="width: 200px;">Students Appeared</th>
+                                                            <th style="width: 70px;">Status</th>
+                                                            @*
+                                                            <th style="width: 70px;">Action</th>*@
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="Cs in ViewClassSummaryDetailsList| filter:searchData.ClassSummary | itemsPerPage: perPage.ClassSummary" current-page="currentPages.ClassSummary" pagination-id="ClassSummaryPagination">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{Cs.TestDateBS}}</td>
+                                                            <td>{{Cs.LessonName}}</td>
+                                                            <td>{{Cs.EmployeeName}}</td>
+                                                            <td>{{Cs.FullMarks}}</td>
+                                                            <td>{{Cs.PassMarks}}</td>
+                                                            <td>
+                                                                <a data-toggle="tooltip"
+                                                                   title="Present Student/Total Student">
+                                                                    {{Cs.PresentStudent}}/{{Cs.TotalStudent}}
+                                                                </a>
+                                                            </td>
+                                                            <td>
+                                                                <a ng-click="GetClassSummaryDetailsById(Cs)" id="ViewDetails"><i class="p-1 fas fa-eye text-info"></i></a>
+                                                            </td>
+
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="ClassSummaryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                    </div>
+
+                                    <div id="ClassSummaryForm">
+                                        <div class="card card-default">
+                                            <div class="card-body p-2" id="table-print">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group d-flex mb-0">
+                                                            <label style="min-width: 120px;">Class</label>
+                                                            <p class="mb-0"><b>:{{newSummary.ClassName}} @*{{newSummary.SectionName}}*@</b></p>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group d-flex mb-0">
+                                                            <label style="min-width: 120px;">Subject</label>
+                                                            <p class="mb-0"><b>:{{newSummary.SubjectName}}</b></p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group d-flex mb-0">
+                                                            <label style="min-width: 100px;">Test Date</label>
+                                                            <p class="mb-0"><b>:{{newSummary.TestDateBS}}</b></p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group d-flex mb-0">
+                                                            <label style="min-width: 120px;">Lesson/Theme</label>
+                                                            <p class="mb-0"><b>:{{newSummary.LessonName}}</b></p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group d-flex mb-0">
+                                                            <label style="min-width: 120px;">Teacher Name</label>
+                                                            <p class="mb-0"><b>:{{newSummary.EmployeeName}}</b></p>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+
+                                                <div class="row p-2">
+                                                    <div class="col-md-12">
+                                                        <header class="row">
+                                                            <div class="col-md-4 px-0" id="none-print">
+                                                                <div class="clearfix">
+                                                                    <form class="form-inline mb-2">
+                                                                        <div class="input-group input-group-sm table-search-filed">
+                                                                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.ClassSummaryDetail" />
+                                                                            <div class="input-group-append">
+                                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                                    <i class="fas fa-search"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-7">
+                                                                <div class="row">
+                                                                    <div class="col-md-3">
+                                                                        <div class="form-group">
+                                                                            <label style="font-weight: bold;">Total Student :</label>
+                                                                            <label style="font-weight: bold;">{{newSummary.TotalStudent}}</label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div class="form-group">
+                                                                            <label style="font-weight: bold;">Passed :</label>
+                                                                            <label style="font-weight: bold;">{{newSummary.PassStudent}}</label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div class="form-group">
+                                                                            <label style="font-weight: bold;">Failed :</label>
+                                                                            <label style="font-weight: bold;">{{newSummary.FailStudent}}</label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div class="form-group">
+                                                                            <label style="font-weight: bold;">Absent :</label>
+                                                                            <label style="font-weight: bold;">{{newSummary.AbsentStudent}}</label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="col-md-1 text-right" id="none-print1">
+                                                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                        <i class="fas fa-download"></i>
+                                                                    </button>
+                                                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                                        <span class="dropdown-item">Choose an option:</span>
+                                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassTestSummary'">
+                                                                            <img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image">
+                                                                            Excel
+                                                                        </a>
+                                                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});">
+                                                                            <img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="CSV image">
+                                                                            CSV
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="top" title="Print" ng-click="triggerPrint()">
+                                                                    <i class="fas fa-print"></i>
+                                                                </a>
+                                                            </div>
+                                                        </header>
+                                                        <div class="row">
+                                                            <div class="card mb-0">
+                                                                <div class="table-scroll-x-y sales-main-table table-scroll mb-3" style="max-height: calc(100vh - 16rem); overflow-x: auto;">
+                                                                    <table id="main-table"
+                                                                           class="main-table table table-sm table-bordered bg-white">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th style="width: 90px;">RegdNo</th>
+                                                                                <th style="width: 110px;">Board Regd No.</th>
+                                                                                <th style="width: 70px;">Roll No.</th>
+                                                                                <th style="width: 200px;">Student Name</th>
+                                                                                <th style="width: 90px;">Obt.Marks</th>
+                                                                                <th style="width: 250px;">Remarks</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr ng-repeat="A in SummaryList| filter:searchData.ClassSummaryDetail">
+                                                                                <td>{{A.RegdNo}}</td>
+                                                                                <td>{{A.BoardRegdNumber}}</td>
+                                                                                <td>{{A.RollNo}}</td>
+                                                                                <td>{{A.StudentName}}</td>
+                                                                                <td ng-class="{'text-danger':  !A.IsAbsent && A.ObtMarks < A.PassMarks}">
+                                                                                    {{A.IsAbsent ? 'Ab' : A.ObtMarks}}
+                                                                                </td>
+                                                                                <td>{{A.Remarks}}</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <!-- timeline time label -->
+                                            <div class="time-label">
+                                                <span class="d-block border-0 p-1 text-center">
+                                                    <button type="button" class="btn btn-sm btn-info" id="back-to-list-ClassSummary"
+                                                            style="min-width: 90px">
+                                                        Back To List
+                                                    </button>
+                                                </span>
+                                            </div>
+                                            <!-- /.timeline-label -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Summary Ends -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+
+

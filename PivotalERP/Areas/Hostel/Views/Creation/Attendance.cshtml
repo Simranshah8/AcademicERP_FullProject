@@ -1,0 +1,933 @@
+﻿<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+
+    .avatar {
+        width: 5em;
+        height: 5em;
+        font-family: sans-serif;
+        background: #f0f0f0;
+        border: 1px dashed #76be4e;
+        position: relative;
+    }
+
+        .avatar input {
+            width: 100%;
+            height: 100%;
+            opacity: 0; /* Hide the button */
+            cursor: pointer;
+        }
+
+    .cross-btn {
+        position: absolute;
+        right: 0;
+        top: -29px;
+        background: #76be4e;
+        border: 2px solid #fff;
+        color: #fff;
+        border-radius: 100px;
+        width: 19px;
+        height: 19px;
+        transition: all .5s;
+        cursor: pointer;
+        outline: none;
+    }
+
+        .cross-btn:hover {
+            background: #dc3545;
+        }
+
+    .previewimg {
+        width: 100px;
+        height: 80px;
+    }
+
+    .user-img-box {
+        position: relative;
+        width: 100px;
+        height: 80px;
+        transition: all .5s;
+    }
+
+    div.attachpreview {
+        margin: 5px;
+        border-radius: 10px;
+        float: left;
+    }
+
+    .crossicon {
+        margin-left: 4px !important;
+        margin-top: 0px;
+        position: absolute;
+        font-size: 12px;
+    }
+
+
+
+    .modal {
+        margin-top: 30px !important;
+    }
+
+    .modal-dialog {
+        margin-bottom: 40px !important;
+    }
+</style>
+
+<script src="/wwwroot/dynamic/js/dropzone.js"></script>
+<script src="~/jslib/hostel/HostelAttendance.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="HostelAttendanceController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="pills-tabContent">
+                    <!-- First Tab Content -->
+                    <!-- Second Tab Content -->
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel" aria-labelledby="pills-second-tab">
+                        <!-- if-page-have-nav-tabs -->
+                        <header class="if-page-have-nav-tabs px-2">
+                            <div class="row upper-tab">
+                                <div class="col-md-12">
+                                    <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                    <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Add Attendance</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Daily Manual Attendance</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="DailyBio-tab" data-toggle="tab" href="#DailyBio" role="tab" aria-controls="DailyBio" aria-selected="false">Daily Bio. Attendance</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Monthly Attendance</a>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <a class="nav-link" id="board-tab" data-toggle="tab" href="#board" role="tab" aria-controls="board" aria-selected="false">Studentwise</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </header>
+                        <!-- end if-page-have-nav-tabs -->
+                        <div class="tab-content" id="myTabContent">
+                           
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                <div id="class-section" class="card p-2">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Hostel</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newAttendance.HostelId">
+                                                    <option ng-value="0" selected>All</option>
+                                                    <option ng-selected="newAttendance.HostelId==h.HostelId" ng-value="h.HostelId" ng-repeat="h in HostelList">{{h.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Building</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newAttendance.BuildingId">
+                                                    <option ng-value="0" selected>All</option>
+                                                    <option ng-selected="newAttendance.BuildingId==h.BuildingId" ng-value="h.BuildingId" ng-repeat="h in BuildingList">{{h.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Floor</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newAttendance.FloorId">
+                                                    <option ng-value="0" selected>All</option>
+                                                    <option ng-selected="newAttendance.FloorId==h.FloorId" ng-value="h.FloorId" ng-repeat="h in FloorList">{{h.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Shift</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newAttendance.ShiftId">
+                                                    <option selected>All</option>
+                                                    <option ng-repeat="h in ShiftList" ng-value="h.AttendanceShiftId" ng-selected="newAttendance.ShiftId==h.AttendanceShiftId">{{h.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newAttendance.ForDate_TMP" date-detail="newAttendance.ForDateDet" confirm-action="validateForDate(newAttendance)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group mt-4 float-right">
+                                                <button class="btn btn-sm btn-success mr-2" style="min-width: 90px;" ng-click="GetAllHostelAttendance()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Remarks</label>
+                                                <textarea class="form-control form-control-sm" rows="1" ng-model="newAttendance.ObservationRemarks"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <form class="form-inline mb-2">
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Attendance">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <div class="float-right">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-default"
+                                                        style="min-width: 90px" ng-click="ClearAttendance()">
+                                                    Reset
+                                                </button>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        style="min-width: 90px" ng-click="SaveHostelAttendance()">
+                                                    {{newAttendance.Mode}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="table-scroll-x-y table-scroll mt-2" style="max-height: 500px">
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 56px;">S.No.</th>
+                                                    <th style="width: 110px;">Adm. No</th>
+                                                    <th style="width: 200px;">Name</th>
+                                                    <th style="width: 110px;">Class/Section</th>
+                                                    <th style="width: 150px;">Room Detail</th>
+                                                    <th style="width: 100px; z-index:2; ">Status</th>
+                                                    <th style="width: 200px;">Remarks</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="sw in newAttendance.StudentList | filter: (searchData.Attendance||'')">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{sw.RegNo}}</td>
+                                                    <td>{{sw.StudentName}}</td>
+                                                    <td>{{sw.ClassSection}}</td>
+                                                    <td>{{sw.RoomDetail}}</td>
+                                                    <td class="text-center align-middle">
+                                                        <select class="form-control form-control-sm select2" ng-model="sw.StatusId">
+                                                            <option ng-repeat="s in StatusList" ng-value="s.AttendanceStatusId" ng-selected="s.AttendanceStatusId==sw.BuildingId">{{s.Name}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td> <textarea class="form-control form-control-sm" rows="1" ng-model="sw.Remarks"></textarea></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- table end -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>To Date</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm" date-picker ng-model="dailyAttendance.ForDate_TMP" date-detail="dailyAttendance.ForDateDet" confirm-action="validateForDate(dailyAttendance)">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Hostel</label>
+                                            <select class="form-control form-control-sm select2" ng-model="dailyAttendance.HostelId">
+                                                <option ng-value="0">All</option>
+                                                <option ng-value="h.HostelId" ng-repeat="h in HostelList" ng-selected="dailyAttendance.HostelId==h.HostelId">{{h.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Building</label>
+                                            <select class="form-control form-control-sm select2" ng-model="dailyAttendance.BuildingId">
+                                                <option ng-value="0">All</option>
+                                                <option ng-selected="dailyAttendance.BuildingId==h.BuildingId" ng-value="h.BuildingId" ng-repeat="h in BuildingList">{{h.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Floor</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newAttendance.FloorId">
+                                                <option ng-value="0">All</option>
+                                                <option ng-selected="dailyAttendance.FloorId==h.FloorId" ng-value="h.FloorId" ng-repeat="h in FloorList">{{h.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Shift</label>
+                                            <select class="form-control form-control-sm select2" ng-model="dailyAttendance.ShiftId">
+                                                <option>All</option>
+                                                <option ng-repeat="h in ShiftList" ng-value="h.AttendanceShiftId" ng-selected="dailyAttendance.ShiftId==h.AttendanceShiftId">{{h.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-2 mt-4">
+                                        <div class="float-right">
+                                            <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button" ng-click="GetStudentHostelDailyAttendance()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                            <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                        type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item" href="#">
+                                                        <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                             class="img-fluid exports-icon" alt="Excel image">
+                                                        Excel
+                                                    </a>
+                                                    <a class="dropdown-item" href="#">
+                                                        <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                             class="img-fluid exports-icon" alt="Excel image">
+                                                        CSV
+                                                    </a>
+
+                                                </div>
+                                            </div>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                @*<div class="row">
+                <div class="col-md-2 col-sm-2">
+                    <label><b>Total Students: {{newStudent.TotalDays}}</b></label>
+                </div>
+                <div class="col-md-1 col-sm-1">
+                    <label><b>Present: {{newStudent.TotalPresent}}</b></label>
+                </div>
+                <div class="col-md-1 col-sm-1">
+                    <label><b>Absent: {{newStudent.TotalAbsent}}</b></label>
+                </div>
+                <div class="col-md-2 col-sm-2">
+                    <label><b>Leave In Campus: {{newStudent.LeaveInCampus}}</b></label>
+                </div>
+                <div class="col-md-2 col-sm-2">
+                    <label><b>Leave Out Campus: {{newStudent.LeaveOutCampus}}</b></label>
+                </div>
+                <div class="col-md-2 col-sm-2">
+                    <label><b>Medical In Campus: {{newStudent.MedicalInCampus}}</b></label>
+                </div>
+                <div class="col-md-2 col-sm-2">
+                    <label><b>Medical Out Campus: {{newStudent.MedicalOutCampus}}</b></label>
+                </div>
+
+            </div>*@
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div ui-grid="gridOptions"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-auto-resize
+                                             ui-grid-save-state style="height: calc(100vh - 170px); max-width: 100%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="DailyBio" role="tabpanel" aria-labelledby="DailyBio-tab">
+                                <div class="tab-content">
+                                    <div id="day-book-section">
+                                        <div class="row mt-2">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label> For Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newDailyBio.ForDate_TMP" date-detail="newDaily.ForDateDet" confirm-action="validateForDate(newDaily)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Hostel</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newDailyBio.HostelId">
+                                                        <option ng-value="0">All</option>
+                                                        <option ng-value="h.HostelId" ng-repeat="h in HostelList" ng-selected="newDailyBio.HostelId==h.HostelId">{{h.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Building</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newDailyBio.BuildingId">
+                                                        <option ng-value="0">All</option>
+                                                        <option ng-selected="newDailyBio.BuildingId==h.BuildingId" ng-value="h.BuildingId" ng-repeat="h in BuildingList">{{h.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Floor</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newDailyBio.FloorId">
+                                                        <option ng-value="0">All</option>
+                                                        <option ng-selected="newDailyBio.FloorId==h.FloorId" ng-value="h.FloorId" ng-repeat="h in FloorList">{{h.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Shift</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newDailyBio.ShiftId">
+                                                        <option>All</option>
+                                                        <option ng-repeat="h in ShiftList" ng-value="h.AttendanceShiftId" ng-selected="newDailyBio.ShiftId==h.AttendanceShiftId">{{h.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!--Ends-->
+
+                                            <div class="col-md-2 mt-4">
+                                                <div class="float-right">
+                                                    <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button" ng-click="GetStudentDailyAttendance()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                                    <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                                type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                                Excel
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                                CSV
+                                                            </a>
+
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div ui-grid="gridOptions1"
+                                                 ui-grid-resize-columns
+                                                 ui-grid-move-columns
+                                                 ui-grid-selection
+                                                 ui-grid-exporter
+                                                 ui-grid-pinning
+                                                 ui-grid-filtering
+                                                 ui-grid-auto-resize
+                                                 ui-grid-save-state style="height: calc(100vh - 170px); max-width: 100%;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade main-section" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label>Year</label>
+                                        <select name="class-group" id="" form="" class="form-control form-control-sm " ng-model="newMonthly.YearId">
+                                            <option ng-value="cl.id" ng-repeat="cl in YearList">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label>For Month</label>
+                                        <select name="class-group" id="" form="" class="form-control form-control-sm " ng-model="newMonthly.MonthId">
+                                            <option ng-value="cl.id" ng-repeat="cl in MonthList">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Hostel</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newMonthly.HostelId">
+                                                <option ng-value="0">All</option>
+                                                <option ng-selected="newMonthly.HostelId==h.HostelId" ng-value="h.HostelId" ng-repeat="h in HostelList">{{h.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Building</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newMonthly.BuildingId">
+                                                <option ng-value="0">All</option>
+                                                <option ng-selected="newMonthly.BuildingId==h.BuildingId" ng-value="h.BuildingId" ng-repeat="h in BuildingList">{{h.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Floor</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newMonthly.FloorId">
+                                                <option ng-value="0">All</option>
+                                                <option ng-selected="newMonthly.FloorId==h.FloorId" ng-value="h.FloorId" ng-repeat="h in FloorList">{{h.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Shift</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newMonthly.ShiftId">
+                                                <option>All</option>
+                                                <option ng-repeat="h in ShiftList" ng-value="h.AttendanceShiftId" ng-selected="newMonthly.ShiftId==h.AttendanceShiftId">{{h.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-12 mb-2">
+                                        <div class="float-right">
+                                            <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                            <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                        type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item" href="#">
+                                                        <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                             class="img-fluid exports-icon" alt="Excel image">
+                                                        Excel
+                                                    </a>
+                                                    <a class="dropdown-item" href="#">
+                                                        <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                             class="img-fluid exports-icon" alt="Excel image">
+                                                        CSV
+                                                    </a>
+
+                                                </div>
+                                            </div>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div ui-grid="gridOptions3"
+                                             ui-grid-resize-columns
+                                             ui-grid-move-columns
+                                             ui-grid-selection
+                                             ui-grid-exporter
+                                             ui-grid-pinning
+                                             ui-grid-filtering
+                                             ui-grid-auto-resize
+                                             ui-grid-save-state style="height: calc(100vh - 170px); max-width: 100%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tab-pane fade main-section" id="board" role="tabpanel" aria-labelledby="board-tab">
+                                <div class="tab-content">
+                                    <div id="day-book-section">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label> Date From</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newStudent.DateFrom_TMP" date-detail="newStudent.DateFromDet" confirm-action="validateDates('fromDate',newStudent)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label> Date To</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newStudent.DateTo_TMP" date-detail="newStudent.DateToDet" confirm-action="validateDates('toDate',newStudent)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5 mt-4" id="selectStu">
+                                                <label class="sr-only"
+                                                       for="inlineFormInputGroup">Select Student</label>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0"
+                                                            style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="newStudent.SelectStudent">
+
+                                                        <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newStudent.SelectStudent">
+                                                            {{ss.text}}
+                                                        </option>
+
+                                                    </select>
+
+                                                    <select style="width:100%" class="form-control select2 form-control-sm" all-student ng-model="newStudent.StudentId" student-detail="newStudent.StudentDetails" side-bar-data="newStudent.SideBarData" search-by="newStudent.SelectStudent" confirm-action="getStudentBIOAttendance()">
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 mt-4">
+                                                <div class="float-right">
+                                                    <button class="btn btn-sm btn-success" style="min-width: 70px;" type="button" ng-click="getStudentBIOAttendance()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                        <i class="fas fa-sms w-t"></i>
+                                                    </a>
+
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                        <i class="fas fa-envelope w-t"></i>
+                                                    </a>
+
+                                                    <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                                type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="/wwwroot/dynamic/images/flaticons/excel.png"
+                                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                                Excel
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="/wwwroot/dynamic/images/flaticons/csv.png"
+                                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                                CSV
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="/wwwroot/dynamic/images/flaticons/pdf.png"
+                                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                                PDF
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="/wwwroot/dynamic/images/flaticons/word.png"
+                                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                                Word
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="/wwwroot/dynamic/images/flaticons/gmail.png"
+                                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                                Mail
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-2 col-sm-2">
+                                            <label><b>Total Days: {{newStudent.TotalDays}}</b></label>
+                                        </div>
+                                        <div class="col-md-1 col-sm-1">
+                                            <label><b>Present: {{newStudent.TotalPresent}}</b></label>
+                                        </div>
+                                        <div class="col-md-1 col-sm-1">
+                                            <label><b>Absent: {{newStudent.TotalAbsent}}</b></label>
+                                        </div>
+                                        <div class="col-md-2 col-sm-2">
+                                            <label><b>Leave In Campus: {{newStudent.LeaveInCampus}}</b></label>
+                                        </div>
+                                        <div class="col-md-2 col-sm-2">
+                                            <label><b>Leave Out Campus: {{newStudent.LeaveOutCampus}}</b></label>
+                                        </div>
+                                        <div class="col-md-2 col-sm-2">
+                                            <label><b>Medical In Campus: {{newStudent.MedicalInCampus}}</b></label>
+                                        </div>
+                                        <div class="col-md-2 col-sm-2">
+                                            <label><b>Medical Out Campus: {{newStudent.MedicalOutCampus}}</b></label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div ui-grid="gridOptions4"
+                                                 ui-grid-resize-columns
+                                                 ui-grid-move-columns
+                                                 ui-grid-selection
+                                                 ui-grid-exporter
+                                                 ui-grid-pinning
+                                                 ui-grid-filtering
+                                                 ui-grid-auto-resize
+                                                 ui-grid-save-state style="height: calc(100vh - 170px); max-width: 100%;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+            <!-- /.row -->
+            <!--SMS modal Starts-->
+            <div class="modal fade" id="sendsms" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h6 class="modal-title">Send SMS</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-2">
+                            <div class="card-body">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="" class="mr-2">SMS Template: </label>
+                                        <select class="form-control form-control-sm select2" style="width: 100%">
+                                            <option selected="selected">
+                                                -- Select SMS Template --
+                                            </option>
+                                            <option>option</option>
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="" class="mr-2">Message: </label>
+                                        <textarea class="form-control form-control-sm" rows="3"
+                                                  placeholder="Enter ..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 d-flex">
+                                    <div class="custom-control custom-checkbox mr-2">
+                                        <input class="custom-control-input" type="checkbox"
+                                               id="customCheckbox2" checked>
+                                        <label for="customCheckbox2"
+                                               class="custom-control-label">Primary No.</label>
+                                    </div>
+
+                                    <div class="custom-control custom-checkbox mr-2">
+                                        <input class="custom-control-input" type="checkbox"
+                                               id="customCheckbox3">
+                                        <label for="customCheckbox3"
+                                               class="custom-control-label">Father No.</label>
+                                    </div>
+
+                                    <div class="custom-control custom-checkbox mr-2">
+                                        <input class="custom-control-input" type="checkbox"
+                                               id="customCheckbox4">
+                                        <label for="customCheckbox4"
+                                               class="custom-control-label">Mother No.</label>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-12 mt-4">
+                                    <div class="form-group">
+                                        <label>Total numbers of selected student: 20</label>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="text-center mb-2">
+
+                            <button type="button" class="btn btn-success  btn-sm" style="width:70px;">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!---->
+            <!--Email modal Starts-->
+            <div class="modal fade" id="sendemail" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h6 class="modal-title">Send Email</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-2">
+                            <div class="card-body">
+                                <div class="col-12">
+                                    <div class="form-group d-flex">
+                                        <label class="mr-2 mt-1" style="min-width:90px;">SMS Template: </label>
+                                        <select class="form-control form-control-sm select2" style="width: 100%">
+                                            <option>option</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-12">
+                                    <div class="form-group d-flex">
+                                        <label class="mr-2 mt-1" style="min-width:90px;">Email Send To</label>
+                                        <div class="checkbox-wrapper  d-flex">
+                                            <div class="custom-control custom-checkbox mr-2">
+
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox23" checked>
+                                                <label for="customCheckbox23"
+                                                       class="custom-control-label">Primary Email Id.</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox mr-2">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox35">
+                                                <label for="customCheckbox35"
+                                                       class="custom-control-label">Guardian</label>
+                                            </div>
+
+                                            <div class="custom-control custom-checkbox mr-2">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox33">
+                                                <label for="customCheckbox33"
+                                                       class="custom-control-label">Father</label>
+                                            </div>
+
+                                            <div class="custom-control custom-checkbox mr-2">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox43">
+                                                <label for="customCheckbox43"
+                                                       class="custom-control-label">Mother</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-12">
+                                    <div class="form-group d-flex">
+                                        <label class="mr-2 mt-1" style="min-width:90px;">CC Employee </label>
+                                        <select class="form-control form-control-sm select2" multiple style="width:100%">
+                                            <option>Employee1</option>
+                                            <option>Employee2</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group d-flex">
+                                        <label class="mr-2 mt-1" style="min-width:90px;">Subject <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" />
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-12">
+                                    <div class="form-group mb-0">
+                                        <label for="" class="mr-2">Message <span class="text-danger">*</span> </label>
+                                        <textarea class="textarea" placeholder="Place some text here" style="
+                                                                          width: 100%;
+                                                                          height: 130px!important;
+                                                                          font-size: 14px;
+                                                                          line-height: 18px;
+                                                                          border: 1px solid #dddddd;
+                                                                          padding: 10px;
+                                                                        " ng-model="newHomeworkType.Description" html-editor></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="">Attach File</label>
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                            <form class="avatar mt-2">
+                                                <p style=" text-align: center; color: #76be4e; font-size: 30px; position: absolute; top: 30%; left: 31%;"><i class="fas fa-plus w-t"></i></p>
+                                                <input type="file" name="avatar" />
+                                            </form>
+                                        </div>
+                                        <div class="col-md-11">
+                                            <div class="attachpreview">
+                                                <a class="user-img-box">
+                                                    <img class="previewimg" src="~/wwwroot/dynamic/images/attach-img.png" alt="Cinque Terre" width="600" height="400">
+                                                    <span class="cross-btn"><span class="crossicon">&#935;</span></span>
+                                                </a>
+                                            </div>
+                                            <div class="attachpreview">
+                                                <a class="user-img-box">
+                                                    <img class="previewimg" src="~/wwwroot/dynamic/images/attach-img.png" alt="Cinque Terre" width="600" height="400">
+                                                    <span class="cross-btn"><span class="crossicon">&#935;</span></span>
+                                                </a>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mt-2">
+                                    <div class="form-group">
+                                        <label>Total numbers of selected student: 20</label>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="text-center mb-3">
+                                <button type="button" class="btn btn-success  btn-sm" style="width:80px">Send</button>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>

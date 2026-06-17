@@ -1,0 +1,502 @@
+﻿<style>
+
+    .t-h-10 .table td, .t-h-10 .table th {
+        line-height: 1;
+        padding: 0.5rem !important;
+        font-size: 0.7875rem !important;
+    }
+
+    .panel-title > a, .panel-title > a:active {
+        font-family: "IBM Plex Sans", sans-serif;
+        display: block;
+        padding: 8px 15px;
+        color: #2D3333;
+        font-size: 0.813rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        word-spacing: 3px;
+        text-decoration: none;
+    }
+
+    .snj-panel .panel-title a {
+        display: block;
+        text-decoration: none;
+        background: #E9F2EE;
+    }
+</style>
+@*<link href="~/wwwroot/dynamic/css/library.css" rel="stylesheet" />*@
+<script src="~/jslib/Library/BookReceived.js?v=20251115"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BookReceivedController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here main-section" style="margin-top:5px;">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="row ">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">Receive Date</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="newBookReceived.ReceivedDate_TMP" date-picker date-detail="newBookReceived.ReceivedDateDet" confirm-action="validateForDate(newBookReceived)">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Receive From</label>
+                                    <select class="form-control form-control-sm" ng-model="newBookReceived.ReceivedFrom" ng-change="ChangeReceiveFrom(newBookReceived.ReceivedFrom)">
+                                        <option ng-value="it.id" ng-repeat="it in IssueToList" ng-selected="it.id==newBookIssue.ReceivedFrom">{{it.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-6 col-md-6 " ng-show="newBookReceived.ReceivedFrom==2" id="selectEmp">
+                                <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+
+                                <div class="input-group-prepend mt-4">
+                                    <select class="input-group-text dropdown-toggle p-0"
+                                            style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="newBookReceived.SelectEmployee">
+
+                                        <option class="dropdown-item float-left" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newBookReceived.SelectEmployee">
+                                            {{ss.text}}
+                                        </option>
+
+                                    </select>
+
+                                    <select class="form-control select2 form-control-sm" all-employee ng-model="newBookReceived.EmployeeId" employee-detail="newBookReceived.EmployeeDetails" side-bar-data="newBookReceived.EmpSideBarData" search-by="newBookReceived.SelectEmployee" style="width: 100%;" confirm-action="getPreviousBookList(2)">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-6 col-md-6" ng-show="newBookReceived.ReceivedFrom==1" id="selectStu">
+                                @*<label class="sr-only"
+        for="inlineFormInputGroup">Select Student</label>*@
+                                <div class="custom-control custom-checkbox text-right">
+                                    <input class="custom-control-input" type="checkbox" ng-model="newBookReceived.ShowLeftStudent"
+                                           id="customCheckbox111" value="option1">
+                                    <label for="customCheckbox111"
+                                           class="custom-control-label">
+                                        Show Left Student
+                                    </label>
+                                </div>
+                                <div class="input-group-prepend">
+                                    <select class="input-group-text dropdown-toggle p-0"
+                                            style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="newBookReceived.SelectStudent">
+
+                                        <option class="float-left" ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newBookReceived.SelectStudent">
+                                            {{ss.text}}
+                                        </option>
+                                    </select>
+                                    <select class="form-control select2 form-control-sm" all-student ng-model="newBookReceived.StudentId" student-detail="newBookReceived.StudentDetails" side-bar-data="newBookReceived.SideBarData" search-by="newBookReceived.SelectStudent" confirm-action="getDuesDetails()" include-left="newBookReceived.ShowLeftStudent">
+                                    </select>
+                                </div>
+                            </div>
+                            <!--Field added by suresh on 25 kartik starts-->
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Scan Barcode</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="newBookReceived.Barcode">
+                                </div>
+                            </div>
+                            <!--ends-->
+                        </div>
+                        <div class="" ng-show="newBookReceived.ReceivedFrom==1" id="stu_dues" style="margin-top: -5px;">
+                            <div class="">
+                                <label class="float-right">Dues Fee :  {{CurDues.TotalDues |number:2}}/-</label>
+                                <!-- <button class="btn btn-sm btn-info float-right" style="min-width:90px;padding: 3px; font-size: 12px;" data-toggle="modal" data-target="#feedetail">Show Details</button> -->
+                            </div>
+                        </div>
+
+                        <div class="table-section">
+                            <div class="card-tools" style="margin-bottom: -15px;">
+                                <label class=""><b>Previous Book Record</b></label> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                <label for="" class="align-items-center"><b>Total Pending : {{PreviousBookDetailsColl.length}}</b></label>
+                            </div>
+
+
+                            <div class="table-scroll-x-y sales-main-table table-scroll mb-4 mt-4 t-h-10 bg-white" style="height: 200px;">
+                                <table id="main-table" class="main-table table table-sm bg-white order-list">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No</th>
+                                            <th>Accession No.</th>
+                                            <th>Title</th>
+                                            <th>Issue Date</th>
+                                            <th>Credit Days</th>
+                                            <th style="width: 150px;">outstanding days</th>
+
+                                            <th>Fine Amount</th>
+                                            <th style="width: 210px; text-align: center;">Action</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="pbr in PreviousBookDetailsColl">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{pbr.AccessionNo}}</td>
+                                            <td>{{pbr.BookTitle}}</td>
+                                            <td>{{pbr.IssueDate_BS}}</td>
+                                            <td>{{pbr.CreditDays}}</td>
+                                            <td>{{pbr.OutStandingDays}}</td>
+                                            <td>{{pbr.FineAmt |number:2}}</td>
+                                            <td class="float-right">
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 60px; padding:2px 4px; font-size:12px" ng-click="AddReceivedBookDetails($index,pbr)">Receive</button>
+                                                <button type="button" class="btn btn-sm btn-info" style="min-width: 60px; padding:2px 4px; font-size:12px" ng-click="AddRenewBookDetails($index,pbr)">Renew</button>
+
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="table-section mt-2">
+                            <div class="card-tools" style="margin-bottom: -15px;">
+                                <label class=""><b>Receive Book</b></label>
+
+                            </div>
+
+                            <div class="table-scroll-x-y sales-main-table table-scroll mb-4 mt-4 t-h-10">
+                                <table id="main-table" class="main-table table table-sm bg-white order-list">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No</th>
+                                            <th>Accession No.</th>
+                                            <th>Title</th>
+                                            <th>Issue Date</th>
+                                            <th>Credit Days</th>
+                                            <th style="width: 105px;">Outstanding days</th>
+
+                                            <th style="width: 100px;">Fine Amount</th>
+                                            <th style="width: 170px;">Remarks</th>
+                                            <th style="text-align: center;width: 60px;">Action</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="rb in newBookReceived.ReceivedBookDetailsColl">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{rb.BookDet.AccessionNo}}</td>
+                                            <td>{{rb.BookDet.BookTitle}}</td>
+                                            <td>{{rb.BookDet.IssueDate_BS}}</td>
+                                            <td>{{rb.BookDet.CreditDays}}</td>
+                                            <td>{{rb.BookDet.OutStandingDays}}</td>
+                                            <td>
+                                                <input number-input class="form-control form-control-sm" ng-model="rb.FineAmount" style="height:25px" />
+                                            </td>
+                                            <td>
+                                                <input class="form-control form-control-sm" ng-model="rb.ReturnRemarks" style="height:25px" />
+                                            </td>
+                                            <td class="text-center">
+                                                <a class="p-1" href="#" ng-click="delReceivedBookDetails($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="table-section mt-2">
+                            <div class="card-tools" style="margin-bottom: -15px;">
+                                <label class=""><b>Renew Book</b></label>
+
+                            </div>
+
+                            <div class="table-scroll-x-y sales-main-table table-scroll mb-4 mt-4 t-h-10">
+                                <table id="main-table" class="main-table table table-sm bg-white order-list">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No</th>
+                                            <th>Accession No.</th>
+                                            <th>Title</th>
+                                            <th style="width:80px">Credit Days</th>
+                                            <th style="width:170px">Remarks</th>
+                                            <th style="text-align: center;width: 60px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="rnb in newBookReceived.RenewBookDetailsColl">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{rnb.BookDet.AccessionNo}}</td>
+                                            <td>{{rnb.BookDet.BookTitle}}</td>
+                                            <td><input class="form-control form-control-sm" ng-model="rnb.CreditDays" style="height:25px" /></td>
+                                            <td><input class="form-control form-control-sm" ng-model="rnb.RenewalRemarks" style="height:25px" /></td>
+                                            <td class="text-center">
+                                                <a class="p-1" ng-click="delRenewBookDetails($index)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearBookReceived()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateBookReceived()">{{newBookReceived.Mode}}</button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="wrapper ">
+                            <div class="panel-group snj-panel" id="accordion" role="tablist" aria-multiselectable="true">
+                                <div class="panel panel-default" id="stu_Details" ng-show="newBookReceived.ReceivedFrom==1">
+                                    <div class="panel-heading active" role="tab" id="headingOne">
+                                        <h4 class="panel-title">
+                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+                                               aria-expanded="true" aria-controls="collapseOne">
+                                                Student Details
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne" class="panel-collapse collapse in show" role="tabpanel"
+                                         aria-labelledby="headingOne">
+                                        <div class="panel-body">
+                                            <div class="col-sm-12 col-md-12 col-lg-12">
+                                                <div class="row">
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        @*<img src="~/wwwroot/dynamic/images/fee_receipt/profile_30.png" />*@
+                                                        <img style="height:50px; width:50px;" class="rounded-circle" ng-src="{{CurDues.PhotoPath}}" />
+                                                    </div>
+                                                    <div class="col-sm-8 col-md-8 col-lg-8">
+                                                        <span class="s-text">Name</span><br>
+                                                        <span><b>{{CurDues.Name}}</b></span><br>
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                    <div class="col-sm-6 col-md-6 col-lg-6">
+                                                        <span class="s-text">Adm. No.: </span>
+                                                        <b>  <span>{{CurDues.RegdNo}}</span></b>
+                                                    </div>
+                                                    <div class="col-sm-6 col-md-6 col-lg-6">
+                                                        <span class="s-text">Roll :</span>
+                                                        <b> <span>{{CurDues.RollNo}}</span></b>
+                                                    </div>
+                                                    <div class="col-sm-12 col-md-12 col-lg-12">
+                                                        <span>
+                                                            Class: <b>
+                                                                <span>
+                                                                    {{CurDues.ClassName ? CurDues.ClassName : ''}}
+                                                                    {{CurDues.SectionName ? ' - ' + CurDues.SectionName : ''}}
+                                                                    {{CurDues.Batch ? ' - ' + CurDues.Batch : ''}}
+                                                                    {{CurDues.Semester ? ' - ' + CurDues.Semester : ''}}
+                                                                    {{CurDues.ClassYear ? ' - ' + CurDues.ClassYear : ''}}
+                                                                </span>
+                                                            </b>
+                                                        </span>
+                                                        @*<span class="s-text">Class/Sec.</span><br>
+                                                            <span>{{CurDues.ClassName}} {{CurDues.SectionName}}</span>*@
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mt-2">
+                                                    <div class="col-sm-12 col-md-12 col-lg-12">
+                                                        <span class="s-text">Address : </span>
+                                                        <b> <span>{{CurDues.Address}}</span></b>
+                                                    </div>
+                                                    <div class="col-sm-12 col-md-12 col-lg-12">
+                                                        <span class="s-text">Father Name : </span>
+                                                        <b> <span>{{CurDues.FatherName}}</span></b>
+                                                    </div>
+                                                    <div class="col-sm-12 col-md-12 col-lg-12">
+                                                        <span class="s-text">Contact : </span>
+                                                        <b>  <span>{{CurDues.ContactNo}}</span></b>
+                                                    </div>
+                                                </div>
+                                                <!--Added by suresh on 25 kartik starts-->
+                                                <div class="row mt-2">
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <span class="s-text">Book Limit</span><br>
+                                                        <span>{{CurDues.BookLimit}}</span>
+                                                    </div>
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <span class="s-text">Credit Days</span><br>
+                                                        <span>{{CurDues.BookCreditDays}}</span>
+                                                    </div>
+                                                </div>
+                                                <!--ends-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="panel panel-default" id="emp_Details" ng-show="newBookReceived.ReceivedFrom==2">
+                                    <div class="panel-heading active" role="tab" id="headingOne">
+                                        <h4 class="panel-title">
+                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+                                               aria-expanded="true" aria-controls="collapseOne">
+                                                Employee Details
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne" class="panel-collapse collapse in show" role="tabpanel"
+                                         aria-labelledby="headingOne">
+                                        <div class="panel-body">
+                                            <div class="col-sm-12 col-md-12 col-lg-12">
+                                                <div class="row">
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <a href="#" data-target="#modalIMG-profile" data-toggle="modal" class="color-gray-darker c6 td-hover-none ">
+                                                            <div class="ba-0 ds-1">
+                                                                <img ng-src="{{DefaultPhoto}}" style="height:50px; width:50px;" class="rounded-circle" />
+                                                            </div>
+                                                        </a>
+
+                                                    </div>
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <span><b>{{newBookReceived.EmployeeDetails.Name}}</b></span><br>
+                                                        <span>{{newBookReceived.EmployeeDetails.Designation}}</span>
+                                                    </div>
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <span class="s-text">Employee Code</span><br>
+                                                        <span>{{newBookReceived.EmployeeDetails.Code}}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <span class="s-text">Contact No.</span><br>
+                                                        <span>{{newBookReceived.EmployeeDetails.MobileNo}}</span>
+                                                    </div>
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <span class="s-text">Address</span><br>
+                                                        <span>{{newBookReceived.EmployeeDetails.Address}}</span>
+                                                    </div>
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <span class="s-text">Subject Teacher</span><br>
+                                                        <span>{{newBookReceived.EmployeeDetails.SubjectTeacher}}</span>
+                                                    </div>
+                                                </div>
+
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="panel panel-default">
+                                    <div class="panel-heading current_due" role="tab" id="headingThree">
+                                        <h4 class="panel-title mb-0">
+                                            <a class="collapsed" role="button" data-parent="#accordion" href="javascript:void(0)"
+                                               aria-expanded="false" aria-controls="collapseThree">
+                                                Book Details
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseThree" class="panel-collapse collapse show" role="tabpanel"
+                                         aria-labelledby="headingThree">
+                                        <div class="panel-body">
+                                            <div class="col-md-12" style="font-size: 0.7rem;">
+                                                <div class="row">
+                                                    <div class="col-sm-9 col-md-9 col-lg-9">
+                                                        <span><b>Book Title</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.BookTitle}}</span>
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3 col-lg-3 float-right">
+                                                        <a href="#" data-target="#modalIMG-general" data-toggle="modal" class="color-gray-darker c6 td-hover-none ">
+                                                            <div class="ba-0 ds-1">
+                                                                <img ng-src="{{newBookReceived.BookDetails.FrontCoverPath}}" style="height: 60px; width: 100%;" />
+                                                            </div>
+                                                        </a>
+                                                        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalIMG-general" role="dialog" tabindex="-1">
+                                                            <div class="modal-dialog modal-lg" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-body mb-0 p-0">
+                                                                        <img ng-src="{{newBookReceived.BookDetails.FrontCoverPath}}" alt="" style="width:100%; height: 30vh;" class="d-flex mx-auto">
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <!-- <div><a href="dynamic/images/book-1.png" target="_blank" download>Download</a></div> -->
+                                                                        <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4 col-md-4 col-lg-4 " style="margin-top: -15px;">
+                                                        <span class="s-text"><b>Bar Code</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.Barcode}}</span>
+                                                    </div>
+                                                    <div class="col-sm-4 col-md-4 col-lg-4 " style="margin-top: -15px;">
+                                                        <span class="s-text"><b>Subject</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.Subject}}</span>
+                                                    </div>
+
+
+                                                </div>
+                                                <div class="row mt-3">
+                                                    <div class="col-sm-8 col-md-8 col-lg-8">
+                                                        <span class="s-text"><b>Authors</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.Authors}}</span>
+                                                    </div>
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <span class="s-text"><b>Credit Days</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.CreditDays}} Days</span>
+                                                    </div>
+                                                    <div class="col-sm-12 col-md-12 col-lg-12 mt-3">
+                                                        <span class="s-text"><b>Publisher</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.Publication}}</span>
+                                                    </div>
+                                                    <div class="col-sm-12 col-md-12 col-lg-12 mt-3">
+                                                        <span class="s-text"><b>Category</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.BookCategory}}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mt-3">
+                                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                                        <span class="s-text"><b>Level</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.ClassName}}</span>
+                                                    </div>
+                                                    <div class="col-sm-4 col-md-4 col-lg-4 ">
+                                                        <span class="s-text"><b>Department</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.Department}}</span>
+                                                    </div>
+                                                    <!--Field added by suresh on 25 kartik starts-->
+                                                    <div class="col-sm-4 col-md-4 col-lg-4 ">
+                                                        <span class="s-text"><b>Class</b></span><br>
+                                                        <span>{{newBookReceived.BookDetails.ClassName}}</span>
+                                                    </div>
+                                                    <!--Ends-->
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+
+
+
+
+
+
+
+

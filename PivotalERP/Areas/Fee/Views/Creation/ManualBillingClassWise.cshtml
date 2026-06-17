@@ -1,0 +1,521 @@
+﻿<script>
+    var entityManualBill=@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.ManualBilling);
+</script>
+@*<script src="~/jslib/Fee/manualbilling.js?v=20251115"></script>*@
+<script src="~/jslib/fee/manualbillingClassWise.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ManualBillingClassWiseController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top:50px!important">
+                <div class="tab-content" id="manual-section">
+                    <!-- Second Tab Content -->
+                    <div class="card py-2">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ManualBilling">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ManualBilling">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.ManualBilling">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file"
+                                     data-toggle="tooltip"
+                                     data-placement="top"
+                                     title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                            type="button"
+                                            id="dropdownMenuButton"
+                                            data-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item" href="#">
+                                            <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                 class="img-fluid exports-icon"
+                                                 alt="Excel image" />
+                                            Excel
+                                        </a>
+                                        <a class="dropdown-item" href="#">
+                                            <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                 class="img-fluid exports-icon"
+                                                 alt="Excel image" />
+                                            CSV
+                                        </a>
+
+                                    </div>
+                                </div>
+                                <a print-tbl table-id="'#main-table'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                   data-toggle="tooltip" data-placement="bottom"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-success"
+                                        id="add-manual"
+                                        style="min-width: 90px">
+                                    <i class="fas fa-plus w-t"></i> Add manual Billing
+                                </button>
+                            </div>
+                        </header>
+                        <div>
+                            <!--Table fields changed by suresh on 6 mangsir starts-->
+                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead class="text-nowrap">
+                                        <tr>
+                                            <th style="width: 70px">Regd.No.</th>
+                                            <th style="width: 200px">Name</th>
+                                            <th style="width: 80px">Roll No.</th>
+                                            <th style="width: 130px">Class/Section</th>
+                                            <th style="width: 80px">Date</th>
+                                            <th style="width: 80px">Bill No</th>
+                                            <th style="width: 80px">Amount</th>
+                                            <th style="width: 150px">BillType</th>
+                                            <th style="width: 120px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in ManualBillingList | filter:searchData.ManualBilling | itemsPerPage: perPage.ManualBilling" current-page="currentPages.ManualBilling" pagination-id="ManualBillingPagination">
+                                            <td>{{cl.RegdNo}}</td>
+                                            <td>{{cl.StudentName}}</td>
+                                            <td>{{cl.RollNo}}</td>
+                                            <td>{{cl.ClassName}}-{{cl.SectionName}}</td>
+                                            <td>{{cl.BillingDate_BS}}</td>
+                                            <td>{{cl.AutoNumber}}</td>
+                                            <td>{{cl.TotalAmount |number:2}}</td>
+                                            <td>{{cl.BillingType}}({{cl.ForMonthName}})</td>
+                                            <td>
+                                                <a class="p-1" href="#" ng-click="GetManualBillingById(cl)">
+                                                    <i class="fas fa-eye text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="Print(cl.TranId)">
+                                                    <i class="fas fa-print text-default"></i>
+                                                </a>
+
+                                                <a ng-hide="cl.IsCancel==true" href="" class="p-1" title="Cancel Select Bill" ng-click="CancelManualBilling(cl)">
+                                                    <i class="fas fa-times-circle text-danger" aria-hidden="true"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="DelManualBillingById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- table end -->
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="ManualBillingPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+                <div id="manual-form">
+                    <div class="card card-default">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <label for="sn">S.No.</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm"
+                                               ng-model="newManualBilling.SNo" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <label for="rboForBilling">
+                                            Student
+                                        </label>
+                                        <input class="form-control form-control-sm mt-3" ng-value="1"
+                                               type="radio" name="ForBilling" id="rboForBilling" ng-model="newManualBilling.ForBilling" ng-change="ChangeForBilling()">
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <label for="rboForBilling1">
+                                            Other
+                                        </label>
+                                        <input class="form-control form-control-sm mt-3" ng-value="2"
+                                               type="radio" name="ForBilling" id="rboForBilling1" ng-model="newManualBilling.ForBilling" ng-change="ChangeForBilling()">
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="newManualBilling.ForBilling==2">
+                                    <div class="form-group">
+                                        <label for="sn">Student Name</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm"
+                                               ng-model="newManualBilling.StudentName" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="newManualBilling.ForBilling==2">
+                                    <div class="form-group">
+                                        <label for="sn">Address</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm"
+                                               ng-model="newManualBilling.Address" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 col-lg-2 col-md-2" ng-show="newManualBilling.ForBilling==2">
+                                    <div class="form-group">
+                                        <label for="sn">Class/Section</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm"
+                                               ng-model="newManualBilling.ClassName" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-7 col-lg-7 col-md-7 mt-4" ng-show="newManualBilling.ForBilling==1">
+                                    <label class="sr-only"
+                                           for="inlineFormInputGroup">Select Student</label>
+                                    <span class="float-right">
+                                        <input type="checkbox" name="leftStudent"
+                                               id="leftStudent" class="mr-2" ng-model="newManualBilling.ShowLeftStudent"><label for="leftStudent">
+                                            Show Left Students
+                                        </label>
+                                    </span>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0"
+                                                style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newManualBilling.SelectStudent">
+
+                                            <option ng-repeat="ss in StudentSearchOptions" ng-value="ss.value" ng-selected="ss.value==newManualBilling.SelectStudent">
+                                                {{ss.text}}
+                                            </option>
+                                        </select>
+                                        <select class="form-control select2 form-control-sm" all-student ng-model="newManualBilling.StudentId" student-detail="newManualBilling.StudentDetails" side-bar-data="newManualBilling.SideBarData" search-by="newManualBilling.SelectStudent" include-left="newManualBilling.ShowLeftStudent">
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="date">Date</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm" date-picker ng-model="newManualBilling.Date_AD_TMP" date-detail="newManualBilling.Date_ADDet">
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-2">
+                                    <div class="custom-control custom-checkbox checkbox-lg">
+                                        <input type="checkbox"
+                                               class="custom-control-input"
+                                               id="checkbox-4"
+                                               ng-model="LoadAutoRate" />
+                                        <label class="custom-control-label" for="checkbox-4">
+                                            Rate As FeeMapping
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group row">
+                                        <label for="" class="col-sm-5 col-form-label">Billing Type</label>
+                                        <div class="col-sm-7">
+                                            <select class="form-control form-control-sm" ng-model="newManualBilling.BillingType" ng-disabled="newManualBilling.ForBilling==2">
+                                                <option ng-repeat="cc in BillingTypes" ng-value="cc.id" ng-selected="cc.id == beData.BillingType">
+                                                    {{cc.text}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1" ng-show="newManualBilling.BillingType==2">
+                                    <div class="custom-control custom-checkbox checkbox-lg">
+                                        <input type="checkbox"
+                                               class="custom-control-input"
+                                               id="checkbox-41"
+                                               ng-model="newManualBilling.IsCash" ng-disabled="newManualBilling.ForBilling==2" />
+                                        <label class="custom-control-label" for="checkbox-41">
+                                            Is Cash
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3" ng-show="newManualBilling.BillingType==1">
+                                    <div class="form-group row">
+                                        <label for="" class="col-sm-4 col-form-label">For Month</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-control form-control-sm " ng-model="newManualBilling.ForMonthId">
+                                                <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newManualBilling.ForMonthId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <span>Dues Amount:</span>
+                                </div>
+                            </div>
+                            <div class="table-scroll-x-y mt-3">
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr class="text-center text-nowrap">
+                                            <th style="width: 20px">S.No.</th>
+                                            <th style="width: 100px">Fee Item</th>
+                                            <th style="width: 50px">Qty.</th>
+                                            <th style="width: 80px">Rate</th>
+                                            <th style="width: 80px">Dis. %</th>
+                                            <th style="width: 100px">Dis.Amt.</th>
+                                            <th style="width: 80px">Receivable Amount</th>
+                                            <th style="width: 50px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-nowrap text-center">
+                                        <tr ng-repeat="cl in newManualBilling.ManualBillingDetailsColl">
+                                            <td>{{$index+1}}</td>
+                                            <td>
+                                                <select class="form-control form-control-sm select2" ng-model="cl.FeeItemId" ng-change="GetFeeRate(cl)">
+                                                    <option ng-value="fi.FeeItemId" ng-repeat="fi in FeeItemList" ng-selected="fi.FeeItemId==cl.FeeItemId">{{fi.Name}}</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" number-input
+                                                       class="form-control form-control-sm" ng-model="cl.Qty" ng-change="ChangeRate(cl,1)" />
+                                            </td>
+                                            <td>
+                                                <input type="text" number-input
+                                                       class="form-control form-control-sm" ng-model="cl.Rate" ng-change="ChangeRate(cl,2)" />
+                                            </td>
+                                            <td>
+                                                <input type="text" number-input
+                                                       class="form-control form-control-sm" ng-model="cl.DiscountPer" ng-change="ChangeRate(cl,3)" />
+                                            </td>
+                                            <td>
+                                                <input type="text" number-input
+                                                       class="form-control form-control-sm" ng-model="cl.DiscountAmt" ng-change="ChangeRate(cl,4)" />
+                                            </td>
+                                            <td> {{cl.PayableAmt |number:2}}</td>
+                                            <td class="answer">
+                                                <a class="p-1" ng-click="AddManualBillingDetail($index)">
+                                                    <i class="fas fa-plus text-info"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="delManualBillingDetail($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="text-nowrap text-center">
+                                            <th colspan="2">TOTAL :-</th>
+                                            <th scope="col" class="cstm-sticky">{{newManualBilling.Qty |number:2}}</th>
+                                            <th scope="col" class="cstm-sticky">{{newManualBilling.Rate |number:2}}</th>
+                                            <th scope="col" class="cstm-sticky"></th>
+                                            <th scope="col" class="cstm-sticky">{{newManualBilling.DiscountAmt |number:2}}</th>
+                                            <th scope="col" class="cstm-sticky">{{newManualBilling.PayableAmt |number:2}}</th>
+                                            <th scope="col" class="cstm-sticky"></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="date1">Remarks</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm" ng-model="newManualBilling.Remarks">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button"
+                                            class="btn btn-sm btn-info"
+                                            id="manualback-btn"
+                                            style="min-width: 90px">
+                                        Back to List
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearManualBilling()">Reset</button>
+                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateManualBilling()">{{newManualBilling.Mode}}</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Manual Billing</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label for="sn">Bill.No :{{BillDet.AutoNumber}}</label>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Student Name : {{BillDet.StudentName}}</label>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="sn">Roll No. :{{BillDet.RollNo}}</label>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="sn">Class/Sec : {{BillDet.ClassName}}-{{BillDet.SectionName}}</label>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="date">Date : {{BillDet.BillingDate_BS}}</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input class="custom-control-input" type="checkbox"
+                                           id="customCheckbox1" ng-model="BillDet.IsLeft">
+                                    <label for="customCheckbox1"
+                                           class="custom-control-label">
+                                        Show Left Student
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <label>Billing Type : {{BillDet.BillingTypeName}}</label>
+                            </div>
+                            <div class="col-sm-3">
+                                <label>For Month : {{BillDet.ForMonthName}}</label>
+                            </div>
+                            <div class="col-md-2">
+                                <span>Total Amount: {{BillDet.TotalAmount |number:2}}</span>
+                            </div>
+                        </div>
+                        <div class="table-scroll-x-y mt-3">
+                            <table id="main-table"
+                                   class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr class="text-center text-nowrap">
+                                        <th style="width: 20px">S.No.</th>
+                                        <th style="width: 100px">Fee Item</th>
+                                        <th style="width: 50px">Qty.</th>
+                                        <th style="width: 80px">Rate</th>
+                                        <th style="width: 80px">Dis. %</th>
+                                        <th style="width: 100px">Dis.Amt.</th>
+                                        <th style="width: 80px">Receivable Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-nowrap text-center">
+                                    <tr ng-repeat="bd in BillDet.ManualBillingDetailsColl">
+                                        <td>{{bd.SNo}}</td>
+                                        <td>
+                                            {{bd.FeeItemName}}
+                                        </td>
+                                        <td>
+                                            {{bd.Qty |number:2}}
+                                        </td>
+                                        <td>
+                                            {{bd.Rate |number:2}}
+                                        </td>
+                                        <td>
+                                            {{bd.DiscountPer |number:2}}
+                                        </td>
+                                        <td>
+                                            {{bd.DiscountAmt |number:2}}
+                                        </td>
+                                        <td>  {{bd.PayableAmt |number:2}}</td>
+
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-nowrap text-center">
+                                        <th colspan="6" align="center">TOTAL :-</th>
+                                        <th scope="col" class="cstm-sticky">{{BillDet.TotalAmount |number:2}}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <!-- table end -->
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="date1">Remarks</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" ng-model="BillDet.Remarks">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="button"
+                                    class="btn btn-sm btn-info"
+                                    data-dismiss="modal"
+                                    style="min-width: 90px">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:30px!important">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

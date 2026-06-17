@@ -1,0 +1,500 @@
+﻿<script src="~/jslib/Exam/Transaction/SymbolNumber.js?v=20251115"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="SymbolNumberController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- Third Tab Content -->
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs px-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-10">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                                   href="#home" role="tab" aria-controls="home"
+                                                   aria-selected="true">Exam Wise Symbol No</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="profile-tab" data-toggle="tab"
+                                                   href="#profile" role="tab" aria-controls="profile"
+                                                   aria-selected="false">Symbol No. Transfer</a>
+                                            </li>
+
+                                            
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="rehome-tab" data-toggle="tab"
+                                                   href="#rehome" role="tab" aria-controls="rehome"
+                                                   aria-selected="true">Re-Exam Wise Symbol No</a>
+                                            </li>                                          
+
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Exam Wise Symbol No TAb Starts -->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div id="examwise-symbol-section">
+                                        <div class="card">
+                                            <div class="card-body px-0">
+                                                <div class="row">
+                                                    <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                                        <div class="form-group">
+                                                            <label for="">Batch</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newSymbolNumber.BatchId">
+                                                                <option ng-value="0">**Select Batch**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newSymbolNumber.BatchId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label>Class</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newSymbolNumber.SelectedClass" ng-change="GetClassWiseStudent()">
+                                                                <option ng-value="0">**Select Class**</option>
+                                                                <option ng-value="cl" ng-repeat="cl in ClassSection.SectionListWithClass" ng-selected="cl.id==newSymbolNumber.ClassId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    @*<div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveFaculty==true">
+                                                        <div class="form-group">
+                                                            <label for="">Faculty</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newSymbolNumber.FacultyId" ng-change="GetClassWiseStudent()">
+                                                                <option ng-value="0">**Select Batch**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in FacultyList" ng-selected="cl.id==newSymbolNumber.FacultyId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>*@
+                                                    <div class="col-md-2" ng-show="newSymbolNumber.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                                        <div class="form-group mb-0">
+                                                            <label for="">Class Year</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newSymbolNumber.ClassYearId" ng-change="GetClassWiseStudent()">
+                                                                <option ng-value="cl.ClassYearId" ng-repeat="cl in ClassYearList">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 col-lg-2 col-md-2" ng-show="newSymbolNumber.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                                        <div class="form-group">
+                                                            <label for="">Semester</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newSymbolNumber.SemesterId" ng-change="GetClassWiseStudent()">
+                                                                <option ng-value="cl.SemesterId" ng-repeat="cl in SemesterList">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-2">
+                                                        <label>Exam</label>
+                                                        <div class="form-group">
+                                                            <select class="form-control form-control-sm select2" ng-model="newSymbolNumber.ExamTypeId" ng-change="GetClassWiseStudent()">
+                                                                <option ng-value="0">**Select ExamType**</option>
+                                                                <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newSymbolNumber.ExamTypeId">{{cl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    @*<div class="col-md-3">
+            <div class="form-group">
+                <label>Class Wise</label>
+                <select class="form-control form-control-sm select2" data-placeholder="Select Class" ng-model="newSymbolNumber.SelectedClassOnly" ng-change="GetClassWiseAllStudent()">
+                    <option ng-value="0">**Select Class**</option>
+                    <option ng-value="se" ng-repeat="se in ClassSection.ClassList ">{{se.text}}</option>
+                </select>
+            </div>
+        </div>*@
+                                                    @*<div class="col-sm-2 col-lg-2 col-md-2">
+            <label>Sort As</label>
+            <select class="form-control form-control-sm select2" data-placeholder="Select Sorting" ng-model="newSymbolNumber.SortAs" ng-change="DataSorting()">
+                <option ng-value="RollNo">**Sort As**</option>
+                <option ng-value="se.value" ng-repeat="se in SortAsList">{{se.text}}</option>
+            </select>
+        </div>*@
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Start No.</label>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.StartNo" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Start Alpha</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.StartAlpha" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Pad Width</label>
+                                                            <input type="number"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.PadWidth" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Prefix</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.Prefix" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label for="">Suffix</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" placeholder="" ng-model="newSymbolNumber.Suffix" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-7">
+                                                        <div class="clearfix">
+                                                            <form class="form-inline">
+
+                                                                <div class="input-group input-group-sm mr-sm-2">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text cstm">Show</span>
+                                                                    </div>
+                                                                    <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.SymbolNumber">
+                                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.SymbolNumber">{{pp.text}}</option>
+                                                                    </select>
+                                                                    <div class="input-group-append">
+                                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="input-group input-group-sm table-search-filed">
+                                                                    <input class="form-control form-control-navbar"
+                                                                           type="search" placeholder="Search"
+                                                                           aria-label="Search" ng-model="searchData.SymbolNumber">
+                                                                    <div class="input-group-append">
+                                                                        <button class="btn btn-default border-left-0"
+                                                                                type="submit">
+                                                                            <i class="fas fa-search"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+
+                                                    
+                                                    <div class="col-md-5 text-right">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-info"
+                                                                style="min-width: 90px" ng-click="AutoGenerateSymbolNo()">
+                                                            Generate SymbolNo
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-default" style="min-width: 70px;" ng-click="ClearSymbolNumber()">Reset</button>
+                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 70px;" ng-click="SaveUpdateSymbolNumber()">{{newSymbolNumber.Mode}}</button>
+
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 17.5rem)">
+                                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white table-head-fixed">
+                                                        <thead class="text-center text-nowrap">
+                                                            <tr>
+                                                                <th style="width: 100px" ng-click="sortSN('SectionName')">Section</th>
+                                                                <th style="width: 100px" ng-click="sortSN('AutoNumber')">Id</th>
+                                                                <th style="width: 100px" ng-click="sortSN('RegdNo')">Regd No.</th>
+                                                                <th style="width: 70px" ng-click="sortSN('RollNo')">Roll No.</th>
+                                                                <th style="width: 250px" ng-click="sortSN('Name')">Name</th>
+                                                                <th style="width: 120px" ng-show="AcademicConfig.ActiveBatch==true" ng-click="sortSN('Batch')">Batch</th>
+                                                                <th style="width: 120px" ng-show="newSymbolNumber.SelectedClass.ClassType==2 && AcademicConfig.ActiveClassYear==true" ng-click="sortSN('ClassYear')">Class Year</th>
+                                                                <th style="width: 120px" ng-show="newSymbolNumber.SelectedClass.ClassType==3 && AcademicConfig.ActiveSemester==true" ng-click="sortSN('Semester')">Semester</th>
+                                                                @*<th style="width: 150px">Class/Sec</th>
+                                                                  <th style="width: 150px">Is Left</th>*@
+                                                                <th style="width: 150px" ng-click="sort('BoardRegdNo')">Board Regd</th>
+                                                                <th style="width: 200px">Symbol No</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr dir-paginate="sn in newSymbolNumber.StudentList  | filter:searchData.SymbolNumber | itemsPerPage: perPage.SymbolNumber | orderBy:sortKeySN:reverse1" current-page="currentPages.SymbolNumber" pagination-id="SymbolNumberPagination">
+                                                            @*<tr ng-repeat="sn in newSymbolNumber.StudentList | filter: searchData.SymbolNumber| orderBy:sortKeySN:reverse1">*@
+                                                                <td>{{sn.SectionName}}</td>
+                                                                <td>{{sn.AutoNumber}}</td>
+                                                                <td>{{sn.RegdNo}}</td>
+                                                                <td>{{sn.RollNo}}</td>
+                                                                <td>{{sn.Name}}</td>
+                                                                <td  ng-show="AcademicConfig.ActiveBatch==true">{{sn.Batch}}</td>
+                                                                <td  ng-show="newSymbolNumber.SelectedClass.ClassType==2 &&AcademicConfig.ActiveClassYear==true">{{sn.ClassYear}}</td>
+                                                                <td  ng-show="newSymbolNumber.SelectedClass.ClassType==3 &&AcademicConfig.ActiveSemester==true">{{sn.Semester}}</td>
+                                                                @*<td>{{sn.ClassSection}}</td>
+                                                                  <td>{{sn.IsLeft}}</td>*@
+                                                                <td>{{sn.BoardRegdNo}}</td>
+                                                                <td><input type="text" class="form-control form-control-sm" ng-model="sn.SymbolNo"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <footer class="row align-items-center">
+                                                 <div class="col-md-12">
+                                                         <dir-pagination-controls pagination-id="SymbolNumberPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                  </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Exam Wise Symbol No  Tab Ends  -->
+                                <!-- Symbol No Transfer Starts -->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel"
+                                     aria-labelledby="profile-tab">
+                                    <div id="examschedule-section">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <label>From Exam Type</label>
+                                                <div class="form-group">
+                                                    <select class="form-control form-control-sm select2" ng-model="newSymbolNumberTransfer.FromExamTypeId">
+                                                        <option ng-value="0">**Select ExamType**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newSymbolNumberTransfer.ExamTypeId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>To Exam Type</label>
+                                                <div class="form-group">
+                                                    <select class="form-control form-control-sm select2" ng-model="newSymbolNumberTransfer.ToExamTypeId">
+                                                        <option ng-value="0">**Select ExamType**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in ExamTypeList| filter:excludeSelectedExamType" ng-selected="cl.id==newSymbolNumberTransfer.ExamTypeId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2 mt-4">
+                                                <div class="input-group form-group input-group-sm ">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search"
+                                                           aria-label="Search" ng-model="searchData.SymbolNumber">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2 mt-4">
+                                                <div class="time-label">
+                                                    <span class="d-block border-0">
+                                                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="TransforSymbolNumber()">Transfer</button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- List Table Starts -->
+                                        <div class="card">
+                                            
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 90px">S.No.</th>
+                                                            <th style="width:200px">From Exam</th>
+                                                            <th style="width:200px">To Exam</th>
+                                                            <th style="width:150px">Transfer Date</th>
+                                                            <th style="width:100px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @*<tr dir-paginate="sn in newSymbolNumberTransfer.SymbolNumberTransferDetailsColl  | filter:searchData.SymbolNumberTransfer | itemsPerPage: perPage.SymbolNumberTransfer" current-page="currentPages.SymbolNumberTransfer" pagination-id="SymbolNumberTransferPagination">*@
+                                                        <tr ng-repeat="sn in newSymbolNumberTransfer.SymbolNumberTransferDetailsColl | filter: searchData.SymbolNumberTransfer">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{sn.FromExam}}</td>
+                                                            <td>{{sn.ToExam}}</td>
+                                                            <td>{{sn.TransferDate}}</td>
+                                                            <td>
+
+                                                                <a class="p-1" ng-click="delSymbolNumberTransferDetails($index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <!-- table end -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Symbol No Transfer Ends -->
+                               
+                                <!-- Exam Wise Symbol No TAb Starts -->
+                                <div class="tab-pane fade show main-section" id="rehome" role="tabpanel"
+                                     aria-labelledby="rehome-tab">
+                                    <div id="reexamwise-symbol-section">
+                                        <div class="card">
+                                            <div class="row">
+
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Class/Sec</label>
+                                                        <select class="form-control form-control-sm select2" data-placeholder="Select Class" ng-model="newReSymbolNumber.SelectedClass" ng-change="GetReClassWiseAllStudent()">
+                                                            <option ng-value="0">**Select Class/Section**</option>
+                                                            <option ng-value="se" ng-repeat="se in ClassSection.SectionList ">{{se.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>For Exam</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newReSymbolNumber.ExamTypeId" ng-change="GetReClassWiseAllStudent()">
+                                                            <option ng-value="0">**Select ExamType**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in ExamTypeList" ng-selected="cl.id==newSymbolNumber.ExamTypeId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>Re-Exam</label>
+                                                    <div class="form-group">
+                                                        <select class="form-control form-control-sm select2" ng-model="newReSymbolNumber.ReExamTypeId" ng-change="GetReClassWiseAllStudent()">
+                                                            <option ng-value="0">**Select ReExamType**</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in ReExamTypeList | filter: { ExamTypeId: newReSymbolNumber.ExamTypeId }:true" ng-selected="cl.id==newSymbolNumber.ReExamTypeId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Class Wise</label>
+                                                        <select class="form-control form-control-sm select2" data-placeholder="Select Class" ng-model="newReSymbolNumber.SelectedClassOnly" ng-change="GetReClassWiseAllStudent()">
+                                                            <option ng-value="0">**Select Class**</option>
+                                                            <option ng-value="se" ng-repeat="se in ClassSection.ClassList ">{{se.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                @*<div class="col-md-2">
+            <label>Sort As</label>
+            <select class="form-control form-control-sm select2" style="width:100%" data-placeholder="Select Sorting" ng-model="newReSymbolNumber.SortAs" ng-change="ReDataSorting()">
+                <option ng-value="RollNo">**Sort As**</option>
+                <option ng-value="se.value" ng-repeat="se in SortAsList">{{se.text}}</option>
+            </select>
+        </div>*@
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Start No.</label>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm" placeholder="" ng-model="newReSymbolNumber.StartNo" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Start Alpha</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" placeholder="" ng-model="newReSymbolNumber.StartAlpha" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Pad Width</label>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm" placeholder="" ng-model="newReSymbolNumber.PadWidth" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div class="form-group">
+                                                        <label for="">Prefix</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" placeholder="" ng-model="newReSymbolNumber.Prefix" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div class="form-group">
+                                                        <label for="">Suffix</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" placeholder="" ng-model="newReSymbolNumber.Suffix" @*ng-change="AutoGenerateSymbolNo()"*@>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 mt-4">
+                                                    <div class="input-group form-group input-group-sm ">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.ReSymbolNumber">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-5 mt-4 text-right">
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-info"
+                                                            style="min-width: 90px" ng-click="ReAutoGenerateSymbolNo()">
+                                                        Generate SymbolNo
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-default" style="min-width: 70px;" ng-click="ClearReSymbolNumber()">Reset</button>
+                                                    <button type="button" class="btn btn-sm btn-danger" style="min-width: 70px;" ng-click="DelReExamSymbollNo()">Delete</button>
+                                                    <button type="button" class="btn btn-sm btn-success" style="min-width: 70px;" ng-click="SaveUpdateReSymbolNumber()">{{newReSymbolNumber.Mode}}</button>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height: calc(100vh - 16rem)">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white  table-head-fixed">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th style="width: 100px" ng-click="sort('SectionName')">Section</th>
+                                                            <th style="width: 150px" ng-click="sort('RegdNo')">Regd No.</th>
+                                                            <th style="width: 70px" ng-click="sort('RollNo')">Roll No.</th>
+                                                            <th style="width: 250px" ng-click="sort('Name')">Name</th>
+                                                            <th style="width: 150px" ng-click="sort('BoardRegdNo')">Board Regd</th>
+                                                            <th style="width: 120px" ng-click="sort('SymbolNo')">Symbol No</th>
+                                                            <th style="width: 100px" ng-repeat="sb in newReSymbolNumber.SubjectList">{{sb.Name}}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @*<tr dir-paginate="sn in newReSymbolNumber.StudentList  | filter:searchData.ReSymbolNumber | itemsPerPage: perPage.ReSymbolNumber" current-page="currentPages.ReSymbolNumber" pagination-id="ReSymbolNumberPagination">*@
+                                                        <tr ng-repeat="sn in newReSymbolNumber.StudentList | filter:searchData.ReSymbolNumber | orderBy:sortKeyRS:reverse2">
+                                                            <td>{{sn.SectionName}}</td>
+                                                            <td>{{sn.RegdNo}}</td>
+                                                            <td>{{sn.RollNo}}</td>
+                                                            <td>{{sn.Name}}</td>
+                                                            <td>{{sn.BoardRegdNo}}</td>
+                                                            <td><input type="text" class="form-control form-control-sm" ng-model="sn.SymbolNo"></td>
+                                                            <td class="text-center" ng-repeat="sb in sn.SubjectList">
+                                                                <div class="custom-control custom-checkbox checkbox-lg ml-2">
+                                                                    <input ng-show="sb.Enabled==true" type="checkbox" class="custom-control-input" id="checkbox-gdet-{{$parent.$index}}-{{$index}}" ng-model="sb.ConductReExam">&nbsp;
+                                                                    <label class="custom-control-label"  for="checkbox-gdet-{{$parent.$index}}-{{$index}}"> {{sb.ObtainMark}}</label>
+                                                                </div>
+                                                            </td>
+
+                                                            @*<td ng-repeat="sb in sn.SubjectList">
+                                                                <input ng-show="sb.Enabled==true" type="checkbox" class="form-control form-control-sm" ng-model="sb.ConductReExam">
+                                                                {{sb.ObtainMark}}
+                                                            </td>*@
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Exam Wise Symbol No  Tab Ends  -->                               
+
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+
+

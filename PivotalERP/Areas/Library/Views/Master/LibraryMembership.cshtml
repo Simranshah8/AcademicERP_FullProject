@@ -1,0 +1,380 @@
+﻿
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/Library/LibraryMembership.js?v=20251115"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="LibraryMembershipController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="root">
+                        <div class="card-primary card-tabs">
+                            <header class="if-page-have-nav-tabs p-2">
+                                <div class="row upper-tab">
+                                    <div class="col-md-10">
+                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active"
+                                            id="myTab"
+                                            role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active"
+                                                   id="home-tab"
+                                                   data-toggle="tab"
+                                                   href="#home"
+                                                   role="tab"
+                                                   aria-controls="home"
+                                                   aria-selected="true">Student</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link"
+                                                   id="profile-tab"
+                                                   data-toggle="tab"
+                                                   href="#profile"
+                                                   role="tab"
+                                                   aria-controls="profile"
+                                                   aria-selected="false">Employee</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Student Start -->
+                                <div class="tab-pane fade show active main-section"
+                                     id="home"
+                                     role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <div class="row pt-2">
+
+                                        <div class="col-sm-2 col-lg-2 col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                            <div class="form-group">
+                                                <label for="">Batch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudent.BatchId">
+                                                    <option ng-value="0">**Select Batch**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newStudent.BatchId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Class</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudent.SelectedClass" data-placeholder="**Select Class**" ng-change="GetClassWiseMemberList()">
+                                                    <option ng-value="cl" ng-repeat="cl in ClassList.SectionList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newStudent.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                            <div class="form-group mb-0">
+                                                <label for="">Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudent.ClassYearId">
+                                                    <option ng-value="0">**Select Year**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newStudent.ClassYearId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newStudent.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                            <div class="form-group mb-0">
+                                                <label for="">Semester</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newStudent.SemesterId">
+                                                    <option ng-value="0">**Select Semester**</option>
+                                                    <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newStudent.SemesterId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label>Prefix</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.Prefix" />
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label>Suffifx </label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newStudent.Suffix" />
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label>Mem.No. as </label>
+                                                    <select class="form-control form-control-sm" ng-model="newStudent.MembershipNoAs">
+                                                        <option ng-value="cl.id" ng-repeat="cl in StudentMembershipNoAsList">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                       
+
+                                        <div class="col-md-2 mt-4">
+                                            <button class="btn btn-sm btn-success" style="min-width:60px;" type="button" ng-click="GetClassWiseMemberList()"><i class="fas fa-sync-alt mr-1"></i> Load</button>
+                                        </div>
+
+                                    </div>
+                                    <div class="card p-0">
+                                        <header class="row">
+
+                                            <div class="col-md-5">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Student">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Student">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search"
+                                                                   placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Student" />
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-md-3 mt-2">
+                                                
+                                                <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                    <input type="checkbox"
+                                                           class="custom-control-input"
+                                                           id="checkboxReGenerateS" ng-model="newStudent.ReGenerate" />
+                                                    <label class="custom-control-label"
+                                                           for="checkboxReGenerateS"> Can Update Exists Membership No.</label>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-4 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'StdLibraryMem'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#StdLibraryMem').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="GenerateStudentMembership()">
+                                                    Generate Membership
+                                                </button>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="StdLibraryMem"
+                                                       class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 110px" ng-click="sort('RegdNo')">Regd.No</th>
+                                                            <th style="width: 200px"  ng-click="sort('Name')">Name</th>
+                                                            <th style="width: 100px"  ng-click="sort('RollNo')">Roll No</th>
+                                                            <th style="width: 200px"  ng-click="sort('ClassSec')">Class/Sec</th>
+                                                            <th style="width: 110px"  ng-click="sort('IsLibMember')">
+                                                                Is Member
+                                                            </th>
+                                                            <th style="width: 200px"  ng-click="sort('MembershipNo')">Membership No</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in StudentMemberList  |orderBy:sortKey:reverse | filter:searchData.Student | itemsPerPage: perPage.Student" current-page="currentPages.Student" pagination-id="StudentPagination">
+                                                            <td>{{cl.RegdNo}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.RollNo}}</td>
+                                                            <td>{{cl.ClassSec}}</td>
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                                    <input type="checkbox"
+                                                                           class="custom-control-input"
+                                                                           id="checkboxDet-{{$index}}" ng-model="cl.IsLibMember" />
+                                                                    <label class="custom-control-label"
+                                                                           for="checkboxDet-{{$index}}"></label>
+                                                                </div>
+                                                            </td>
+                                                            <td>{{cl.MembershipNo}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="StudentPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Student Ends -->
+                                <!-- Employee Start -->
+                                <div class="tab-pane fade main-section"
+                                     id="profile"
+                                     role="tabpanel"
+                                     aria-labelledby="profile-tab">
+
+                                    <div class="card py-2">
+                                        <div class="row">
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Prefix</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newEmployee.Prefix" />
+                                            </div>
+                                            <div class="col-sm-2 col-lg-2 col-md-2">
+                                                <label>Suffifx </label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newEmployee.Suffix" />
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <label>User Name as </label>
+                                                <select class="form-control form-control-sm" ng-model="newEmployee.MembershipNoAs">
+                                                    <option ng-value="cl.id" ng-repeat="cl in EmployeeMembershipNoAsList">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 mt-4">
+                                                <button class="btn btn-sm btn-success" style="min-width:60px;" type="button" ng-click="GetEmpMemberList()"><i class="fas fa-sync-alt mr-1"></i> Load</button>
+                                            </div>
+                                        </div>
+                                        <header class="row mt-2">
+                                            <div class="col-md-8">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Employee">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Employee">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Employee">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="px-2">
+                                                            <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkboxReGenerate" ng-model="newEmployee.ReGenerate" />
+                                                                <label class="custom-control-label"
+                                                                       for="checkboxReGenerate">Can Update Exists UserName</label>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-4 text-right">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'EmpLibraryMem'"><img src="~/wwwroot/dynamic/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#EmpLibraryMem').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px" ng-click="GenerateEmployeeMembership()">
+                                                    Generate Membership
+                                                </button>
+                                            </div>
+                                        </header>
+
+                                        <div>
+                                            <div class="table-scroll-x-y sales-main-table table-scroll">
+                                                <table id="EmpLibraryMem"
+                                                       class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="align-middle" style="width: 130px">Employee Code</th>
+                                                            <th class="align-middle" style="width: 250px">Name</th>
+                                                            <th class="align-middle" style="width: 150px">Designation</th>
+                                                            <th class="align-middle" style="width: 110px">
+                                                                <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                                    <input type="checkbox"
+                                                                           class="custom-control-input"
+                                                                           id="checkbox-3" />
+                                                                    <label class="custom-control-label"
+                                                                           for="checkbox-3">Is Member</label>
+                                                                </div>
+                                                            </th>
+                                                            <th class="align-middle" style="width: 150px">Membership No</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in EmpMemberList | filter:searchData.Employee | itemsPerPage: perPage.Employee" current-page="currentPages.Employee" pagination-id="EmployeePagination">
+                                                            <td>{{cl.EmployeeCode}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.Designation}}</td>
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox checkbox-sm text-center">
+                                                                    <input type="checkbox" class="custom-control-input" id="checkboxDet-{{$index}}" ng-model="cl.IsLibMember" />
+                                                                    <label class="custom-control-label" for="checkboxDet-{{$index}}"></label>
+                                                                </div>
+                                                            </td>
+                                                            <td>{{cl.MembershipNo}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <footer class="row align-items-center">
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="EmployeePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>
+                                            </footer>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>
+
+
+
+
+
+
+
+
