@@ -21,22 +21,22 @@
 			EmployeeGroup: GlobalServices.getPerPageRow(),
 		};
 
-	/*	$scope.BaseGroupList = [];
-		$http({
-			method: 'Get',
-			url: base_url + "Attendance/Transaction/GetAllEmployeeGroup",
-			dataType: "json"
-		}).then(function (res) {
-			hidePleaseWait();
-			$scope.loadingstatus = "stop";
-			if (res.data.IsSuccess && res.data.Data) {
-				$scope.BaseGroupList = res.data.Data;
-			} else {
-				Swal.fire(res.data.ResponseMSG);
-			}
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});*/
+		//$scope.BaseGroupList = [];
+		//$http({
+		//	method: 'Get',
+		//	url: base_url + "Attendance/Transaction/GetAllEmployeeGroup",
+		//	dataType: "json"
+		//}).then(function (res) {
+		//	hidePleaseWait();
+		//	$scope.loadingstatus = "stop";
+		//	if (res.data.IsSuccess && res.data.Data) {
+		//		$scope.BaseGroupList = res.data.Data;
+		//	} else {
+		//		Swal.fire(res.data.ResponseMSG);
+		//	}
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
 
 		$scope.newEmployeeGroup = {
 			EmployeeGroupId: null,

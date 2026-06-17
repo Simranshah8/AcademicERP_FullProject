@@ -501,7 +501,7 @@ namespace PivotalERP.Areas.Elearning.Controllers
         [HttpPost]
         public JsonNetResult GetLPClassSubjectSecWise(int ClassId, int SubjectId, string SectionIdColl, int? BatchId, int? ClassYearId, int? SemesterId)
         {
-            var dataColl = new AcademicLib.BL.Academic.Transaction.LessonPlanning(User.UserId, User.HostName, User.DBName).GetLPClassSubjectSecWise(ClassId, SubjectId, SectionIdColl, BatchId, ClassYearId, SemesterId,this.AcademicYearId);
+            var dataColl = new AcademicLib.BL.Academic.Transaction.LessonPlanning(User.UserId, User.HostName, User.DBName).GetLPClassSubjectSecWise(ClassId, SubjectId, SectionIdColl, BatchId, ClassYearId, SemesterId, this.AcademicYearId);
 
             return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }

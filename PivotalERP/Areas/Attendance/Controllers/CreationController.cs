@@ -274,6 +274,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
 
                             foreach (var st in query)
                             {
+                                st.PunchTime = "Manual";
 
                                 if (st.Attendance == "PRESENT" || st.Attendance == "LATE")
                                 {
@@ -623,9 +624,9 @@ namespace PivotalERP.Areas.Attendance.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult GetStudentMonthlyBIOAttendance(int YearId,int MonthId,int ClassId,int? SectionId, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null)
+        public JsonNetResult GetStudentMonthlyBIOAttendance(int YearId, int MonthId, int ClassId, int? SectionId, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null)
         {
-            var dataColl = new AcademicLib.BL.Attendance.Device(User.UserId, User.HostName, User.DBName).getStudentMonthlyAttendance(this.AcademicYearId, YearId, MonthId, ClassId, SectionId, BatchId, SemesterId, ClassYearId);
+            var dataColl = new AcademicLib.BL.Attendance.Device(User.UserId, User.HostName, User.DBName).getStudentMonthlyAttendance( this.AcademicYearId, YearId, MonthId, ClassId, SectionId, BatchId, SemesterId, ClassYearId);
 
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
@@ -722,17 +723,17 @@ namespace PivotalERP.Areas.Attendance.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult GetEmpMonthlyBIOAttendance(int YearId, int MonthId,string branchIdColl, int empType,int ForEmp)
+        public JsonNetResult GetEmpMonthlyBIOAttendance(int YearId, int MonthId,string branchIdColl,int empType,int ForEmp)
         {
             if (!string.IsNullOrEmpty(branchIdColl))
             {
-                if (branchIdColl == "0")
+                if (branchIdColl == "0")    
                     branchIdColl = "";
             }
             else
                 branchIdColl = "";
 
-            var dataColl = new AcademicLib.BL.Attendance.Device(User.UserId, User.HostName, User.DBName).getEmpMonthlyAttendance(YearId, MonthId,branchIdColl, 1, ForEmp);
+            var dataColl = new AcademicLib.BL.Attendance.Device(User.UserId, User.HostName, User.DBName).getEmpMonthlyAttendance(YearId, MonthId,branchIdColl,empType,ForEmp);
 
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
@@ -749,6 +750,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
             }
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
+
         public ActionResult RdlEmpDateWiseInOut()
         {
             return View();
@@ -826,21 +828,6 @@ namespace PivotalERP.Areas.Attendance.Controllers
                 resVal.ResponseMSG = ee.Message;
             }
 
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
-        [HttpPost]
-        public JsonNetResult GetPeriodAutoOrderNo()
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                resVal = new AcademicLib.BL.Attendance.FinancialPeriod(User.UserId, User.HostName, User.DBName).GetPeriodAutoOrderNo(0);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
         #endregion
@@ -990,7 +977,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
         {
             return View();
         }
-        
+
 
         [HttpPost]
         public JsonNetResult SaveLeaveOpening()
@@ -1006,7 +993,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
                     if (!beData.TranId.HasValue)
                         beData.TranId = 0;
 
-                    beData.OpeningQty = beData.LeaveQuotaDetail.Sum(p1 => p1.NoOfLeave??0);
+                    beData.OpeningQty = beData.LeaveQuotaDetail.Sum(p1 => p1.NoOfLeave ?? 0);
                     resVal = new AcademicLib.BL.Attendance.LeaveOpening(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
                 }
                 else
@@ -1024,7 +1011,8 @@ namespace PivotalERP.Areas.Attendance.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
 
-        
+
+
         [HttpPost]
         public JsonNetResultWithEnum GetAllLeaveOpeningList()
         {
@@ -1201,12 +1189,12 @@ namespace PivotalERP.Areas.Attendance.Controllers
 
 
         [HttpPost]
-        public JsonNetResult GetEmployeeAttendSummary(string BranchIdColl, string DepartmentIdColl, string GroupIdColl, DateTime? DateFrom, DateTime? DateTo, int? EmpType,int ForEmp)
+        public JsonNetResult GetEmployeeAttendSummary(string BranchIdColl, string DepartmentIdColl, string GroupIdColl, DateTime? DateFrom, DateTime? DateTo, int? EmpType,int? ForEmp)
         {
             AcademicLib.RE.Attendance.EmpAttendanceSummaryCollections dataColl = new AcademicLib.RE.Attendance.EmpAttendanceSummaryCollections();
             try
             {
-                dataColl = new AcademicLib.BL.Attendance.EmpAttendanceSummary(User.UserId, User.HostName, User.DBName).GetEmpAttendanceSummary(BranchIdColl, DepartmentIdColl, GroupIdColl, DateFrom, DateTo, EmpType, ForEmp);
+                dataColl = new AcademicLib.BL.Attendance.EmpAttendanceSummary(User.UserId, User.HostName, User.DBName).GetEmpAttendanceSummary(BranchIdColl, DepartmentIdColl, GroupIdColl, DateFrom, DateTo, EmpType,ForEmp);
                 return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
             }
             catch (Exception ee)
@@ -1389,13 +1377,12 @@ namespace PivotalERP.Areas.Attendance.Controllers
         }
         #endregion
 
-
         #region "Allow Leave Type"
         public ActionResult AllowLeaveType()
         {
             return View();
         }
-               
+
         [HttpPost]
         //[PermissionsAttribute(AcademicLib.BusinessEntity.Global.Actions.Modify, (int)FormsEntity.AllowLeaveType)]
         public JsonNetResult GetAllEmployeeForAllowLeaveType(int? BranchId, int? DepartmentId, int? DesignationId, int? LevelId, int? EmployeeGroupId)
@@ -1441,7 +1428,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
 
-        [HttpPost]        
+        [HttpPost]
         public JsonNetResult DelAllowLeaveType()
         {
             ResponeValues resVal = new ResponeValues();
@@ -1657,6 +1644,6 @@ namespace PivotalERP.Areas.Attendance.Controllers
             }
 
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }       
+        }
     }
 }

@@ -268,12 +268,12 @@ app.controller('AddAttendanceController', function ($scope, $http, $timeout, $fi
 	};
 
 	$scope.GetClassWiseStudentList = function () {
-
+		
 		$scope.newStudentWise.StudentList = [];
 
 		if ($scope.newStudentWise.ClassSection && $scope.newStudentWise.DateDet && $scope.newStudentWise.DateDet.dateAD) {
 			$scope.GetClassWiseShift(); //Added by Simran
-             var para = {
+			var para = {
 				ClassId: $scope.newStudentWise.ClassSection.ClassId,
 				SectionIdColl: $scope.newStudentWise.ClassSection.SectionId,
 				//Added by Suresh on Magh 17 Starts
@@ -346,6 +346,9 @@ app.controller('AddAttendanceController', function ($scope, $http, $timeout, $fi
 
 
 	};
+
+	
+
 	$scope.IsValidStudentWise = function () {
 		if (!$scope.newStudentWise.DateDet) {
 			Swal.fire("Please Select For Date.",);
@@ -479,6 +482,9 @@ app.controller('AddAttendanceController', function ($scope, $http, $timeout, $fi
 			}
 		});
 	};
+
+
+
 	//Added by Simran
 	$scope.GetClassWiseShift = function () {
 		$scope.loadingstatus = "running";
@@ -505,6 +511,7 @@ app.controller('AddAttendanceController', function ($scope, $http, $timeout, $fi
 			Swal.fire('Failed' + reason);
 		});
 	};
+
 	//End
 	//************************* Subject wise *********************************
 
@@ -528,13 +535,14 @@ app.controller('AddAttendanceController', function ($scope, $http, $timeout, $fi
 		return true;
 	}
 
+
 	$scope.GetClassWiseSubMap = function () {
 		$scope.newSubjectWise.SubjectList = [];
 		$scope.newSubjectWise.StudentList = [];
 
 		if ($scope.newSubjectWise.ClassSection && $scope.newSubjectWise.ForDateDet) {
-			$scope.GetClassWiseShiftforSub();  //Added by Simran
 
+			$scope.GetClassWiseShiftforSub();  //Added by Simran
 			var para = {
 				ClassId: $scope.newSubjectWise.ClassSection.ClassId,
 				SectionIdColl: $scope.newSubjectWise.ClassSection.SectionId,
@@ -584,6 +592,7 @@ app.controller('AddAttendanceController', function ($scope, $http, $timeout, $fi
 			}
 		}
 	};
+
 
 	//Added by Simran
 	$scope.GetClassWiseShiftforSub = function () {

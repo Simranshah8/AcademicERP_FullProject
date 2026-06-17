@@ -57,6 +57,11 @@ namespace AcademicLib.BL.Attendance
         {
             return db.getPeriodForAttendance(_UserId, EntityId, BatchId, ClassId, SectionId, SemesterId, ClassYearId, SubjectId);
         }
+
+        public List<AcademicLib.RE.Global.EmployeeMonthlyAttendanceSum> getMonthlyAttendanceSummaryForEmpDB(int? YearId, int? MonthId)
+        {
+            return db.getMonthlyAttendanceSummaryForEmpDB(_UserId, YearId, MonthId);
+        }
         public ResponeValues IsValidData(ref BE.Attendance.AttendanceStudentWiseCollections beData)
         {
             ResponeValues resVal = new ResponeValues();
@@ -105,12 +110,6 @@ namespace AcademicLib.BL.Attendance
             }
 
             return resVal;
-        }
-
-
-        public List<AcademicLib.RE.Global.EmployeeMonthlyAttendanceSum> getMonthlyAttendanceSummaryForEmpDB(int? YearId, int? MonthId)
-        {
-            return db.getMonthlyAttendanceSummaryForEmpDB(_UserId, YearId, MonthId);
         }
     }
 }

@@ -520,41 +520,19 @@
 
 	};
 
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newVisitor.FromDateDet || !$scope.newVisitor.ToDateDet ||
-			!$scope.newVisitor.FromDateDet.dateAD || !$scope.newVisitor.ToDateDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-		var fromDate = $filter('date')(new Date($scope.newVisitor.FromDateDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newVisitor.ToDateDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be greater than To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newVisitor.FromDate_TMP = new Date();
-						$scope.newVisitor.FromDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be less than From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newVisitor.ToDate_TMP = new Date();
-						$scope.newVisitor.ToDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
 	};
+
 });

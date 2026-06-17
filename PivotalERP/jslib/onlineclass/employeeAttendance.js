@@ -23,19 +23,16 @@
 			PeriodAttendance: GlobalServices.getPerPageRow(),
 		};
 
-		$scope.newPeriodAttendence = {
-
-		};
-	};
+        $scope.newPeriodAttendence = {
+            FromDate_TMP: new Date(),
+            ToDate_TMP: new Date(),
+        };
+    };
 
 
 	/************************Daily Attendance ***************/
 	function OnClickDefault() {
 		document.getElementById('detail-of-employee').style.display = "none";
-
-
-
-
 		document.getElementById('back-btn').onclick = function () {
 			document.getElementById('daily-attendence-section').style.display = "block";
 			document.getElementById('detail-of-employee').style.display = "none";
@@ -200,6 +197,21 @@
 		}
 
 		return true;
+	};
+
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
 	};
 
 

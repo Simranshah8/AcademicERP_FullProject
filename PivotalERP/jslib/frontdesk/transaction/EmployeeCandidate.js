@@ -1189,6 +1189,9 @@
 	};
 
 
-
+	$scope.ValidatePhoto = function (obj, id, modelTmpName, modelDataName, imageId, fieldName, allowedExtensions, maxSizeMB = 1) {
+		GlobalServices.validateImageFile(obj, id, modelTmpName, modelDataName, imageId, fieldName, allowedExtensions, maxSizeMB);
+		$scope.$applyAsync();
+	};
 
 });

@@ -1164,6 +1164,88 @@
 			}
 		});
 	};
+
+	$scope.EditRoom = function (cl) {
+		cl.IsEdit = true;
+		// Backup original values
+		cl.OldRoomFee = cl.RoomFee;
+	};
+
+	$scope.CancelEditRoom = function (cl) {
+		cl.RoomFee = cl.OldRoomFee;
+		cl.IsEdit = false;
+	};
+
+	$scope.UpdateRoom = function (refData) {
+		Swal.fire({
+			title: 'Update Hostel Room Fees?',
+			text: 'This action will update the hostel room fees and automatically apply the changes to all associated Hosetl Bed Mapping records. Do you want to continue?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Update',
+		}).then((result) => {
+			/* Read more about isConfirmed, isDenied below */
+			if (result.isConfirmed) {
+				$scope.loadingstatus = "running";
+				showPleaseWait();
+				var para = {
+					RoomId: refData.RoomId,
+					RoomFee: refData.RoomFee
+				};
+				$http({
+					method: 'POST',
+					url: base_url + "Hostel/Creation/UpdateRoom",
+					dataType: "json",
+					data: JSON.stringify(para)
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingstatus = "stop";
+					if (res.data.IsSuccess) {
+						$scope.GetAllRoomList();
+						Swal.fire({ icon: 'success', title: 'Updated Successfully', text: res.data.ResponseMSG });
+					} else {
+						Swal.fire({ icon: 'error', title: 'Update Failed', text: res.data.ResponseMSG });
+					}
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		});
+	};
+
+	$scope.CurHostelRoomFee = function () {
+		Swal.fire({
+			title: 'Apply Hostel Room Fees?',
+			text: 'This action will update the hostel room fees and automatically apply the changes to all associated Hosetl Bed Mapping records. Do you want to continue?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Apply',
+		}).then((result) => {
+			/* Read more about isConfirmed, isDenied below */
+			if (result.isConfirmed) {
+				$scope.loadingstatus = "running";
+				showPleaseWait();
+				$http({
+					method: 'POST',
+					url: base_url + "Hostel/Creation/CurHostelRoomFee",
+					dataType: "json"
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingstatus = "stop";
+					if (res.data.IsSuccess) {
+						$scope.GetAllTransportPointList();
+						Swal.fire({ icon: 'success', title: 'Applied Successfully', text: res.data.ResponseMSG });
+					} else {
+						Swal.fire({ icon: 'error', title: 'Apply Failed', text: res.data.ResponseMSG });
+					}
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		});
+	};
+
+
 	$scope.pageChangeHandler = function (num) {
 		console.log('page changed to ' + num);
 	};

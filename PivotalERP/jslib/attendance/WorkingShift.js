@@ -299,7 +299,12 @@
 			$scope.loadingstatus = "stop";
 			if (res.data.IsSuccess && res.data.Data) {
 				$scope.WorkingShiftList = res.data.Data;
-
+				// Set default Working Shift
+				angular.forEach($scope.WorkingShiftList, function (item) {
+					if (item.IsDefault === true) {
+						$scope.newMapping.WorkingShiftId = item.WorkingShiftId;
+					}
+				});
 			} else {
 				Swal.fire(res.data.ResponseMSG);
 			}

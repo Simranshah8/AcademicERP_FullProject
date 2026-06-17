@@ -482,5 +482,40 @@ namespace PivotalERP.Areas.Transport.Controllers
         }
 
         #endregion
+
+
+        [HttpPost]
+        public JsonNetResult UpdateTransportPoint(int TransportPointId, double InRate, double OutRate, double BothRate)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new AcademicLib.BL.Transport.Creation.TransportPoint(User.UserId, User.HostName, User.DBName).UpdateTransportPoint(this.AcademicYearId, TransportPointId, InRate, OutRate, BothRate);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult CurTransportRate()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new AcademicLib.BL.Transport.Creation.TransportPoint(User.UserId, User.HostName, User.DBName).CurTransportRate(0, this.AcademicYearId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
     }
 }

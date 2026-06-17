@@ -46,6 +46,7 @@ namespace AcademicLib.RE.Attendance
         public string WorkingShift { get; set; }
         public DateTime ForDate { get; set; }
         public string TeacherPhotoPath { get; set; }
+        public bool IsLeft { get; set; }
     }
 
     public class EmpAttendanceSummaryCollections : System.Collections.Generic.List<EmpAttendanceSummary>

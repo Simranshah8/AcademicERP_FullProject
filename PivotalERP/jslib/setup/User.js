@@ -38,7 +38,7 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 			Password: '',
 			RePassword: '',
 			Address: '',
-			MobileNO: '',
+			MobileNO:'',
 			BranchId: 1,
 			EMailID: '',
 			Active: true,
@@ -52,7 +52,7 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 			UserWiseAutoPost: false,
 			Photo: null,
 			PhotoPath: null,
-			AllowAppLogin: false,
+			AllowAppLogin:false,
 			Mode: 'Save'
 		};
 		$scope.UserGroupList = [];
@@ -60,10 +60,10 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 			method: 'POST',
 			url: base_url + "Setup/Security/GetAllUserGroupList",
 			dataType: "json"
-		}).then(function (res) {
+		}).then(function (res) {		
 			if (res.data.IsSuccess && res.data.Data) {
 				$scope.UserGroupList = res.data.Data;
-			}
+			} 
 		}, function (reason) {
 			Swal.fire('Failed' + reason);
 		});
@@ -73,7 +73,7 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 			method: 'POST',
 			url: base_url + "Setup/Security/GetAllBranchList",
 			dataType: "json"
-		}).then(function (res) {
+		}).then(function (res) {			
 			if (res.data.IsSuccess && res.data.Data) {
 				$scope.BranchList = res.data.Data;
 			}
@@ -141,7 +141,7 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 	// Clear photo
 	$scope.ClearUserPhoto = function () {
 
-
+		
 		$timeout(function () {
 			$scope.$apply(function () {
 				$scope.newUser.PhotoData = null;
@@ -175,7 +175,7 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 			return false;
 		}
 
-		if ($scope.newUser.BranchId == 0) {
+		if ($scope.newUser.BranchId==0) {
 			Swal.fire('Please ! Select Valid Branch Name');
 			return false;
 		}
@@ -195,10 +195,10 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 				Swal.fire('User Password Re-Password does not matched');
 				return false;
 			}
-		}
+        }
+		
 
-
-
+	
 		return true;
 	}
 
@@ -274,7 +274,7 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 
 		});
 
-
+		
 	}
 
 	$scope.GetAllUserList = function () {
@@ -335,7 +335,7 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 					document.getElementById('user-form').style.display = "block";
 
 				});
-
+				
 			} else {
 				Swal.fire(res.data.ResponseMSG);
 			}
@@ -387,7 +387,7 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 	$scope.ClearLogById = function (refData) {
 
 		Swal.fire({
-			title: 'Do you want to clear login lof of user ' + refData.UserName + ' ?',
+			title: 'Do you want to clear login lof of user '+refData.UserName+' ?',
 			showCancelButton: true,
 			confirmButtonText: 'Clear Log',
 		}).then((result) => {
@@ -429,12 +429,12 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 			if (result.isConfirmed) {
 				$scope.loadingstatus = "running";
 				showPleaseWait();
-
+				 
 
 				$http({
 					method: 'POST',
 					url: base_url + "Setup/Security/GetGoogleAuthKey",
-					dataType: "json",
+					dataType: "json", 
 				}).then(function (res) {
 					hidePleaseWait();
 					$scope.loadingstatus = "stop";
@@ -485,47 +485,10 @@ app.controller('UserController', function ($scope, $http, $timeout, $filter, Glo
 			Swal.fire(errormessage);
 		});
 	}
-
+	 
 
 	$scope.pageChangeHandler = function (num) {
 		console.log('page changed to ' + num);
 	};
 
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newUser.StartDateDet || !$scope.newUser.EndDateDet ||
-			!$scope.newUser.StartDateDet.dateAD || !$scope.newUser.EndDateDet.dateAD) {
-			return true;
-		}
-		var StartDate = $filter('date')(new Date($scope.newUser.StartDateDet.dateAD), 'yyyy-MM-dd')
-		var EndDate = $filter('date')(new Date($scope.newUser.EndDateDet.dateAD), 'yyyy-MM-dd')
-		if (!StartDate || !EndDate) return true;
-		if (StartDate > EndDate) {
-			if (changedField === 'StartDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Start Date cannot be After End Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newUser.StartDate_TMP = new Date();
-						$scope.newUser.StartDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'EndDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'End Date cannot be Before Start Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newUser.EndDate_TMP = new Date();
-						$scope.newUser.EndDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
-	};
 });

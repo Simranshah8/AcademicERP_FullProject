@@ -320,6 +320,7 @@ app.controller('ManualBillingController', function ($scope, $http, $timeout, $fi
 			IsCash: true,
 			ForBilling: 1,
 			SelectionId: 1,
+			IsRateAsFeeMapping: true,
 			Mode: 'Save'
 		};
 		$scope.AddManualBillingDetail(0);
@@ -347,16 +348,30 @@ app.controller('ManualBillingController', function ($scope, $http, $timeout, $fi
 
 		var taxRate = isEmptyAmt(det.TaxRate);
 		if (col == 1 || col == 2) {
-			det.PayableAmt = (det.Qty * det.Rate) - det.DiscountAmt;
+			var disAmt = 0;
+			var amt = det.Qty * det.Rate;
+			if (det.DiscountPer > 0) {
+				disAmt = amt * det.DiscountPer / 100;
+			}
+			det.DiscountAmt = disAmt;
+
+			det.PayableAmt = (det.Qty * det.Rate) - disAmt;
+			//det.DiscountAmt = (det.Qty * det.Rate) - disAmt;
 			det.TaxAmt = det.PayableAmt * taxRate / 100;
-			det.PayableAmt = ((det.Qty * det.Rate) - det.DiscountAmt) + isEmptyAmt(det.TaxAmt);
+			det.PayableAmt = ((det.Qty * det.Rate) - disAmt) + isEmptyAmt(det.TaxAmt);
+
 		} else if (col == 3) {
 			var disAmt = 0;
 			var amt = det.Qty * det.Rate;
 			if (det.DiscountPer > 0) {
 				disAmt = amt * det.DiscountPer / 100;
 			}
-
+			if (det.DiscountPer < 0) {
+				det.DiscountPer = 0;
+			}
+			if (det.DiscountPer > 100) {
+				det.DiscountPer = 100;
+			}
 			det.DiscountAmt = disAmt;
 			det.PayableAmt = amt - disAmt;
 			det.TaxAmt = det.PayableAmt * taxRate / 100;
@@ -367,10 +382,16 @@ app.controller('ManualBillingController', function ($scope, $http, $timeout, $fi
 			if (det.DiscountAmt > 0) {
 				disPer = (det.DiscountAmt / amt) * 100;
 			}
-			det.DiscountPer = disPer;
+			det.DiscountPer = disPer ?? 0;
 			det.PayableAmt = amt - det.DiscountAmt;
 			det.TaxAmt = det.PayableAmt * taxRate / 100;
 			det.PayableAmt = (amt - det.DiscountAmt) + isEmptyAmt(det.TaxAmt);
+			if (det.DiscountAmt > det.PayableAmt + 1) {
+				det.DiscountAmt = 0;
+				det.DiscountPer = 0;
+				det.PayableAmt = (det.Qty * det.Rate);
+				Swal.fire('Discount Amount cannot be more then Receivable Amount');
+			}
 		}
 		if (CW == 'CW') {
 			var findData = mx($scope.newManualBillingClass.ManualBillingDetailsColl);
@@ -727,7 +748,6 @@ app.controller('ManualBillingController', function ($scope, $http, $timeout, $fi
 
 
 	$scope.GetManualBillingById = function (refData) {
-
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 		$scope.BillDet = {};
@@ -746,7 +766,6 @@ app.controller('ManualBillingController', function ($scope, $http, $timeout, $fi
 			if (res.data.IsSuccess && res.data.Data) {
 				$scope.BillDet = res.data.Data;
 				$('#modal-xl').modal('show');
-
 			} else {
 				Swal.fire(res.data.ResponseMSG);
 			}
@@ -1653,7 +1672,7 @@ app.controller('ManualBillingController', function ($scope, $http, $timeout, $fi
 	};
 
 
-	$scope.GetManualBillingById = function (refData) {
+	$scope.GetClassWiseManualBillingById = function (refData) {
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 		$scope.MBillDet = {};
@@ -1670,6 +1689,11 @@ app.controller('ManualBillingController', function ($scope, $http, $timeout, $fi
 			$scope.loadingstatus = "stop";
 			if (res.data.IsSuccess && res.data.Data) {
 				$scope.MBillDet = res.data.Data;
+				angular.forEach($scope.BillingTypes, function (item) {
+					if (item.Id == $scope.MBillDet.BillingType) {
+						$scope.MBillDet.BillingTypeName = item.Text;
+					}
+				});
 				$('#modal-xl1').modal('show');
 
 			} else {

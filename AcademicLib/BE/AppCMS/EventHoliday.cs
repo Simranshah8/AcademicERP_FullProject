@@ -23,11 +23,9 @@ namespace AcademicLib.BE.AppCMS.Creation
         public string Branch { get; set; }
         public string Employee { get; set; }
         public string Religion { get; set; }
-        //Added by Simran on 19th Jestha
         public string ClassYearId { get; set; }
         public string BatchId { get; set; }
-        public string SemesterId { get; set; }
-        //End
+        public string SemesterId { get; set; }  
     }
 
     public class EventHolidayCollections : System.Collections.Generic.List<EventHoliday>

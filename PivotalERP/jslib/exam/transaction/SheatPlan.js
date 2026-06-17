@@ -80,12 +80,12 @@
 			FieldNameAs: 1,
 		};
 
-		/*$scope.ExamTypeList = [];
-		gSrv.getExamTypeList().then(function (res) {
-			$scope.ExamTypeList = res.data.Data;
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});*/
+		//$scope.ExamTypeList = [];
+		//gSrv.getExamTypeList().then(function (res) {
+		//	$scope.ExamTypeList = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
 
 
 		$scope.GetAllRoomDetailsList();

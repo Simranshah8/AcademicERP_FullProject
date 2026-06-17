@@ -195,9 +195,9 @@
 		{
 			if (res.data.IsSuccess && res.data.Data) {
 				$scope.newNormalTabulation.TemplatesColl = res.data.Data;
-
-			}
-
+			 
+            }
+				
 		}, function (reason) {
 			Swal.fire('Failed' + reason);
 		});
@@ -208,7 +208,7 @@
 			dataType: "json"
 		}).then(function (res) {
 			if (res.data.IsSuccess && res.data.Data) {
-
+			 
 				$scope.newReNormalTabulation.TemplatesColl = res.data.Data;
 			}
 
@@ -226,7 +226,7 @@
 		}, function (reason) {
 			Swal.fire('Failed' + reason);
 		});
-	}
+    }
 
 	$scope.LoadClassWiseSemesterYear = function (classId) {
 
@@ -267,9 +267,9 @@
 		if ($scope.newNormalTabulation.SelectedClass && $scope.newNormalTabulation.SelectedClass.length == 1) {
 			$scope.SelectedClass = $scope.newNormalTabulation.SelectedClass[0];
 			$scope.LoadClassWiseSemesterYear($scope.SelectedClass.ClassId);
-		}
+        }
 		$scope.PrintNormalTabulation();
-	}
+    }
 	$scope.PrintNormalTabulation = function (fromRef)
 	{
 		if (fromRef == 1 || fromRef == 2)
@@ -286,7 +286,7 @@
 			var tmpIdColl = [];
 			var cIdColl = '';
 			angular.forEach($scope.newNormalTabulation.SelectedClass, function (cl) {
-
+				
 				if (mx(tmpIdColl).contains(cl.ClassId)==false)
 					tmpIdColl.push(cl.ClassId);
 			});
@@ -300,7 +300,7 @@
 			angular.forEach($scope.newNormalTabulation.StudentIdColl, function (s) {
 				if (s > 0) {
 					stIdColl.push(s);
-				}
+                }
 			});
 
 			if ($scope.newNormalTabulation.RptTranId > 0) {
@@ -335,12 +335,12 @@
 				document.body.style.cursor = 'wait';
 				document.getElementById("frmRptTabulation").src = '';
 				document.body.style.cursor = 'default';
-			}
+            }			
 		} else {
 			document.body.style.cursor = 'wait';
 			document.getElementById("frmRptTabulation").src = '';
 			document.body.style.cursor = 'default';
-		}
+		}	
 
 	};
 
@@ -359,7 +359,7 @@
 				}
 			});
 
-			if ($scope.newGroupTabulation.RptTranId > 0) {
+			if ($scope.newGroupTabulation.RptTranId > 0) {				
 				var examN = mx($scope.ExamTypeGroupList).firstOrDefault(p1 => p1.ExamTypeGroupId == $scope.newGroupTabulation.ExamTypeGroupId);
 				var rptPara = {
 					entityid: EntityId,
@@ -378,7 +378,7 @@
 					ClassYearId: ($scope.newGroupTabulation.ClassYearId ? $scope.newGroupTabulation.ClassYearId : 0),
 					FromPublished: ($scope.newGroupTabulation.FromPublished ? $scope.newGroupTabulation.FromPublished : false),
 					BranchId: ($scope.newGroupTabulation.BranchId ? $scope.newGroupTabulation.BranchId : 0),
-					istransaction: false,
+					istransaction: false,										
 					ExamTypeGroupId: $scope.newGroupTabulation.ExamTypeGroupId,
 					CurExamTypeId: ($scope.newGroupTabulation.CurExamTypeId ? $scope.newGroupTabulation.CurExamTypeId : 0),
 					ExamTypeGroupId2: ($scope.newGroupTabulation.ExamTypeGroupId2 ? $scope.newGroupTabulation.ExamTypeGroupId2 : 0),
@@ -391,7 +391,7 @@
 				document.body.style.cursor = 'default';
 			} else {
 				document.body.style.cursor = 'wait';
-				document.getElementById("frmRptGrpTabulation").src = '';
+				document.getElementById("frmRptGrpTabulation").src = '';				
 				document.body.style.cursor = 'default';
 			}
 		} else {
@@ -403,6 +403,7 @@
 	};
 
 	$scope.PublishExamResult = function () {
+
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 		var para =
@@ -428,6 +429,7 @@
 	}
 
 	$scope.PublishGroupExamResult = function () {
+
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 		var para =
@@ -662,9 +664,9 @@
 				if ($scope.newNormalTabulation.SelectedClass && $scope.newNormalTabulation.SelectedClass.length > 0) {
 					var findTemp = tempColl.firstOrDefault(p1 => p1.ClassId == $scope.newNormalTabulation.SelectedClass[0].ClassId);
 					if (findTemp && findTemp.ReportTemplateId > 0) {
-						$scope.newNormalTabulation.ReportTemplateId = findTemp.ReportTemplateId;
-					}
-				}
+						$scope.newNormalTabulation.ReportTemplateId = findTemp.ReportTemplateId;											 
+                    }
+                }
 
 			} else {
 				Swal.fire(res.data.ResponseMSG);

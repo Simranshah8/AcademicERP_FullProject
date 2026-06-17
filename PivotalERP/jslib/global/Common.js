@@ -320,7 +320,7 @@ app.filter('countOfValue', function () {
         var sum = 0;
         angular.forEach(data, function (value) {
             var v = value[key];
-            if (v && v.length>0) {
+            if (v && v.length > 0) {
                 sum = sum + 1;
             }
         });
@@ -418,13 +418,13 @@ app.directive('printTbl', ['$http', '$timeout', '$filter', function ($http, $tim
 app.directive('printDiv', ['$http', '$timeout', '$filter', function ($http, $timeout, $filter) {
     return {
         scope: {
-            divId: "=?",            
+            divId: "=?",
             reportName: "=?"
         },
         restrict: 'A',
         link: function (scope, element, attrs) {
             element.bind('click', function () {
-                 
+
                 if (scope.reportName == undefined || scope.reportName == null)
                     scope.reportName = '';
 
@@ -439,8 +439,8 @@ app.directive('printDiv', ['$http', '$timeout', '$filter', function ($http, $tim
                             Abt.LogoPath = "/wwwroot/dynamic/images/logo.png"
 
                         var totalColumnCount = 6;
-                         
-                         
+
+
                         var pageHeader = "<table class=\"main-table table table-bordered table-striped table-hover table-sm\"> <thead>";
                         pageHeader = pageHeader + "<tr><th style='text-align: center;'  align='center' colspan='" + totalColumnCount + "'>" + "<h3 style='margin: 15px;'>" + Abt.Name + "</h3>" + "</th></tr>";
                         pageHeader = pageHeader + "<tr><th style='text-align: center;' align='center' colspan='" + totalColumnCount + "'>" + Abt.Address + "</th></tr>";
@@ -3291,7 +3291,7 @@ app.directive("allStudent", ['$http', '$timeout', '$filter', function ($http, $t
         function setCustomformat(retVal) {
 
             if (retVal.data) {
-                return retVal.data.Name + ' - ' + retVal.data.RegdNo + ' - '+retVal.data.ClassName + (retVal.data.ClassYear && retVal.data.ClassYear.length > 0 ? "(" + retVal.data.ClassYear + ")" : "")+ (retVal.data.Semester && retVal.data.Semester.length > 0 ? "(" + retVal.data.Semester + ")" : "");
+                return retVal.data.Name + ' - ' + retVal.data.RegdNo + ' - ' + retVal.data.ClassName + (retVal.data.ClassYear && retVal.data.ClassYear.length > 0 ? "(" + retVal.data.ClassYear + ")" : "") + (retVal.data.Semester && retVal.data.Semester.length > 0 ? "(" + retVal.data.Semester + ")" : "");
             }
             return retVal;
         };
@@ -3345,7 +3345,7 @@ app.directive("allStudent", ['$http', '$timeout', '$filter', function ($http, $t
                             scope.studentDetail = item;
                             ngModel.$setViewValue(item.StudentId);
                             return {
-                                text: item.Name + ' - ' + item.ClassName + (item.SectionName && item.SectionName.length > 0 ? "(" + item.SectionName + ")" : "") + (item.ClassYear && item.ClassYear.length > 0 ? "(" + item.ClassYear + ")" : "")+ (item.Semester && item.Semester.length > 0 ? "(" + item.Semester + ")" : "") + ' - ' + item.RollNo + ' - ' + item.RegdNo + ' - ' + item.FatherName + ' - ' + item.ContactNo + ' - ' + item.Address,
+                                text: item.Name + ' - ' + item.ClassName + (item.SectionName && item.SectionName.length > 0 ? "(" + item.SectionName + ")" : "") + (item.ClassYear && item.ClassYear.length > 0 ? "(" + item.ClassYear + ")" : "") + (item.Semester && item.Semester.length > 0 ? "(" + item.Semester + ")" : "") + ' - ' + item.RollNo + ' - ' + item.RegdNo + ' - ' + item.FatherName + ' - ' + item.ContactNo + ' - ' + item.Address,
                                 id: item.StudentId + ',' + item.SemesterId + ',' + item.ClassYearId,
                                 data: item
                             }
@@ -3536,6 +3536,13 @@ app.directive("allEmployee", ['$http', '$timeout', '$filter', function ($http, $
 
         var onSelectChange = false;
 
+        var showLeft = false;
+        if (attrs.showLeft == true || attrs.showLeft == "true" || (scope.includeLeft && (scope.includeLeft == true || scope.includeLeft == "true")))
+            showLeft = true;
+        else
+            showLeft = false;
+
+
 
         $(element).select2({
             placeholder: placeholder,
@@ -3559,7 +3566,8 @@ app.directive("allEmployee", ['$http', '$timeout', '$filter', function ($http, $
                         Operator: "like",
                         ForTransaction: true,
                         OrderByCol: "E.Name",
-                        ColValue: params.term
+                        ColValue: params.term,
+                        ShowLeft: (attrs.showLeft == true || attrs.showLeft == "true" || (scope.includeLeft && (scope.includeLeft == true || scope.includeLeft == "true"))) ? true : false,
                     }
                     return queryParameters;
                 },
@@ -3572,8 +3580,10 @@ app.directive("allEmployee", ['$http', '$timeout', '$filter', function ($http, $
                     //return { results: data };
                     return {
                         results: $.map(res.Data, function (item) {
-                            scope.employeeDetail = item;
-                            ngModel.$setViewValue(item.EmployeeId);
+                            //scope.employeeDetail = item;
+                            //ngModel.$setViewValue(item.EmployeeId);
+
+
                             return {
                                 text: item.Name + ' - ' + item.Code + ' - ' + item.MobileNo,
                                 id: item.EmployeeId,
@@ -3620,8 +3630,9 @@ app.directive("allEmployee", ['$http', '$timeout', '$filter', function ($http, $
                                         // viewWatch();
 
                                         callback(tData);
-                                    } else
-                                        alert("No Data Found on Load");
+                                    }
+                                    //else
+                                    //    Swal.fire("No Data Found on Load");
 
                                 });
                         }
@@ -3677,24 +3688,40 @@ app.directive("allEmployee", ['$http', '$timeout', '$filter', function ($http, $
 
             //$('#sidebarzz').toggleClass('active');
         });
-        $(element).on("change", function (e) {
-            scope.sideBarData = [];
-            onSelectChange = true;
-            var selectedData = $(element).select2('data');
 
-            if (selectedData && selectedData.length > 0) {
-                var selectedEmployee = selectedData[0].data;
-                ngModel.$setViewValue(selectedEmployee.EmployeeId);
-                scope.employeeDetail = selectedEmployee;
+        $(element).on('select2:select', function (e) {
+            var selectedData = e.params.data;
+
+            console.log("Selected:", selectedData);
+
+            // update Angular model safely
+            scope.$applyAsync(function () {
+                scope.employeeDetail = selectedData.data;
+                ngModel.$setViewValue(selectedData.id);
 
                 $timeout(function () {
                     scope.$apply(function () {
                         scope.confirmAction();
                     });
                 });
+            });
+        });
 
+        $(element).on("change", function (e) {
+            scope.sideBarData = [];
+            onSelectChange = true;
+            var selectedData = $(element).select2('data');
 
+            if (selectedData && selectedData.length > 0) {
+                //var selectedEmployee = selectedData[0].data;
+                //ngModel.$setViewValue(selectedEmployee.EmployeeId);
+                //scope.employeeDetail = selectedEmployee;
 
+                //$timeout(function () {
+                //    scope.$apply(function () {
+                //        scope.confirmAction();
+                //    });
+                //});                 
 
             } else {
 
@@ -3713,7 +3740,8 @@ app.directive("allEmployee", ['$http', '$timeout', '$filter', function ($http, $
             sideBarData: '=',
             searchBy: '=',
             model: '=ngModel',
-            confirmAction: '&'
+            confirmAction: '&',
+            includeLeft: '=?',
         }
     };
 }]);
@@ -4250,6 +4278,12 @@ app.directive("datePicker", ['$http', '$timeout', '$filter', 'GlobalServices', f
                         });
 
                     }
+
+                }
+                else {
+                    $timeout(function () {
+                        bslink(scope, ele, attrs, ngModel);
+                    });
 
                 }
             }, function (reason) {
@@ -6156,7 +6190,220 @@ function GetVDCList() {
     return dataColl;
 };
 
+//Added By Suresh for table column resize starts
+app.directive('makeTableResizable', function ($timeout, $window) {
+    return {
+        restrict: 'A',
+        // Scope is now empty as it doesn't need input from a controller
+        scope: {},
+        link: function (scope, element, attrs) {
+            const storageKey = 'myDynamicTableColumnWidths';
+
+            // --- STATE MANAGEMENT ---
+            let currentWidths = {};
+            let originalWidths = {};
+            let hasCapturedOriginals = false;
+
+            // --- CONFIGURATION ---
+            const defaultWidths = {
+                1: 300, // Particulars
+                3: 150, // Description
+                5: 150, // Sales Ledger
+                7: 150, // Godown
+            };
+
+            // --- CORE FUNCTIONS (Unchanged) ---
+            function captureOriginalWidths() {
+                if (hasCapturedOriginals) return;
+                const headers = element.find('thead tr:first > th');
+                headers.each(function (index) {
+                    originalWidths[index] = $(this).outerWidth();
+                });
+                hasCapturedOriginals = true;
+            }
+
+            function applyWidth(oneBasedColumnIndex, newWidth) {
+                const widthValue = (typeof newWidth === 'number' && newWidth > 0) ? newWidth + 'px' : '';
+                element.find(`tr > th:nth-child(${oneBasedColumnIndex})`).css('width', widthValue);
+                element.find(`tbody tr > td:nth-child(${oneBasedColumnIndex})`).css('width', widthValue);
+                element.find(`tfoot tr > td:nth-child(${oneBasedColumnIndex})`).css('width', widthValue);
+            }
+
+            function resetWidths() {
+                const allHeaders = element.find('thead tr:first > th');
+                allHeaders.each(function (index) {
+                    if (defaultWidths.hasOwnProperty(index)) {
+                        applyWidth(index + 1, defaultWidths[index]);
+                    } else if (currentWidths.hasOwnProperty(index) && originalWidths.hasOwnProperty(index)) {
+                        applyWidth(index + 1, originalWidths[index]);
+                    }
+                });
+                currentWidths = {};
+                $window.localStorage.removeItem(storageKey);
+                initializeResizer();
+                alert('Column layout has been reset.');
+            }
+
+            function saveWidths() {
+                $window.localStorage.setItem(storageKey, angular.toJson(currentWidths));
+                alert('Column layout has been saved!');
+            }
+
+            function initializeResizer() {
+                $(document).off('.resizer');
+                element.find('.resize-handle').remove();
+                const headers = element.find('thead tr:first > th');
+                for (const index in currentWidths) {
+                    if (currentWidths.hasOwnProperty(index)) {
+                        applyWidth(parseInt(index, 10) + 1, currentWidths[index]);
+                    }
+                }
+                headers.filter(':visible:not(:last-child)').each(function () {
+                    const $header = $(this);
+                    /*$header.css('position', 'relative');*/
+                    const $handle = $('<div class="resize-handle"></div>').css({
+                        position: 'absolute', right: 0, top: 0, height: '100%',
+                        width: '5px', cursor: 'col-resize', zIndex: 10
+                    });
+                    $header.append($handle);
+                    $handle.on('mousedown', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const $currentColumn = $(this).parent();
+                        const columnIndex = headers.index($currentColumn);
+                        const startX = e.pageX;
+                        const startWidth = $currentColumn.outerWidth();
+                        $(document).on('mousemove.resizer', function (e) {
+                            const newWidth = startWidth + (e.pageX - startX);
+                            if (newWidth > 40) {
+                                applyWidth(columnIndex + 1, newWidth);
+                            }
+                        });
+                        $(document).on('mouseup.resizer', function (e) {
+                            $(document).off('.resizer');
+                            const finalWidth = $currentColumn.outerWidth();
+                            currentWidths[columnIndex] = finalWidth;
+                        });
+                    });
+                });
+            }
+
+            // --- WATCHERS & INITIALIZATION ---
+
+            function loadAndInitialize() {
+                const fromStorage = $window.localStorage.getItem(storageKey);
+                currentWidths = fromStorage ? angular.fromJson(fromStorage) : {};
+                $timeout(() => {
+                    captureOriginalWidths();
+                    initializeResizer();
+                });
+            }
+
+            // Watch for ng-hide/ng-repeat changes
+            scope.$watch(() => element.find('thead th:visible').length, (newValue, oldValue) => {
+                if (newValue > 0 && newValue !== oldValue) {
+                    loadAndInitialize();
+                }
+            });
+
+            // ** NEW: INTERNAL EVENT HANDLING **
+            // Find the action dropdown within the table and handle its change event.
+            const $actionDropdown = element.find('#table-action-select');
+            $actionDropdown.on('change', function () {
+                const selectedAction = $(this).val();
+
+                if (selectedAction === 'save') {
+                    saveWidths();
+                } else if (selectedAction === 'reset') {
+                    resetWidths();
+                }
+
+                // Reset the dropdown to the placeholder text
+                $(this).val('');
+            });
+
+            // Initial run
+            loadAndInitialize();
+        }
+    };
+});
+
+
+angular.element(document).ready(function () {
+    const $scrollContainer = $('.table-h-scrollbar-fix');
+    const $table = $('.main-table');
+    function checkScroll() {
+        const scrollLeft = $scrollContainer.scrollLeft();
+        const scrollTop = $scrollContainer.scrollTop();
+
+        const isHorizontallyOverflowing = $scrollContainer[0].scrollWidth > $scrollContainer[0].clientWidth;
+        const isVerticallyOverflowing = $scrollContainer[0].scrollHeight > $scrollContainer[0].clientHeight;
+
+        const $highlightThs = $table.find('th.highlight-on-scroll');
+        const $highlightTds = $table.find('td.highlight-on-scroll');
+
+        if (isHorizontallyOverflowing && scrollLeft > 0) {
+            $highlightThs.addClass('scrolled');
+            $highlightTds.addClass('scrolled');
+            $table.addClass('has-scroll-main');
+        } else {
+            $highlightThs.removeClass('scrolled');
+            $highlightTds.removeClass('scrolled');
+            $table.removeClass('has-scroll-main');
+        }
+
+        // Handle vertical scroll class
+        if (isVerticallyOverflowing && scrollTop > 0) {
+            $table.addClass('vertical-scroll');
+        } else {
+            $table.removeClass('vertical-scroll');
+        }
+    }
+
+    checkScroll();
+
+    $scrollContainer.on('scroll', function () {
+        checkScroll();
+    });
+
+    $(window).on('resize', function () {
+        checkScroll();
+    });
+});
 
 
 
+app.directive('jsonTable', function () {
+    return {
+        restrict: 'E',
+        scope: {
+            data: '=',
+            tableid: "@",
+        },
+        link: function (scope, element) {
 
+            // Set the table id manually on the DOM
+            var table = element.find('table')[0];
+            table.id = scope.tableid;
+
+        },
+        template: `
+            <table class="table table-bordered table-striped text-nowrap">
+                <thead>
+                    <tr>
+                        <th ng-repeat="(key, value) in data[0]">
+                            {{ key | uppercase }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="row in data">
+                        <td ng-repeat="(key, value) in row">
+                            {{ value }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        `
+    };
+});

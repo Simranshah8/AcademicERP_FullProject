@@ -215,7 +215,8 @@
         if ($scope.UseSSL && $scope.UseSSL == true)
             url = 'WSS';
 
-        var websocket = new WebSocketEx(url+'://202.51.3.113:'+$scope.DevicePort, '', function ()
+		//var websocket = new WebSocketEx(url+'://202.51.3.113:'+$scope.DevicePort, '', function ()
+		var websocket = new WebSocketEx(url + '://192.168.100.69:' + $scope.DevicePort, '', function ()
         {
             //messageBoard.append('* Connection open<br/>');
             ws = websocket;
@@ -554,7 +555,7 @@
 			}
 
 
-			$scope.DeviceList.forEach(function (dv) {
+			$scope.AddDeviceList.forEach(function (dv) {
 				var companyId = dv.DeviceCompanyId;
 				if (dv.IsSelected == true) {
 

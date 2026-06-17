@@ -634,41 +634,20 @@ app.controller('ExamSetupController', function ($scope, $http, $timeout, $filter
 
 	}
 
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newExamSetup.ExamDateDet || !$scope.newExamSetup.ResultDateDet ||
-			!$scope.newExamSetup.ExamDateDet.dateAD || !$scope.newExamSetup.ResultDateDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.ExamDate_TMP = new Date();
+				obj.ResultDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-		var fromDate = $filter('date')(new Date($scope.newExamSetup.ExamDateDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newExamSetup.ResultDateDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'ExamDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Start Date cannot be After Result Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newExamSetup.ExamDate_TMP = new Date();
-						$scope.newExamSetup.ExamDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'ResultDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Result Date cannot be Before Start Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newExamSetup.ResultDate_TMP = new Date();
-						$scope.newExamSetup.ResultDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
 	};
+
+
 });

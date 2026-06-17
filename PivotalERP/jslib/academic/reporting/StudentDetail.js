@@ -334,12 +334,12 @@
             Swal.fire('Failed' + reason);
         });
 
-       /* $scope.ClassSectionList = [];
+        $scope.ClassSectionList = [];
         GlobalServices.getClassSectionList().then(function (res) {
             $scope.ClassSectionList = res.data.Data;
         }, function (reason) {
             Swal.fire('Failed' + reason);
-        });*/
+        });
 
         $scope.AcademicYearList = [];
         GlobalServices.getAcademicYearList().then(function (res) {
@@ -680,12 +680,12 @@
         // End
 
        //For LEAVE ENTRY Start
-       /* $scope.AcademicYearList = {};
+        $scope.AcademicYearList = {};
         GlobalServices.getAcademicYearList().then(function (res) {
             $scope.AcademicYearList = res.data.Data;
         }, function (reason) {
             Swal.fire('Failed' + reason);
-        });*/
+        });
         $scope.LeaveDurationList = [
             { id: 1, text: 'Full Day' },
             { id: 2, text: 'Half Day' },
@@ -1520,14 +1520,14 @@
 
     };
 
-  /*  $scope.LoadClassSectionList = function () {
+    $scope.LoadClassSectionList = function () {
         $scope.ClassSection = {};
         GlobalServices.getClassSectionList().then(function (res) {
             $scope.ClassSection = res.data.Data;
         }, function (reason) {
             Swal.fire('Failed' + reason);
         });
-    }*/
+    }
 
     $scope.GetStudentForSibling = function (sb, ind) {
         $timeout(function () {

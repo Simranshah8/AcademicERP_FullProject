@@ -45,11 +45,20 @@ namespace AcademicLib.BL.Transport.Creation
         {
             return db.getPickupPoint(_UserId);
         }
-        public AcademicLib.RE.Transport.MSGForPickupPointCollections getPickUpMSG(string pointIdColl,int msgFor, string nextPointIdColl, string pastPointIdColl)
+        public AcademicLib.RE.Transport.MSGForPickupPointCollections getPickUpMSG(string pointIdColl, int msgFor, string nextPointIdColl, string pastPointIdColl)
         {
-            return db.getPickUpMSG(_UserId, pointIdColl,msgFor, nextPointIdColl, pastPointIdColl);
+            return db.getPickUpMSG(_UserId, pointIdColl, msgFor, nextPointIdColl, pastPointIdColl);
         }
-            public ResponeValues IsValidData(ref BE.Transport.Creation.TransportPoint beData, bool IsModify)
+        public ResponeValues UpdateTransportPoint(int AcademicYearId, int PointId, double InRate, double OutRate, double BothRate)
+        {
+            return db.UpdateTransportPoint(_UserId, AcademicYearId, PointId, InRate, OutRate, BothRate);
+        }
+        public ResponeValues CurTransportRate(int EntityId, int AcademicYearId)
+        {
+            return db.CurTransportRate(_UserId, EntityId, AcademicYearId);
+        }
+
+        public ResponeValues IsValidData(ref BE.Transport.Creation.TransportPoint beData, bool IsModify)
         {
             ResponeValues resVal = new ResponeValues();
             try
@@ -73,13 +82,14 @@ namespace AcademicLib.BL.Transport.Creation
                 else if (string.IsNullOrEmpty(beData.Name))
                 {
                     resVal.ResponseMSG = "Please ! Select Logo";
-                }else if(beData.RouteIdColl==null || beData.RouteIdColl.Count == 0)
+                }
+                else if (beData.RouteIdColl == null || beData.RouteIdColl.Count == 0)
                 {
                     resVal.ResponseMSG = "Please ! Select Valid Route Name";
                 }
                 else
                 {
-                    
+
                     resVal.IsSuccess = true;
                     resVal.ResponseMSG = "Valid";
                 }

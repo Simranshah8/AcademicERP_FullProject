@@ -736,5 +736,39 @@ namespace PivotalERP.Areas.Hostel.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        public JsonNetResult UpdateRoom(int RoomId, double RoomFee)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new AcademicLib.BL.Hostel.Room(User.UserId, User.HostName, User.DBName).UpdateRoom(0, RoomId, RoomFee);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult CurHostelRoomFee()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new AcademicLib.BL.Hostel.Room(User.UserId, User.HostName, User.DBName).CurHostelRoomFee(0, this.AcademicYearId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
     }
 }

@@ -203,8 +203,8 @@ app.controller('EnquiryController', function ($scope, $http, $timeout, $filter, 
 				//{ name: "CA_LocalLevel", displayName: "TA_LocalLevel", minWidth: 140, headerCellClass: 'headerAligment' },
 				//{ name: "CA_WardNo", displayName: "TA_WardNo", minWidth: 140, headerCellClass: 'headerAligment' },
 				//{ name: "CA_StreetName", displayName: "TA_StreetName", minWidth: 140, headerCellClass: 'headerAligment' },
-				//{ name: "PreviousSchool", displayName: "PreviousSchool", minWidth: 140, headerCellClass: 'headerAligment' },
-				//{ name: "PreviousSchoolAddress", displayName: "PreviousSchoolAddress", minWidth: 140, headerCellClass: 'headerAligment' },
+				{ name: "PreviousSchool", displayName: "PreviousSchool", minWidth: 140, headerCellClass: 'headerAligment' },
+				{ name: "PreviousSchoolAddress", displayName: "PreviousSchoolAddress", minWidth: 140, headerCellClass: 'headerAligment' },
 				{ name: "PreviousClassGpa", displayName: "Previous GPA", minWidth: 140, headerCellClass: 'headerAligment' },
 				//{ name: "OptionalFirst", displayName: "OptionalFirst", minWidth: 140, headerCellClass: 'headerAligment' },
 				//{ name: "OptionalSecond", displayName: "OptionalSecond", minWidth: 140, headerCellClass: 'headerAligment' },
@@ -245,6 +245,7 @@ app.controller('EnquiryController', function ($scope, $http, $timeout, $filter, 
 				//Added By Suresh on 27 KArtik for Sunway
 
 				{ name: "Qualification", displayName: "Qualification", minWidth: 150, headerCellClass: 'headerAligment' },
+
 			],
 			//   rowTemplate: rowTemplate(),
 			exporterCsvFilename: 'enqSummary.csv',
@@ -2508,44 +2509,19 @@ app.controller('EnquiryController', function ($scope, $http, $timeout, $filter, 
 		});
 	};
 
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newEnquiry.FromDateDet || !$scope.newEnquiry.ToDateDet ||
-			!$scope.newEnquiry.FromDateDet.dateAD || !$scope.newEnquiry.ToDateDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-		var fromDate = $filter('date')(new Date($scope.newEnquiry.FromDateDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newEnquiry.ToDateDet.dateAD), 'yyyy-MM-dd')
-
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be greater than To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newEnquiry.FromDate_TMP = new Date();
-						$scope.newEnquiry.FromDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be less than From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newEnquiry.ToDate_TMP = new Date();
-						$scope.newEnquiry.ToDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
-
 	};
 
 });

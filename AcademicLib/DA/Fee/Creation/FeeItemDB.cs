@@ -82,10 +82,10 @@ namespace AcademicLib.DA.Fee.Creation
                 if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
                     resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
 
-                if (resVal.IsSuccess && resVal.RId > 0 && beData.MonthIdColl != null && beData.MonthIdColl.Count > 0)
+                if(resVal.IsSuccess && resVal.RId > 0 && beData.MonthIdColl!=null && beData.MonthIdColl.Count>0)
                 {
                     cmd.CommandType = System.Data.CommandType.Text;
-                    foreach (var m in beData.MonthIdColl)
+                    foreach(var m in beData.MonthIdColl)
                     {
                         cmd.Parameters.Clear();
                         cmd.Parameters.AddWithValue("@FeeItemId", resVal.RId);
@@ -190,7 +190,7 @@ namespace AcademicLib.DA.Fee.Creation
                     if (!(reader[5] is DBNull)) beData.LedgerId = reader.GetInt32(5);
                     if (!(reader[6] is DBNull)) beData.ProductId = reader.GetInt32(6);
                     if (!(reader[7] is DBNull)) beData.ApplyTax = reader.GetBoolean(7);
-                    if (!(reader[8] is DBNull)) beData.TaxRate = Convert.ToDouble(reader[8]);
+                    if (!(reader[8] is DBNull)) beData.TaxRate =Convert.ToDouble(reader[8]);
                     if (!(reader[9] is DBNull)) beData.OrderNo = reader.GetInt32(9);
                     if (!(reader[10] is DBNull)) beData.OneTimeApplicable = reader.GetBoolean(10);
                     if (!(reader[11] is DBNull)) beData.OnlyForNewStudent = reader.GetBoolean(11);
@@ -262,46 +262,10 @@ namespace AcademicLib.DA.Fee.Creation
                     resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
 
             }
-            catch (System.Data.ConstraintException ee)
+            catch(System.Data.ConstraintException ee)
             {
                 resVal.IsSuccess = false;
                 resVal.ResponseMSG = "Can not delete . Already in used.";
-            }
-            catch (System.Data.SqlClient.SqlException ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            finally
-            {
-                dal.CloseConnection();
-            }
-            return resVal;
-        }
-
-        public ResponeValues GetFeeItemAutoOrderNo(int UserId, int EntityId)
-        {
-            ResponeValues resVal = new ResponeValues();
-            dal.OpenConnection();
-            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@UserId", UserId);
-            cmd.Parameters.AddWithValue("@EntityId", EntityId);
-            cmd.Parameters.Add("@OrderNo", System.Data.SqlDbType.Int);
-            cmd.CommandText = "usp_FeeItemAutoOrderNo";
-            cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
-            try
-            {
-                cmd.ExecuteNonQuery();
-                if (!(cmd.Parameters[2].Value is DBNull))
-                    resVal.RId = Convert.ToInt32(cmd.Parameters[2].Value);
-                resVal.IsSuccess = true;
-                resVal.ResponseMSG = GLOBALMSG.SUCCESS;
             }
             catch (System.Data.SqlClient.SqlException ee)
             {

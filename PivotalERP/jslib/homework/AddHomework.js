@@ -120,12 +120,12 @@
 		});
 
 		//student list
-		$scope.ClassListsection = [];
-		glbS.getClassSectionList().then(function (res) {
-			$scope.ClassListsection = res.data.Data;
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
+		//$scope.ClassListsection = [];
+		//glbS.getClassSectionList().then(function (res) {
+		//	$scope.ClassListsection = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
 
 		//$scope.SubjectList = [];
 		//$http({
@@ -242,6 +242,7 @@
 
 		$scope.newAddHomework = {
 			DeadlineDate_TMP: new Date(),
+			DeadlineforRedo_TMP: new Date(),
 			HomeworkId: null,
 			TeacherId: null,
 			ClassId: null,
@@ -506,6 +507,8 @@
 			AttachmentColl: [],
 			SectionListName: '',
 			SubjectName: '',
+			DeadlineDate_TMP: new Date(),
+			DeadlineforRedo_TMP: new Date(),
 			Mode: 'Save'
 		};
 
@@ -1379,80 +1382,19 @@
 	};
 
 
-	$scope.validateDates1 = function (changedField) {
-		if (!$scope.newFilter.FromDateDet || !$scope.newFilter.ToDateDet ||
-			!$scope.newFilter.FromDateDet.dateAD || !$scope.newFilter.ToDateDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-		var fromDate = $filter('date')(new Date($scope.newFilter.FromDateDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newFilter.ToDateDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be After To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newFilter.FromDate_TMP = new Date();
-						$scope.newFilter.FromDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be Before From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newFilter.ToDate_TMP = new Date();
-						$scope.newFilter.ToDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
 	};
 
-	$scope.validateDates2 = function (changedField) {
-		if (!$scope.newAddHomework.DeadlineDateDet || !$scope.newAddHomework.DeadlineforRedoDet ||
-			!$scope.newAddHomework.DeadlineDateDet.dateAD || !$scope.newAddHomework.DeadlineforRedoDet.dateAD) {
-			return true;
-		}
-		var fromDate = $filter('date')(new Date($scope.newAddHomework.DeadlineDateDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newAddHomework.DeadlineforRedoDet.dateAD), 'yyyy-MM-dd')
-
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'DeadlineDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Deadline Date cannot be After Deadline for Redo Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newAddHomework.DeadlineDate_TMP = new Date();
-						$scope.newAddHomework.DeadlineDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'DeadlineforRedo') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Deadline for Redo Date cannot be Before Deadline Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newAddHomework.DeadlineforRedo_TMP = new Date();
-						$scope.newAddHomework.DeadlineforRedoDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
-	};
 });

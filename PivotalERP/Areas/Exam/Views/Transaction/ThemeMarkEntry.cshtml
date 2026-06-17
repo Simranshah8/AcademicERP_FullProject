@@ -1,0 +1,151 @@
+﻿
+<script src="~/jslib/exam/transaction/ThemeMarkEntry.js"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="ThemeMarkEntryController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here" style="padding-top: 45px !important;">
+                <div class="row">
+                    <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                        <div class="form-group mb-1">
+                            <label>Batch</label>
+                            <select class="form-control form-control-sm select2" ng-model="beData.BatchId" style="width:100%">
+                                <option ng-value="0">**Select Batch**</option>
+                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==beData.BatchId">{{cl.text}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mb-1">
+                            <label>Class/Sec</label>
+                            <select class="form-control form-control-sm select2" ng-model="beData.SelectedClass" ng-change="GetClassWiseSubMap()">
+                                <option ng-value="0">**Select Class**</option>
+                                <option ng-repeat="cl in ClassList.SectionListWithClass" ng-value="cl">{{cl.text}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2" ng-show="beData.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                        <div class="form-group mb-1">
+                            <label>Class Year</label>
+                            <select class="form-control form-control-sm select2" ng-model="beData.ClassYearId" ng-change="GetClassWiseSubMap()" style="width:100%">
+                                <option ng-value="0">**Select Year**</option>
+                                <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==beData.ClassYearId">{{cl.text}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2" ng-show="beData.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                        <div class="form-group mb-1">
+                            <label>Semester</label>
+                            <select class="form-control form-control-sm select2" ng-model="beData.SemesterId" ng-change="GetClassWiseSubMap()" style="width:100%">
+                                <option ng-value="0">**Select Semester**</option>
+                                <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==beData.SemesterId">{{cl.text}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mb-1">
+                            <label>Subject</label>
+                            <select name="class-group" id="" form="" class="form-control form-control-sm select2" ng-model="beData.SubjectId" ng-change="GetSubjectLessonWise()">
+                                <option ng-value="s.SubjectId" ng-repeat="s in beData.SubjectList">{{s.Name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mb-1">
+                            <label>Lesson/Theme</label>
+                            <select class="form-control form-control-sm select2" ng-model="beData.SelectLesson" ng-change="GetThemeWiseMarkEntry()">
+                                <option ng-value="cl" ng-repeat="cl in SubjectLessonWiseList">{{cl.LessonName}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group mb-1">
+                            <label>Assessment Type</label>
+                            <select class="form-control form-control-sm select2" ng-model="beData.AssessmentTypeId" ng-change="GetThemeWiseMarkEntry()">
+                                <option ng-value="cl.AssessmentTypeId" ng-repeat="cl in AssessmentList" ng-selected="cl.AssessmentTypeId==beData.AssessmentTypeId">{{cl.Name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mb-1">
+                            <label for="">Assessment Date</label>
+                            <input type="text" class="form-control form-control-sm" date-picker ng-model="beData.AssessmentDate_TMP" date-detail="beData.AssessmentDateDet">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mb-1">
+                            <label>Copy From Assestment</label>
+                            <select class="form-control form-control-sm select2" ng-model="beData.CFAssessmentTypeId" ng-change="GetThemeWiseMarkEntry()" ng-disabled="isCopyDisabled()">
+                                <option ng-value="cl.AssessmentTypeId" ng-if="cl.AssessmentTypeId != beData.AssessmentTypeId" ng-repeat="cl in AssessmentList" ng-selected="cl.AssessmentTypeId==newFilter.CFAssessmentTypeId">{{cl.Name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mb-1">
+                            <label>No. of Learning Achievement</label>
+                            <input type="number" class="form-control form-control-sm" ng-model="beData.AchievementNo" ng-change="ChangeFullMarks()">
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-group mb-1">
+                            <label>Full Marks</label>
+                            <label class="form-control form-control-sm" style="background-color: #f5f5f9 !important;">{{beData.FullMarks}}</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 mt-4">
+                        <div class="input-group input-group-sm table-search-filed">
+                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.ThemeWiseME" />
+                            <div class="input-group-append">
+                                <button class="btn btn-default border-left-0" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mt-4">
+                        <div class="form-group mb-1 float-right">
+                            <button type="button" class="btn btn-sm btn-danger btn-sm px-1" style="width:60px" ng-click="DelThemeMarkEntry()">Delete</button>
+                            <button type="button" class="btn btn-sm btn-default btn-sm px-1" style="width:60px" ng-click="ClearBEData()">Reset</button>
+                            <button type="button" class="btn btn-sm btn-success btn-sm px-1" style="width:60px" ng-click="SaveThemeWiseME()">Save</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-2">
+                    <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:calc(100vh - 11rem)">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px">Regd.No</th>
+                                    <th style="width: 112px">Section/RollNo</th>
+                                    <th style="width: 200px">Student Name</th>
+                                    <th style="width: 80px">Obtain Marks</th>
+                                    <th style="width: 150px">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="Ic in ThemeStudentsDetailsList | filter: searchData.ThemeWiseME">
+                                    <td>{{Ic.RegdNo}}</td>
+                                    <td>
+                                        <label title="Section">{{Ic.SectionName}}</label>
+                                        <label ng-if="Ic.SectionName && Ic.RollNo">/</label>
+                                        <label title="Roll No.">{{Ic.RollNo}}</label>
+                                    </td>
+                                    <td>{{Ic.StudentName}}</td>
+                                    <td class="text-center">
+                                        <input type="number" class="form-control form-control-sm" ng-model="Ic.ObtainMarks" ng-change="CheckObtainMarks(Ic)" ng-paste="PastePayData('ObtainMarks',$index)" onpaste="return false"/>
+                                    </td>
+                                    <td><textarea class="form-control form-control-sm" rows="1" ng-model="Ic.Remarks"></textarea></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+            </section>
+        </div>
+    </section>
+</div>
+
+

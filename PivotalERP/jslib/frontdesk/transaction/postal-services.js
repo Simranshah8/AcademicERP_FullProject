@@ -26,8 +26,8 @@
 		};
 
 		$scope.newReceivedSearch = {
-			DateFrom_TMP: new Date(),
-			DateTo_TMP:new Date(),
+			FromDate_TMP: new Date(),
+			ToDate_TMP:new Date(),
 		}
 		$scope.newDispatchSearch = {
 			DateFrom_TMP: new Date(),
@@ -67,6 +67,8 @@
 			dateFrom: '',
 			dateTo: '',
 			Date_TMP: new Date(),
+			DateFrom_TMP: new Date(),
+			DateTo_TMP: new Date(),
 			AttachmentColl: [],
 			Mode: 'Save'
 		};
@@ -792,80 +794,20 @@
 
 	};
 
-	$scope.validateDatesRcv = function (changedField) {
-		if (!$scope.newReceivedSearch.DateFromDet || !$scope.newReceivedSearch.DateToDet ||
-			!$scope.newReceivedSearch.DateFromDet.dateAD || !$scope.newReceivedSearch.DateToDet.dateAD) {
-			return true;
-		}
-		var fromDate = $filter('date')(new Date($scope.newReceivedSearch.DateFromDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newReceivedSearch.DateToDet.dateAD), 'yyyy-MM-dd')
-		
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be greater than To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newReceivedSearch.DateFrom_TMP = new Date();
-						$scope.newReceivedSearch.DateFromDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be less than From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newReceivedSearch.DateTo_TMP = new Date();
-						$scope.newReceivedSearch.DateToDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
 
-		return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
 	};
 
-	$scope.validateDatesDispatch = function (changedField) {
-		if (!$scope.newDispatch.FromDateDet || !$scope.newDispatch.ToDateDet ||
-			!$scope.newDispatch.FromDateDet.dateAD || !$scope.newDispatch.ToDateDet.dateAD) {
-			return true;
-		}
-		var fromDate = $filter('date')(new Date($scope.newDispatch.FromDateDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newDispatch.ToDateDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be greater than To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newDispatch.dateFrom = new Date();
-						$scope.newDispatch.FromDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be less than From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newDispatch.dateTo = new Date();
-						$scope.newDispatch.ToDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
-	};
 });

@@ -38,10 +38,6 @@ namespace AcademicLib.BL.HomeWork
         {
             return db.DeleteById(_UserId, EntityId, AssignmentTypeId);
         }
-        public ResponeValues GetAssTypeAutoOrderNo(int EntityId)
-        {
-            return db.GetAssTypeAutoOrderNo(_UserId, EntityId);
-        }
         public ResponeValues IsValidData(ref BE.HomeWork.AssignmentType beData, bool IsModify)
         {
             ResponeValues resVal = new ResponeValues();

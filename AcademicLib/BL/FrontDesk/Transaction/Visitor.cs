@@ -51,10 +51,21 @@ namespace AcademicLib.BL.FrontDesk.Transaction
                     resVal.ResponseMSG = GLOBALMSG.NO_DATA_FOUND;
                 }
 
-                var vEmail = base.IsValidEmail(beData.Email);
-                if (vEmail.IsSuccess == false)
+                //var vEmail = base.IsValidEmail(beData.Email);
+                //if (vEmail.IsSuccess == false)
+                //{
+                //    return vEmail;
+                //}
+
+                if (!string.IsNullOrWhiteSpace(beData.Email))
                 {
-                    return vEmail;
+                    var fEmail = base.IsValidEmail(beData.Email);
+                    if (!fEmail.IsSuccess)
+                    {
+                        resVal.IsSuccess = false;
+                        resVal.ResponseMSG = "Please enter valid Email";
+                        return resVal;
+                    }
                 }
 
                 var vMobile = base.IsValidContactNo(beData.Contact);

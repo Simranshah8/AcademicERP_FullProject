@@ -25,6 +25,58 @@
 			Swal.fire('Failed' + reason);
 		});		
 
+		$scope.AcademicConfig = {};
+		GlobalServices.getAcademicConfig().then(function (res1) {
+			$scope.AcademicConfig = res1.data.Data;
+			if ($scope.AcademicConfig.ActiveFaculty == true) {
+				$scope.FacultyList = [];
+				GlobalServices.getFacultyList().then(function (res) {
+					$scope.FacultyList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+
+			if ($scope.AcademicConfig.ActiveLevel == true) {
+				$scope.LevelList = [];
+				GlobalServices.getClassLevelList().then(function (res) {
+					$scope.LevelList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+
+			if ($scope.AcademicConfig.ActiveSemester == true) {
+				$scope.SelectedClassSemesterList = [];
+				$scope.SemesterList = [];
+				GlobalServices.getSemesterList().then(function (res) {
+					$scope.SemesterList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+
+			if ($scope.AcademicConfig.ActiveBatch == true) {
+				$scope.BatchList = [];
+				GlobalServices.getBatchList().then(function (res) {
+					$scope.BatchList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+
+			if ($scope.AcademicConfig.ActiveClassYear == true) {
+				$scope.ClassYearList = [];
+				$scope.SelectedClassClassYearList = [];
+				GlobalServices.getClassYearList().then(function (res) {
+					$scope.ClassYearList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
 
 		$scope.newIndicator = {
 			IndicatorId: null,
@@ -74,68 +126,90 @@
 		}
 	};
 
+	$scope.$watch('newIndicator.SelectedClass', function (newVal, oldVal) {
+		if (newVal && newVal !== oldVal) {
+			$scope.newIndicator.ClassYearId = null;
+			$scope.newIndicator.SemesterId = null;
+		}
+	});
+	$scope.$watch('newDet.SelectedClass', function (newVal, oldVal) {
+		if (newVal && newVal !== oldVal) {
+			$scope.newDet.ClassYearId = null;
+			$scope.newDet.SemesterId = null;
+		}
+	});
+	$scope.$watch('newSummary.SelectedClass', function (newVal, oldVal) {
+		if (newVal && newVal !== oldVal) {
+			$scope.newSummary.ClassYearId = null;
+			$scope.newSummary.SemesterId = null;
+		}
+	});
 	//************************* Indicator *********************************
-	$scope.GetClassWiseSubjectList = function (classId) {
-		$scope.SubjectListAdd = [];		
-		var para = {
-			ClassId: classId
-		};
+    $scope.GetClassWiseSubjectList = function (resVal) {
+        $scope.SubjectListAdd = [];
+        var para = {
+            ClassId: resVal.SelectedClass.ClassId,
+            BatchId: resVal.BatchId || null,
+            ClassYearId: resVal.ClassYearId || null,
+            SemesterId: resVal.SemesterId || null,
+        };
+        $http({
+            method: 'POST',
+            url: base_url + "Academic/Creation/GetSubjectListForLessonPlan",
+            dataType: "json",
+            data: JSON.stringify(para)
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.SubjectListAdd = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+    }
 
-		if (classId > 0) {
-			$http({
-				method: 'POST',
-				url: base_url + "Academic/Creation/GetSubjectListForLessonPlan",
-				dataType: "json",
-				data: JSON.stringify(para)
-			}).then(function (res) {
-				hidePleaseWait();
-				$scope.loadingstatus = "stop";
-				if (res.data.IsSuccess && res.data.Data) {
-					$scope.SubjectListAdd = res.data.Data;
-				} else {
-					Swal.fire(res.data.ResponseMSG);
-				}
-			}, function (reason) {
-				Swal.fire('Failed' + reason);
-			});
-		}
+    $scope.GetClassWiseSubjectListRpt = function (resVal, be) {
+        var para = {
+            ClassId: resVal.SelectedClass.ClassId,
+            BatchId: resVal.BatchId || null,
+            ClassYearId: resVal.ClassYearId || null,
+            SemesterId: resVal.SemesterId || null,
+        };
+        $http({
+            method: 'POST',
+            url: base_url + "Academic/Creation/GetSubjectListForLessonPlan",
+            dataType: "json",
+            data: JSON.stringify(para)
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                if (be == 1) {
+                    $scope.SubjectListForRpt = [];
+                    $scope.SubjectListForRpt = res.data.Data;
+                } else {
+                    $scope.SubjectListRpt = [];
+                    $scope.SubjectListRpt = res.data.Data;
+                }
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
 
-	}
-
-	$scope.GetClassWiseSubjectListRpt = function (classId) {
-		$scope.SubjectListRpt = [];
-		var para = {
-			ClassId: classId
-		};
-		if (classId > 0) {
-			$http({
-				method: 'POST',
-				url: base_url + "Academic/Creation/GetSubjectListForLessonPlan",
-				dataType: "json",
-				data: JSON.stringify(para)
-			}).then(function (res) {
-				hidePleaseWait();
-				$scope.loadingstatus = "stop";
-				if (res.data.IsSuccess && res.data.Data) {
-					$scope.SubjectListRpt = res.data.Data;
-				} else {
-					Swal.fire(res.data.ResponseMSG);
-				}
-
-			}, function (reason) {
-				Swal.fire('Failed' + reason);
-			});
-		}
-
-	}
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+    }
 
 	$scope.GetTopicWiseIndicator = function () {
 		$scope.newIndicator.IndicatorDetailsColl = [];
-		if ($scope.newIndicator.LessonId != null && !$scope.newIndicator.TopicName == "") {
+		if ($scope.newIndicator.SelectLesson.LessonSno != null && !$scope.newIndicator.TopicName == "") {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 			var para = {
-				LessonId: $scope.newIndicator.LessonId,
+				LessonId: $scope.newIndicator.SelectLesson.LessonId,
 				TopicName: $scope.newIndicator.TopicName,
 			};
 			$http({
@@ -201,7 +275,7 @@
 		$scope.newIndicator.IndicatorDetailsColl.forEach((item, index) => {
 			item.SNo = index + 1;
 		});
-
+		$scope.newIndicator.LessonSno = $scope.newIndicator.SelectLesson.LessonSno;
 
 		$scope.loadingstatus = "running";
 		showPleaseWait();
@@ -242,12 +316,15 @@
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 		$scope.IndicatorList = [];
-		if ($scope.newDet.ClassId != null && !$scope.newDet.SubjectId != null) {
+		if ($scope.newDet.SelectedClass.ClassId != null && !$scope.newDet.SubjectId != null) {
 			var para = {
-				ClassId: $scope.newDet.ClassId,
+				ClassId: $scope.newDet.SelectedClass.ClassId,
 				SubjectId: $scope.newDet.SubjectId,
-				LessonId: $scope.newDet.LessonId,
+				LessonId: $scope.newDet.SelectLesson.LessonId,
 				TopicName: $scope.newDet.TopicName,
+				BatchId: $scope.newDet.BatchId || null,
+				ClassYearId: $scope.newDet.ClassYearId || null,
+				SemesterId: $scope.newDet.SemesterId || null,
 			};
 			$http({
 				method: 'POST',
@@ -302,15 +379,13 @@
         }
 
 	}
-
-	
-
+		
 	$scope.GetSubjectLessonWise = function () {
-		if ($scope.newIndicator.ClassId && $scope.newIndicator.SubjectId>0) {
+		if ($scope.newIndicator.SelectedClass.ClassId && $scope.newIndicator.SubjectId>0) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 			var para = {
-				ClassId: $scope.newIndicator.ClassId,
+				ClassId: $scope.newIndicator.SelectedClass.ClassId,
 				SubjectId: $scope.newIndicator.SubjectId
 			};
 			$scope.SubjectLessonWiseList = [];
@@ -325,7 +400,6 @@
 				$scope.loadingstatus = "stop";
 				if (res.data.IsSuccess && res.data.Data) {
 					$scope.SubjectLessonWiseList = res.data.Data;
-
 				} else {
 					Swal.fire(res.data.ResponseMSG);
 				}
@@ -335,13 +409,12 @@
 		}
 	}
 
-
 	$scope.GetLessonTopicDetailsWise = function () {
-		if ($scope.newIndicator.LessonId) {
+		if ($scope.newIndicator.SelectLesson) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 			var para = {
-				LessonId: $scope.newIndicator.LessonId
+				LessonId: $scope.newIndicator.SelectLesson.LessonId
 			};
 			$scope.LessonTopicDetailsWiseList = [];
 
@@ -367,11 +440,11 @@
 	}
 	
 	$scope.GetRSubjectLessonWise = function () {
-		if ($scope.newDet.ClassId && $scope.newDet.SubjectId > 0) {
+		if ($scope.newDet.SelectedClass.ClassId && $scope.newDet.SubjectId > 0) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 			var para = {
-				ClassId: $scope.newDet.ClassId,
+				ClassId: $scope.newDet.SelectedClass.ClassId,
 				SubjectId: $scope.newDet.SubjectId
 			};
 			$scope.RSubjectLessonWiseList = [];
@@ -395,13 +468,12 @@
 		}
 	}
 
-
 	$scope.GetRLessonTopicDetailsWise = function () {
-		if ($scope.newDet.LessonId) {
+		if ($scope.newDet.SelectLesson.LessonId) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 			var para = {
-				LessonId: $scope.newDet.LessonId
+				LessonId: $scope.newDet.SelectLesson.LessonId
 			};
 			$scope.RLessonTopicDetailsWiseList = [];
 
@@ -426,14 +498,16 @@
 		}
 	}
 
-
 	$scope.GetIndicatorSummary = function () {
-		if ($scope.newSummary.ClassId) {
+		if ($scope.newSummary.SelectedClass.ClassId) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 			var para = {
-				ClassId: $scope.newSummary.ClassId,
-				SubjectId: $scope.newSummary.SubjectId
+				ClassId: $scope.newSummary.SelectedClass.ClassId,
+				SubjectId: $scope.newSummary.SubjectId,
+				BatchId: $scope.newSummary.BatchId || null,
+				ClassYearId: $scope.newSummary.ClassYearId || null,
+				SemesterId: $scope.newSummary.SemesterId || null,
 			};
 			$scope.IndicatorTotalSummaryList = {};
 			$http({
@@ -455,7 +529,6 @@
 			});
 		}
 	}
-
 
 	$scope.pageChangeHandler = function (num) {
 		console.log('page changed to ' + num);

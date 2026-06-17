@@ -37,9 +37,17 @@ namespace AcademicLib.BL.Hostel
         {
             return db.getAllRoomForMapping(_UserId);
         }
-            public ResponeValues DeleteById(int EntityId, int RoomId)
+        public ResponeValues DeleteById(int EntityId, int RoomId)
         {
             return db.DeleteById(_UserId, EntityId, RoomId);
+        }
+        public ResponeValues UpdateRoom(int EntityId, int RoomId,double RoomFee)
+        {
+            return db.UpdateRoom(_UserId, EntityId, RoomId, RoomFee);
+        }
+        public ResponeValues CurHostelRoomFee(int EntityId, int AcademicYearId)
+        {
+            return db.CurHostelRoomFee(_UserId, EntityId, AcademicYearId);
         }
         public ResponeValues IsValidData(ref AcademicLib.BE.Hostel.Room beData, bool IsModify)
         {

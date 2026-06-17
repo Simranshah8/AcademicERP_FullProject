@@ -36,10 +36,6 @@ namespace AcademicLib.BL.Fee.Creation
         {
             return db.DeleteById(_UserId, EntityId, FeeItemId);
         }
-        public ResponeValues GetFeeItemAutoOrderNo(int EntityId)
-        {
-            return db.GetFeeItemAutoOrderNo(_UserId, EntityId);
-        }
         public ResponeValues IsValidData(ref BE.Fee.Creation.FeeItem beData, bool IsModify)
         {
             ResponeValues resVal = new ResponeValues();
@@ -65,8 +61,7 @@ namespace AcademicLib.BL.Fee.Creation
                 else if (string.IsNullOrEmpty(beData.Name))
                 {
                     resVal.ResponseMSG = "Please ! Enter FeeItem Name";
-                }
-                else if (!beData.ProductId.HasValue || beData.ProductId.Value == 0)
+                }else if(!beData.ProductId.HasValue || beData.ProductId.Value == 0)
                 {
                     resVal.ResponseMSG = "Please ! Select Product Name";
                 }
@@ -78,7 +73,7 @@ namespace AcademicLib.BL.Fee.Creation
                 {
                     if (beData.IsExtraFee)
                     {
-                        if (beData.MonthIdColl != null && beData.MonthIdColl.Count > 0)
+                        if(beData.MonthIdColl!=null && beData.MonthIdColl.Count > 0)
                         {
                             resVal.ResponseMSG = "For Extra Fee Item Not Need To Mapping Month";
                             return resVal;
@@ -87,7 +82,7 @@ namespace AcademicLib.BL.Fee.Creation
 
                     if (beData.LedgerId.HasValue && beData.LedgerId.Value == 0)
                         beData.LedgerId = null;
-
+                    
                     if (beData.ProductId.HasValue && beData.ProductId.Value == 0)
                         beData.ProductId = null;
 

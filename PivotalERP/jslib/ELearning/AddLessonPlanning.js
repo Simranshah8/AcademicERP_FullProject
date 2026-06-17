@@ -799,4 +799,20 @@
 			}
 		}
 	};
+
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.PlanStartDate_TMP = new Date();
+				obj.PlanEndDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
+	};
+
 });

@@ -2,7 +2,9 @@
 	$scope.Title = 'Admin Dashboard';
 	var gSrv = GlobalServices;
 	$rootScope.ChangeLanguage();
+	//Added by Rabin
 	$scope.isInitialLoad = true;
+	//Ends
 	$scope.LoadData = function ()
 	{
 		$scope.isLoading = true;
@@ -181,10 +183,11 @@
 			}, function (reason) {
 				Swal.fire('Failed' + reason);
 			});
-
+			//Added by Rabin
 			$timeout(function () {
 				$scope.isInitialLoad = false;
-			},500);
+			}, 500);
+			//Ends
 		});
 
 
@@ -195,23 +198,23 @@
 			MonthColl: []
 		};
 
-	/*	$scope.CurDate = {};
-		$http({
-			method: 'POST',
-			url: base_url + "Global/GetDate",
-			dataType: "json"
-		}).then(function (res) {
-			$scope.CurDate = res.data.Data;
+		//$scope.CurDate = {};
+		//$http({
+		//	method: 'POST',
+		//	url: base_url + "Global/GetDate",
+		//	dataType: "json"
+		//}).then(function (res) {
+		//	$scope.CurDate = res.data.Data;
 
-			if ($rootScope.LANG == 'in') {
-				$scope.AcademicCalendar.YearId = new Date($scope.CurDate.Date_AD).getFullYear();
-			} else {
-				$scope.AcademicCalendar.YearId = $scope.CurDate.NY;
-			}
+		//	if ($rootScope.LANG == 'in') {
+		//		$scope.AcademicCalendar.YearId = new Date($scope.CurDate.Date_AD).getFullYear();
+		//	} else {
+		//		$scope.AcademicCalendar.YearId = $scope.CurDate.NY;
+		//	}
 
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});*/
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
 
 		$scope.ClassList = [];
 		gSrv.getClassSectionList().then(function (res) {
@@ -412,9 +415,11 @@
 	//Ends
 
 	$scope.ReLoadData = function () {
+		//Added by Rabin
 		if ($scope.isInitialLoad) {
 			return;
-        }
+		}
+		//Ewnds
 		$timeout(function () {
 
 			var para = {

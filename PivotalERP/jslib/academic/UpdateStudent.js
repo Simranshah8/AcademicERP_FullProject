@@ -440,12 +440,12 @@
 				$scope.loadingstatus = "running";
 				showPleaseWait();
 
-				//Added on 28 baishakh
+
 				var filteredStudents = $filter('filter')(
 					$scope.UpdateStudentList,
 					$scope.searchData.UpdateStudent
 				);
-				//Ends
+
 
 				/*angular.forEach($scope.UpdateStudentList, function (ut) {*/
 				angular.forEach(filteredStudents, function (ut) {

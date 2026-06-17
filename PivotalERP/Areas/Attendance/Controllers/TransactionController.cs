@@ -110,7 +110,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
         }
 
         #region "LeaveRequest"
-
+        
 
         [HttpPost]
         //[PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.Lea)]
@@ -139,7 +139,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
                         }
                     }
 
-                    beData.CUserId = User.UserId;
+                        beData.CUserId = User.UserId;
 
                     resVal = new AcademicLib.BL.Attendance.LeaveRequest(User.UserId, User.HostName, User.DBName).SaveFromApp(beData);
                     if (resVal.IsSuccess)
@@ -461,7 +461,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
         #region "PayHeading"
         //[PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.View, (int)FormsEntity.PayHeading)]
 
-        [HttpPost]
+        [HttpPost]        
         [PermissionsAttribute(Actions.Save, (int)ENTITIES.Payheading, false)]
         public JsonNetResult SavePayHeading()
         {
@@ -1584,7 +1584,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost]        
         public JsonNetResult SaveAllowExpenseCategory()
         {
             ResponeValues resVal = new ResponeValues();
@@ -1791,7 +1791,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
         }
 
         [PermissionsAttribute(Actions.Save, (int)ENTITIES.SalarySheet, false)]
-        public JsonNetResult SaveSalaryJV(int YearId, int MonthId)
+        public JsonNetResult SaveSalaryJV(int YearId,int MonthId)
         {
             ResponeValue resVal = new ResponeValue();
             try
@@ -2056,21 +2056,6 @@ namespace PivotalERP.Areas.Attendance.Controllers
             return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
 
-        [HttpPost]
-        public JsonNetResult GetAttendanceTypeAutoOrderNo()
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                resVal = new AcademicLib.BL.Payroll.AttendanceType(User.UserId, User.HostName, User.DBName).GetAttendanceTypeAutoOrderNo(0);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
         #endregion
         public ActionResult UnitOfWork()
         {
@@ -2305,7 +2290,7 @@ namespace PivotalERP.Areas.Attendance.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost]        
         public JsonNetResult GetPayrollConfiguration()
         {
             ResponeValues resVal = new ResponeValues();

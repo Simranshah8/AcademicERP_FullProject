@@ -230,21 +230,6 @@ namespace PivotalERP.Areas.HomeWork.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
 
-        [HttpPost]
-        public JsonNetResult GetHomeworkTypeAutoOrderNo()
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                resVal = new AcademicLib.BL.HomeWork.HomeworkType(User.UserId, User.HostName, User.DBName).GetHomeworkTypeAutoOrderNo(0);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
 
         #endregion
 
@@ -427,24 +412,10 @@ namespace PivotalERP.Areas.HomeWork.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
 
-        [HttpPost]
-        public JsonNetResult GetAssTypeAutoOrderNo()
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                resVal = new AcademicLib.BL.HomeWork.AssignmentType(User.UserId, User.HostName, User.DBName).GetAssTypeAutoOrderNo(0);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
+
         #endregion
 
-
+         
         public ActionResult HomeworkType()
         {
             return View();

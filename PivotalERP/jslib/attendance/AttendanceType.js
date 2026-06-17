@@ -142,6 +142,29 @@
 		$scope.GetAllAttendanceTypeList();
 	}
 
+	$scope.GetAutoOrderNo = function (be) {
+		var para = {
+			For: be
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetClassSetupAutoOrderNo",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				var vDet = res.data.Data;
+				if (be == 17) { //AttendanceType
+					$scope.newAttendanceType.SNO = vDet.RId;
+				}
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
+
 	function OnClickDefault() {
 		document.getElementById('form-section').style.display = "none";
 
@@ -149,7 +172,7 @@
 			document.getElementById('table-section').style.display = "none";
 			document.getElementById('form-section').style.display = "block";
 			$scope.ClearAttendanceType();
-			$scope.GetAttendanceTypeAutoOrderNo();
+			$scope.GetAutoOrderNo(17);
 		}
 		document.getElementById('backbtn').onclick = function () {
 			document.getElementById('form-section').style.display = "none";
@@ -173,7 +196,7 @@
 				IsActive: true,
 				CanEditable: true,
 				ShowInSalarySheet: true,
-				IsMonthly: true,
+				IsMonthly:true,
 				Description: '',
 				AttendanceTypeDetailsColl: [],
 				Mode: 'Save'
@@ -220,7 +243,7 @@
 		if (!$scope.newAttendanceType.UnitsOfWorkId || $scope.newAttendanceType.UnitsOfWorkId === 0) {
 			Swal.fire('Please select the Unit of Work');
 			return false;
-		}
+        }
 		return true;
 	}
 
@@ -357,24 +380,6 @@
 			}
 		});
 	};
-
-	$scope.GetAttendanceTypeAutoOrderNo = function () {
-		$http({
-			method: 'POST',
-			url: base_url + "Attendance/Transaction/GetAttendanceTypeAutoOrderNo",
-			dataType: "json",
-		}).then(function (res) {
-			if (res.data.IsSuccess && res.data.Data) {
-				var vDet = res.data.Data;
-				$scope.newAttendanceType.SNO = vDet.RId;
-			} else {
-				Swal.fire(res.data.ResponseMSG);
-			}
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
-
-	}
 
 	$scope.pageChangeHandler = function (num) {
 		console.log('page changed to ' + num);

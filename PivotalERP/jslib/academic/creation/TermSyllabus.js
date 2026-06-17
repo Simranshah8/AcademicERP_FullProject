@@ -262,14 +262,23 @@ app.controller('TermSyllabusController', function ($scope, $http, $timeout, Glob
     function OnClickDefault() {
         document.getElementById('add-Syllabus-form').style.display = "none";
         document.getElementById('preview-form').style.display = "none";
+        document.getElementById('formdetail').style.display = "none";
 
         document.getElementById('add-Syllabus').onclick = function () {
             document.getElementById('table-section').style.display = "none";
             document.getElementById('add-Syllabus-form').style.display = "block";
+            document.getElementById('formdetail').style.display = "none";
         }
         document.getElementById('Syllabusback-btn').onclick = function () {
             document.getElementById('add-Syllabus-form').style.display = "none";
             document.getElementById('table-section').style.display = "block";
+            document.getElementById('formdetail').style.display = "none";
+        }
+
+        document.getElementById('backfromdetail').onclick = function () {
+            document.getElementById('add-Syllabus-form').style.display = "none";
+            document.getElementById('table-section').style.display = "block";
+            document.getElementById('formdetail').style.display = "none";
         }
     };
 
@@ -587,6 +596,9 @@ app.controller('TermSyllabusController', function ($scope, $http, $timeout, Glob
                 if (res.data.IsSuccess && res.data.Data) {
                     $scope.ContentSyllabusList = res.data.Data;
 
+                    document.getElementById('add-Syllabus-form').style.display = "none";
+                    document.getElementById('table-section').style.display = "none";
+                    document.getElementById('formdetail').style.display = "block";
                     $('#ModalList').modal('show');
                 } else {
                     Swal.fire(res.data.ResponseMSG);

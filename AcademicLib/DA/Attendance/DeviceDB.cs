@@ -396,7 +396,7 @@ namespace AcademicLib.DA.Attendance
             return dataColl;
         }
 
-        public RE.Attendance.StudentMonthlyBIOSummaryCollections getStudentMonthlyAttendance(int UserId, int AcademicYearId, int YearId,int MonthId,int ClassId,int? SectionId, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null)
+        public RE.Attendance.StudentMonthlyBIOSummaryCollections getStudentMonthlyAttendance(int UserId, int AcademicYearId, int YearId, int MonthId, int ClassId, int? SectionId, int? BatchId = null, int? SemesterId = null, int? ClassYearId = null)
         {
             RE.Attendance.StudentMonthlyBIOSummaryCollections dataColl = new RE.Attendance.StudentMonthlyBIOSummaryCollections();
             dal.OpenConnection();
@@ -408,11 +408,9 @@ namespace AcademicLib.DA.Attendance
             cmd.Parameters.AddWithValue("@ClassId", ClassId);
             cmd.Parameters.AddWithValue("@SectionId", SectionId);
             cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
-            //Added
             cmd.Parameters.AddWithValue("@BatchId", BatchId);
             cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
             cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
-            //Ends
             cmd.CommandText = "usp_GetStudentBIOAttendanceSummary";
             try
             {
@@ -775,7 +773,7 @@ namespace AcademicLib.DA.Attendance
             return dataColl;
         }
 
-        public RE.Attendance.EmpMonthlyAttendanceLogCollections getEmpMonthlyAttendance(int UserId, int YearId, int MonthId, string BranchIdColl,int empType,int ForEmp)
+        public RE.Attendance.EmpMonthlyAttendanceLogCollections getEmpMonthlyAttendance(int UserId, int YearId, int MonthId, string BranchIdColl,int empType,int ReportType)
         {
             RE.Attendance.EmpMonthlyAttendanceLogCollections dataColl = new RE.Attendance.EmpMonthlyAttendanceLogCollections();
 
@@ -795,7 +793,7 @@ namespace AcademicLib.DA.Attendance
                 cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
 
                 cmd.Parameters.AddWithValue("@EmpType", empType);
-                cmd.Parameters.AddWithValue("@ForEmp", ForEmp);
+                cmd.Parameters.AddWithValue("@ReportType", ReportType);
                 cmd.CommandText = "sp_GetEmpMonthlyAttendanceLog";
                 System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
                 int sno = 1;
@@ -908,6 +906,7 @@ namespace AcademicLib.DA.Attendance
                     {
                         if (!(reader[96] is System.DBNull)) beData.TotalAbsent = Convert.ToInt32(reader[96]);
                         if (!(reader[97] is System.DBNull)) beData.WorkingShift = Convert.ToString(reader[97]);
+                        if (!(reader[98] is System.DBNull)) beData.IsLeft = Convert.ToBoolean(reader[98]);
                     }
                     catch { }
 
@@ -1457,7 +1456,8 @@ namespace AcademicLib.DA.Attendance
 
 
         //PeriodWise Attendance
-        public AcademicLib.RE.Attendance.PeriodWiseAttendanceCollections getPeriodWiseAttendance(int UserId, int AcademicYearId, int StudentId,  int? SubjectId,int? YearId, int? MonthId)
+
+        public AcademicLib.RE.Attendance.PeriodWiseAttendanceCollections getPeriodWiseAttendance(int UserId, int AcademicYearId, int StudentId, int? SubjectId, int? YearId, int? MonthId)
         {
             AcademicLib.RE.Attendance.PeriodWiseAttendanceCollections dataColl = new RE.Attendance.PeriodWiseAttendanceCollections();
 

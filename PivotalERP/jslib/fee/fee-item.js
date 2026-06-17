@@ -11,7 +11,8 @@
 
 		$scope.MonthList = [];
 		$scope.MonthDetailsColl = [];
-		GlobalServices.getMonthListFromDB().then(function (res1) {
+		GlobalServices.getMonthListFromDB().then(function (res1)
+		{
 			angular.forEach(res1.data.Data, function (m) {
 				$scope.MonthList.push({ id: m.NM, text: m.MonthName });
 			});
@@ -23,7 +24,7 @@
 					IsChecked: false
 				});
 			});
-
+			
 		}, function (reason) {
 			Swal.fire('Failed' + reason);
 		});
@@ -62,7 +63,7 @@
 			FeeItemGroupId: null,
 			Name: '',
 			FeeItemIdColl: [],
-			FeeItemList: [],
+			FeeItemList:[],
 			Mode: 'Save'
 		};
 
@@ -72,33 +73,55 @@
 
 	}
 
+	$scope.GetAutoOrderNo = function (be) {
+		var para = {
+			For: be
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetClassSetupAutoOrderNo",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				var vDet = res.data.Data;
+				if (be == 19) { //Fee Item
+					$scope.newFeeItem.OrderNo = vDet.RId;
+				}
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
 	function OnClickDefault() {
 		document.getElementById('fee-item-form').style.display = "none";
 		document.getElementById('fee-item-group-form').style.display = "none";
 
 		// Fee Item
 		document.getElementById('add-fee-item').onclick = function () {
-			document.getElementById('fee-tem-section').style.display = "none";
+		document.getElementById('fee-tem-section').style.display = "none";
 			document.getElementById('fee-item-form').style.display = "block";
 			$scope.ClearFeeItem();
-			$scope.GetFeeItemAutoOrderNo();
-
+			$scope.GetAutoOrderNo(19);
 		}
 		document.getElementById('feeitem-back-btn').onclick = function () {
-			document.getElementById('fee-item-form').style.display = "none";
+		document.getElementById('fee-item-form').style.display = "none";
 			document.getElementById('fee-tem-section').style.display = "block";
 			$scope.ClearFeeItem();
 		}
 
 		// Fee Item Group
-		document.getElementById('add-fee-item-group').onclick = function () {
+		document.getElementById('add-fee-item-group').onclick = function ()
+		{
 			$scope.ClearFeeItemGroup();
-			document.getElementById('fee-item-group-section').style.display = "none";
+		document.getElementById('fee-item-group-section').style.display = "none";
 			document.getElementById('fee-item-group-form').style.display = "block";
-
+			
 		}
 		document.getElementById('fee-item-group-back-btn').onclick = function () {
-			document.getElementById('fee-item-group-form').style.display = "none";
+		document.getElementById('fee-item-group-form').style.display = "none";
 			document.getElementById('fee-item-group-section').style.display = "block";
 			$scope.ClearFeeItemGroup();
 		}
@@ -112,7 +135,7 @@
 
 	$scope.ClearFeeItem = function () {
 		$scope.newFeeItem = {
-			FeeItemId: null,
+			FeeItemId: null,			
 			Name: '',
 			HeadFor: 1,
 			ApplyTax: false,
@@ -131,18 +154,19 @@
 			Name: '',
 			FeeItemIdColl: [],
 			FeeItemList: [],
-			CheckAll: false,
+			CheckAll:false,
 			Mode: 'Save'
 		};
 
 		$timeout(function () {
-			angular.forEach($scope.FeeItemList, function (fi) {
+			angular.forEach($scope.FeeItemList, function (fi)
+			{
 				fi.IsChecked = false;
 				$scope.newFeeItemGroup.FeeItemList.push(fi);
 			})
 		});
-
-	}
+		
+	}	
 	$scope.CheckAllGroup = function () {
 		angular.forEach($scope.newFeeItemGroup.FeeItemList, function (fi) {
 			fi.IsChecked = $scope.newFeeItemGroup.CheckAll;
@@ -274,7 +298,8 @@
 				if ($scope.newFeeItem.MonthIdColl && $scope.newFeeItem.MonthIdColl.length > 0) {
 
 					var mQuery = mx($scope.newFeeItem.MonthIdColl);
-					angular.forEach($scope.MonthDetailsColl, function (md) {
+					angular.forEach($scope.MonthDetailsColl, function (md)
+					{
 						if (mQuery.contains(md.id))
 							md.IsChecked = true;
 						else
@@ -285,7 +310,7 @@
 					angular.forEach($scope.MonthDetailsColl, function (md) {
 						md.IsChecked = false;
 					});
-				}
+                }
 
 				$scope.newFeeItem.Mode = 'Modify';
 
@@ -526,20 +551,5 @@
 
 
 	};
-	$scope.GetFeeItemAutoOrderNo = function () {
-		$http({
-			method: 'POST',
-			url: base_url + "Fee/Creation/GetFeeItemAutoOrderNo",
-			dataType: "json",
-		}).then(function (res) {
-			if (res.data.IsSuccess && res.data.Data) {
-				var vDet = res.data.Data;
-				$scope.newFeeItem.OrderNo = vDet.RId;
-			} else {
-				Swal.fire(res.data.ResponseMSG);
-			}
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
-	}
+
 });

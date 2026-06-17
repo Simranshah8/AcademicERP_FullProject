@@ -211,7 +211,7 @@ namespace AcademicLib.DA.Payroll
 			dal.OpenConnection();
 			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
 			cmd.CommandType = System.Data.CommandType.StoredProcedure;
-			cmd.Parameters.AddWithValue("@UserId", UserId);
+			cmd.Parameters.AddWithValue("@UserId", UserId);			
 			cmd.CommandText = "usp_GetAttendanceTypeForTran";
 			try
 			{
@@ -234,15 +234,15 @@ namespace AcademicLib.DA.Payroll
 					if (!(reader[12] is DBNull)) beData.IsActive = Convert.ToBoolean(reader[12]);
 					if (!(reader[13] is DBNull)) beData.CanEditable = Convert.ToBoolean(reader[13]);
 					if (!(reader[14] is DBNull)) beData.PayHeadingId = Convert.ToInt32(reader[14]);
-					if (!(reader[15] is DBNull)) beData.ActiveTotalInput = Convert.ToBoolean(reader[15]);
+					if (!(reader[15] is DBNull)) beData.ActiveTotalInput = Convert.ToBoolean(reader[15]);					
 					if (!(reader[16] is DBNull)) beData.Formula = Convert.ToString(reader[16]);
 					if (!(reader[17] is DBNull)) beData.ShowInSalarySheet = Convert.ToBoolean(reader[17]);
 					if (!(reader[18] is DBNull)) beData.IsMonthly = Convert.ToBoolean(reader[18]);
 					dataColl.Add(beData);
 				}
 				reader.NextResult();
-				while (reader.Read())
-				{
+                while (reader.Read())
+                {
 					AcademicLib.BE.Payroll.AttendanceTypeDetails det1 = new AcademicLib.BE.Payroll.AttendanceTypeDetails();
 					if (!(reader[0] is DBNull)) det1.AttendanceTypeId = reader.GetInt32(0);
 					if (!(reader[1] is DBNull)) det1.EmployeeGroupId = reader.GetInt32(1);
@@ -250,7 +250,7 @@ namespace AcademicLib.DA.Payroll
 					if (!(reader[3] is DBNull)) det1.CalculationValue = Convert.ToDouble(reader[3]);
 					if (!(reader[4] is DBNull)) det1.BranchId = reader.GetInt32(4);
 					if (!(reader[5] is DBNull)) det1.DepartmentId = reader.GetInt32(5);
-					dataColl.Find(p1 => p1.AttendanceTypeId == det1.AttendanceTypeId).AttendanceTypeDetailsColl.Add(det1);
+					dataColl.Find(p1=>p1.AttendanceTypeId==det1.AttendanceTypeId).AttendanceTypeDetailsColl.Add(det1);
 				}
 				reader.Close();
 				dataColl.IsSuccess = true;
@@ -276,8 +276,8 @@ namespace AcademicLib.DA.Payroll
 
 			foreach (AcademicLib.BE.Payroll.AttendanceTypeDetails beData in beDataColl)
 			{
-				if (beData.CalculationValue != 0 || beData.EmployeeGroupId > 0)
-				{
+				if(beData.CalculationValue!=0 || beData.EmployeeGroupId > 0)
+                {
 					System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
 					cmd.CommandType = System.Data.CommandType.StoredProcedure;
 					cmd.Parameters.AddWithValue("@EmployeeGroupId", beData.EmployeeGroupId);
@@ -287,11 +287,11 @@ namespace AcademicLib.DA.Payroll
 					cmd.Parameters.AddWithValue("@DepartmentId", beData.DepartmentId);
 					cmd.Parameters.AddWithValue("@AttendanceTypeId", AttendanceTypeId);
 					cmd.Parameters.AddWithValue("@UserId", UserId);
-
+					
 					cmd.CommandText = "usp_AddAttendanceTypeDetailsDetails";
 					cmd.ExecuteNonQuery();
 				}
-
+				
 			}
 
 		}
@@ -362,41 +362,6 @@ namespace AcademicLib.DA.Payroll
 
 		}
 
-		public ResponeValues GetAttendanceTypeAutoOrderNo(int UserId, int EntityId)
-		{
-			ResponeValues resVal = new ResponeValues();
-			dal.OpenConnection();
-			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
-			cmd.CommandType = System.Data.CommandType.StoredProcedure;
-			cmd.Parameters.AddWithValue("@UserId", UserId);
-			cmd.Parameters.AddWithValue("@EntityId", EntityId);
-			cmd.Parameters.Add("@SNO", System.Data.SqlDbType.Int);
-			cmd.CommandText = "usp_AttendanceTypeAutoOrderNo";
-			cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
-			try
-			{
-				cmd.ExecuteNonQuery();
-				if (!(cmd.Parameters[2].Value is DBNull))
-					resVal.RId = Convert.ToInt32(cmd.Parameters[2].Value);
-				resVal.IsSuccess = true;
-				resVal.ResponseMSG = GLOBALMSG.SUCCESS;
-			}
-			catch (System.Data.SqlClient.SqlException ee)
-			{
-				resVal.IsSuccess = false;
-				resVal.ResponseMSG = ee.Message;
-			}
-			catch (Exception ee)
-			{
-				resVal.IsSuccess = false;
-				resVal.ResponseMSG = ee.Message;
-			}
-			finally
-			{
-				dal.CloseConnection();
-			}
-			return resVal;
-		}
 	}
 
 }

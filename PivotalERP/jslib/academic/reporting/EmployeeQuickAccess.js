@@ -18,6 +18,24 @@
 		$scope.YearList = GlobalServices.getYearList();
 		$scope.LeaveStatusColl = [{ id: 0, text: 'ALL' }, { id: 1, text: 'NOT_APPROVED' }, { id: 2, text: 'APPROVED' }, { id: 3, text: 'CANCEL' }, { id: 4, text: 'REJECTED' },]
 
+		$scope.CurDate = {};
+		$http({
+			method: 'POST',
+			url: base_url + "Global/GetDate",
+			dataType: "json"
+		}).then(function (res) {
+			$scope.CurDate = res.data.Data;
+
+			if ($rootScope.LANG == 'in') {
+				$scope.newEQuickAccess.YearId = new Date($scope.CurDate.Date_AD).getFullYear();
+			} else {
+				$scope.newEQuickAccess.YearId = $scope.CurDate.NY;
+			}
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
 		$scope.showCredentials = false;
 
 		$scope.CasteList = [];
@@ -2349,14 +2367,21 @@
 		}];
 
 		// Reset notice data
-		$scope.newNotice = {};
+		$scope.ResetNotification();
 		//$scope.templatesColl = [];
 		//$scope.selectedTemplate = null;
 
 		// Template request parameters
 		$('#modal-Notification').modal('show');
 	};
-
+	$scope.ResetNotification = function () {
+		$scope.newNotice = {
+			Title: '',
+			Description: '',
+			AttachmentColl: null
+		};
+		document.getElementById('fileAttachment').value = '';
+	}
 
 	$scope.SendManualNoticeToStudent = function () {
 		$scope.loadingstatus = "running";

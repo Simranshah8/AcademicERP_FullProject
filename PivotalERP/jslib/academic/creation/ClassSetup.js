@@ -575,6 +575,20 @@
 			return false;
 		}
 
+		if ($scope.newClass.ClassType == 2 || $scope.newClass.ClassType == 3) {
+
+			if (!$scope.newClass.FacultyId || $scope.newClass.FacultyId == 0) {
+				Swal.fire('Please select Faculty');
+				return false;
+			}
+
+			if (!$scope.newClass.LevelId || $scope.newClass.LevelId == 0) {
+				Swal.fire('Please select Level');
+				return false;
+			}
+		}
+
+
 		let monthSet = new Set();
 		for (let i = 0; i < $scope.newClass.AcademicMonthColl.length; i++) {
 			let msNo = $scope.newClass.AcademicMonthColl[i].MSNo;
@@ -2468,41 +2482,19 @@
 
 	};
 	
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newAcademicYear.StartDateDet || !$scope.newAcademicYear.EndDateDet ||
-			!$scope.newAcademicYear.StartDateDet.dateAD || !$scope.newAcademicYear.EndDateDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.StartDate_TMP = new Date();
+				obj.EndDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-		var StartDate = $filter('date')(new Date($scope.newAcademicYear.StartDateDet.dateAD), 'yyyy-MM-dd');
-		var EndDate = $filter('date')(new Date($scope.newAcademicYear.EndDateDet.dateAD), 'yyyy-MM-dd');
-		if (!StartDate || !EndDate) return true;
-		if (StartDate > EndDate) {
-			if (changedField === 'StartDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Start Date cannot be After End Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newAcademicYear.StartDate_TMP = new Date();
-						$scope.newAcademicYear.StartDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'EndDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'End Date cannot be Before Start Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newAcademicYear.EndDate_TMP = new Date();
-						$scope.newAcademicYear.EndDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
 	};
+
 });

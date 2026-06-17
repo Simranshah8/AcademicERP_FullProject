@@ -760,11 +760,11 @@
 	};
 
 	// 🔄 Call both API on load
-/*	$scope.init = function () {
+	$scope.init = function () {
 		$scope.GetAllBooksTaken(false); // total issued
 		$scope.GetAllBooksTaken(true);  // yet to return
 	};
-	$scope.init();*/
+	$scope.init();
 
 	$scope.GetAllBooksReturned = function () {
 		$scope.loadingstatus = "running";

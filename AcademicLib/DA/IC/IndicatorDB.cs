@@ -25,7 +25,7 @@ namespace AcademicLib.DA.Exam.Transaction
             cmd.Parameters.AddWithValue("@BranchId", beData.BranchId);
             cmd.Parameters.AddWithValue("@ClassId", beData.ClassId);
             cmd.Parameters.AddWithValue("@SubjectId", beData.SubjectId);
-            cmd.Parameters.AddWithValue("@LessonId", beData.LessonId);
+            cmd.Parameters.AddWithValue("@LessonSno", beData.LessonSno);
             cmd.Parameters.AddWithValue("@TopicName", beData.TopicName);
 
             cmd.Parameters.AddWithValue("@UserId", beData.CUserId);
@@ -47,6 +47,9 @@ namespace AcademicLib.DA.Exam.Transaction
             cmd.Parameters[8].Direction = System.Data.ParameterDirection.Output;
             cmd.Parameters[9].Direction = System.Data.ParameterDirection.Output;
             cmd.Parameters[10].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@BatchId", beData.BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", beData.SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", beData.ClassYearId);
             try
             {
                 cmd.ExecuteNonQuery();
@@ -90,7 +93,7 @@ namespace AcademicLib.DA.Exam.Transaction
         }
 
 
-        public BE.Exam.Transaction.IndicatorCollections getAllIndicator(int UserId, int EntityId, int ClassId, int SubjectId, int? LessonId, string TopicName)
+        public BE.Exam.Transaction.IndicatorCollections getAllIndicator(int UserId, int EntityId, int ClassId, int SubjectId, int? LessonId, string TopicName, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             BE.Exam.Transaction.IndicatorCollections dataColl = new BE.Exam.Transaction.IndicatorCollections();
             dal.OpenConnection();
@@ -102,6 +105,9 @@ namespace AcademicLib.DA.Exam.Transaction
             cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
             cmd.Parameters.AddWithValue("@LessonId", LessonId);
             cmd.Parameters.AddWithValue("@TopicName", TopicName);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
             cmd.CommandText = "usp_GetAllIndicator";
             try
             {
@@ -113,7 +119,7 @@ namespace AcademicLib.DA.Exam.Transaction
                     if (!(reader[1] is DBNull)) beData.BranchId = reader.GetInt32(1);
                     if (!(reader[2] is DBNull)) beData.ClassId = reader.GetInt32(2);
                     if (!(reader[3] is DBNull)) beData.SubjectId = reader.GetInt32(3);
-                    if (!(reader[4] is DBNull)) beData.LessonId = reader.GetInt32(4);
+                    if (!(reader[4] is DBNull)) beData.LessonSno = reader.GetInt32(4);
                     if (!(reader[5] is DBNull)) beData.TopicName = reader.GetString(5);
                     if (!(reader[6] is DBNull)) beData.IndicatorName = reader.GetString(6);
                     if (!(reader[7] is DBNull)) beData.LessonName = reader.GetString(7);
@@ -140,15 +146,16 @@ namespace AcademicLib.DA.Exam.Transaction
         {
             if (beDataColl == null || beDataColl.Count == 0 || TranId == 0)
                 return;
-
+            int SNo = 0;
             foreach (BE.Exam.Transaction.IndicatorDetails beData in beDataColl)
             {
+                SNo++;
                 System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
 
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
               
                 cmd.Parameters.AddWithValue("@TranId", TranId);
-                cmd.Parameters.AddWithValue("@SNo", beData.SNo);
+                cmd.Parameters.AddWithValue("@SNo", SNo);
                 cmd.Parameters.AddWithValue("@IndicatorName", beData.IndicatorName);
                 cmd.Parameters.AddWithValue("@UserId", UserId);
 
@@ -260,8 +267,9 @@ namespace AcademicLib.DA.Exam.Transaction
                 {
                     AcademicLib.BE.Exam.Transaction.TopicWiseIndicator beData = new AcademicLib.BE.Exam.Transaction.TopicWiseIndicator();
                     if (!(reader[0] is DBNull)) beData.TranId = reader.GetInt32(0);
-                    if (!(reader[1] is DBNull)) beData.LessonId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.LessonId = reader.GetInt32(1);
                     if (!(reader[2] is DBNull)) beData.IndicatorName = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.TopicId = reader.GetInt32(3);
                     dataColl.Add(beData);
                 }
 
@@ -283,7 +291,7 @@ namespace AcademicLib.DA.Exam.Transaction
         }
 
        
-        public BE.Exam.Transaction.IndicatorSummary getIndicatorSummary(int UserId, int EntityId, int? ClassId, int? SubjectId)
+        public BE.Exam.Transaction.IndicatorSummary getIndicatorSummary(int UserId, int EntityId, int? ClassId, int? SubjectId, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             BE.Exam.Transaction.IndicatorSummary beData = new BE.Exam.Transaction.IndicatorSummary();
             dal.OpenConnection();
@@ -293,6 +301,9 @@ namespace AcademicLib.DA.Exam.Transaction
             cmd.Parameters.AddWithValue("@EntityId", EntityId);
             cmd.Parameters.AddWithValue("@ClassId", ClassId);
             cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
 
             cmd.CommandText = "usp_GetIndicatorSummary";
             try

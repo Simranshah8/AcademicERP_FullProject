@@ -112,6 +112,7 @@ namespace AcademicLib.RE.Attendance
         public string BranchAddress { get; set; }
         public int TotalAbsent { get; set; }
         public string WorkingShift { get; set; }
+        public bool IsLeft { get; set; }
     }
     public class EmpMonthlyAttendanceLogCollections : System.Collections.Generic.List<EmpMonthlyAttendanceLog> {
         public string ResponseMSG { get; set; }

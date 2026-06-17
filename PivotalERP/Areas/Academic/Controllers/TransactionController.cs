@@ -566,10 +566,17 @@ namespace PivotalERP.Areas.Academic.Controllers
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
 
+        //[HttpPost]
+        //public JsonNetResult GetStudentSiblingDetails(int StudentId)
+        //{
+        //    var dataColl = new AcademicLib.BL.Academic.Transaction.Student(User.UserId, User.HostName, User.DBName).getStudentSiblingDetails( StudentId,this.AcademicYearId);
+
+        //    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
         [HttpPost]
         public JsonNetResult GetStudentSiblingDetails(int StudentId)
         {
-            var dataColl = new AcademicLib.BL.Academic.Transaction.Student(User.UserId, User.HostName, User.DBName).getStudentSiblingDetails( StudentId,this.AcademicYearId);
+            var dataColl = new AcademicLib.BL.Academic.Transaction.Student(User.UserId, User.HostName, User.DBName).getStudentSiblingDetails(StudentId, this.AcademicYearId);
             var resultObj = new
             {
                 SiblingDetails = dataColl,                // List<SiblingDetail>
@@ -578,7 +585,6 @@ namespace PivotalERP.Areas.Academic.Controllers
 
             return new JsonNetResult() { Data = resultObj, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
-
 
         [HttpPost]
         [PermissionsAttribute(Actions.Delete, (int)ENTITIES.AddStudent, false)]
@@ -1167,7 +1173,7 @@ namespace PivotalERP.Areas.Academic.Controllers
         [HttpPost]
         public JsonNetResult GetStudentDetForCC(int StudentId)
         {
-            var dataColl = new AcademicLib.BL.Academic.Transaction.CC(User.UserId, User.HostName, User.DBName).getStudentDetailsForTCCC(StudentId,this.AcademicYearId);
+            var dataColl = new AcademicLib.BL.Academic.Transaction.CC(User.UserId, User.HostName, User.DBName).getStudentDetailsForTCCC(StudentId, this.AcademicYearId);
 
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
@@ -2203,58 +2209,58 @@ namespace PivotalERP.Areas.Academic.Controllers
         }
         #endregion
 
-        #region "Banking"
+        //#region "Banking"
 
-        public ActionResult NICBankAccount()
-        {
-            return View();
-        }
+        //public ActionResult NICBankAccount()
+        //{
+        //    return View();
+        //}
 
-        [HttpPost]
-        public JsonNetResult GetStudentForAccountOpen()
-        {
+        //[HttpPost]
+        //public JsonNetResult GetStudentForAccountOpen()
+        //{
 
-            var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).getStudentListForAccountOpen(this.AcademicYearId);
+        //    var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).getStudentListForAccountOpen(this.AcademicYearId);
 
-            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
+        //    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
 
-        [HttpPost]
-        public JsonNetResult GetEmpForAccountOpen()
-        {
+        //[HttpPost]
+        //public JsonNetResult GetEmpForAccountOpen()
+        //{
 
-            var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).getEmpListForAccountOpen(this.AcademicYearId);
+        //    var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).getEmpListForAccountOpen(this.AcademicYearId);
 
-            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
+        //    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
 
-        [HttpPost]
-        public JsonNetResult OpenStudentAccount(List<NICBank.BE.IdForNewAccount> studentIdColl)
-        {
+        //[HttpPost]
+        //public JsonNetResult OpenStudentAccount(List<NICBank.BE.IdForNewAccount> studentIdColl)
+        //{
 
-            var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).OpenStudentAccount(studentIdColl);
+        //    var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).OpenStudentAccount(studentIdColl);
 
-            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
-        [HttpPost]
-        public JsonNetResult OpenEmpAccount(List<NICBank.BE.IdForNewAccount> empIdColl)
-        {
+        //    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
+        //[HttpPost]
+        //public JsonNetResult OpenEmpAccount(List<NICBank.BE.IdForNewAccount> empIdColl)
+        //{
 
-            var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).OpenEmpAccount(empIdColl);
+        //    var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).OpenEmpAccount(empIdColl);
 
-            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
+        //    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
 
-        [HttpPost]
-        public JsonNetResult CheckBAStatus(List<NICBank.BE.IdForNewAccount> bankIdColl)
-        {
+        //[HttpPost]
+        //public JsonNetResult CheckBAStatus(List<NICBank.BE.IdForNewAccount> bankIdColl)
+        //{
 
-            var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).AccountStatus(bankIdColl);
+        //    var dataColl = new NICBank.BL.NewAccount(User.UserId, User.HostName, User.DBName).AccountStatus(bankIdColl);
 
-            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
+        //    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
 
-        #endregion
+        //#endregion
 
 
         [HttpPost]

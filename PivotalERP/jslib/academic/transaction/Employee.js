@@ -22,44 +22,55 @@
 	//Added By Suresh on 12 Mangsir for webcam
 	let stream = null;
 	let video = document.querySelector("#video");
-	let canvas = document.querySelector('#canvas');
+	let canvas = document.querySelector("#canvas");
+	$scope.webCam = {
+		Start: false
+	};
+	$scope.newEmployee = $scope.newEmployee || {};
 	$scope.takePhotoFromCamera = async function () {
-
-		if ($scope.webCam.Start == true) {
-			$scope.webCam.Start = false;
-
-			canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-			$scope.newEmployee.PhotoData = canvas.toDataURL('image/jpeg');
-
+		if ($scope.webCam.Start === true) {
+			canvas.width = video.videoWidth || 320;
+			canvas.height = video.videoHeight || 240;
+			var context = canvas.getContext("2d");
+			context.drawImage(video, 0, 0, canvas.width, canvas.height);
+			var base64Image = canvas.toDataURL("image/jpeg", 0.9);
+			var byteString = atob(base64Image.split(',')[1]);
+			var mimeString = base64Image.split(',')[0].split(':')[1].split(';')[0];
+			var ab = new ArrayBuffer(byteString.length);
+			var ia = new Uint8Array(ab);
+			for (var i = 0; i < byteString.length; i++) {
+				ia[i] = byteString.charCodeAt(i);
+			}
+			var blob = new Blob([ab], { type: mimeString });
+			// Create File object
+			var file = new File([blob], "CameraPhoto.jpg", {
+				type: "image/jpeg"
+			});
+			$scope.$applyAsync(function () {
+				$scope.newEmployee.PhotoData = base64Image;
+				$scope.newEmployee.Photo_TMP = [file];
+				$scope.webCam.Start = false;
+			});
+		}
+		else {
 			try {
-				// stop only video
-				stream.getVideoTracks()[0].stop();
-
-			} catch { }
-			stream = null;
-
-		} else {
-			$scope.webCam.Start = true;
-
-			stream = null;
-
-			try {
-				stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+				stream = await navigator.mediaDevices.getUserMedia({
+					video: {
+						width: 640,
+						height: 480
+					},
+					audio: false
+				});
+				video.srcObject = stream;
+				$scope.$applyAsync(function () {
+					$scope.webCam.Start = true;
+				});
 			}
 			catch (error) {
-				alert(error.message);
-				return;
+				Swal.fire("Camera Error: " + error.message);
 			}
-
-			try {
-				video.srcObject = stream;
-			} catch {
-				video.src = URL.createObjectURL(stream);
-			}
-
-			//video.style.display = 'block';
 		}
-	}
+	};
 	//Ends
 
 
@@ -1889,7 +1900,10 @@
 	}
 
 
-	
+	$scope.ValidateEmployeePhoto = function (obj, id, modelTmpName, modelDataName, imageId, fieldName, allowedExtensions, maxSizeMB=1) {
+		GlobalServices.validateImageFile(obj, id, modelTmpName, modelDataName, imageId, fieldName, allowedExtensions,maxSizeMB);
+		$scope.$applyAsync();
+	};
 
 
 	$scope.PrintEmployeeForm = function () {

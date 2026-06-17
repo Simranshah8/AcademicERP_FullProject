@@ -87,21 +87,7 @@ namespace PivotalERP.Areas.Exam.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
 
-        [HttpPost]
-        public JsonNetResult GetExamTypeAutoOrderNo(int? For)
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                resVal = new AcademicLib.BL.Exam.Creation.ExamType(User.UserId, User.HostName, User.DBName).GetExamTypeAutoOrderNo(0, For);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
+
         #endregion
 
         #region "ReExamType"
@@ -2122,12 +2108,12 @@ namespace PivotalERP.Areas.Exam.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult GetAllIndicator(int ClassId, int SubjectId, int? LessonId, string TopicName)
+        public JsonNetResult GetAllIndicator(int ClassId, int SubjectId, int? LessonId, string TopicName, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             AcademicLib.BE.Exam.Transaction.IndicatorCollections dataColl = new AcademicLib.BE.Exam.Transaction.IndicatorCollections();
             try
             {
-                dataColl = new AcademicLib.BL.Exam.Transaction.Indicator(User.UserId, User.HostName, User.DBName).GetAllIndicator(0, ClassId, SubjectId, LessonId, TopicName);
+                dataColl = new AcademicLib.BL.Exam.Transaction.Indicator(User.UserId, User.HostName, User.DBName).GetAllIndicator(0, ClassId, SubjectId, LessonId, TopicName, BatchId, SemesterId, ClassYearId);
                 return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
             }
             catch (Exception ee)
@@ -2222,12 +2208,12 @@ namespace PivotalERP.Areas.Exam.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult GetIStudentsDetailsSubjectsWise(int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, int? CFAssessmentTypeId)
+        public JsonNetResult GetIStudentsDetailsSubjectsWise(int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, int? CFAssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             AcademicLib.BE.Exam.Transaction.ICStudentsDetailCollections dataColl = new AcademicLib.BE.Exam.Transaction.ICStudentsDetailCollections();
             try
             {
-                dataColl = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).GetIStudentsDetailsSubjectsWise(0, this.AcademicYearId, ClassId, SectionId, FilterSection, SubjectId, LessonId, TopicName, AssessmentTypeId, CFAssessmentTypeId);
+                dataColl = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).GetIStudentsDetailsSubjectsWise(0, this.AcademicYearId, ClassId, SectionId, FilterSection, SubjectId, LessonId, TopicName, AssessmentTypeId, CFAssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
                 return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
             }
             catch (Exception ee)
@@ -2239,12 +2225,12 @@ namespace PivotalERP.Areas.Exam.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult GetTopicForStudentWiseIC(int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, int? CFAssessmentTypeId)
+        public JsonNetResult GetTopicForStudentWiseIC(int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, int? CFAssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             AcademicLib.BE.Exam.Transaction.TopicForStudentWiseICCollections dataColl = new AcademicLib.BE.Exam.Transaction.TopicForStudentWiseICCollections();
             try
             {
-                dataColl = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).GetTopicForStudentWiseIC(0, this.AcademicYearId, ClassId, SectionId, FilterSection, SubjectId, LessonId, StudentId, AssessmentTypeId, CFAssessmentTypeId);
+                dataColl = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).GetTopicForStudentWiseIC(0, this.AcademicYearId, ClassId, SectionId, FilterSection, SubjectId, LessonId, StudentId, AssessmentTypeId, CFAssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
                 return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
             }
             catch (Exception ee)
@@ -2256,12 +2242,12 @@ namespace PivotalERP.Areas.Exam.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult GetICMArkEntryStatus(int ClassId, int? SectionId, int SubjectId, int LessonId)
+        public JsonNetResult GetICMArkEntryStatus(int ClassId, int? SectionId, int SubjectId, int LessonId, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             AcademicLib.BE.Exam.Transaction.ICMArkEntryStatusCCollections dataColl = new AcademicLib.BE.Exam.Transaction.ICMArkEntryStatusCCollections();
             try
             {
-                dataColl = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).GetICMArkSubmitStatus(ClassId, SectionId, SubjectId, LessonId, this.AcademicYearId);
+                dataColl = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).GetICMArkSubmitStatus(ClassId, SectionId, SubjectId, LessonId, this.AcademicYearId, BatchId, SemesterId, ClassYearId);
                 return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
             }
             catch (Exception ee)
@@ -2277,12 +2263,12 @@ namespace PivotalERP.Areas.Exam.Controllers
         //NEw code added by bibek for IndicatorSummary
         [HttpPost]
         //[PermissionsAttribute(AcademicERP.BE.Global.Actions.Modify, (int)FormsEntity.Vaccine)]
-        public JsonNetResult GetIndicatorSummary(int? ClassId, int? SubjectId)
+        public JsonNetResult GetIndicatorSummary(int? ClassId, int? SubjectId, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             ResponeValues resVal = new ResponeValues();
             try
             {
-                resVal = new AcademicLib.BL.Exam.Transaction.Indicator(User.UserId, User.HostName, User.DBName).GetIndicatorSummary(0, ClassId, SubjectId);
+                resVal = new AcademicLib.BL.Exam.Transaction.Indicator(User.UserId, User.HostName, User.DBName).GetIndicatorSummary(0, ClassId, SubjectId, BatchId, SemesterId, ClassYearId);
             }
             catch (Exception ee)
             {
@@ -2805,12 +2791,12 @@ namespace PivotalERP.Areas.Exam.Controllers
 
         //Delete the ICMarkEntry starts
         [HttpPost]
-        public JsonNetResult DeleteICMarkEntry(int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int AssessmentTypeId)
+        public JsonNetResult DeleteICMarkEntry(int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int AssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             ResponeValues resVal = new ResponeValues();
             try
             {
-                resVal = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).DeleteById(0, ClassId, SectionId, FilterSection, SubjectId, LessonId, TopicName, AssessmentTypeId);
+                resVal = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).DeleteById(0, ClassId, SectionId, FilterSection, SubjectId, LessonId, TopicName, AssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
             }
             catch (Exception ee)
             {
@@ -2821,12 +2807,12 @@ namespace PivotalERP.Areas.Exam.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult DeleteICMarkEntryStudentWise(int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int AssessmentTypeId)
+        public JsonNetResult DeleteICMarkEntryStudentWise(int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int AssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             ResponeValues resVal = new ResponeValues();
             try
             {
-                resVal = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).DeleteByIdStudentWise(0, ClassId, SectionId, FilterSection, SubjectId, LessonId, StudentId, AssessmentTypeId);
+                resVal = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).DeleteByIdStudentWise(0, ClassId, SectionId, FilterSection, SubjectId, LessonId, StudentId, AssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
             }
             catch (Exception ee)
             {
@@ -3081,5 +3067,108 @@ namespace PivotalERP.Areas.Exam.Controllers
 
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
+
+        #region "LOCMarkEntry"
+
+        [HttpPost]
+        public JsonNetResult GetStudentsForLOCMarkEntry(int ClassId, int? SectionId, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, int? CFAssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
+        {
+            AcademicLib.BE.Exam.Transaction.LOCWiseMarkEntryCollections dataColl = new AcademicLib.BE.Exam.Transaction.LOCWiseMarkEntryCollections();
+            try
+            {
+                dataColl = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).GetStudentsForLOCMarkEntry(0, this.AcademicYearId, ClassId, SectionId, SubjectId, LessonId, TopicName, AssessmentTypeId, CFAssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetStdWiseLOCMarkEntry(int ClassId, int? SectionId, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, int? CFAssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
+        {
+            AcademicLib.BE.Exam.Transaction.StdWiseLOCMarkEntryCollections dataColl = new AcademicLib.BE.Exam.Transaction.StdWiseLOCMarkEntryCollections();
+            try
+            {
+                dataColl = new AcademicLib.BL.Exam.Transaction.ICMarkEntry(User.UserId, User.HostName, User.DBName).GetStdWiseLOCMarkEntry(0, this.AcademicYearId, ClassId, SectionId, SubjectId, LessonId, StudentId, AssessmentTypeId, CFAssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        #endregion
+
+        #region "Theme Mark Entry"
+
+        public ActionResult ThemeMarkEntry()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonNetResult GetThemeWiseMarkEntry(int ClassId, int? SectionId, int SubjectId, int LessonId, int AssessmentTypeId, int? CFAssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
+        {
+            AcademicLib.BE.Exam.Transaction.ThemeWiseMarkEntryCollections dataColl = new AcademicLib.BE.Exam.Transaction.ThemeWiseMarkEntryCollections();
+            try
+            {
+                dataColl = new AcademicLib.BL.Exam.Transaction.ThemeMarkEntry(User.UserId, User.HostName, User.DBName).GetThemeWiseMarkEntry(0, this.AcademicYearId, ClassId, SectionId, SubjectId, LessonId, AssessmentTypeId, CFAssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult SaveThemeMarkEntry()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<List<AcademicLib.BE.Exam.Transaction.ThemeMarkEntry>>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    resVal = new AcademicLib.BL.Exam.Transaction.ThemeMarkEntry(User.UserId, User.HostName, User.DBName).SaveUpdate(beData);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult DelThemeMarkEntry(int ClassId, int? SectionId, int SubjectId, int LessonId, int AssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new AcademicLib.BL.Exam.Transaction.ThemeMarkEntry(User.UserId, User.HostName, User.DBName).DelThemeMarkEntry(0, ClassId, SectionId,  SubjectId, LessonId,  AssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        #endregion
     }
 }

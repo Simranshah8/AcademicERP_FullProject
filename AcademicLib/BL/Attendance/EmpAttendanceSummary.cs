@@ -21,9 +21,9 @@ namespace AcademicLib.BL.Attendance
 			db = new DA.Attendance.EmpAttendanceSummaryDB(hostName, dbName);
 		}
 
-		public RE.Attendance.EmpAttendanceSummaryCollections GetEmpAttendanceSummary(string BranchIdColl, string DepartmentIdColl, string GroupIdColl, DateTime? DateFrom, DateTime? DateTo, int? EmpType,int ForEmp)
+		public RE.Attendance.EmpAttendanceSummaryCollections GetEmpAttendanceSummary(string BranchIdColl, string DepartmentIdColl, string GroupIdColl, DateTime? DateFrom, DateTime? DateTo, int? EmpType,int? ReportType)
 		{
-			return db.getAllEmpAttendanceSummary(_UserId, BranchIdColl, DepartmentIdColl, GroupIdColl, DateFrom, DateTo, EmpType, ForEmp);
+			return db.getAllEmpAttendanceSummary(_UserId, BranchIdColl, DepartmentIdColl, GroupIdColl, DateFrom, DateTo, EmpType,ReportType);
 		}
 	}
 }

@@ -86,21 +86,6 @@ namespace PivotalERP.Areas.Fee.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
 
-        [HttpPost]
-        public JsonNetResult GetFeeItemAutoOrderNo()
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                resVal = new AcademicLib.BL.Fee.Creation.FeeItem(User.UserId, User.HostName, User.DBName).GetFeeItemAutoOrderNo(0);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
 
         #endregion
         #region "FeeItemGroup"

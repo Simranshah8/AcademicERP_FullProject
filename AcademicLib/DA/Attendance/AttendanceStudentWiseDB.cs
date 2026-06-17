@@ -247,7 +247,6 @@ namespace AcademicLib.DA.Attendance
                     if (!(reader[9] is DBNull)) beData.Late = Convert.ToInt32(reader[9]);
                     if (!(reader[10] is DBNull)) beData.Leave = Convert.ToInt32(reader[10]);
                     if (!(reader[11] is DBNull)) beData.Holiday = Convert.ToInt32(reader[11]);
-
                     if (!(reader[12] is DBNull)) beData.IsWeekEnd = Convert.ToBoolean(reader[12]);
                     if (!(reader[13] is DBNull)) beData.Batch = reader.GetString(13);
                     if (!(reader[14] is DBNull)) beData.Semester = reader.GetString(14);
@@ -532,7 +531,6 @@ namespace AcademicLib.DA.Attendance
             return dataColl;
         }
 
-
         public List<AcademicLib.RE.Global.EmployeeMonthlyAttendanceSum> getMonthlyAttendanceSummaryForEmpDB(int UserId, int? YearId, int? MonthId)
         {
             List<AcademicLib.RE.Global.EmployeeMonthlyAttendanceSum> dataColl = new List<RE.Global.EmployeeMonthlyAttendanceSum>();
@@ -573,6 +571,5 @@ namespace AcademicLib.DA.Attendance
             }
 
         }
-
     }
 }

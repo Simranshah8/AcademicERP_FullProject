@@ -57,7 +57,9 @@
 			hidePleaseWait();
 			$scope.loadingstatus = "stop";
 			if (res.data.IsSuccess && res.data.Data) {
-				$scope.EvaliationToolList = res.data.Data;
+				$scope.EvaliationToolList = res.data.Data.filter(function (item) {
+					return item.IsActive === true;
+				});
 			} else {
 				Swal.fire(res.data.ResponseMSG);
 			}
@@ -73,8 +75,6 @@
 			Swal.fire('Failed' + reason);
 		});
 
-
-
 		$scope.SubjectList = {};
 		gSrv.getSubjectList().then(function (res) {
 			$scope.SubjectList = mx(res.data.Data);
@@ -82,6 +82,58 @@
 			Swal.fire('Failed' + reason);
 		});
 
+		$scope.AcademicConfig = {};
+		GlobalServices.getAcademicConfig().then(function (res1) {
+			$scope.AcademicConfig = res1.data.Data;
+			if ($scope.AcademicConfig.ActiveFaculty == true) {
+				$scope.FacultyList = [];
+				GlobalServices.getFacultyList().then(function (res) {
+					$scope.FacultyList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+
+			if ($scope.AcademicConfig.ActiveLevel == true) {
+				$scope.LevelList = [];
+				GlobalServices.getClassLevelList().then(function (res) {
+					$scope.LevelList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+
+			if ($scope.AcademicConfig.ActiveSemester == true) {
+				$scope.SelectedClassSemesterList = [];
+				$scope.SemesterList = [];
+				GlobalServices.getSemesterList().then(function (res) {
+					$scope.SemesterList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+
+			if ($scope.AcademicConfig.ActiveBatch == true) {
+				$scope.BatchList = [];
+				GlobalServices.getBatchList().then(function (res) {
+					$scope.BatchList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+
+			if ($scope.AcademicConfig.ActiveClassYear == true) {
+				$scope.ClassYearList = [];
+				$scope.SelectedClassClassYearList = [];
+				GlobalServices.getClassYearList().then(function (res) {
+					$scope.ClassYearList = res.data.Data;
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
 
 		$scope.newICMarkSubject = {
 			TranId: null,
@@ -94,15 +146,41 @@
 			Evaluation: 0,
 			Marks: null,
 			Remarks: "",
-			AssessmentDate_TMP: new Date(),
+			AssessmentDate_TMP:new Date(),
 			Mode: 'Save'
 		};
 
 		$scope.newStudentWise = {
-			AssessmentDate_TMP:new Date()
-        }
+			TranId: null,
+			ClassId: null,
+			SubjectId: null,
+			LessonId: null,
+			TopicName: "",
+			StudentId: null,
+			AssessmentDate_TMP:new Date(),
+			Mode: 'Save'
+		};
 		//$scope.GetAllMarkEntryList();
 	}
+
+	$scope.$watch('newICMarkSubject.SelectedClass', function (newVal, oldVal) {
+		if (newVal && newVal !== oldVal) {
+			$scope.newICMarkSubject.ClassYearId = null;
+			$scope.newICMarkSubject.SemesterId = null;
+		}
+	});
+	$scope.$watch('newStudentWise.SelectedClass', function (newVal, oldVal) {
+		if (newVal && newVal !== oldVal) {
+			$scope.newStudentWise.ClassYearId = null;
+			$scope.newStudentWise.SemesterId = null;
+		}
+	});
+	$scope.$watch('newStatus.SelectedClass', function (newVal, oldVal) {
+		if (newVal && newVal !== oldVal) {
+			$scope.newStatus.ClassYearId = null;
+			$scope.newStatus.SemesterId = null;
+		}
+	});
 
 	$scope.ClearICMarkSubject = function () {
 		$scope.newICMarkSubject = {
@@ -116,6 +194,7 @@
 			Evaluation: 0,
 			Marks: null,
 			Remarks: "",
+			AssessmentDate_TMP: new Date(),
 			Mode: 'Save'
 		};
 	}
@@ -147,30 +226,31 @@
 		showPleaseWait();
 		var dataToSave = [];
 
-		const assessmentDate = $scope.newICMarkSubject.AssessmentDateDet?.dateAD || null;
+		var assessmentDate = $filter('date')(new Date($scope.newICMarkSubject.AssessmentDateDet.dateAD), 'yyyy-MM-dd');
 
 		$scope.IStudentsDetailsSubjectsWiseList.forEach(function (emp) {
 			emp.Indicators.forEach(function (ph) {
-				if (emp.Marks > 0) {
-					dataToSave.push({
-						StudentId: emp.StudentId,
-						IndicatorName: ph.IndicatorName,
-						IndicatorSNo: ph.IndicatorSNo,
-						Evaluation: ph.Evaluation,
-						Marks: emp.Marks,
-						Remarks: emp.Remarks,
-						ClassId: $scope.newICMarkSubject.SelectedClass.ClassId,
-						SectionId: $scope.newICMarkSubject.SelectedClass.SectionId,
-						SubjectId: $scope.newICMarkSubject.SubjectId,
-						LessonId: $scope.newICMarkSubject.LessonId,
-						TopicName: $scope.newICMarkSubject.TopicName,
-						//Added by Suresh on 6 Baishakh 2082
-						EvaluationAreaId: ph.EvaluationAreaId,
-						IndicatorId: ph.IndicatorId,
-						AssessmentTypeId: $scope.newICMarkSubject.AssessmentTypeId,
-						AssessmentDate: assessmentDate
-					});
-				}
+				dataToSave.push({
+					StudentId: emp.StudentId,
+					IndicatorName: ph.IndicatorName,
+					IndicatorSNo: ph.IndicatorSno,
+					Evaluation: ph.Evaluation,
+					Marks: emp.Marks,
+					Remarks: emp.Remarks,
+					ClassId: $scope.newICMarkSubject.SelectedClass.ClassId,
+					SectionId: $scope.newICMarkSubject.SelectedClass.SectionId,
+					SubjectId: $scope.newICMarkSubject.SubjectId,
+					LessonSno: $scope.newICMarkSubject.SelectLesson.LessonSno,
+					TopicName: $scope.newICMarkSubject.TopicName,
+					//Added by Suresh on 6 Baishakh 2082
+					EvaluationAreaId: ph.EvaluationAreaId,
+					IndicatorId: ph.IndicatorId,
+					AssessmentTypeId: $scope.newICMarkSubject.AssessmentTypeId,
+					AssessmentDate: assessmentDate,
+					BatchId: $scope.newICMarkSubject.BatchId || null,
+					ClassYearId: $scope.newICMarkSubject.ClassYearId || null,
+					SemesterId: $scope.newICMarkSubject.SemesterId || null,
+				});
 			})
 		});
 
@@ -217,11 +297,8 @@
 		});
 	};
 
-
-
-
 	$scope.GetIStudentsDetailsSubjectsWise = function () {
-		if ($scope.newICMarkSubject.SelectedClass && $scope.newICMarkSubject.SubjectId > 0 && $scope.newICMarkSubject.LessonId > 0 && $scope.newICMarkSubject.TopicName != null) {
+		if ($scope.newICMarkSubject.SelectedClass && $scope.newICMarkSubject.SubjectId > 0 && $scope.newICMarkSubject.SelectLesson.LessonId > 0 && $scope.newICMarkSubject.TopicName != null) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 			var para = {
@@ -229,10 +306,14 @@
 				SectionId: $scope.newICMarkSubject.SelectedClass.SectionId,
 				FilterSection: $scope.newICMarkSubject.SelectedClass.FilterSection,
 				SubjectId: $scope.newICMarkSubject.SubjectId,
-				LessonId: $scope.newICMarkSubject.LessonId,
+				LessonId: $scope.newICMarkSubject.SelectLesson.LessonId,
 				TopicName: $scope.newICMarkSubject.TopicName,
 				AssessmentTypeId: $scope.newICMarkSubject.AssessmentTypeId,
-				CFAssessmentTypeId: $scope.newICMarkSubject.CFAssessmentTypeId
+				CFAssessmentTypeId: $scope.newICMarkSubject.CFAssessmentTypeId,
+				AssessmentDate: $filter('date')(new Date($scope.newICMarkSubject.AssessmentDateDet.dateAD), 'yyyy-MM-dd'),
+				BatchId: $scope.newICMarkSubject.BatchId || null,
+				ClassYearId: $scope.newICMarkSubject.ClassYearId || null,
+				SemesterId: $scope.newICMarkSubject.SemesterId || null,
 			};
 
 			$http({
@@ -244,70 +325,10 @@
 				hidePleaseWait();
 				$scope.loadingstatus = "stop";
 				if (res.data.IsSuccess && res.data.Data) {
-					var data = res.data.Data;
-
-					console.log("Received data:", data);
-
-					if (!Array.isArray(data)) {
-						console.error("Data is not an array:", data);
-						Swal.fire('Failed: Data format is incorrect.');
-						return;
-					}
-
-					// Process data to group students and their indicators
-					var groupedStudents = data.reduce((acc, item) => {
-						let student = acc.find(s => s.RegdNo === item.RegdNo);
-						if (!student) {
-							// Create a new student entry
-							student = {
-								RegdNo: item.RegdNo,
-								SectionName: item.SectionName,
-								RollNumber: item.RollNumber,
-								StudentName: item.StudentName,
-								StudentId: item.StudentId,
-								Marks: item.Marks,
-								Remarks: item.Remarks,
-								Indicators: []
-							};
-							acc.push(student);
-						}
-
-						// Add indicator to the student
-						if (item.IndicatorName && item.SNo != null) {
-							student.Indicators.push({
-								IndicatorName: item.IndicatorName,
-								IndicatorSNo: item.SNo,
-								Evaluation: item.Evaluation,
-								//Added on baishakh 6 2082
-								EvaluationAreaId: item.EvaluationAreaId,
-								IndicatorId: item.IndicatorId
-							});
-						}
-
-						return acc;
-					}, []);
-
-					console.log("Processed and grouped student data:", groupedStudents);
-
-					$scope.IStudentsDetailsSubjectsWiseList = groupedStudents;
-
-					//if ($scope.newICMarkSubject.AssessmentTypeId > 0) {
-					//	if (data.length > 0 && data[0].AssessmentDate) {
-					//		let parsedDate = new Date(data[0].AssessmentDate);
-					//		if (!isNaN(parsedDate)) {
-					//			$scope.newICMarkSubject.AssessmentDate_TMP = parsedDate;
-					//		} else {
-					//			$scope.newICMarkSubject.AssessmentDate_TMP = new Date(); // fallback to today
-					//		}
-					//	} else {
-					//		$scope.newICMarkSubject.AssessmentDate_TMP = new Date(); // fallback to today
-					//	}
-					//} else {
-					//	// If AssessmentType is not selected, don't set date
-					//	$scope.newICMarkSubject.AssessmentDate_TMP = null;
-					//}
-
-
+					$scope.IStudentsDetailsSubjectsWiseList = res.data.Data;
+					angular.forEach($scope.IStudentsDetailsSubjectsWiseList, function (item) {
+						$scope.MarksRemakrs(item);
+					});
 				} else {
 					Swal.fire(res.data.ResponseMSG);
 				}
@@ -321,6 +342,18 @@
 		}
 	};
 
+	$scope.MarksRemakrs = function (Ic) {
+		var totalMarks = 0;
+		var remarks = "";
+		angular.forEach(Ic.Indicators, function (indicator) {
+			if (indicator.Evaluation) {
+				totalMarks = indicator.Marks;
+				remarks = indicator.Remarks;
+			}
+		});
+		Ic.Marks = totalMarks;
+		Ic.Remarks = remarks;
+	};
 
 	//$scope.GetClassWiseSubjectListAdd = function (classId) {
 	//	$scope.SubjectListAdd = [];
@@ -380,13 +413,12 @@
 		}
 	}
 
-
 	$scope.GetLessonTopicDetailsWise = function () {
-		if ($scope.newICMarkSubject.LessonId) {
+		if ($scope.newICMarkSubject.SelectLesson.LessonId) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 			var para = {
-				LessonId: $scope.newICMarkSubject.LessonId
+				LessonId: $scope.newICMarkSubject.SelectLesson.LessonId
 			};
 			$scope.LessonTopicDetailsWiseList = [];
 
@@ -411,7 +443,6 @@
 		}
 	}
 
-
 	$scope.updateMarks = function (student) {
 		var count = 0;
 		angular.forEach(student.Indicators, function (indicator) {
@@ -427,9 +458,8 @@
 		student.Marks = 0;
 	});
 
-
 	//NEw Code Added
-	$scope.GetClassWiseSubMap = function () {
+	$scope.GetClassWiseSubMap= function () {
 		$scope.newICMarkSubject.SubjectList = [];
 		/*	$scope.newSubjectWise.StudentColl = [];*/
 		if ($scope.newICMarkSubject.SelectedClass) {
@@ -535,9 +565,7 @@
 				Swal.fire('Failed' + reason);
 			});
 		}
-
 	};
-
 
 	$scope.GetSubjectLessonAndStudentList = function () {
 		if ($scope.newStudentWise.SelectedClass.ClassId && $scope.newStudentWise.SubjectId > 0) {
@@ -564,7 +592,10 @@
 					var paraStudent = {
 						ClassId: $scope.newStudentWise.SelectedClass.ClassId,
 						SectionId: $scope.newStudentWise.SelectedClass.SectionId,
-						ExamTypeId: $scope.newStudentWise.ExamTypeId
+						ExamTypeId: $scope.newStudentWise.ExamTypeId,
+						BatchId: $scope.newStudentWise.BatchId || null,
+						ClassYearId: $scope.newStudentWise.ClassYearId || null,
+						SemesterId: $scope.newStudentWise.SemesterId || null,
 					};
 
 					$scope.newStudentWise.StudentList = [];
@@ -594,10 +625,8 @@
 		}
 	}
 
-
-
 	$scope.GetTopicForStudentWiseIC = function () {
-		if ($scope.newStudentWise.SelectedClass && $scope.newStudentWise.SubjectId > 0 && $scope.newStudentWise.LessonId > 0 && $scope.newStudentWise.StudentId > 0) {
+		if ($scope.newStudentWise.SelectedClass && $scope.newStudentWise.SubjectId > 0 && $scope.newStudentWise.SelectLesson.LessonId > 0 && $scope.newStudentWise.StudentId > 0) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 
@@ -606,11 +635,15 @@
 				SectionId: $scope.newStudentWise.SelectedClass.SectionId,
 				FilterSection: $scope.newStudentWise.SelectedClass.FilterSection,
 				SubjectId: $scope.newStudentWise.SubjectId,
-				LessonId: $scope.newStudentWise.LessonId,
+				LessonId: $scope.newStudentWise.SelectLesson.LessonId,
 				StudentId: $scope.newStudentWise.StudentId,
 				//new field
 				AssessmentTypeId: $scope.newStudentWise.AssessmentTypeId,
-				CFAssessmentTypeId: $scope.newStudentWise.CFAssessmentTypeId
+				CFAssessmentTypeId: $scope.newStudentWise.CFAssessmentTypeId,
+				AssessmentDate: $filter('date')(new Date($scope.newStudentWise.AssessmentDateDet.dateAD), 'yyyy-MM-dd'),
+				BatchId: $scope.newStudentWise.BatchId || null,
+				ClassYearId: $scope.newStudentWise.ClassYearId || null,
+				SemesterId: $scope.newStudentWise.SemesterId || null,
 			};
 
 			$http({
@@ -623,51 +656,10 @@
 				$scope.loadingstatus = "stop";
 
 				if (res.data.IsSuccess && res.data.Data) {
-					var data = res.data.Data;
-					console.log("Received data:", data);
-
-					if (!Array.isArray(data)) {
-						console.error("Data is not an array:", data);
-						Swal.fire('Failed: Data format is incorrect.');
-						return;
-					}
-
-					// Grouping by TranId (unique for each topic)
-					var groupedByTopic = data.reduce((acc, item) => {
-						// Find if the topic already exists in the accumulator
-						let topic = acc.find(t => t.TranId === item.TranId);
-
-						if (topic) {
-							// Add the new indicator to the existing topic
-							topic.Indicators.push({
-								IndicatorName: item.IndicatorName,
-								IndicatorSNo: item.SNo,
-								Evaluation: item.Evaluation,
-								EvaluationAreaId: item.EvaluationAreaId
-							});
-						} else {
-							// If this topic hasn't been added yet, create a new entry
-							acc.push({
-								TranId: item.TranId,
-								TopicName: item.TopicName,
-								Marks: item.Marks,
-								Remarks: item.Remarks,
-								EvaluationType: {}, // Initialize if needed
-								RemarksType: item.RemarksType,
-								Indicators: [{
-									IndicatorName: item.IndicatorName,
-									IndicatorSNo: item.SNo,
-									Evaluation: item.Evaluation,
-									EvaluationAreaId: item.EvaluationAreaId
-								}]
-							});
-						}
-						return acc;
-					}, []);
-
-					// Bind the grouped topics and their indicators to the scope for rendering in the view
-					$scope.TopicForStudentWiseICList = groupedByTopic;
-
+					$scope.TopicForStudentWiseICList = res.data.Data;
+					angular.forEach($scope.TopicForStudentWiseICList, function (item) {
+						$scope.MarksRemakrs(item);
+					});
 				} else {
 					Swal.fire(res.data.ResponseMSG);
 				}
@@ -680,36 +672,36 @@
 		}
 	};
 
-
 	$scope.SaveUpdateStudentWise = function () {
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 		var dataToSave = [];
 
-		const assessmentDate = $scope.newStudentWise.AssessmentDateDet?.dateAD || null;
+		var assessmentDate = $filter('date')(new Date($scope.newStudentWise.AssessmentDateDet.dateAD), 'yyyy-MM-dd');
 
 		$scope.TopicForStudentWiseICList.forEach(function (emp) {
 			emp.Indicators.forEach(function (ph) {
-				if (emp.Marks > 0) {
-					dataToSave.push({
-						StudentId: $scope.newStudentWise.StudentId,
-						IndicatorName: ph.IndicatorName,
-						IndicatorSNo: ph.IndicatorSNo,
-						Evaluation: ph.Evaluation,
-						Marks: emp.Marks,
-						Remarks: emp.Remarks,
-						ClassId: $scope.newStudentWise.SelectedClass.ClassId,
-						SectionId: $scope.newStudentWise.SelectedClass.SectionId,
-						SubjectId: $scope.newStudentWise.SubjectId,
-						LessonId: $scope.newStudentWise.LessonId,
-						TopicName: emp.TopicName,
-						//Added by Suresh on 6 Baishakh 2082
-						EvaluationAreaId: ph.EvaluationAreaId,
-						IndicatorId: ph.IndicatorId,
-						AssessmentTypeId: $scope.newStudentWise.AssessmentTypeId,
-						AssessmentDate: assessmentDate
-					});
-				}
+				dataToSave.push({
+					StudentId: $scope.newStudentWise.StudentId,
+					IndicatorName: ph.IndicatorName,
+					IndicatorSNo: ph.IndicatorSno,
+					Evaluation: ph.Evaluation,
+					Marks: emp.Marks,
+					Remarks: emp.Remarks,
+					ClassId: $scope.newStudentWise.SelectedClass.ClassId,
+					SectionId: $scope.newStudentWise.SelectedClass.SectionId,
+					SubjectId: $scope.newStudentWise.SubjectId,
+					LessonSno: $scope.newStudentWise.SelectLesson.LessonSno,
+					TopicName: emp.TopicName,
+					//Added by Suresh on 6 Baishakh 2082
+					EvaluationAreaId: ph.EvaluationAreaId,
+					IndicatorId: ph.IndicatorId,
+					AssessmentTypeId: $scope.newStudentWise.AssessmentTypeId,
+					AssessmentDate: assessmentDate,
+					BatchId: $scope.newStudentWise.BatchId || null,
+					ClassYearId: $scope.newStudentWise.ClassYearId || null,
+					SemesterId: $scope.newStudentWise.SemesterId || null,
+				});
 			})
 		});
 
@@ -742,7 +734,6 @@
 	}
 
 	//Studentwise Code Ends
-
 
 	//IC MarkEntry Status Code Starts
 	$scope.GetClassWiseSubMapForStatus = function () {
@@ -829,10 +820,8 @@
 		}
 	}
 
-
 	$scope.GetAllMarkSubmittedStatusList = function () {
-
-		if ($scope.newStatus && $scope.newStatus.LessonId) {
+		if ($scope.newStatus && $scope.newStatus.SelectLesson.LessonId) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
 			$scope.PendingMarkList = [];
@@ -842,7 +831,10 @@
 				ClassId: $scope.newStatus.SelectedClass.ClassId,
 				SectionId: $scope.newStatus.SelectedClass.SectionId,
 				SubjectId: $scope.newStatus.SubjectId,
-				LessonId: $scope.newStatus.LessonId,
+				LessonId: $scope.newStatus.SelectLesson.LessonId,
+				BatchId: $scope.newStatus.BatchId || null,
+				ClassYearId: $scope.newStatus.ClassYearId || null,
+				SemesterId: $scope.newStatus.SemesterId || null,
 			};
 			$http({
 				method: 'POST',
@@ -870,13 +862,12 @@
 	}
 	//IC MArk Entry Status Code Ends
 
-
 	$scope.DeleteICMarkEntry = function () {
 		if (!$scope.newICMarkSubject.SubjectId) {
 			Swal.fire("Please select a subject.");
 			return;
 		}
-		if (!$scope.newICMarkSubject.LessonId) {
+		if (!$scope.newICMarkSubject.SelectLesson.LessonId) {
 			Swal.fire("Please select a lesson.");
 			return;
 		}
@@ -902,9 +893,13 @@
 					SectionId: $scope.newICMarkSubject.SelectedClass.SectionId,
 					FilterSection: $scope.newICMarkSubject.SelectedClass.FilterSection,
 					SubjectId: $scope.newICMarkSubject.SubjectId,
-					LessonId: $scope.newICMarkSubject.LessonId,
+					LessonId: $scope.newICMarkSubject.SelectLesson.LessonId,
 					TopicName: $scope.newICMarkSubject.TopicName,
 					AssessmentTypeId: $scope.newICMarkSubject.AssessmentTypeId,
+					AssessmentDate: $filter('date')(new Date($scope.newICMarkSubject.AssessmentDateDet.dateAD), 'yyyy-MM-dd'),
+					BatchId: $scope.newICMarkSubject.BatchId || null,
+					ClassYearId: $scope.newICMarkSubject.ClassYearId || null,
+					SemesterId: $scope.newICMarkSubject.SemesterId || null,
 				};
 				$http({
 					method: 'POST',
@@ -927,13 +922,12 @@
 		});
 	};
 
-
 	$scope.DeleteICMarkEntryStudentWise = function () {
 		if (!$scope.newStudentWise.SubjectId) {
 			Swal.fire("Please select a subject.");
 			return;
 		}
-		if (!$scope.newStudentWise.LessonId) {
+		if (!$scope.newStudentWise.SelectLesson.LessonId) {
 			Swal.fire("Please select a lesson.");
 			return;
 		}
@@ -959,9 +953,13 @@
 					SectionId: $scope.newStudentWise.SelectedClass.SectionId,
 					FilterSection: $scope.newStudentWise.SelectedClass.FilterSection,
 					SubjectId: $scope.newStudentWise.SubjectId,
-					LessonId: $scope.newStudentWise.LessonId,
+					LessonId: $scope.newStudentWise.SelectLesson.LessonId,
 					StudentId: $scope.newStudentWise.StudentId,
 					AssessmentTypeId: $scope.newStudentWise.AssessmentTypeId,
+					AssessmentDate: $filter('date')(new Date($scope.newStudentWise.AssessmentDateDet.dateAD), 'yyyy-MM-dd'),
+					BatchId: $scope.newStudentWise.BatchId || null,
+					ClassYearId: $scope.newStudentWise.ClassYearId || null,
+					SemesterId: $scope.newStudentWise.SemesterId || null,
 				};
 				$http({
 					method: 'POST',

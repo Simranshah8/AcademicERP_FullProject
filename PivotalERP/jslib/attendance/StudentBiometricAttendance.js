@@ -778,12 +778,12 @@
 
 		$scope.YearList = GlobalServices.getYearList();
 
-		$scope.ClassSection = {};
-		GlobalServices.getClassSectionList().then(function (res) {
-			$scope.ClassSection = res.data.Data;
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
+		//$scope.ClassSection = {};
+		//GlobalServices.getClassSectionList().then(function (res) {
+		//	$scope.ClassSection = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
 
 
 		$scope.newClassWise = {

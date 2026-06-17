@@ -188,7 +188,7 @@
 		if (!$scope.newUpdateLessonPlan.SubjectId ||
 			$scope.newUpdateLessonPlan.SubjectId == 0) {
 			$scope.newUpdateLessonPlan.DetailsColl = [];
-			return; 
+			return;
 		}
 
 		if ($scope.newUpdateLessonPlan.SelectedClass.ClassId > 0 && $scope.newUpdateLessonPlan.SubjectId > 0) {

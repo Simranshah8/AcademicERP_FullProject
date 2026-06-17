@@ -53,11 +53,10 @@ namespace AcademicLib.DA.AppCMS.Creation
             cmd.Parameters.AddWithValue("@Branch", beData.Branch);
             cmd.Parameters.AddWithValue("@Employee", beData.Employee);
             cmd.Parameters.AddWithValue("@Religion", beData.Religion);
-            //Added by Simran on 19th Jestha
             cmd.Parameters.AddWithValue("@ClassYearId", beData.ClassYearId);
             cmd.Parameters.AddWithValue("@BatchId", beData.BatchId);
             cmd.Parameters.AddWithValue("@SemesterId", beData.SemesterId);
-            //End
+           
             try
             {
                 cmd.ExecuteNonQuery();
@@ -76,9 +75,6 @@ namespace AcademicLib.DA.AppCMS.Creation
 
                 if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
                     resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
-
-
-
             }
             catch (System.Data.SqlClient.SqlException ee)
             {
@@ -257,11 +253,11 @@ namespace AcademicLib.DA.AppCMS.Creation
                     if (!(reader[12] is DBNull)) beData.Branch = reader.GetString(12);
                     if (!(reader[13] is DBNull)) beData.Employee = reader.GetString(13);
                     if (!(reader[14] is DBNull)) beData.Religion = reader.GetString(14);
-                    //Added by Simran on 19th Jestha
+                    
                     if (!(reader[15] is DBNull)) beData.ClassYearId = reader.GetString(15);
                     if (!(reader[16] is DBNull)) beData.BatchId = reader.GetString(16);
                     if (!(reader[17] is DBNull)) beData.SemesterId = reader.GetString(17);
-                    //End
+                   
                 }
 
 

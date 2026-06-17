@@ -32,7 +32,8 @@
 
 		$scope.newEvaluate = {
 			EvaluateId: null,
-
+			DateFrom_TMP: new Date(),
+			DateTo_TMP: new Date(),
 			Mode: 'Save'
 		};
 
@@ -781,42 +782,20 @@
 
 	};
 
-
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newEvaluate.DateFromDet || !$scope.newEvaluate.DateToDet ||
-			!$scope.newEvaluate.DateFromDet.dateAD || !$scope.newEvaluate.DateToDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.DateFrom_TMP = new Date();
+				obj.DateTo_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-		var fromDate = $filter('date')(new Date($scope.newEvaluate.DateFromDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newEvaluate.DateToDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be After To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newEvaluate.DateFrom_TMP = new Date();
-						$scope.newEvaluate.DateFromDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be Before From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newEvaluate.DateTo_TMP = new Date();
-						$scope.newEvaluate.DateToDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
 	};
+
+
 });

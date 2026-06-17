@@ -23,6 +23,7 @@ namespace AcademicLib.BE.Academic.Setup
         public bool SectionWiseSubjectMapping { get; set; }
         public bool SectionWiseExamSchedule { get; set; }
         public bool SectionWiseMarkSetup { get; set; }
-        public bool SectionWiseLessonPlan { get; set; }
+        public bool SectionWiseLessonPlan { get; set; }  
+        public bool ActiveRunningAcademicYear { get; set; }
     }
 }

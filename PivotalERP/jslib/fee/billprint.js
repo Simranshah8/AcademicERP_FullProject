@@ -64,21 +64,21 @@ app.controller('BillPrintController', function ($scope, $http, $timeout, $filter
 			Swal.fire('Failed' + reason);
 		});
 
-	/*	$scope.MediumList = [];
-		GlobalServices.getMediumList().then(function (res) {
-			$scope.MediumList = res.data.Data;
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});*/
+		//$scope.MediumList = [];
+		//GlobalServices.getMediumList().then(function (res) {
+		//	$scope.MediumList = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
 
 	
 
-/*		$scope.StudentTypeList = [];
-		GlobalServices.getStudentTypeList().then(function (res) {
-			$scope.StudentTypeList = res.data.Data;
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});*/
+		//$scope.StudentTypeList = [];
+		//GlobalServices.getStudentTypeList().then(function (res) {
+		//	$scope.StudentTypeList = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
 
 
 		$scope.AcademicConfig = {};

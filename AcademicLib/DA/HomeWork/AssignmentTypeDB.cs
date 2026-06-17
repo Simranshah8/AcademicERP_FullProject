@@ -103,7 +103,7 @@ namespace AcademicLib.DA.Homework
                     if (!(reader[1] is DBNull)) beData.OrderNo = reader.GetInt32(1);
                     if (!(reader[2] is DBNull)) beData.Name = reader.GetString(2);
                     if (!(reader[3] is DBNull)) beData.Description = reader.GetString(3);
-
+               
                     dataColl.Add(beData);
                 }
                 reader.Close();
@@ -144,7 +144,7 @@ namespace AcademicLib.DA.Homework
                     if (!(reader[2] is DBNull)) beData.Name = reader.GetString(2);
                     if (!(reader[3] is DBNull)) beData.Description = reader.GetString(3);
                 }
-
+             
                 reader.Close();
                 beData.IsSuccess = true;
                 beData.ResponseMSG = GLOBALMSG.SUCCESS;
@@ -194,42 +194,6 @@ namespace AcademicLib.DA.Homework
                 if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
                     resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
 
-            }
-            catch (System.Data.SqlClient.SqlException ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            finally
-            {
-                dal.CloseConnection();
-            }
-            return resVal;
-        }
-
-        public ResponeValues GetAssTypeAutoOrderNo(int UserId, int EntityId)
-        {
-            ResponeValues resVal = new ResponeValues();
-            dal.OpenConnection();
-            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@UserId", UserId);
-            cmd.Parameters.AddWithValue("@EntityId", EntityId);
-            cmd.Parameters.Add("@OrderNo", System.Data.SqlDbType.Int);
-            cmd.CommandText = "usp_AssignmentTypeAutoOrderNo";
-            cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
-            try
-            {
-                cmd.ExecuteNonQuery();
-                if (!(cmd.Parameters[2].Value is DBNull))
-                    resVal.RId = Convert.ToInt32(cmd.Parameters[2].Value);
-                resVal.IsSuccess = true;
-                resVal.ResponseMSG = GLOBALMSG.SUCCESS;
             }
             catch (System.Data.SqlClient.SqlException ee)
             {

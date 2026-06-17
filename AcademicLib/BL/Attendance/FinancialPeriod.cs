@@ -36,10 +36,7 @@ namespace AcademicLib.BL.Attendance
         {
             return db.DeleteById(_UserId, EntityId, PeriodId);
         }
-        public ResponeValues GetPeriodAutoOrderNo(int EntityId)
-        {
-            return db.GetPeriodAutoOrderNo(_UserId, EntityId);
-        }
+
         public ResponeValues IsValidData(ref BE.Attendance.FinancialPeriod beData, bool IsModify)
         {
             ResponeValues resVal = new ResponeValues();

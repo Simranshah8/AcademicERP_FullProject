@@ -30,7 +30,8 @@ namespace AcademicLib.BE.Exam.Transaction
 		public int? IndicatorId { get; set; }
 		public int? AssessmentTypeId { get; set; }
 		public DateTime AssessmentDate { get; set; }
-	}
+        public int? LessonSno { get; set; }
+    }
 	public class ICMarkEntryCollections : System.Collections.Generic.List<ICMarkEntry>
 	{
 		public ICMarkEntryCollections()
@@ -45,7 +46,7 @@ namespace AcademicLib.BE.Exam.Transaction
 
 
 
-	public class ICStudentsDetail: ResponeValues
+	public class ICStudentsDetail
 	{
 
 		public int? TranId { get; set; }
@@ -62,12 +63,20 @@ namespace AcademicLib.BE.Exam.Transaction
 		public string IndicatorName { get; set; } = "";
 		public int? StudentId { get; set; }
 		public int? SNo { get; set; }
-
-		//Added on Baishakh 6 2082
 		public int? EvaluationAreaId { get; set; }
 		public int? IndicatorId { get; set; }
 		public int? AssessmentTypeId { get; set; }
-		public DateTime AssessmentDate { get; set; }
+		//public DateTime? AssessmentDate { get; set; }
+		public int? BatchId { get; set; }
+		public int? SemesterId { get; set; }
+		public int? ClassYearId { get; set; }
+		public int? SubjectId { get; set; }
+        public ICStudentsDetail()
+        {
+
+			Indicators = new List<IndicatorList>();
+		}
+        public List<IndicatorList> Indicators { get; set; }
 	}
 
 	public class ICStudentsDetailCollections : System.Collections.Generic.List<ICStudentsDetail>
@@ -75,24 +84,41 @@ namespace AcademicLib.BE.Exam.Transaction
 		public ICStudentsDetailCollections()
 		{
 			ResponseMSG = "";
+			Indicators = new List<IndicatorList>();
 		}
 		public string ResponseMSG { get; set; }
 		public bool IsSuccess { get; set; }
-	}
+        public List<IndicatorList> Indicators { get; set; }
+    }
 
 
-	public class TopicForStudentWiseIC : ResponeValues
+	public class TopicForStudentWiseIC
 	{
-		public int? TranId { get; set; }
+		//public int? TranId { get; set; }
 		public string TopicName { get; set; } = "";
-		public string IndicatorName { get; set; } = "";
-		public int? IndicatorId { get; set; }
-		public int? Marks { get; set; }
-		public string Remarks { get; set; } = "";
-		public bool Evaluation { get; set; }
-		public int? SNo { get; set; }
-		//Added on Baishakh 6 2082
-		public int? EvaluationAreaId { get; set; }
+		//public string IndicatorName { get; set; } = "";
+		//public int? IndicatorId { get; set; }
+		//public int? Marks { get; set; }
+		//public string Remarks { get; set; } = "";
+		//public bool Evaluation { get; set; }
+		//public int? SNo { get; set; }
+		//public int? EvaluationAreaId { get; set; }
+		public int? StudentId { get; set; }
+		public int? ClassId { get; set; }
+		public int? SectionId { get; set; }
+		public int? BatchId { get; set; }
+		public int? SemesterId { get; set; }
+		public int? ClassYearId { get; set; }
+		public int? SubjectId { get; set; }
+		public int? LessonSno { get; set; }
+		//public DateTime? AssessmentDate { get; set; }
+		public int? LessonId { get; set; }
+		public TopicForStudentWiseIC()
+		{
+
+			Indicators = new List<IndicatorList>();
+		}
+		public List<IndicatorList> Indicators { get; set; }
 	}
 
 	public class TopicForStudentWiseICCollections : System.Collections.Generic.List<TopicForStudentWiseIC>
@@ -100,9 +126,11 @@ namespace AcademicLib.BE.Exam.Transaction
 		public TopicForStudentWiseICCollections()
 		{
 			ResponseMSG = "";
+			Indicators = new List<IndicatorList>();
 		}
 		public string ResponseMSG { get; set; }
 		public bool IsSuccess { get; set; }
+		public List<IndicatorList> Indicators { get; set; }
 	}
 
 
@@ -130,6 +158,84 @@ namespace AcademicLib.BE.Exam.Transaction
 		public string ResponseMSG { get; set; }
 		public bool IsSuccess { get; set; }
 	}
+
+	public class IndicatorList
+	{
+        public int? IndicatorId { get; set; }
+        public int? IndicatorSno { get; set; }
+		public string IndicatorName { get; set; } = "";
+		public int? LessonSno { get; set; }
+		public string TopicName { get; set; } = "";
+		public int? StudentId { get; set; }
+		public bool Evaluation { get; set; }
+		public int? Marks { get; set; }
+		public string Remarks { get; set; } = "";
+		public int? EvaluationAreaId { get; set; }
+		public int? AssessmentTypeId { get; set; }
+		public DateTime AssessmentDate { get; set; }
+
+	}
+
+	public class LOCWiseMarkEntry
+	{
+        public int? StudentId { get; set; }
+        public int? AcademicYearId { get; set; }
+		public string StudentName { get; set; } = "";
+		public string RegdNo { get; set; } = "";
+		public int? RollNumber { get; set; }
+        public int? ClassId { get; set; }
+        public int? SectionId { get; set; }
+		public string SectionName { get; set; } = "";
+        public int? BatchId { get; set; }
+        public int? SemesterId { get; set; }
+        public int? ClassYearId { get; set; }
+        public int? SubjectId { get; set; }
+        public int? LessonSno { get; set; }
+		public string TopicName { get; set; } = "";
+		public int? Marks { get; set; }
+		public string Remarks { get; set; } = "";
+		public int? AssessmentTypeId { get; set; }
+		public DateTime? AssessmentDate { get; set; }
+		public int? EvaluationAreaId { get; set; }
+	}
+	public class LOCWiseMarkEntryCollections : List<LOCWiseMarkEntry>
+    {
+		public LOCWiseMarkEntryCollections()
+		{
+			ResponseMSG = "";
+		}
+		public string ResponseMSG { get; set; }
+		public bool IsSuccess { get; set; }
+	}
+
+	public class StdWiseLOCMarkEntry
+	{
+		public int? StudentId { get; set; }
+		public int? AcademicYearId { get; set; }
+		public int? LessonSno { get; set; }
+		public string TopicName { get; set; } = "";
+		public int? ClassId { get; set; }
+		public int? SectionId { get; set; }
+		public int? BatchId { get; set; }
+		public int? SemesterId { get; set; }
+		public int? ClassYearId { get; set; }
+		public int? SubjectId { get; set; }
+		public int? EvaluationAreaId { get; set; }
+		public int? Marks { get; set; }
+		public string Remarks { get; set; } = "";
+		public int? AssessmentTypeId { get; set; }
+		public DateTime? AssessmentDate { get; set; }
+	}
+	public class StdWiseLOCMarkEntryCollections : List<StdWiseLOCMarkEntry>
+	{
+		public StdWiseLOCMarkEntryCollections()
+		{
+			ResponseMSG = "";
+		}
+		public string ResponseMSG { get; set; }
+		public bool IsSuccess { get; set; }
+	}
+
 }
 
 

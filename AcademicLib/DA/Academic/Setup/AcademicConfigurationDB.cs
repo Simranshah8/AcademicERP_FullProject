@@ -42,7 +42,7 @@ namespace AcademicLib.DA.Academic.Setup
             cmd.Parameters.AddWithValue("@SectionWiseExamSchedule", beData.SectionWiseExamSchedule);
             cmd.Parameters.AddWithValue("@SectionWiseMarkSetup", beData.SectionWiseMarkSetup);
             cmd.Parameters.AddWithValue("@SectionWiseLessonPlan", beData.SectionWiseLessonPlan);
-        
+            cmd.Parameters.AddWithValue("@ActiveRunningAcademicYear", beData.ActiveRunningAcademicYear);
             try
             {
                 cmd.ExecuteNonQuery();
@@ -103,6 +103,7 @@ namespace AcademicLib.DA.Academic.Setup
                     if (!(reader[8] is DBNull)) beData.SectionWiseExamSchedule = reader.GetBoolean(8);
                     if (!(reader[9] is DBNull)) beData.SectionWiseMarkSetup = reader.GetBoolean(9);
                     if (!(reader[10] is DBNull)) beData.SectionWiseLessonPlan = reader.GetBoolean(10);
+                    if (!(reader[11] is DBNull)) beData.ActiveRunningAcademicYear = reader.GetBoolean(11);
                 }
                 reader.Close();
                 beData.IsSuccess = true;

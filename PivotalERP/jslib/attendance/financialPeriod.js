@@ -38,7 +38,28 @@
 		$scope.GetAllFinancialPeriodList();
 
 	}
-
+	$scope.GetAutoOrderNo = function (be) {
+		var para = {
+			For: be
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetClassSetupAutoOrderNo",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				var vDet = res.data.Data;
+				if (be == 18) { //FinancialPeriod
+					$scope.newFinancialPeriod.OrderNo = vDet.RId;
+				}
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
 	function OnClickDefault() {
 
 		document.getElementById('fp-form').style.display = "none";
@@ -48,6 +69,7 @@
 			document.getElementById('fp-section').style.display = "none";
 			document.getElementById('fp-form').style.display = "block";
 			$scope.ClearFinancialPeriod();
+			$scope.GetAutoOrderNo(18);
 		}
 
 		document.getElementById('back-to-list-fp').onclick = function () {

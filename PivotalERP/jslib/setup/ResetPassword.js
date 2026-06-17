@@ -2,6 +2,7 @@
 	$scope.Title = 'Reset Password';
 	//OnClickDefault();
 	$scope.LoadData = function () {
+		$('.select2').select2();
 		$scope.confirmMSG = GlobalServices.getConfirmMSG();
 		$scope.newResetPassword = {
 			ResetPasswordId: null,

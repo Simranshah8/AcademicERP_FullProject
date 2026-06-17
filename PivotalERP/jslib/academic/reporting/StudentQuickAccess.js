@@ -2188,6 +2188,22 @@
 
 	};
 
+	// store selected image
+	$scope.selectedNotificationImage = null;
+	// open modal
+	$scope.openNotificationDoc = function (path) {
+		if (path) {
+			$scope.selectedNotificationImage = path;
+		}
+	};
+	// clear on modal close (important)
+	$('#notificationdoc').on('hidden.bs.modal', function () {
+		var scope = angular.element(this).scope();
+		scope.$apply(function () {
+			scope.selectedNotificationImage = null;
+		});
+	});
+
 	$scope.getNotificationLog = function () {
 		$scope.NotificationLogColl = [];
 
@@ -2850,13 +2866,22 @@
 		}];
 
 		// Reset notice data
-		$scope.newNotice = {};
+		$scope.ResetNotification();
 		//$scope.templatesColl = [];
 		//$scope.selectedTemplate = null;
 
 		// Template request parameters
 		$('#modal-Notification').modal('show');
 	};
+
+	$scope.ResetNotification = function () {
+		$scope.newNotice = {
+			Title: '',
+			Description: '',
+			AttachmentColl: null
+		};
+		document.getElementById('fileAttachment').value = '';
+    }
 	
 
 	$scope.SendManualNoticeToStudent = function () {		
@@ -3080,6 +3105,17 @@
 		}
 		myDropzone.removeAllFiles();
 		/*$scope.selectedStudentsCount = 1;*/
+		$scope.ClearCurEmailSend();
+		$scope.selectedStudents = [{
+			StudentId: $scope.newQuickAccess.StudentId,
+			StudentDetails: $scope.newQuickAccess.StudentDetails
+		}];
+
+		// Reset notice data
+		$scope.CurEmailSend = {};
+		$('#sendemail').modal('show');
+	};
+	$scope.ClearCurEmailSend = function() {
 		$scope.CurEmailSend = {
 			Temlate: {},
 			Description: '',
@@ -3092,15 +3128,10 @@
 			CC: '',
 			DataColl: [],
 		};
-		$scope.selectedStudents = [{
-			StudentId: $scope.newQuickAccess.StudentId,
-			StudentDetails: $scope.newQuickAccess.StudentDetails
-		}];
-
-		// Reset notice data
-		$scope.CurEmailSend = {};
-		$('#sendemail').modal('show');
-	};
+		setTimeout(function () {
+			$('.textarea').summernote('code', '');
+		}, 100);
+    }
 
 	$scope.SendEmail = function () {
 		if (!$scope.CurEmailSend) {
@@ -3110,6 +3141,24 @@
 
 		if (!$scope.newQuickAccess || !$scope.newQuickAccess.StudentId) {
 			Swal.fire('Please select a student to send email.');
+			return;
+		}
+
+		if (!$scope.CurEmailSend || !$scope.CurEmailSend.Subject || $scope.CurEmailSend.Subject.trim() === '') {
+			Swal.fire({
+				icon: 'warning',
+				title: 'Required',
+				text: 'Please enter email subject.'
+			});
+			return;
+		}
+
+		if (!$scope.CurEmailSend.Description || $scope.CurEmailSend.Description.trim() === '') {
+			Swal.fire({
+				icon: 'warning',
+				title: 'Required',
+				text: 'Please enter email description.'
+			});
 			return;
 		}
 

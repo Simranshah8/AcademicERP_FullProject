@@ -347,24 +347,6 @@
 		
 	}
 
-	$scope.onDateFromChange = function () {
-		if ($scope.newEligibility.ToDateDet &&
-			$scope.newEligibility.FromDateDet &&
-			$scope.newEligibility.ToDateDet.dateAD < $scope.newEligibility.FromDateDet.dateAD) {
-			$scope.newEligibility.ToDate_TMP = null;
-			Swal.fire('Invalid Date Range', 'Date To cannot be before Date From', 'warning');
-		}
-	};
-
-	$scope.onDateToChange = function () {
-		if ($scope.newEligibility.FromDateDet &&
-			$scope.newEligibility.ToDateDet &&
-			$scope.newEligibility.ToDateDet.dateAD < $scope.newEligibility.FromDateDet.dateAD) {
-			$scope.newEligibility.ToDate_TMP = null;
-			Swal.fire('Invalid Date Range', 'Date To cannot be before Date From', 'warning');
-		}
-	};
-
 	$scope.GetAllExamList = function () {
 		$scope.loadingstatus = "running";
 		showPleaseWait();
@@ -1161,5 +1143,21 @@
 			per = (om / fm) * 100;
 			$scope.newDet.Eligibility.Percentage = per;
         }
-    }
+	}
+
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
+	};
+
 });

@@ -993,7 +993,8 @@ app.controller('mainController', function ($scope, $http, $timeout,$rootScope, $
             data:JSON.stringify(para)
         }).then(function (res) {
             if (res.data.Data) {
-                refreshAllTabs();
+                refreshActiveTab()
+             /*   refreshAllTabs();*/
                 Swal.fire(res.data.ResponseMSG);
             }
         }, function (reason) {

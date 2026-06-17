@@ -702,12 +702,14 @@ app.controller('SalaryDetailController', function ($scope, $http, $timeout, $fil
 	$scope.ShowTaxDetails = function (emp, ph) {
 		$scope.CurTaxDetailsColl = [];
 		$scope.SumTotalAmount = 0;
+		$scope.SumYearTax = 0;
 		$scope.SumTotalTax = 0;
 
 		if (ph.TaxSlabColl) {
 			ph.TaxSlabColl.forEach(function (ts) {
 				$scope.CurTaxDetailsColl.push(ts);
 				$scope.SumTotalAmount += ts.Amount || 0;
+				$scope.SumYearTax += ts.TotalTax || 0;
 				$scope.SumTotalTax += ts.Tax || 0;
 			});
 			$('#detailmodel').modal('show');

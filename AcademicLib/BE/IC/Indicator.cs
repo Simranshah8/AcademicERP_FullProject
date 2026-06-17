@@ -25,7 +25,11 @@ namespace AcademicLib.BE.Exam.Transaction
 			IndicatorDetailsColl = new IndicatorDetailsCollections();
 		}
 		public IndicatorDetailsCollections IndicatorDetailsColl { get; set; }
-	}
+        public int? LessonSno { get; set; }
+        public int? BatchId { get; set; }
+        public int? SemesterId { get; set; }
+        public int? ClassYearId { get; set; }
+    }
 	public class IndicatorDetails
 	{
 

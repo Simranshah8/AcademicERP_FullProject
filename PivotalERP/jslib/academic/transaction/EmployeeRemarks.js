@@ -304,20 +304,6 @@
 
 
 	$scope.GetEmpRemarksList = function () {
-		if ($scope.newRemarkList.FromDateDet &&
-			$scope.newRemarkList.ToDateDet &&
-			$scope.newRemarkList.ToDateDet.dateAD < $scope.newRemarkList.FromDateDet.dateAD) {
-
-			$scope.newRemarkList.ToDate_TMP = null;
-			$scope.newRemarkList.ToDateDet = null;
-
-			Swal.fire(
-				'Invalid Date',
-				'To Date must be greater than or equal to From Date',
-				'warning'
-			);
-			return;
-		}
 		if ($scope.newRemarkList.FromDateDet && $scope.newRemarkList.ToDateDet) {
 			$scope.loadingstatus = "running";
 			showPleaseWait();
@@ -348,8 +334,6 @@
 			});
 		}
 	}
-
-
 
 	$scope.SendRemarkSMS = function (rl) {
 		if (!rl) {
@@ -401,8 +385,6 @@
 
 		});
 	};
-
-
 
 	$scope.SendRemarkNotification = function (rl) {
 
@@ -511,6 +493,22 @@
 		});
 	};
 
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		} else {
+			$scope.GetEmpRemarksList();
+		}
+	};
 
 
 });

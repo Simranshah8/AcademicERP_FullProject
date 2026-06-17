@@ -7,7 +7,7 @@
 		$scope.confirmMSG = GlobalServices.getConfirmMSG();
 		$scope.perPageColl = GlobalServices.getPerPageList();
 
-/*
+
 		$scope.BankGroupColl = [];
 		$http({
 			method: 'GET',
@@ -58,7 +58,6 @@
 		}, function (reason) {
 			Swal.fire('Failed' + reason);
 		});
-		*/
 
 
 		$scope.currentPages = {

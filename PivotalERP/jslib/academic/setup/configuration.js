@@ -75,6 +75,7 @@
 			SectionWiseExamSchedule: false,
 			SectionWiseMarkSetup: false,
 			SectionWiseLessonPlan: false,
+			ActiveRunningAcademicYear:false,
 			Mode: 'Save'
 		};
 
@@ -162,6 +163,7 @@
 			SectionWiseExamSchedule: false,
 			SectionWiseMarkSetup: false,
 			SectionWiseLessonPlan: false,
+			ActiveRunningAcademicYear: false,
 			Mode: 'Save'
 		};
 

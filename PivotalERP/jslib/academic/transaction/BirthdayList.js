@@ -199,7 +199,7 @@
 			//$scope.gridApi3.grid.refresh();
 			$scope.gridApi4.grid.refresh();
 			$scope.gridApi7.grid.refresh();
-			/*		$scope.gridApi5.grid.refresh();*/
+	/*		$scope.gridApi5.grid.refresh();*/
 
 
 		}, function (reason) {
@@ -2768,22 +2768,6 @@
 	//}
 
 	$scope.LoadDOB = function () {
-		//Validation Added
-		if ($scope.newBirthday.DateFromDet &&
-			$scope.newBirthday.DateToDet &&
-			$scope.newBirthday.DateToDet.dateAD < $scope.newBirthday.DateFromDet.dateAD) {
-
-			$scope.newBirthday.DateTo_TMP = null;
-			$scope.newBirthday.DateToDet = null;
-
-			Swal.fire(
-				'Invalid Date',
-				'To Date must be greater than or equal to From Date',
-				'warning'
-			);
-			return;
-		}
-
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 
@@ -3544,22 +3528,6 @@
 
 	//Employee Birthday JS
 	$scope.LoadDOBE = function () {
-		//Added Validation
-		if ($scope.newBirthdayE.DateFromDet &&
-			$scope.newBirthdayE.DateToDet &&
-			$scope.newBirthdayE.DateToDet.dateAD < $scope.newBirthdayE.DateFromDet.dateAD) {
-
-			$scope.newBirthdayE.DateTo_TMP = null;
-			$scope.newBirthdayE.DateToDet = null;
-
-			Swal.fire(
-				'Invalid Date',
-				'To Date must be greater than or equal to From Date',
-				'warning'
-			);
-			return;
-		}
-
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 
@@ -3944,6 +3912,7 @@
 
 	$scope.PrintEmployeeBirthday = function () {
 
+
 		$http({
 			method: 'GET',
 			url: base_url + "ReportEngine/GetReportTemplates?entityId=" + entityEmployeeBirthday + "&voucherId=0&isTran=false",
@@ -4116,6 +4085,22 @@
 		}, function (reason) {
 			Swal.fire('Failed' + reason);
 		});
+	};
+
+
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.DateFrom_TMP = new Date();
+				obj.DateTo_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
 	};
 
 });

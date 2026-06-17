@@ -14,7 +14,7 @@ namespace AcademicLib.DA.Exam.Creation
         {
             dal = new DataAccessLayer1(hostName, dbName);
         }
-        public ResponeValues SaveUpdate(int AcademicYearId, BE.Exam.Creation.ExamType beData, bool isModify)
+        public ResponeValues SaveUpdate(int AcademicYearId,BE.Exam.Creation.ExamType beData, bool isModify)
         {
             ResponeValues resVal = new ResponeValues();
 
@@ -80,11 +80,11 @@ namespace AcademicLib.DA.Exam.Creation
                 if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
                     resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
 
-                if (resVal.RId > 0 && resVal.IsSuccess)
+                if(resVal.RId>0 && resVal.IsSuccess)
                 {
                     SaveClassWiseResult(beData.CUserId, resVal.RId, beData.ClassWiseColl);
                 }
-
+            
 
             }
             catch (System.Data.SqlClient.SqlException ee)
@@ -110,7 +110,7 @@ namespace AcademicLib.DA.Exam.Creation
 
             foreach (BE.Exam.Creation.ClassWiseResultPublichedDate beData in beDataColl)
             {
-                foreach (var v in beData.ClassIdColl)
+                foreach(var v in beData.ClassIdColl)
                 {
                     if (v != 0)
                     {
@@ -123,11 +123,11 @@ namespace AcademicLib.DA.Exam.Creation
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
                         cmd.CommandText = "usp_AddClassWiseResultPublichedDate";
                         cmd.ExecuteNonQuery();
-                    }
-                }
+                    }                    
+                }              
             }
         }
-        public BE.Exam.Creation.ExamTypeCollections getAllExamType(int UserId, int AcademicYearId, int EntityId, int? ForEntity = null)
+        public BE.Exam.Creation.ExamTypeCollections getAllExamType(int UserId,int AcademicYearId, int EntityId,int? ForEntity=null)
         {
             BE.Exam.Creation.ExamTypeCollections dataColl = new BE.Exam.Creation.ExamTypeCollections();
 
@@ -234,7 +234,7 @@ namespace AcademicLib.DA.Exam.Creation
                 }
                 reader.NextResult();
                 beData.ClassWiseColl = new List<BE.Exam.Creation.ClassWiseResultPublichedDate>();
-                var tmpClassColl = new List<BE.Exam.Creation.ClassWiseResultPublichedDate>();
+                var tmpClassColl= new List<BE.Exam.Creation.ClassWiseResultPublichedDate>(); 
                 while (reader.Read())
                 {
                     BE.Exam.Creation.ClassWiseResultPublichedDate det = new BE.Exam.Creation.ClassWiseResultPublichedDate();
@@ -246,18 +246,18 @@ namespace AcademicLib.DA.Exam.Creation
                 }
                 reader.Close();
 
-                if (tmpClassColl != null && tmpClassColl.Count > 0)
+                if(tmpClassColl!=null && tmpClassColl.Count > 0)
                 {
                     var query = from dc in tmpClassColl
                                 group dc by dc.ResultDateTime into g
-                                select new
+                                select new 
                                 {
-                                    ResultDateTime = g.Key,
-                                    MarkSubmitDeadline_Teacher = g.Max(p1 => p1.MarkSubmitDeadline_Teacher),
-                                    ChieldColl = g
+                                    ResultDateTime=g.Key,
+                                    MarkSubmitDeadline_Teacher=g.Max(p1=>p1.MarkSubmitDeadline_Teacher),
+                                    ChieldColl =g
                                 };
 
-                    foreach (var v in query)
+                    foreach(var v in query)
                     {
                         BE.Exam.Creation.ClassWiseResultPublichedDate det = new BE.Exam.Creation.ClassWiseResultPublichedDate();
                         det.ResultDateTime = v.ResultDateTime;
@@ -318,42 +318,6 @@ namespace AcademicLib.DA.Exam.Creation
                 if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
                     resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
 
-            }
-            catch (System.Data.SqlClient.SqlException ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            finally
-            {
-                dal.CloseConnection();
-            }
-            return resVal;
-        }
-        public ResponeValues GetExamTypeAutoOrderNo(int UserId, int EntityId, int? For)
-        {
-            ResponeValues resVal = new ResponeValues();
-            dal.OpenConnection();
-            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@UserId", UserId);
-            cmd.Parameters.AddWithValue("@EntityId", EntityId);
-            cmd.Parameters.Add("@OrderNo", System.Data.SqlDbType.Int);
-            cmd.CommandText = "usp_ExamTypeAutoOrderNo";
-            cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
-            cmd.Parameters.AddWithValue("@For", For);
-            try
-            {
-                cmd.ExecuteNonQuery();
-                if (!(cmd.Parameters[2].Value is DBNull))
-                    resVal.RId = Convert.ToInt32(cmd.Parameters[2].Value);
-                resVal.IsSuccess = true;
-                resVal.ResponseMSG = GLOBALMSG.SUCCESS;
             }
             catch (System.Data.SqlClient.SqlException ee)
             {

@@ -73,7 +73,7 @@
 			SelectEmployee: $scope.EmployeeSearchOptions[0].value,
 			Mode: 'Save'
 		};
-		$scope.GetAllLeaveEntryList();
+		//$scope.GetAllLeaveEntryList();
 	};
 
 	//$scope.DateChanged = function () {
@@ -295,7 +295,7 @@
 			Swal.fire(res.data.ResponseMSG);
 			if (res.data.IsSuccess == true) {
 				$scope.ClearLeaveEntry();
-				$scope.GetAllLeaveEntryList();
+				//$scope.GetAllLeaveEntryList();
 			}
 		}, function (errormessage) {
 			hidePleaseWait();

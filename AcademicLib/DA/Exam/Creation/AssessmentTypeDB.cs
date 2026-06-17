@@ -167,10 +167,9 @@ namespace AcademicLib.DA.Exam.Creation
             {
                 dal.CloseConnection();
             }
-
             return dataColl;
-
         }
+
         public BE.Exam.Creation.AssessmentType getAssessmentTypeById(int UserId, int EntityId, int AssessmentTypeId)
         {
             BE.Exam.Creation.AssessmentType beData = new BE.Exam.Creation.AssessmentType();
@@ -207,9 +206,7 @@ namespace AcademicLib.DA.Exam.Creation
             {
                 dal.CloseConnection();
             }
-
             return beData;
-
         }
 
     }

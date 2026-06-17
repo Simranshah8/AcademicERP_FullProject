@@ -991,9 +991,9 @@ namespace AcademicLib.DA.Exam.Transaction
             cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
             cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
             cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
- /*           cmd.Parameters.AddWithValue("@BatchId", BatchId);
+            cmd.Parameters.AddWithValue("@BatchId", BatchId);
             cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
-            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);*/
+            cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
             try
             {
                 cmd.ExecuteNonQuery();

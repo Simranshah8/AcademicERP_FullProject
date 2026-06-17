@@ -1824,4 +1824,72 @@ app.service('GlobalServices', function ($http, $filter, $timeout, $translate, $r
         return true;
     };
 
+    this.validateImageFile = function (obj,inputId,modelTmpName,modelDataName,imageId,fieldName,allowedExtensions,maxSizeMB) {
+        var fileInput = document.getElementById(inputId);
+        if (!fileInput || !fileInput.files || !fileInput.files.length)
+            return true;
+        var file = fileInput.files[0];
+        var extensionPattern = "\\.(" + allowedExtensions.replace(/,/g, '|') + ")$";
+        var allowedExtension = new RegExp(extensionPattern, "i");
+        if (!allowedExtension.test(file.name)) {
+
+            fileInput.value = '';
+
+            if (obj) {
+                obj[modelTmpName] = null;
+                obj[modelDataName] = null;
+            }
+            var img = document.getElementById(imageId);
+            if (img) img.src = '';
+            fileInput.style.border = '1px solid red';
+            Swal.fire({
+                text: 'Only ' + allowedExtensions.toUpperCase().replace(/,/g, ', ') +
+                    ' files are allowed for ' + fieldName,
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+
+            return false;
+        }
+        var maxSize = maxSizeMB * 1024 * 1024;
+        if (file.size > maxSize) {
+            fileInput.value = '';
+            if (obj) {
+                obj[modelTmpName] = null;
+                obj[modelDataName] = null;
+            }
+            var img = document.getElementById(imageId);
+            if (img) img.src = '';
+            Swal.fire({
+                text: fieldName + ' size must not be greater than ' + maxSizeMB + ' MB.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            return false;
+        }
+        fileInput.style.border = '';
+        return true;
+    };
+
+
+    this.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+        var result = {
+            IsSuccess: true,
+            Message: ""
+        };
+        if (!obj[startField] || !obj[endField] ||
+            !obj[startField].dateAD || !obj[endField].dateAD) {
+            return true;
+        }
+        var startDate = $filter('date')(new Date(obj[startField].dateAD), 'yyyy-MM-dd');
+        var endDate = $filter('date')(new Date(obj[endField].dateAD), 'yyyy-MM-dd');
+        if (!startDate || !endDate)
+            return true;
+        if (startDate > endDate) {
+            result.IsSuccess = false;
+            result.Message = startLabel + " cannot be After " + endLabel + ".";
+        }
+        return result;
+    };
+
 });

@@ -37,10 +37,6 @@ namespace AcademicLib.BL.Exam.Creation
         {
             return db.DeleteById(_UserId, EntityId, ExamTypeId);
         }
-        public ResponeValues GetExamTypeAutoOrderNo(int EntityId, int? For)
-        {
-            return db.GetExamTypeAutoOrderNo(_UserId, EntityId, For);
-        }
         public ResponeValues IsValidData(ref BE.Exam.Creation.ExamType beData, bool IsModify)
         {
             ResponeValues resVal = new ResponeValues();

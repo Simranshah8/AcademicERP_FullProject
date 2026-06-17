@@ -102,21 +102,42 @@
 
 	}
 
+	$scope.GetAutoOrderNo = function (be) {
+		var para = {
+			For: be
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetClassSetupAutoOrderNo",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				var vDet = res.data.Data;
+				if (be == 16) { //Assignment Type
+					$scope.newAssignmentType.OrderNo = vDet.RId;
+				}
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
 	function OnClickDefault() {
 		document.getElementById('assignment-type-form').style.display = "none";
 
 		document.getElementById('add-assignment-type-btn').onclick = function () {
 			document.getElementById('assignment-type-section').style.display = "none";
 			document.getElementById('assignment-type-form').style.display = "block";
-			$scope.GetAssTypeAutoOrderNo();
+			$scope.GetAutoOrderNo(16);
 		}
 
 		document.getElementById('back-assignment-btn').onclick = function () {
 			document.getElementById('assignment-type-section').style.display = "block";
-
 			document.getElementById('assignment-type-form').style.display = "none";
-		}
-
+		} 
+	 
 	}
 
 
@@ -1135,22 +1156,6 @@
 
 	};
 
-	$scope.GetAssTypeAutoOrderNo = function () {
-		$http({
-			method: 'POST',
-			url: base_url + "Homework/Transaction/GetAssTypeAutoOrderNo",
-			dataType: "json",
-		}).then(function (res) {
-			if (res.data.IsSuccess && res.data.Data) {
-				var vDet = res.data.Data;
-				$scope.newAssignmentType.OrderNo = vDet.RId;
-			} else {
-				Swal.fire(res.data.ResponseMSG);
-			}
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
-	}
 
 
 	$scope.pageChangeHandler = function (num) {

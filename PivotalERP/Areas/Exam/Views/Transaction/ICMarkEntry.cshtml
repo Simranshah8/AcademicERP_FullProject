@@ -1,12 +1,11 @@
 ﻿
-<script src="~/jslib/exam/transaction/ICMarkEntry.js?v=@AcademicLib.BE.Global.AppVer.Ver"></script>
+<script src="~/jslib/exam/transaction/ICMarkEntry.js?v=20251115"></script>
 <div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="MarkEntryController" ng-init="LoadData()">
     <section class="content">
         <div class="container-fluid">
             <section class="iframe-content-starts-here">
                 <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
-                         aria-labelledby="pills-second-tab">
+                    <div class="tab-pane fade show active" id="pills-second" role="tabpanel" aria-labelledby="pills-second-tab">
                         <header class="if-page-have-nav-tabs px-2">
                             <div class="row upper-tab">
                                 <div class="col-md-12">
@@ -33,9 +32,18 @@
                         </header>
                         <div class="tab-content" id="myTabContent">
                             <!-- Subject Wise Tab Starts -->
-                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
-                                 aria-labelledby="home-tab">
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
                                 <div class="row mt-2">
+                                    <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                        <div class="form-group ">
+                                            <label>Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newICMarkSubject.BatchId" style="width:100%">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newICMarkSubject.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Class/Sec</label>
@@ -45,6 +53,26 @@
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div class="col-md-2" ng-show="newICMarkSubject.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group">
+                                            <label>Class Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newICMarkSubject.ClassYearId" ng-change="GetClassWiseSubMap()" style="width:100%">
+                                                <option ng-value="0">**Select Year**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newICMarkSubject.ClassYearId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newICMarkSubject.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label>Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newICMarkSubject.SemesterId" ng-change="GetClassWiseSubMap()" style="width:100%">
+                                                <option ng-value="0">**Select Semester**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newICMarkSubject.SemesterId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Subject</label>
@@ -56,8 +84,8 @@
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Lesson/Theme</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newICMarkSubject.LessonId" ng-change="GetLessonTopicDetailsWise()">
-                                                <option ng-value="cl.LessonId" ng-repeat="cl in SubjectLessonWiseList" ng-selected="cl.LessonId==newICMarkSubject.LessonId">{{cl.LessonName}}</option>
+                                            <select class="form-control form-control-sm select2" ng-model="newICMarkSubject.SelectLesson" ng-change="GetLessonTopicDetailsWise()">
+                                                <option ng-value="cl" ng-repeat="cl in SubjectLessonWiseList">{{cl.LessonName}}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -80,10 +108,18 @@
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="">Assessment Date</label>
-                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newICMarkSubject.AssessmentDate_TMP" date-detail="newICMarkSubject.AssessmentDateDet">
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newICMarkSubject.AssessmentDate_TMP" date-detail="newICMarkSubject.AssessmentDateDet" confirm-action="GetIStudentsDetailsSubjectsWise()">
                                         </div>
                                     </div>
                                     <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Copy From Assestment</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newICMarkSubject.CFAssessmentTypeId" ng-change="GetIStudentsDetailsSubjectsWise()" ng-disabled="isCopyDisabled()">
+                                                <option ng-value="cl.AssessmentTypeId" ng-if="cl.AssessmentTypeId != newICMarkSubject.AssessmentTypeId" ng-repeat="cl in AssessmentList" ng-selected="cl.AssessmentTypeId==newFilter.CFAssessmentTypeId">{{cl.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 mt-4">
                                         <div class="input-group input-group-sm table-search-filed">
                                             <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.ICMarkSubject" />
                                             <div class="input-group-append">
@@ -93,20 +129,19 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <!--<div class="col-md-4">
+        <div class="input-group input-group-sm mr-sm-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text cstm" style="color:#000000">Copy From Assestment</span>
+            </div>
+            <select class="form-control form-control-sm select2" ng-model="newICMarkSubject.CFAssessmentTypeId" ng-change="GetIStudentsDetailsSubjectsWise()" ng-disabled="isCopyDisabled()" style="width:50%">
+                <option value="0">Select Assessment Type</option>
+                <option ng-value="cl.AssessmentTypeId" ng-if="cl.AssessmentTypeId != newICMarkSubject.AssessmentTypeId" ng-repeat="cl in AssessmentList" ng-selected="cl.AssessmentTypeId==newFilter.CFAssessmentTypeId">{{cl.Name}}</option>
+            </select>
+        </div>
+    </div>-->
 
-                                    <div class="col-md-4">
-                                        <div class="input-group input-group-sm mr-sm-2">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text cstm" style="color:#000000">Copy From Assestment</span>
-                                            </div>
-                                            <select class="form-control form-control-sm select2" ng-model="newICMarkSubject.CFAssessmentTypeId" ng-change="GetIStudentsDetailsSubjectsWise()" ng-disabled="isCopyDisabled()" style="width:50%">
-                                                <option value="0">Select Assessment Type</option>
-                                                <option ng-value="cl.AssessmentTypeId" ng-if="cl.AssessmentTypeId != newICMarkSubject.AssessmentTypeId" ng-repeat="cl in AssessmentList" ng-selected="cl.AssessmentTypeId==newFilter.CFAssessmentTypeId">{{cl.Name}}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
+                                    <div class="col-md-3 mt-4">
                                         <div class="form-group mb-1 float-right">
                                             <button type="button" class="btn btn-sm btn-danger btn-sm px-1" style="width:60px" ng-click="DeleteICMarkEntry()">Delete</button>
                                             <button type="button" class="btn btn-sm btn-default btn-sm px-1" style="width:60px" ng-click="ClearICMarkSubject()">Reset</button>
@@ -123,14 +158,14 @@
                                                     <th style="width: 112px">Section/RollNo</th>
                                                     <th style="width: 200px">Student Name</th>
                                                     <th style="width: 300px;z-index:3">Indicator<span class="float-right">Evaluation Area/Tool <span class="ml-5"> Evaluation</span></span></th>
-
+                                                   
                                                     <th style="width: 56px">Marks</th>
                                                     <th style="width: 150px">Remarks</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr ng-repeat="Ic in IStudentsDetailsSubjectsWiseList | filter: searchData.ICMarkSubject" ng-if="hasValidIndicators(Ic.Indicators)">
-                                                    <td class="text-center">{{Ic.RegdNo}}</td>
+                                                <tr ng-repeat="Ic in IStudentsDetailsSubjectsWiseList | filter: searchData.ICMarkSubject"  ng-if="hasValidIndicators(Ic.Indicators)">
+                                                    <td>{{Ic.RegdNo}}</td>
                                                     <td>{{Ic.SectionName}}/{{Ic.RollNumber}}</td>
                                                     <td>{{Ic.StudentName}}</td>
                                                     <td class="p-0" style="z-index: 1 !important">
@@ -141,7 +176,6 @@
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control form-control-sm" ng-model="Indicator.EvaluationAreaId">
-                                                                        <option ng-value="">Select Evaluation Area</option>
                                                                         <option ng-repeat="I in EvaliationToolList" ng-value="I.EvaluationId" ng-selected="Indicator.EvaluationAreaId==I.EvaluationId">
                                                                             {{I.Name}}
                                                                         </option>
@@ -149,8 +183,8 @@
                                                                 </td>
                                                                 <td class="text-center" style="width:70px;z-index:1!important">
                                                                     <div class="custom-control custom-checkbox">
-                                                                        <input class="custom-control-input" type="checkbox" ng-model="Indicator.Evaluation" id="customCheckbox{{Ic.RegdNo}}-{{Indicator.IndicatorSNo}}" ng-change="updateMarks(Ic)">
-                                                                        <label for="customCheckbox{{Ic.RegdNo}}-{{Indicator.IndicatorSNo}}" class="custom-control-label"></label>
+                                                                        <input class="custom-control-input" type="checkbox" ng-model="Indicator.Evaluation" id="customCheckbox{{Ic.RegdNo}}-{{Indicator.IndicatorSno}}" ng-change="updateMarks(Ic)" ng-disabled="!Indicator.EvaluationAreaId">
+                                                                        <label for="customCheckbox{{Ic.RegdNo}}-{{Indicator.IndicatorSno}}" class="custom-control-label"></label>
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -158,7 +192,7 @@
                                                     </td>
 
                                                     <td class="text-center"><input class="form-control form-control-sm" ng-model="Ic.Marks" type="number" readonly /></td>
-
+                                                   
                                                     <td>
                                                         <textarea class="form-control form-control-sm" rows="2" ng-model="Ic.Remarks"></textarea>
                                                     </td>
@@ -174,6 +208,16 @@
                             <div class="tab-pane fade  main-section" id="student" role="tabpanel"
                                  aria-labelledby="student-tab">
                                 <div class="row py-2">
+                                    <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                        <div class="form-group ">
+                                            <label>Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.BatchId" style="width:100%">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newICMarkSubject.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Class/Sec</label>
@@ -183,10 +227,30 @@
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div class="col-md-2" ng-show="newStudentWise.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group">
+                                            <label>Class Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.ClassYearId" ng-change="GetClassWiseSubMapStW()" style="width:100%">
+                                                <option ng-value="0">**Select Year**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newStudentWise.ClassYearId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newStudentWise.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label>Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.SemesterId" ng-change="GetClassWiseSubMapStW()" style="width:100%">
+                                                <option ng-value="0">**Select Semester**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newStudentWise.SemesterId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Subject</label>
-                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="newStudentWise.SubjectId" ng-change="GetSubjectLessonAndStudentList()">
+                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.SubjectId" ng-change="GetSubjectLessonAndStudentList()">
                                                 <option ng-value="s.SubjectId" ng-repeat="s in newStudentWise.SubjectList">{{s.Name}}</option>
                                             </select>
                                         </div>
@@ -195,16 +259,15 @@
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Lesson/Theme</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.LessonId" @*ng-change="GetLessonTopicDetailsWise()"*@>
-                                                <option ng-value="cl.LessonId" ng-repeat="cl in SubjectLessonWiseList1" ng-selected="cl.LessonId==newStudentWise.LessonId">{{cl.LessonName}}</option>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.SelectLesson" @*ng-change="GetLessonTopicDetailsWise()"*@>
+                                                <option ng-value="cl" ng-repeat="cl in SubjectLessonWiseList1">{{cl.LessonName}}</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Student Name</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.StudentId" ng-change="GetTopicForStudentWiseIC()">
-                                                <option ng-value="0">**Select Student**</option>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.StudentId" @*ng-change="GetTopicForStudentWiseIC()"*@>
                                                 <option ng-value="cl.StudentId" ng-repeat="cl in newStudentWise.StudentList">{{cl.Name}}-{{cl.RollNo}}</option>
                                             </select>
                                         </div>
@@ -223,11 +286,20 @@
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="">Assessment Date</label>
-                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newStudentWise.AssessmentDate_TMP" date-detail="newStudentWise.AssessmentDateDet">
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newStudentWise.AssessmentDate_TMP" date-detail="newStudentWise.AssessmentDateDet" confirm-action="GetTopicForStudentWiseIC()">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-1">
+                                            <label>Copy From Assestment</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.CFAssessmentTypeId" ng-change="GetTopicForStudentWiseIC()" ng-disabled="isCopyDisabledStudentWise()">
+                                                <option value="0">Select Assessment Type</option>
+                                                <option ng-value="cl.AssessmentTypeId" ng-if="cl.AssessmentTypeId != newStudentWise.AssessmentTypeId" ng-repeat="cl in AssessmentList" ng-selected="cl.AssessmentTypeId==newFilter2.CFAssessmentTypeId">{{cl.Name}}</option>
+                                            </select>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 mt-4">
                                         <div class="input-group input-group-sm table-search-filed">
                                             <input class="form-control form-control-navbar" type="search"
                                                    placeholder="Search" aria-label="Search" ng-model="searchData.StudentWiseIC">
@@ -238,20 +310,19 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <!--<div class="col-md-4">
+        <div class="input-group input-group-sm mr-sm-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text cstm" style="color:#000000">Copy From Assestment</span>
+            </div>
+            <select class="form-control form-control-sm select2" ng-model="newStudentWise.CFAssessmentTypeId" ng-change="GetTopicForStudentWiseIC()" ng-disabled="isCopyDisabledStudentWise()" style="width:50%">
+                <option value="0">Select Assessment Type</option>
+                <option ng-value="cl.AssessmentTypeId" ng-if="cl.AssessmentTypeId != newStudentWise.AssessmentTypeId" ng-repeat="cl in AssessmentList" ng-selected="cl.AssessmentTypeId==newFilter2.CFAssessmentTypeId">{{cl.Name}}</option>
+            </select>
+        </div>
+    </div>-->
 
-                                    <div class="col-md-4">
-                                        <div class="input-group input-group-sm mr-sm-2">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text cstm" style="color:#000000">Copy From Assestment</span>
-                                            </div>
-                                            <select class="form-control form-control-sm select2" ng-model="newStudentWise.CFAssessmentTypeId" ng-change="GetTopicForStudentWiseIC()" ng-disabled="isCopyDisabledStudentWise()" style="width:50%">
-                                                <option value="0">Select Assessment Type</option>
-                                                <option ng-value="cl.AssessmentTypeId" ng-if="cl.AssessmentTypeId != newStudentWise.AssessmentTypeId" ng-repeat="cl in AssessmentList" ng-selected="cl.AssessmentTypeId==newFilter2.CFAssessmentTypeId">{{cl.Name}}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
+                                    <div class="col-md-3 mt-4">
                                         <div class="form-group mb-1 float-right">
                                             <button type="button" class="btn btn-sm btn-danger btn-sm px-1" style="width:60px" ng-click="DeleteICMarkEntryStudentWise()">Delete</button>
                                             <button type="button" class="btn btn-sm btn-default btn-sm px-1" style="width:60px" ng-click="ClearClassWise()">Reset</button>
@@ -272,8 +343,8 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr ng-repeat="Ic in TopicForStudentWiseICList | filter: searchData.StudentWiseIC" @*ng-if="hasValidIndicators(Ic.Indicators)*@>
-                                                    <td class="text-center">{{$index+1}}</td>
+                                                <tr ng-repeat="Ic in TopicForStudentWiseICList | filter: searchData.StudentWiseIC" @*ng-if="hasValidIndicators(Ic.Indicators)*@">
+                                                    <td class="text-center">{{$index+1}}</td>                                                  
                                                     <td>{{Ic.TopicName}}</td>
                                                     <td class="p-0" style="z-index: 1 !important">
                                                         <table class="inner-table">
@@ -291,8 +362,8 @@
                                                                 </td>
                                                                 <td class="text-center" style="width:70px;z-index:1!important">
                                                                     <div class="custom-control custom-checkbox">
-                                                                        <input class="custom-control-input" type="checkbox" ng-model="Indicator.Evaluation" id="customCheckbox{{Ic.TranId}}-{{Indicator.IndicatorSNo}}" ng-change="updateMarks(Ic)">
-                                                                        <label for="customCheckbox{{Ic.TranId}}-{{Indicator.IndicatorSNo}}" class="custom-control-label"></label>
+                                                                        <input class="custom-control-input" type="checkbox" ng-model="Indicator.Evaluation" id="customCheckbox{{Indicator.IndicatorId}}-{{Indicator.IndicatorSno}}" ng-change="updateMarks(Ic)">
+                                                                        <label for="customCheckbox{{Indicator.IndicatorId}}-{{Indicator.IndicatorSno}}" class="custom-control-label"></label>
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -305,7 +376,7 @@
                                                 </tr>
                                             </tbody>
 
-
+                                           
                                         </table>
                                         <!-- table end -->
                                     </div>
@@ -317,6 +388,16 @@
                             <div class="tab-pane fade main-section" id="board" role="tabpanel"
                                  aria-labelledby="board-tab">
                                 <div class="row py-2">
+                                    <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                        <div class="form-group ">
+                                            <label>Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStatus.BatchId" style="width:100%">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newStatus.BatchId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Class/Sec</label>
@@ -326,10 +407,30 @@
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div class="col-md-2" ng-show="newStatus.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group">
+                                            <label>Class Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStatus.ClassYearId" ng-change="GetClassWiseSubMapForStatus()" style="width:100%">
+                                                <option ng-value="0">**Select Year**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newStatus.ClassYearId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newStatus.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label>Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newStatus.SemesterId" ng-change="GetClassWiseSubMapForStatus()" style="width:100%">
+                                                <option ng-value="0">**Select Semester**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newStatus.SemesterId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Subject</label>
-                                            <select name="class-group" id="" form="" class="form-control form-control-sm" ng-model="newStatus.SubjectId" ng-change="GetSubjectLessonWiseStatus()">
+                                            <select form="" class="form-control form-control-sm select2" ng-model="newStatus.SubjectId" ng-change="GetSubjectLessonWiseStatus()">
                                                 <option ng-value="s.SubjectId" ng-repeat="s in newStatus.SubjectList">{{s.Name}}</option>
                                             </select>
                                         </div>
@@ -338,8 +439,8 @@
                                     <div class="col-md-2">
                                         <div class="form-group mb-1">
                                             <label>Lesson/Theme</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newStatus.LessonId" ng-change="GetAllMarkSubmittedStatusList()">
-                                                <option ng-value="cl.LessonId" ng-repeat="cl in SubjectLessonWiseListSt" ng-selected="cl.LessonId==newStatus.LessonId">{{cl.LessonName}}</option>
+                                            <select class="form-control form-control-sm select2" ng-model="newStatus.SelectLesson" ng-change="GetAllMarkSubmittedStatusList()">
+                                                <option ng-value="cl" ng-repeat="cl in SubjectLessonWiseListSt">{{cl.LessonName}}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -400,19 +501,19 @@
                                                             </div>
                                                         </div>
                                                         @*<div class="col-md-5">
-                                                                <div class="form-group">
-                                                                    <div class="input-group input-group-sm">
-                                                                        <div class="input-group-prepend">
-                                                                            <span class="input-group-text cstm">Sorting By</span>
-                                                                        </div>
-                                                                        <select class="form-control form-control-sm select2" style="width:50%;">
-                                                                            <option value="">Subject</option>
-                                                                            <option value="">Class</option>
-                                                                            <option value="">Submitted by</option>
-                                                                        </select>
+                                                            <div class="form-group">
+                                                                <div class="input-group input-group-sm">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text cstm">Sorting By</span>
                                                                     </div>
+                                                                    <select class="form-control form-control-sm select2" style="width:50%;">
+                                                                        <option value="">Subject</option>
+                                                                        <option value="">Class</option>
+                                                                        <option value="">Submitted by</option>
+                                                                    </select>
                                                                 </div>
-                                                            </div>*@
+                                                            </div>
+                                                        </div>*@
                                                     </header>
                                                     <table id="dt-basic-example"
                                                            class="table table-hover table-bordered table-sm bg-white">
@@ -466,7 +567,7 @@
                                                                         <input class="form-control form-control-navbar"
                                                                                type="search"
                                                                                placeholder="Search"
-                                                                               aria-label="Search" ng-model="searchData.MarkSubmittedStatusPending" />
+                                                                               aria-label="Search" ng-model="searchData.MarkSubmittedStatusPending"/>
                                                                         <div class="input-group-append">
                                                                             <button class="btn btn-default border-left-0"
                                                                                     type="submit">

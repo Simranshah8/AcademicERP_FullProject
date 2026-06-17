@@ -37,17 +37,13 @@ namespace AcademicLib.BL.Payroll
 		{
 			return db.getAttendanceTypeForTran(_UserId);
 		}
-		public AcademicLib.BE.Payroll.AttendanceType GetAttendanceTypeById(int EntityId, int AttendanceTypeId)
+			public AcademicLib.BE.Payroll.AttendanceType GetAttendanceTypeById(int EntityId, int AttendanceTypeId)
 		{
 			return db.getAttendanceTypeById(_UserId, EntityId, AttendanceTypeId);
 		}
 		public ResponeValues DeleteById(int EntityId, int AttendanceTypeId)
 		{
 			return db.DeleteById(_UserId, EntityId, AttendanceTypeId);
-		}
-		public ResponeValues GetAttendanceTypeAutoOrderNo(int EntityId)
-		{
-			return db.GetAttendanceTypeAutoOrderNo(_UserId, EntityId);
 		}
 		public ResponeValues IsValidData(ref AcademicLib.BE.Payroll.AttendanceType beData, bool IsModify)
 		{
@@ -74,12 +70,12 @@ namespace AcademicLib.BL.Payroll
 				{
 					resVal.ResponseMSG = "Please ! Enter Name ";
 				}
-				else if (beData.Types == 0)
+				else if (beData.Types == 0 )
 				{
 					resVal.ResponseMSG = "Please ! Select Types ";
 				}
-
-				else if (beData.PeriodType == 0)
+				
+				else if (beData.PeriodType == 0 )
 				{
 					resVal.ResponseMSG = "Please ! Select PeriodType ";
 				}

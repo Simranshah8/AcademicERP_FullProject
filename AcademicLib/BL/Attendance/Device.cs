@@ -73,9 +73,9 @@ namespace AcademicLib.BL.Attendance
         {
             return db.getEmpDailyAttendance(_UserId, forDate, branchIdColl,isManualOnly,empType);
         }
-        public RE.Attendance.EmpMonthlyAttendanceLogCollections getEmpMonthlyAttendance(int YearId, int MonthId, string BranchIdColl,int empType,int ForEmp)
+        public RE.Attendance.EmpMonthlyAttendanceLogCollections getEmpMonthlyAttendance(int YearId, int MonthId, string BranchIdColl,int empType,int ReportType)
         {
-            return db.getEmpMonthlyAttendance(_UserId, YearId, MonthId, BranchIdColl,empType, ForEmp);
+            return db.getEmpMonthlyAttendance(_UserId, YearId, MonthId, BranchIdColl,empType,ReportType);
         }
         public RE.Attendance.EmployeeWiseAttendanceCollections getEmployeeWiseAttendance(int? EmployeeId, DateTime? dateFrom, DateTime? dateTo, int? YearId, int? MonthId, ref int totalAbsent, ref double TotalWorkingHour)
         {

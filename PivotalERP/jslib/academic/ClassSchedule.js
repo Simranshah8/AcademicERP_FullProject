@@ -199,7 +199,7 @@
 		});
 
 		$scope.GetAllClassShift();
-	/*	$scope.GetAllPeriodManagement();	*/	
+		//$scope.GetAllPeriodManagement();
 		$scope.GetAllAssignClassTeacherList();
 		//$scope.GetAllAssignHodList();
 		//$scope.GetAllCreateGroupList();
@@ -770,7 +770,7 @@
 	$scope.GetClassWiseSubMap = function (fromInd) {
 
 		
-	/*	$scope.GetAllTeacherQuota();*/
+		//$scope.GetAllTeacherQuota();
 
 		$scope.newManageSchedule.SubjectMappingColl = [];		
 		$scope.newManageSchedule.SubjectList = [];
@@ -1049,33 +1049,6 @@
 	};
 	$scope.CallSaveUpdateClassSchedule = function ()
 	{
-		var tmpDataColl = [];
-		var hasValidData = false;
-
-		angular.forEach($scope.newManageSchedule.CurClassScheduleColl, function (sc) {
-			angular.forEach(sc.ScheduleColl, function (s) {
-
-				if (!s.IsBreak) {
-					// Check if at least one meaningful data exists
-					if ((s.SubjectId && s.SubjectId > 0) && (s.EmployeeId && s.EmployeeId > 0)) {
-						hasValidData = true;
-					}
-				}
-
-				tmpDataColl.push(s);
-			});
-		});
-
-		// 🚫 रोक्ने condition
-		if (!hasValidData) {
-			Swal.fire({
-				icon: 'warning',
-				title: 'Please add at least one subject and teacher before saving!'
-				
-			});
-			return;
-		}
-
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 

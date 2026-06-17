@@ -652,8 +652,6 @@ app.controller('ClassTestController', function ($scope, $http, $timeout, $filter
 	//js for view the ClassSummaryDetails data
 
 	$scope.GetClassSummaryDetailsById = function (refData) {
-
-
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 		var para = {
@@ -673,34 +671,42 @@ app.controller('ClassTestController', function ($scope, $http, $timeout, $filter
 			$scope.loadingstatus = "stop";
 			if (res.data.IsSuccess && res.data.Data) {
 				$scope.SummaryList = res.data.Data;
-
 				$scope.SummaryList.forEach(function (item) {
-					item.PassMarks = refData.PassMarks; // If PassMarks exists in the response, use it; else use the default
+					item.PassMarks = refData.PassMarks;
 				});
-
 				if ($scope.SummaryList.length > 0) {
 					$scope.newSummary.SubjectName = $scope.SummaryList[0].SubjectName;
 					$scope.newSummary.ClassName = $scope.SummaryList[0].ClassName;
+					$scope.newSummary.SectionName = $scope.SummaryList[0].SectionName;
 					$scope.newSummary.TestDate = refData.TestDate;
+					$scope.newSummary.TestDateBS = refData.TestDateBS;
 					$scope.newSummary.EmployeeName = refData.EmployeeName;
 					$scope.newSummary.LessonName = refData.LessonName;
-					$scope.newSummary.SectionName = $scope.SummaryList[0].SectionName;
-					$scope.newSummary.TestDateBS = refData.TestDateBS;
 				}
-
+				$scope.newSummary.TotalStudent = 0;
+				$scope.newSummary.PassStudent = 0;
+				$scope.newSummary.FailStudent = 0;
+				$scope.newSummary.AbsentStudent = 0;
+				angular.forEach($scope.SummaryList, function (item) {
+					$scope.newSummary.TotalStudent++;
+					if (item.IsAbsent) {
+						$scope.newSummary.AbsentStudent++;
+					} else if (Number(item.ObtMarks) >= Number(item.PassMarks)) {
+						$scope.newSummary.PassStudent++;
+					} else {
+						$scope.newSummary.FailStudent++;
+					}
+				});
 				$scope.newSummary.Mode = 'Modify';
-				$scope.newSummary.TotalStudent = refData.TotalStudent;
-				$scope.newSummary.PassStudent = refData.TotalPassStudent;
-				$scope.newSummary.FailStudent = refData.PresentStudent - refData.TotalPassStudent;
-				$scope.newSummary.AbsentStudent = refData.TotalStudent - refData.PresentStudent;
 				document.getElementById('ClassSummarySection').style.display = "none";
 				document.getElementById('ClassSummaryForm').style.display = "block";
-
 			} else {
 				Swal.fire(res.data.ResponseMSG);
 			}
 		}, function (reason) {
-			Swal.fire('Failed' + reason);
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			Swal.fire('Failed : ' + reason);
 		});
 	};
 

@@ -2793,42 +2793,24 @@
 		});
 	};
 
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newRegistration.FromDateDet || !$scope.newRegistration.ToDateDet ||
-			!$scope.newRegistration.FromDateDet.dateAD || !$scope.newRegistration.ToDateDet.dateAD) {
-			return true;
-		}
-		var fromDate = $filter('date')(new Date($scope.newRegistration.FromDateDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newRegistration.ToDateDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be greater than To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newRegistration.FromDate_TMP = new Date();
-						$scope.newRegistration.FromDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be less than From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newRegistration.ToDate_TMP = new Date();
-						$scope.newRegistration.ToDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
+	$scope.ValidatePhoto = function (obj, id, modelTmpName, modelDataName, imageId, fieldName, allowedExtensions, maxSizeMB = 1) {
+		GlobalServices.validateImageFile(obj, id, modelTmpName, modelDataName, imageId, fieldName, allowedExtensions, maxSizeMB);
+		$scope.$applyAsync();
+	};
 
-		return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
 	};
 
 });

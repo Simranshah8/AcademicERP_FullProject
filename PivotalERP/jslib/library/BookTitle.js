@@ -459,6 +459,7 @@
 			document.getElementById('add-BookCategory-form').style.display = "none";
 			document.getElementById('table-section').style.display = "block";
 		}
+
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 			var target = $(e.target).attr("href");
 			if (target === "#profile") {

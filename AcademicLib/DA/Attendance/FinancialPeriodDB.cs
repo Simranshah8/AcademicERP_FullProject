@@ -215,40 +215,5 @@ namespace AcademicLib.DA.Attendance
 
         }
 
-        public ResponeValues GetPeriodAutoOrderNo(int UserId, int EntityId)
-        {
-            ResponeValues resVal = new ResponeValues();
-            dal.OpenConnection();
-            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@UserId", UserId);
-            cmd.Parameters.AddWithValue("@EntityId", EntityId);
-            cmd.Parameters.Add("@OrderNo", System.Data.SqlDbType.Int);
-            cmd.CommandText = "usp_PeriodAutoOrderNo";
-            cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
-            try
-            {
-                cmd.ExecuteNonQuery();
-                if (!(cmd.Parameters[2].Value is DBNull))
-                    resVal.RId = Convert.ToInt32(cmd.Parameters[2].Value);
-                resVal.IsSuccess = true;
-                resVal.ResponseMSG = GLOBALMSG.SUCCESS;
-            }
-            catch (System.Data.SqlClient.SqlException ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            finally
-            {
-                dal.CloseConnection();
-            }
-            return resVal;
-        }
     }
 }

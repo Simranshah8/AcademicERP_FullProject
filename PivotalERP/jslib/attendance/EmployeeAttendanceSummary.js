@@ -78,8 +78,14 @@
 			enableGridMenu: true,
 			columnDefs: [
 				{ name: "SNo", displayName: "S.No.", minWidth: 90, headerCellClass: 'headerAligment' },
-				{ name: "EmpCode", displayName: "Emp. Code", minWidth: 140, headerCellClass: 'headerAligment' },
-				{ name: "Name", displayName: "Name", minWidth: 200, headerCellClass: 'headerAligment' },
+				{
+					name: "EmpCode", minWidth: 140,
+					cellClass: $scope.leftEmployeeClass
+				},
+				{
+					name: "Name", minWidth: 200,
+					cellClass: $scope.leftEmployeeClass
+				},
 				{ name: "Designation", displayName: "Designation", minWidth: 140, headerCellClass: 'headerAligment' },
 				{ name: "EnrollNumber", displayName: "Enroll No", minWidth: 140, headerCellClass: 'headerAligment' },
 				{ name: "Day1", displayName: "Day1", minWidth: 140, headerCellClass: 'headerAligment' },
@@ -94,9 +100,10 @@
 				{ name: "Category", displayName: "Category", minWidth: 140, headerCellClass: 'headerAligment' },
 				{ name: "BranchName", displayName: "Branch", minWidth: 140, headerCellClass: 'headerAligment' },
 				{ name: "BranchAddress", displayName: "Branch Address", minWidth: 140, headerCellClass: 'headerAligment' },
+				{ name: "IsLeft", displayName: "Is Left", minWidth: 140, headerCellClass: 'headerAligment'}
 			],
 			//   rowTemplate: rowTemplate(),
-			exporterCsvFilename: 'enqSummary.csv',
+			exporterCsvFilename: 'EmpMonthlyAttSummary.csv',
 			exporterPdfDefaultStyle: { fontSize: 9 },
 			exporterPdfTableStyle: { margin: [30, 30, 30, 30] },
 			exporterPdfTableHeaderStyle: { fontSize: 10, bold: true, italics: true, color: 'blue' },
@@ -113,11 +120,16 @@
 			exporterPdfPageSize: 'LETTER',
 			exporterPdfMaxGridWidth: 500,
 			exporterCsvLinkElement: angular.element(document.querySelectorAll(".custom-csv-link-location")),
-			exporterExcelFilename: 'enqSummary.xlsx',
-			exporterExcelSheetName: 'enqSummary',
+			exporterExcelFilename: 'EmpMonthlyAttSummary.xlsx',
+			exporterExcelSheetName: 'EmpMonthlyAttSummary',
 			onRegisterApi: function (gridApi) {
 				$scope.gridApi2 = gridApi;
-			}
+			},
+			rowTemplate:
+				'<div ng-class="{\'text-danger\': row.entity.IsLeft}" class="ui-grid-row">' +
+				' <div ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.colDef.name" ' +
+				' class="ui-grid-cell" ui-grid-cell></div>' +
+				'</div>',
 		};
 
 		//Employee Attendance
@@ -258,7 +270,8 @@
 		var gSrv = GlobalServices;
 		$scope.newMonthly = {
 			YearId: 2078,
-			MonthId: 0
+			MonthId: 0,
+			ForEmp: 2,
 		};
 
 		$scope.EmpTypeList = [
@@ -267,6 +280,11 @@
 			{ id: 3, text: 'Non-teaching' }
 		];
 
+		$scope.ForEmployeeColl = [
+			{ id: 1, text: 'All' },
+			{ id: 2, text: 'Continue' },
+			{ id: 3, text: 'Left' }
+		]
 
 		$scope.newInOutDet = {
 			FromDate_TMP: new Date(),
@@ -280,7 +298,8 @@
 			DepartmentId: null,
 			CategoryId: null,
 			ClassShiftId: null,
-			EmpType: 1
+			EmpType: 1,
+			ForEmp: 2,
 		};
 
 		$scope.entity = {
@@ -360,9 +379,13 @@
 			$scope.loadingstatus = "stop";
 			if (res.data.IsSuccess) {
 				$scope.CurrentDateDet = res.data.Data;
-
-				$scope.newMonthly.YearId = $scope.CurrentDateDet.NY;
-				$scope.newMonthly.MonthId = $scope.CurrentDateDet.NM;
+				if ($rootScope.LANG == 'in') {
+					$scope.newMonthly.YearId = new Date($scope.CurrentDateDet.Date_AD).getFullYear();
+					$scope.newMonthly.MonthId = new Date($scope.CurrentDateDet.Date_AD).getMonth();
+				} else {
+					$scope.newMonthly.YearId = $scope.CurrentDateDet.NY;
+					$scope.newMonthly.MonthId = $scope.CurrentDateDet.NM;
+				}
 			}
 		}, function (reason) {
 			Swal.fire('Failed' + reason);
@@ -397,12 +420,18 @@
 		});
 	};
 
+	$scope.leftEmployeeClass = function (grid, row) {
+		return row.entity.IsLeft ? 'text-danger' : '';
+	};
+
 	$scope.GetMonthAttendance = function () {
 		$scope.gridOptions2.data = [];
 		var para = {
 			YearId: $scope.newMonthly.YearId,
 			MonthId: $scope.newMonthly.MonthId,
-			branchIdColl: $scope.newMonthly.BranchId
+			branchIdColl: $scope.newMonthly.BranchId,
+			empType: 1,
+			ForEmp: $scope.newMonthly.ForEmp,
 		};
 		$scope.loadingstatus = "running";
 		showPleaseWait();
@@ -438,8 +467,14 @@
 		//Attendance Summary Starts
 		var columnDefs = [
 			{ name: "SNo", displayName: "S.No.", minWidth: 90, headerCellClass: 'headerAligment' },
-			{ name: "EmpCode", displayName: "Emp.Code", minWidth: 140, headerCellClass: 'headerAligment' },
-			{ name: "Name", displayName: "Name", minWidth: 200, headerCellClass: 'headerAligment' },
+			{
+				name: "EmpCode", minWidth: 140,
+				cellClass: $scope.leftEmployeeClass
+			},
+			{
+				name: "Name", minWidth: 200,
+				cellClass: $scope.leftEmployeeClass
+			},
 			{ name: "Department", displayName: "Department", minWidth: 120, headerCellClass: 'headerAligment' },
 			{ name: "EnrollNumber", displayName: "Enroll No", minWidth: 120, headerCellClass: 'headerAligment' },
 			{ name: "Designation", displayName: "Designation", minWidth: 120, headerCellClass: 'headerAligment' },
@@ -460,6 +495,10 @@
 			{ name: "TotalLeave", displayName: "Leave", minWidth: 140, headerCellClass: 'headerAligment' },
 			{ name: "TotalHoliday", displayName: "Holiday", minWidth: 140, headerCellClass: 'headerAligment' },
 			{ name: "TotalAbsent", displayName: "TotalAbsent", minWidth: 140, headerCellClass: 'headerAligment' },
+			{
+				name: "IsLeft", displayName: "Is Left", minWidth: 140, headerCellClass: 'headerAligment',
+				cellTemplate: '<div class="ui-grid-cell-contents">{{row.entity.IsLeft ? "Yes" : "No"}}</div>'
+			}
 		);
 
 		$scope.gridOptions2 = {
@@ -494,7 +533,8 @@
 			exporterExcelSheetName: 'empAttendance',
 			onRegisterApi: function (gridApi) {
 				$scope.gridApi = gridApi;
-			}
+			},
+			
 		};
 
 	};
@@ -596,6 +636,7 @@
 			DateFrom: $filter('date')($scope.newAttSummary.FromDateDet.dateAD, 'yyyy-MM-dd'),
 			DateTo: $filter('date')($scope.newAttSummary.ToDateDet.dateAD, 'yyyy-MM-dd'),
 			EmpType: $scope.newAttSummary.EmpType,
+			ForEmp: $scope.newAttSummary.ForEmp,
 		};
 		$scope.loadingstatus = "running";
 		showPleaseWait();

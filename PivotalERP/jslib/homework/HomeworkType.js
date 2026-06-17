@@ -89,21 +89,44 @@
 
 	}
 
+	$scope.GetAutoOrderNo = function (be) {
+		var para = {
+			For: be
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetClassSetupAutoOrderNo",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				var vDet = res.data.Data;
+				if (be == 15) { //HomeworkType
+					$scope.newHomeworkType.OrderNo = vDet.RId;
+				}
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
+
 	function OnClickDefault() {
 		document.getElementById('homework-type-form').style.display = "none";
-
+ 
 
 		document.getElementById('add-homework-type-btn').onclick = function () {
 			document.getElementById('homework-type-section').style.display = "none";
 			document.getElementById('homework-type-form').style.display = "block";
-			$scope.GetHomeworkTypeAutoOrderNo();
+			$scope.GetAutoOrderNo(15);
 		}
 
 		document.getElementById('back-homework-btn').onclick = function () {
 			document.getElementById('homework-type-section').style.display = "block";
 			document.getElementById('homework-type-form').style.display = "none";
 		}
-
+		 
 	}
 
 	$scope.SumitDetails = function () {
@@ -760,22 +783,6 @@
 
 	};
 
-	$scope.GetHomeworkTypeAutoOrderNo = function () {
-		$http({
-			method: 'POST',
-			url: base_url + "Homework/Transaction/GetHomeworkTypeAutoOrderNo",
-			dataType: "json",
-		}).then(function (res) {
-			if (res.data.IsSuccess && res.data.Data) {
-				var vDet = res.data.Data;
-				$scope.newHomeworkType.OrderNo = vDet.RId;
-			} else {
-				Swal.fire(res.data.ResponseMSG);
-			}
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
-	}
 
 
 	$scope.pageChangeHandler = function (num) {

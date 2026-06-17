@@ -37,34 +37,63 @@
                             <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
                                  aria-labelledby="home-tab">
                                 <div class="row mt-2 px-2">
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label>Class</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.ClassId" ng-change="GetClassWiseSubjectList(newIndicator.ClassId)">
-                                                <option ng-value="0">**Select Class**</option>
-                                                <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==newIndicator.ClassId">{{cl.text}}</option>
+                                    <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                        <div class="form-group ">
+                                            <label>Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.BatchId" style="width:100%" ng-change="GetClassWiseSubjectList(newIndicator)">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newIndicator.BatchId">{{cl.text}}</option>
                                             </select>
-                                           
                                         </div>
                                     </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-1">
+                                            <label>Class/Sec</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.SelectedClass" ng-change="GetClassWiseSubjectList(newIndicator)">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2" ng-show="newIndicator.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group">
+                                            <label>Class Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.ClassYearId" ng-change="GetClassWiseSubjectList(newIndicator)" style="width:100%">
+                                                <option ng-value="0">**Select Year**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newIndicator.ClassYearId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newIndicator.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label>Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.SemesterId" ng-change="GetClassWiseSubjectList(newIndicator)" style="width:100%">
+                                                <option ng-value="0">**Select Semester**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newIndicator.SemesterId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Subject</label>
                                             <select class="form-control form-control-sm select2" ng-model="newIndicator.SubjectId" ng-change="GetSubjectLessonWise()">
                                                 <option ng-value="cl.id" ng-repeat="cl in SubjectListAdd" ng-selected="cl.id==newIndicator.SubjectId">{{cl.text}}</option>
                                             </select>
-                                           
+
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Lesson/Theme</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.LessonId" ng-change="GetLessonTopicDetailsWise()">
-                                                <option ng-value="cl.LessonId" ng-repeat="cl in SubjectLessonWiseList" ng-selected="cl.LessonId==newIndicator.LessonId">{{cl.LessonName}}</option>
+                                            <select class="form-control form-control-sm select2" ng-model="newIndicator.SelectLesson" ng-change="GetLessonTopicDetailsWise()">
+                                                <option ng-value="cl" ng-repeat="cl in SubjectLessonWiseList">{{cl.LessonName}}</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Topic/LOC</label>
                                             <select class="form-control form-control-sm select2" ng-model="newIndicator.TopicName" ng-change="GetTopicWiseIndicator()">
@@ -72,8 +101,9 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group mb-1 float-right mt-4">
+                                    <div class="col-md-2"
+                                         ng-class="{ 'col-md-12': newIndicator.SelectedClass && (newIndicator.SelectedClass.ClassType == 2 || newIndicator.SelectedClass.ClassType == 3), 'mt-4': !(newIndicator.SelectedClass && (newIndicator.SelectedClass.ClassType == 2 || newIndicator.SelectedClass.ClassType == 3)) }">
+                                        <div class="form-group mb-1 float-right">
                                             <button type="button" class="btn btn-sm btn-default btn-sm px-1" style="width:60px" ng-click="ClearIndicator()">Reset</button>
                                             <button type="button" class="btn btn-sm btn-success btn-sm px-1" style="width:60px" ng-click="SaveUpdateIndicator()">Save</button>
                                         </div>
@@ -112,33 +142,63 @@
                             <div class="tab-pane fade main-section" id="board" role="tabpanel"
                                  aria-labelledby="board-tab">
                                 <div class="row mt-2">
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label>Class</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newDet.ClassId" ng-change="GetClassWiseSubjectListRpt(newDet.ClassId)">
-                                                <option ng-value="0">**Select Class**</option>
-                                                <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==newDet.ClassId">{{cl.text}}</option>
+                                    <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                        <div class="form-group ">
+                                            <label>Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.BatchId" style="width:100%" ng-change="GetClassWiseSubjectListRpt(newDet)">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newDet.BatchId">{{cl.text}}</option>
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-1">
+                                            <label>Class/Sec</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.SelectedClass" ng-change="GetClassWiseSubjectListRpt(newDet)">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2" ng-show="newDet.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group">
+                                            <label>Class Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.ClassYearId" ng-change="GetClassWiseSubjectListRpt(newDet)" style="width:100%">
+                                                <option ng-value="0">**Select Year**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newDet.ClassYearId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newDet.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label>Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.SemesterId" ng-change="GetClassWiseSubjectListRpt(newDet)" style="width:100%">
+                                                <option ng-value="0">**Select Semester**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newDet.SemesterId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-2">
                                         <div class="form-group">
-                                            <label>Subject</label>   
+                                            <label>Subject</label>
                                             <select class="form-control form-control-sm select2" ng-model="newDet.SubjectId" ng-change="GetRSubjectLessonWise()">
                                                 <option ng-value="cl.id" ng-repeat="cl in SubjectListRpt" ng-selected="cl.id==newDet.SubjectId">{{cl.text}}</option>
                                             </select>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Lesson/Theme</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newDet.LessonId" ng-change="GetRLessonTopicDetailsWise()">
-                                                <option ng-value="cl.LessonId" ng-repeat="cl in RSubjectLessonWiseList" ng-selected="cl.LessonId==newDet.LessonId">{{cl.LessonName}}</option>
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.SelectLesson" ng-change="GetRLessonTopicDetailsWise()">
+                                                <option ng-value="cl" ng-repeat="cl in RSubjectLessonWiseList">{{cl.LessonName}}</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Topic/LOC</label>
                                             <select class="form-control form-control-sm select2" ng-model="newDet.TopicName" ng-change="GetAllIndicatorList()">
@@ -146,8 +206,10 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <button class="btn btn-sm btn-success mt-4" ng-click="GetAllIndicatorList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                    <div class="col-md-2" ng-class="{ 'col-md-12': newDet.SelectedClass && (newDet.SelectedClass.ClassType == 2 || newDet.SelectedClass.ClassType == 3), 'mt-4': !(newDet.SelectedClass && (newDet.SelectedClass.ClassType == 2 || newDet.SelectedClass.ClassType == 3)) }">
+                                        <div class="form-group mb-1 float-right">
+                                            <button class="btn btn-sm btn-success" ng-click="GetAllIndicatorList()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                        </div>
                                     </div>
                                 </div>                                
                               
@@ -199,39 +261,69 @@
                             <div class="tab-pane fade main-section" id="summary" role="tabpanel"
                                  aria-labelledby="board-tab">
                                 <div class="row mt-2">
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label>Class</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newSummary.ClassId" ng-change="GetClassWiseSubjectListRpt(newSummary.ClassId)">
-                                                <option ng-value="0">**Select Class**</option>
-                                                <option ng-value="cl.id" ng-repeat="cl in ClassSection.ClassList" ng-selected="cl.id==newSummary.ClassId">{{cl.text}}</option>
+                                    <div class="col-md-2" ng-show="AcademicConfig.ActiveBatch==true">
+                                        <div class="form-group ">
+                                            <label>Batch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSummary.BatchId" style="width:100%" ng-change="GetClassWiseSubjectListRpt(newSummary,1)">
+                                                <option ng-value="0">**Select Batch**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in BatchList" ng-selected="cl.id==newSummary.BatchId">{{cl.text}}</option>
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-1">
+                                            <label>Class/Sec</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSummary.SelectedClass" ng-change="GetClassWiseSubjectListRpt(newSummary,1)">
+                                                <option ng-value="0">**Select Class**</option>
+                                                <option ng-value="cl" ng-repeat="cl in ClassSection.ClassList">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2" ng-show="newSummary.SelectedClass.ClassType==2  &&  AcademicConfig.ActiveClassYear==true">
+                                        <div class="form-group">
+                                            <label>Class Year</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSummary.ClassYearId" ng-change="GetClassWiseSubjectListRpt(newSummary,1)" style="width:100%">
+                                                <option ng-value="0">**Select Year**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in ClassYearList" ng-selected="cl.id==newSummary.ClassYearId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newSummary.SelectedClass.ClassType==3 &&  AcademicConfig.ActiveSemester==true">
+                                        <div class="form-group">
+                                            <label>Semester</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newSummary.SemesterId" ng-change="GetClassWiseSubjectListRpt(newSummary,1)" style="width:100%">
+                                                <option ng-value="0">**Select Semester**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in SemesterList" ng-selected="cl.id==newSummary.SemesterId">{{cl.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Subject</label>
-                                            <select class="form-control form-control-sm select2" ng-model="newSummary.SubjectId">
-                                                <option ng-value="cl.id" ng-repeat="cl in SubjectListRpt" ng-selected="cl.id==newSummary.SubjectId">{{cl.text}}</option>
+                                            <select class="form-control form-control-sm select2" ng-model="newSummary.SubjectId" ng-change="GetIndicatorSummary()">
+                                                <option ng-value="cl.id" ng-repeat="cl in SubjectListForRpt" ng-selected="cl.id==newSummary.SubjectId">{{cl.text}}</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-2">
-                                        <button class="btn btn-sm btn-success mt-4" ng-click="GetIndicatorSummary()">Load</button>
+                                        <button class="btn btn-sm btn-success mt-4" ng-click="GetIndicatorSummary()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
                                     </div>
 
 
                                     @*<div class="col-md-2">
-                <div class="input-group input-group-sm table-search-filed mt-4">
-                    <input class="form-control form-control-navbar" type="search"
-                           placeholder="Search" aria-label="Search">
-                    <div class="input-group-append">
-                        <button class="btn btn-default border-left-0" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
+            <div class="input-group input-group-sm table-search-filed mt-4">
+                <input class="form-control form-control-navbar" type="search"
+                       placeholder="Search" aria-label="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-default border-left-0" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
                 </div>
-            </div>*@
+            </div>
+        </div>*@
                                 </div>
 
                                 <div class="table-scroll-x-y sales-main-table table-scroll">

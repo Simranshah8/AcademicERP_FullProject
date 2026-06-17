@@ -140,13 +140,13 @@ app.controller('EnrollNumberController', function ($scope, $http, $timeout, $fil
 		};
 		$scope.newEmployee.EmployeeDetailsColl.push({});
 
-	/*	$scope.ClassSection = {};
-		GlobalServices.getClassSectionList().then(function (res) {
-			$scope.ClassSection = res.data.Data;
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
-*/
+		//$scope.ClassSection = {};
+		//GlobalServices.getClassSectionList().then(function (res) {
+		//	$scope.ClassSection = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
+
 		//$scope.GetAllStudentList();
 		//$scope.GetAllEmployeeList();
 

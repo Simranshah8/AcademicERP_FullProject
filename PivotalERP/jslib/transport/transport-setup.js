@@ -105,7 +105,6 @@
 */
 		$scope.isRouteLoaded = false;
 		$scope.isPointLoaded = false;
-
 		$scope.LoadRoutesTab = function () {
 			if (!$scope.isRouteLoaded) {
 				$scope.GetAllTransportRouteList();
@@ -124,10 +123,10 @@
 			script.type = 'text/javascript';
 			script.src = 'https://maps.googleapis.com/maps/api/js?key=' + API_KEY+'&callback=initMap';
 			document.body.appendChild(script);
-			/*setTimeout(function () {
-				$scope.initMap();
-			}, 500);
-*/
+			//setTimeout(function () {
+			//	$scope.initMap();
+			//}, 500);
+
 		} catch { }
 
 		
@@ -883,7 +882,7 @@
 		$scope.loadingstatus = "running";
 		showPleaseWait();
 		$scope.TransportPointList = [];
-		$scope.GetAllTransportRouteList();
+		//$scope.GetAllTransportRouteList();
 		$http({
 			method: 'POST',
 			url: base_url + "Transport/Creation/GetAllTransportPointList",
@@ -1209,6 +1208,92 @@
 		} catch { }
 		 
 	}
+
+	$scope.EditTransportPoint = function (cl) {
+		cl.IsEdit = true;
+		// Backup original values
+		cl.OldInRate = cl.InRate;
+		cl.OldOutRate = cl.OutRate;
+		cl.OldBothRate = cl.BothRate;
+	};
+
+	$scope.CancelEditTransportPoint = function (cl) {
+		cl.InRate = cl.OldInRate;
+		cl.OutRate = cl.OldOutRate;
+		cl.BothRate = cl.OldBothRate;
+		cl.IsEdit = false;
+	};
+
+	$scope.UpdateTransportPoint = function (refData) {
+		Swal.fire({
+			title: 'Update Transport Point Rate?',
+			text: 'This action will update the transport rates and automatically apply the changes to all associated Transport Mapping records. Do you want to continue?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Update',
+		}).then((result) => {
+			/* Read more about isConfirmed, isDenied below */
+			if (result.isConfirmed) {
+				$scope.loadingstatus = "running";
+				showPleaseWait();
+				var para = {
+					TransportPointId: refData.PointId,
+					InRate: refData.InRate,
+					OutRate: refData.OutRate,
+					BothRate: refData.BothRate
+				};
+				$http({
+					method: 'POST',
+					url: base_url + "Transport/Creation/UpdateTransportPoint",
+					dataType: "json",
+					data: JSON.stringify(para)
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingstatus = "stop";
+					if (res.data.IsSuccess) {
+						$scope.GetAllTransportPointList();
+						Swal.fire({ icon: 'success', title: 'Updated Successfully', text: res.data.ResponseMSG });
+					} else {
+						Swal.fire({ icon: 'error', title: 'Update Failed', text: res.data.ResponseMSG });
+					}
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		});
+	};
+
+	$scope.CurTransportRate = function () {
+		Swal.fire({
+			title: 'Apply Transport Point Rate?',
+			text: 'This action will update the transport rates and automatically apply the changes to all associated Transport Mapping records. Do you want to continue?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Apply',
+		}).then((result) => {
+			/* Read more about isConfirmed, isDenied below */
+			if (result.isConfirmed) {
+				$scope.loadingstatus = "running";
+				showPleaseWait();
+				$http({
+					method: 'POST',
+					url: base_url + "Transport/Creation/CurTransportRate",
+					dataType: "json"
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingstatus = "stop";
+					if (res.data.IsSuccess) {
+						$scope.GetAllTransportPointList();
+						Swal.fire({ icon: 'success', title: 'Applied Successfully', text: res.data.ResponseMSG });
+					} else {
+						Swal.fire({ icon: 'error', title: 'Apply Failed', text: res.data.ResponseMSG });
+					}
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		});
+	};
 
 	//*********************From and To Date Validation*************************
 	$scope.validateDateRange = function (changedField, obj, fromDetKey, toDetKey, fromTmpKey, toTmpKey, fromLabel, toLabel) {

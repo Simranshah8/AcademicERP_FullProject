@@ -29,9 +29,9 @@ namespace AcademicLib.BL.Exam.Transaction
 			else
 				return isValid;
 		}
-		public BE.Exam.Transaction.IndicatorCollections GetAllIndicator(int EntityId, int ClassId, int SubjectId, int? LessonId, string TopicName)
+		public BE.Exam.Transaction.IndicatorCollections GetAllIndicator(int EntityId, int ClassId, int SubjectId, int? LessonId, string TopicName, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
-			return db.getAllIndicator(_UserId, EntityId, ClassId, SubjectId,LessonId,TopicName);
+			return db.getAllIndicator(_UserId, EntityId, ClassId, SubjectId,LessonId,TopicName, BatchId, SemesterId, ClassYearId);
 		}
 		
 		public BE.Exam.Transaction.SubjectLessonWiseCollections GetSubjectLessonWise(int EntityId, int ClassId, int SubjectId)
@@ -52,9 +52,9 @@ namespace AcademicLib.BL.Exam.Transaction
 
 		//new code added by bibek for IndicatorSummary on 06 june
 
-		public BE.Exam.Transaction.IndicatorSummary GetIndicatorSummary(int EntityId, int? ClassId, int? SubjectId)
+		public BE.Exam.Transaction.IndicatorSummary GetIndicatorSummary(int EntityId, int? ClassId, int? SubjectId, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
-			return db.getIndicatorSummary(_UserId, EntityId, ClassId, SubjectId);
+			return db.getIndicatorSummary(_UserId, EntityId, ClassId, SubjectId, BatchId, SemesterId, ClassYearId);
 		}
 
 		public ResponeValues IsValidData(ref BE.Exam.Transaction.Indicator beData, bool IsModify)

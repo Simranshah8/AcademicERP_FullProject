@@ -31,7 +31,7 @@ namespace AcademicLib.DA.Exam.Transaction
 					cmd.Parameters.AddWithValue("@ClassId", beData.ClassId);
 					cmd.Parameters.AddWithValue("@SectionId", beData.SectionId);
 					cmd.Parameters.AddWithValue("@SubjectId", beData.SubjectId);
-					cmd.Parameters.AddWithValue("@LessonId", beData.LessonId);
+					cmd.Parameters.AddWithValue("@LessonSno", beData.LessonSno);
 					cmd.Parameters.AddWithValue("@TopicName", beData.TopicName);
 					cmd.Parameters.AddWithValue("@StudentId", beData.StudentId);
                     cmd.Parameters.AddWithValue("@IndicatorSNo", beData.IndicatorSNo);
@@ -39,12 +39,13 @@ namespace AcademicLib.DA.Exam.Transaction
                     cmd.Parameters.AddWithValue("@Marks", beData.Marks);
 					cmd.Parameters.AddWithValue("@Remarks", beData.Remarks);
 					cmd.Parameters.AddWithValue("@UserId", UserId);
-					//Added on chaitra 6
 					cmd.Parameters.AddWithValue("@EvaluationAreaId", beData.EvaluationAreaId);
 					cmd.Parameters.AddWithValue("@IndicatorId", beData.IndicatorId);
 					cmd.Parameters.AddWithValue("@AssessmentTypeId", beData.AssessmentTypeId);
 					cmd.Parameters.AddWithValue("@AssessmentDate", beData.AssessmentDate);
-					//Ends
+					cmd.Parameters.AddWithValue("@BatchId", beData.BatchId);
+					cmd.Parameters.AddWithValue("@SemesterId", beData.SemesterId);
+					cmd.Parameters.AddWithValue("@ClassYearId", beData.ClassYearId);
 					cmd.CommandText = "usp_AddICMarkEntry";
 					cmd.ExecuteNonQuery();
 				}
@@ -70,7 +71,8 @@ namespace AcademicLib.DA.Exam.Transaction
 		}
 
 
-		public AcademicLib.BE.Exam.Transaction.ICStudentsDetailCollections getIStudentsDetailsSubjectsWise(int UserId, int EntityId, int? AcademicYearId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, int? CFAssessmentTypeId)
+		public AcademicLib.BE.Exam.Transaction.ICStudentsDetailCollections getIStudentsDetailsSubjectsWise(int UserId, int EntityId, int? AcademicYearId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, int? CFAssessmentTypeId,
+			DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
 			AcademicLib.BE.Exam.Transaction.ICStudentsDetailCollections dataColl = new AcademicLib.BE.Exam.Transaction.ICStudentsDetailCollections();
 			dal.OpenConnection();
@@ -87,6 +89,10 @@ namespace AcademicLib.DA.Exam.Transaction
 			cmd.Parameters.AddWithValue("@TopicName", TopicName);
 			cmd.Parameters.AddWithValue("@AssessmentTypeId", AssessmentTypeId);
 			cmd.Parameters.AddWithValue("@CFAssessmentTypeId", CFAssessmentTypeId);
+			cmd.Parameters.AddWithValue("@AssessmentDate", AssessmentDate);
+			cmd.Parameters.AddWithValue("@BatchId", BatchId);
+			cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+			cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
 			cmd.CommandText = "usp_GetStudentsForICMarkEntry";
 			try
 			{
@@ -94,26 +100,51 @@ namespace AcademicLib.DA.Exam.Transaction
 				while (reader.Read())
 				{
 					AcademicLib.BE.Exam.Transaction.ICStudentsDetail beData = new AcademicLib.BE.Exam.Transaction.ICStudentsDetail();
-					if (!(reader[0] is DBNull)) beData.ClassId = reader.GetInt32(0);
-					if (!(reader[1] is DBNull)) beData.SectionId = reader.GetInt32(1);
-					if (!(reader[2] is DBNull)) beData.SectionName = reader.GetString(2);
+					beData.Indicators = new List<BE.Exam.Transaction.IndicatorList>();
+					if (!(reader[0] is DBNull)) beData.StudentId = reader.GetInt32(0);
+					if (!(reader[1] is DBNull)) beData.AcademicYearId = reader.GetInt32(1);
+					if (!(reader[2] is DBNull)) beData.StudentName = reader.GetString(2);
 					if (!(reader[3] is DBNull)) beData.RegdNo = reader.GetString(3);
 					if (!(reader[4] is DBNull)) beData.RollNumber = reader.GetInt32(4);
-					if (!(reader[5] is DBNull)) beData.StudentName = reader.GetString(5);
-					if (!(reader[6] is DBNull)) beData.Evaluation = Convert.ToBoolean(reader[6]);
-					if (!(reader[7] is DBNull)) beData.Marks = reader.GetInt32(7);
-					if (!(reader[8] is DBNull)) beData.Remarks = reader.GetString(8);
-					if (!(reader[9] is DBNull)) beData.AcademicYearId = reader.GetInt32(9);
-					if (!(reader[10] is DBNull)) beData.SNo = reader.GetInt32(10);
-					if (!(reader[11] is DBNull)) beData.IndicatorName = reader.GetString(11);
-					if (!(reader[12] is DBNull)) beData.StudentId = reader.GetInt32(12);
-
-					//Added By Suresh on 6 Baishakh 2082
-					if (!(reader[13] is DBNull)) beData.EvaluationAreaId = reader.GetInt32(13);
-					if (!(reader[14] is DBNull)) beData.IndicatorId = reader.GetInt32(14);
-					if (!(reader[15] is DBNull)) beData.AssessmentTypeId = reader.GetInt32(15);
-					if (!(reader[16] is DBNull)) beData.AssessmentDate = reader.GetDateTime(16);
+					if (!(reader[5] is DBNull)) beData.ClassId = reader.GetInt32(5);
+					if (!(reader[6] is DBNull)) beData.SectionId = reader.GetInt32(6);
+					if (!(reader[7] is DBNull)) beData.SectionName = reader.GetString(7); 
+					if (!(reader[8] is DBNull)) beData.BatchId = reader.GetInt32(7);
+					if (!(reader[9] is DBNull)) beData.SemesterId = reader.GetInt32(9);
+					if (!(reader[10] is DBNull)) beData.ClassYearId = reader.GetInt32(10);
+					if (!(reader[11] is DBNull)) beData.SubjectId = reader.GetInt32(11);
 					dataColl.Add(beData);
+				}
+				if (reader.NextResult())
+				{
+					while (reader.Read())
+					{
+						BE.Exam.Transaction.IndicatorList det = new BE.Exam.Transaction.IndicatorList();
+						if (!(reader[0] is DBNull)) det.IndicatorId = reader.GetInt32(0);
+						if (!(reader[1] is DBNull)) det.IndicatorSno = reader.GetInt32(1);
+						if (!(reader[2] is DBNull)) det.IndicatorName = reader.GetString(2);
+						if (!(reader[3] is DBNull)) det.LessonSno = reader.GetInt32(3);
+						if (!(reader[4] is DBNull)) det.TopicName = reader.GetString(4);
+						if (!(reader[5] is DBNull)) det.StudentId = reader.GetInt32(5);
+						if (!(reader[6] is DBNull)) det.Evaluation = Convert.ToBoolean(reader[6]);
+						if (!(reader[7] is DBNull)) det.Marks = reader.GetInt32(7);
+						if (!(reader[8] is DBNull)) det.Remarks = reader.GetString(8);
+						if (!(reader[9] is DBNull)) det.EvaluationAreaId = reader.GetInt32(9);
+						if (!(reader[10] is DBNull)) det.AssessmentTypeId = reader.GetInt32(10);
+						if (!(reader[11] is DBNull)) det.AssessmentDate = Convert.ToDateTime(reader[11]);
+						var student = dataColl.FirstOrDefault(x =>x.StudentId == det.StudentId);
+						if (student != null)
+						{
+							if (student.Indicators == null)
+								student.Indicators = new List<BE.Exam.Transaction.IndicatorList>();
+							// Prevent duplicate indicators
+							bool exists = student.Indicators.Any(x =>x.IndicatorId == det.IndicatorId && x.IndicatorSno == det.IndicatorSno && x.StudentId == det.StudentId);
+							if (!exists)
+							{
+								student.Indicators.Add(det);
+							}
+						}
+					}					
 				}
 				reader.Close();
 				dataColl.IsSuccess = true;
@@ -132,7 +163,8 @@ namespace AcademicLib.DA.Exam.Transaction
 			return dataColl;
 		}
 
-		public AcademicLib.BE.Exam.Transaction.TopicForStudentWiseICCollections getTopicForStudentWiseIC(int UserId, int EntityId, int? AcademicYearId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, int? CFAssessmentTypeId)
+		public AcademicLib.BE.Exam.Transaction.TopicForStudentWiseICCollections getTopicForStudentWiseIC(int UserId, int EntityId, int? AcademicYearId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, int? CFAssessmentTypeId,
+			DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
 			AcademicLib.BE.Exam.Transaction.TopicForStudentWiseICCollections dataColl = new AcademicLib.BE.Exam.Transaction.TopicForStudentWiseICCollections();
 			dal.OpenConnection();
@@ -147,29 +179,84 @@ namespace AcademicLib.DA.Exam.Transaction
 			cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
 			cmd.Parameters.AddWithValue("@LessonId", LessonId);
 			cmd.Parameters.AddWithValue("@StudentId", StudentId);
-			//Added Fields
 			cmd.Parameters.AddWithValue("@AssessmentTypeId", AssessmentTypeId);
 			cmd.Parameters.AddWithValue("@CFAssessmentTypeId", CFAssessmentTypeId);
-			//Ends
+			cmd.Parameters.AddWithValue("@AssessmentDate", AssessmentDate);
+			cmd.Parameters.AddWithValue("@BatchId", BatchId);
+			cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+			cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
 			cmd.CommandText = "usp_GetTopicForStudentWiseIC";
 			try
 			{
 				System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+				//while (reader.Read())
+				//{
+				//	AcademicLib.BE.Exam.Transaction.TopicForStudentWiseIC beData = new AcademicLib.BE.Exam.Transaction.TopicForStudentWiseIC();
+				//	if (!(reader[0] is DBNull)) beData.IndicatorId = reader.GetInt32(0);
+				//	if (!(reader[1] is DBNull)) beData.TopicName = reader.GetString(1);
+				//	if (!(reader[2] is DBNull)) beData.IndicatorName = reader.GetString(2);
+				//	if (!(reader[3] is DBNull)) beData.SNo = reader.GetInt32(3);
+				//	if (!(reader[4] is DBNull)) beData.Marks = reader.GetInt32(4);
+				//	if (!(reader[5] is DBNull)) beData.Remarks = reader.GetString(5);
+				//	if (!(reader[6] is DBNull)) beData.Evaluation = Convert.ToBoolean(reader[6]);
+				//	if (!(reader[7] is DBNull)) beData.EvaluationAreaId = reader.GetInt32(7);
+				//	if (!(reader[8] is DBNull)) beData.ClassId = reader.GetInt32(8);
+				//	if (!(reader[9] is DBNull)) beData.SectionId = reader.GetInt32(9);
+				//	if (!(reader[10] is DBNull)) beData.BatchId = reader.GetInt32(10);
+				//	if (!(reader[11] is DBNull)) beData.SemesterId = reader.GetInt32(11);
+				//	if (!(reader[12] is DBNull)) beData.ClassYearId = reader.GetInt32(12);
+				//	if (!(reader[13] is DBNull)) beData.StudentId = reader.GetInt32(13);
+				//	if (!(reader[14] is DBNull)) beData.SubjectId = reader.GetInt32(14);
+				//	if (!(reader[15] is DBNull)) beData.LessonSno = reader.GetInt32(15);
+				//	if (!(reader[16] is DBNull)) beData.AssessmentDate = Convert.ToDateTime(reader[16]);
+
+				//	dataColl.Add(beData);
+				//}
 				while (reader.Read())
 				{
 					AcademicLib.BE.Exam.Transaction.TopicForStudentWiseIC beData = new AcademicLib.BE.Exam.Transaction.TopicForStudentWiseIC();
-					if (!(reader[0] is DBNull)) beData.TranId = reader.GetInt32(0);
-					if (!(reader[1] is DBNull)) beData.TopicName = reader.GetString(1);
-					if (!(reader[2] is DBNull)) beData.IndicatorName = reader.GetString(2);
-					if (!(reader[3] is DBNull)) beData.SNo = reader.GetInt32(3);
-					if (!(reader[4] is DBNull)) beData.Marks = reader.GetInt32(4);
-					if (!(reader[5] is DBNull)) beData.Remarks = reader.GetString(5);
-					if (!(reader[6] is DBNull)) beData.Evaluation = Convert.ToBoolean(reader[6]);
-
-					//Added By Suresh on Baishakh 6
-					if (!(reader[7] is DBNull)) beData.EvaluationAreaId = reader.GetInt32(7);
-
+					if (!(reader[0] is DBNull)) beData.LessonId = reader.GetInt32(0);
+					if (!(reader[1] is DBNull)) beData.LessonSno = reader.GetInt32(1);
+					if (!(reader[2] is DBNull)) beData.TopicName = reader.GetString(2);
+					if (!(reader[3] is DBNull)) beData.ClassId = reader.GetInt32(3);
+					if (!(reader[4] is DBNull)) beData.SectionId = reader.GetInt32(4);
+					if (!(reader[5] is DBNull)) beData.BatchId = reader.GetInt32(5);
+					if (!(reader[6] is DBNull)) beData.SemesterId = reader.GetInt32(6);
+					if (!(reader[7] is DBNull)) beData.ClassYearId = reader.GetInt32(7);
+					if (!(reader[8] is DBNull)) beData.SubjectId = reader.GetInt32(8);
+					if (!(reader[9] is DBNull)) beData.StudentId = reader.GetInt32(9);
 					dataColl.Add(beData);
+				}
+				if (reader.NextResult())
+				{
+					while (reader.Read())
+					{
+						BE.Exam.Transaction.IndicatorList det = new BE.Exam.Transaction.IndicatorList();
+						if (!(reader[0] is DBNull)) det.IndicatorId = reader.GetInt32(0);
+						if (!(reader[1] is DBNull)) det.IndicatorSno = reader.GetInt32(1);
+						if (!(reader[2] is DBNull)) det.IndicatorName = reader.GetString(2);
+						if (!(reader[3] is DBNull)) det.LessonSno = reader.GetInt32(3);
+						if (!(reader[4] is DBNull)) det.TopicName = reader.GetString(4);
+						if (!(reader[5] is DBNull)) det.StudentId = reader.GetInt32(5);
+						if (!(reader[6] is DBNull)) det.Evaluation = Convert.ToBoolean(reader[6]);
+						if (!(reader[7] is DBNull)) det.Marks = reader.GetInt32(7);
+						if (!(reader[8] is DBNull)) det.Remarks = reader.GetString(8);
+						if (!(reader[9] is DBNull)) det.EvaluationAreaId = reader.GetInt32(9);
+						if (!(reader[10] is DBNull)) det.AssessmentTypeId = reader.GetInt32(10);
+						if (!(reader[11] is DBNull)) det.AssessmentDate = Convert.ToDateTime(reader[11]);
+						var student = dataColl.FirstOrDefault(x => x.TopicName == det.TopicName);
+						if (student != null)
+						{
+							if (student.Indicators == null)
+								student.Indicators = new List<BE.Exam.Transaction.IndicatorList>();
+							// Prevent duplicate indicators
+							bool exists = student.Indicators.Any(x => x.IndicatorId == det.IndicatorId && x.IndicatorSno == det.IndicatorSno && x.TopicName == det.TopicName);
+							if (!exists)
+							{
+								student.Indicators.Add(det);
+							}
+						}
+					}
 				}
 				reader.Close();
 				dataColl.IsSuccess = true;
@@ -188,7 +275,7 @@ namespace AcademicLib.DA.Exam.Transaction
 			return dataColl;
 		}
 
-		public AcademicLib.BE.Exam.Transaction.ICMArkEntryStatusCCollections getICMarkSubmitStatus(int UserId, int ClassId, int? SectionId, int SubjectId, int LessonId, int? AcademicYearId)
+		public AcademicLib.BE.Exam.Transaction.ICMArkEntryStatusCCollections getICMarkSubmitStatus(int UserId, int ClassId, int? SectionId, int SubjectId, int LessonId, int? AcademicYearId, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
 			AcademicLib.BE.Exam.Transaction.ICMArkEntryStatusCCollections dataColl = new AcademicLib.BE.Exam.Transaction.ICMArkEntryStatusCCollections();
 			dal.OpenConnection();
@@ -200,6 +287,9 @@ namespace AcademicLib.DA.Exam.Transaction
 			cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
 			cmd.Parameters.AddWithValue("@LessonId", LessonId);
 			cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+			cmd.Parameters.AddWithValue("@BatchId", BatchId);
+			cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+			cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
 			cmd.CommandText = "usp_GetICMarkSubmitList";
 			try
 			{
@@ -235,9 +325,7 @@ namespace AcademicLib.DA.Exam.Transaction
 			return dataColl;
 		}
 
-
-
-		public ResponeValues DeleteICMarkEntryById(int UserId, int EntityId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId)
+		public ResponeValues DeleteICMarkEntryById(int UserId, int EntityId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
 			ResponeValues resVal = new ResponeValues();
 			dal.OpenConnection();
@@ -259,6 +347,10 @@ namespace AcademicLib.DA.Exam.Transaction
 			cmd.Parameters[9].Direction = System.Data.ParameterDirection.Output;
 			cmd.Parameters[10].Direction = System.Data.ParameterDirection.Output;
 			cmd.Parameters[11].Direction = System.Data.ParameterDirection.Output;
+			cmd.Parameters.AddWithValue("@AssessmentDate", AssessmentDate);
+			cmd.Parameters.AddWithValue("@BatchId", BatchId);
+			cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+			cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
 			try
 			{
 				cmd.ExecuteNonQuery();
@@ -294,7 +386,7 @@ namespace AcademicLib.DA.Exam.Transaction
 		}
 
 
-		public ResponeValues DeleteICMarkEntryStudentwiseById(int UserId, int EntityId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId)
+		public ResponeValues DeleteICMarkEntryStudentwiseById(int UserId, int EntityId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
 			ResponeValues resVal = new ResponeValues();
 			dal.OpenConnection();
@@ -316,6 +408,10 @@ namespace AcademicLib.DA.Exam.Transaction
 			cmd.Parameters[9].Direction = System.Data.ParameterDirection.Output;
 			cmd.Parameters[10].Direction = System.Data.ParameterDirection.Output;
 			cmd.Parameters[11].Direction = System.Data.ParameterDirection.Output;
+			cmd.Parameters.AddWithValue("@AssessmentDate", AssessmentDate);
+			cmd.Parameters.AddWithValue("@BatchId", BatchId);
+			cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+			cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
 			try
 			{
 				cmd.ExecuteNonQuery();
@@ -349,6 +445,135 @@ namespace AcademicLib.DA.Exam.Transaction
 			}
 			return resVal;
 		}
+
+		public AcademicLib.BE.Exam.Transaction.LOCWiseMarkEntryCollections GetStudentsForLOCMarkEntry(int UserId, int EntityId, int? AcademicYearId, int ClassId, int? SectionId, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, int? CFAssessmentTypeId,
+			DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
+		{
+			AcademicLib.BE.Exam.Transaction.LOCWiseMarkEntryCollections dataColl = new AcademicLib.BE.Exam.Transaction.LOCWiseMarkEntryCollections();
+			dal.OpenConnection();
+			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+			cmd.CommandType = System.Data.CommandType.StoredProcedure;
+			cmd.Parameters.AddWithValue("@UserId", UserId);
+			cmd.Parameters.AddWithValue("@EntityId", EntityId);
+			cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+			cmd.Parameters.AddWithValue("@ClassId", ClassId);
+			cmd.Parameters.AddWithValue("@SectionId", SectionId);
+			cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
+			cmd.Parameters.AddWithValue("@LessonId", LessonId);
+			cmd.Parameters.AddWithValue("@TopicName", TopicName);
+			cmd.Parameters.AddWithValue("@AssessmentTypeId", AssessmentTypeId);
+			cmd.Parameters.AddWithValue("@CFAssessmentTypeId", CFAssessmentTypeId);
+			cmd.Parameters.AddWithValue("@AssessmentDate", AssessmentDate);
+			cmd.Parameters.AddWithValue("@BatchId", BatchId);
+			cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+			cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+			cmd.CommandText = "usp_GetStudentsForLOCMarkEntry";
+			try
+			{
+				System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+				while (reader.Read())
+				{
+					AcademicLib.BE.Exam.Transaction.LOCWiseMarkEntry beData = new AcademicLib.BE.Exam.Transaction.LOCWiseMarkEntry();
+					if (!(reader[0] is DBNull)) beData.StudentId = reader.GetInt32(0);
+					if (!(reader[1] is DBNull)) beData.AcademicYearId = reader.GetInt32(1);
+					if (!(reader[2] is DBNull)) beData.StudentName = reader.GetString(2);
+					if (!(reader[3] is DBNull)) beData.RegdNo = reader.GetString(3);
+					if (!(reader[4] is DBNull)) beData.RollNumber = reader.GetInt32(4);
+					if (!(reader[5] is DBNull)) beData.ClassId = reader.GetInt32(5);
+					if (!(reader[6] is DBNull)) beData.SectionId = reader.GetInt32(6);
+					if (!(reader[7] is DBNull)) beData.SectionName = reader.GetString(7);
+					if (!(reader[8] is DBNull)) beData.BatchId = reader.GetInt32(7);
+					if (!(reader[9] is DBNull)) beData.SemesterId = reader.GetInt32(9);
+					if (!(reader[10] is DBNull)) beData.ClassYearId = reader.GetInt32(10);
+					if (!(reader[11] is DBNull)) beData.SubjectId = reader.GetInt32(11);
+					if (!(reader[12] is DBNull)) beData.LessonSno = reader.GetInt32(12);
+					if (!(reader[13] is DBNull)) beData.TopicName = reader.GetString(13);
+					if (!(reader[14] is DBNull)) beData.Marks = reader.GetInt32(14);
+					if (!(reader[15] is DBNull)) beData.Remarks = reader.GetString(15);
+					if (!(reader[16] is DBNull)) beData.AssessmentTypeId = reader.GetInt32(16);
+					if (!(reader[17] is DBNull)) beData.AssessmentDate = Convert.ToDateTime(reader[17]);
+					if (!(reader[18] is DBNull)) beData.EvaluationAreaId = reader.GetInt32(18);
+					dataColl.Add(beData);
+				}
+				reader.Close();
+				dataColl.IsSuccess = true;
+				dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+			}
+			catch (Exception ee)
+			{
+				dataColl.IsSuccess = false;
+				dataColl.ResponseMSG = ee.Message;
+			}
+			finally
+			{
+				dal.CloseConnection();
+			}
+			return dataColl;
+		}
+
+		public AcademicLib.BE.Exam.Transaction.StdWiseLOCMarkEntryCollections GetStdWiseLOCMarkEntry(int UserId, int EntityId, int? AcademicYearId, int ClassId, int? SectionId, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, int? CFAssessmentTypeId,
+			DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
+		{
+			AcademicLib.BE.Exam.Transaction.StdWiseLOCMarkEntryCollections dataColl = new AcademicLib.BE.Exam.Transaction.StdWiseLOCMarkEntryCollections();
+			dal.OpenConnection();
+			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+			cmd.CommandType = System.Data.CommandType.StoredProcedure;
+			cmd.Parameters.AddWithValue("@UserId", UserId);
+			cmd.Parameters.AddWithValue("@EntityId", EntityId);
+			cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+			cmd.Parameters.AddWithValue("@ClassId", ClassId);
+			cmd.Parameters.AddWithValue("@SectionId", SectionId);
+			cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
+			cmd.Parameters.AddWithValue("@LessonId", LessonId);
+			cmd.Parameters.AddWithValue("@StudentId", StudentId);
+			cmd.Parameters.AddWithValue("@AssessmentTypeId", AssessmentTypeId);
+			cmd.Parameters.AddWithValue("@CFAssessmentTypeId", CFAssessmentTypeId);
+			cmd.Parameters.AddWithValue("@AssessmentDate", AssessmentDate);
+			cmd.Parameters.AddWithValue("@BatchId", BatchId);
+			cmd.Parameters.AddWithValue("@SemesterId", SemesterId);
+			cmd.Parameters.AddWithValue("@ClassYearId", ClassYearId);
+			cmd.CommandText = "usp_GetStdWiseLOCMarkEntry";
+			try
+			{
+				System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+				while (reader.Read())
+				{
+					AcademicLib.BE.Exam.Transaction.StdWiseLOCMarkEntry beData = new AcademicLib.BE.Exam.Transaction.StdWiseLOCMarkEntry();
+					if (!(reader[0] is DBNull)) beData.StudentId = reader.GetInt32(0);
+					if (!(reader[1] is DBNull)) beData.AcademicYearId = reader.GetInt32(1);
+					if (!(reader[2] is DBNull)) beData.LessonSno = reader.GetInt32(2);
+					if (!(reader[3] is DBNull)) beData.TopicName = reader.GetString(3);
+					if (!(reader[4] is DBNull)) beData.ClassId = reader.GetInt32(4);
+					if (!(reader[5] is DBNull)) beData.SectionId = reader.GetInt32(5);
+					if (!(reader[6] is DBNull)) beData.BatchId = reader.GetInt32(6);
+					if (!(reader[7] is DBNull)) beData.SemesterId = reader.GetInt32(7);
+					if (!(reader[8] is DBNull)) beData.ClassYearId = reader.GetInt32(7);
+					if (!(reader[9] is DBNull)) beData.SubjectId = reader.GetInt32(9);
+					if (!(reader[10] is DBNull)) beData.EvaluationAreaId = reader.GetInt32(10);
+					if (!(reader[11] is DBNull)) beData.Marks = reader.GetInt32(11);
+					if (!(reader[12] is DBNull)) beData.Remarks = reader.GetString(12);
+					if (!(reader[13] is DBNull)) beData.AssessmentTypeId = reader.GetInt32(13);
+					if (!(reader[14] is DBNull)) beData.AssessmentDate = Convert.ToDateTime(reader[14]);
+					dataColl.Add(beData);
+				}
+				reader.Close();
+				dataColl.IsSuccess = true;
+				dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+			}
+			catch (Exception ee)
+			{
+				dataColl.IsSuccess = false;
+				dataColl.ResponseMSG = ee.Message;
+			}
+			finally
+			{
+				dal.CloseConnection();
+			}
+			return dataColl;
+		}
+
 	}
 }
 

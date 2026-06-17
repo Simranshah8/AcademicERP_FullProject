@@ -15,7 +15,7 @@ namespace AcademicLib.DA.Attendance
             dal = new DataAccessLayer1(hostName, dbName);
         }
 
-        public AcademicLib.RE.Attendance.EmpAttendanceSummaryCollections getAllEmpAttendanceSummary(int UserId, string BranchIdColl, string DepartmentIdColl, string GroupIdColl, DateTime? DateFrom, DateTime? DateTo, int? EmpType,int ForEmp)
+        public AcademicLib.RE.Attendance.EmpAttendanceSummaryCollections getAllEmpAttendanceSummary(int UserId, string BranchIdColl, string DepartmentIdColl, string GroupIdColl, DateTime? DateFrom, DateTime? DateTo, int? EmpType,int? ReportType)
         {
             AcademicLib.RE.Attendance.EmpAttendanceSummaryCollections dataColl = new AcademicLib.RE.Attendance.EmpAttendanceSummaryCollections();
             dal.OpenConnection();
@@ -27,8 +27,8 @@ namespace AcademicLib.DA.Attendance
             cmd.Parameters.AddWithValue("@GroupIdColl", GroupIdColl);
             cmd.Parameters.AddWithValue("@DateFrom", DateFrom);
             cmd.Parameters.AddWithValue("@DateTo", DateTo);
-            cmd.Parameters.AddWithValue("@EmpType", EmpType);           
-            cmd.Parameters.AddWithValue("@ForEmp", ForEmp);           
+            cmd.Parameters.AddWithValue("@EmpType", EmpType);
+            cmd.Parameters.AddWithValue("@ReportType", ReportType);
             //cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
             //cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
             //cmd.Parameters.Add("@ErrorNumber", System.Data.SqlDbType.Int);
@@ -62,7 +62,7 @@ namespace AcademicLib.DA.Attendance
                     if (!(reader[19] is DBNull)) beData.ServiceType = reader.GetString(19);
                     if (!(reader[20] is DBNull)) beData.CompanyName = reader.GetString(20);
                     if (!(reader[21] is DBNull)) beData.WorkingDuration = Convert.ToDouble(reader[21]);
-                    if (!(reader[22] is DBNull)) beData.OTDuration = Convert.ToDouble(reader[22]); ;
+                    if (!(reader[22] is DBNull)) beData.OTDuration = Convert.ToDouble(reader[22]);
                     if (!(reader[23] is DBNull)) beData.SinglePunchDeduction = Convert.ToDouble(reader[23]); ;
                     if (!(reader[24] is DBNull)) beData.EarlyInMinutes = Convert.ToDouble(reader[24]); ;
                     if (!(reader[25] is DBNull)) beData.LateInMinutes = Convert.ToDouble(reader[25]); ;
@@ -77,6 +77,7 @@ namespace AcademicLib.DA.Attendance
                     if (!(reader[34] is DBNull)) beData.BranchAddress = reader.GetString(34);
                     if (!(reader[35] is DBNull)) beData.TotalAbsent = reader.GetInt32(35);
                     if (!(reader[36] is DBNull)) beData.WorkingShift = reader.GetString(36);
+                    if (!(reader[37] is DBNull)) beData.IsLeft = Convert.ToBoolean(reader[37]);
                     dataColl.Add(beData);
                 }               
                

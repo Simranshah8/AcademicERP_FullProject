@@ -304,7 +304,7 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 			ForPreStudent: false,
 			IsActive: true,
 			DisplayYearAD: '',
-			DisplayYearBS: '',
+			DisplayYearBS:'',
 			Mode: 'Save'
 		};
 		$scope.newExamType.ClassWiseColl_TMP.push({});
@@ -385,6 +385,38 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 
 	}
 
+	$scope.GetAutoOrderNo = function (be) {
+		var para = {
+			For: be
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Creation/GetClassSetupAutoOrderNo",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				var vDet = res.data.Data;
+				if (be == 11) { //Exam Type
+					$scope.newExamType.OrderNo = vDet.RId;
+				}
+				if (be == 12) {  //Exam Type Group
+					$scope.newExamTypeGroup.OrderNo = vDet.RId;
+				}
+				if (be == 13) {	//Re-Exam Type
+					$scope.newReExamType.OrderNo = vDet.RId;
+				}
+				if (be == 14) { //Parent Exam Type Group
+					$scope.newParentExamTypeGroup.OrderNo = vDet.RId;
+				}
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
+
 	function OnClickDefault() {
 
 
@@ -400,8 +432,7 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 			document.getElementById('exam-type-section').style.display = "none";
 			document.getElementById('exam-type-form').style.display = "block";
 			$scope.ClearExamType();
-			$scope.GetExamTypeAutoOrderNo(1);
-
+			$scope.GetAutoOrderNo(11);
 		}
 
 		document.getElementById('back-exam-type').onclick = function () {
@@ -416,8 +447,7 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 			document.getElementById('reexam-type-section').style.display = "none";
 			document.getElementById('reexam-type-form').style.display = "block";
 			$scope.ClearExamType();
-			$scope.GetExamTypeAutoOrderNo(3);
-
+			$scope.GetAutoOrderNo(13);
 		}
 
 		document.getElementById('back-reexam-type').onclick = function () {
@@ -433,8 +463,7 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 			document.getElementById('exam-type-group-section').style.display = "none";
 			document.getElementById('exam-type-group-form').style.display = "block";
 			$scope.ClearExamTypeGroup();
-			$scope.GetExamTypeAutoOrderNo(2);
-
+			$scope.GetAutoOrderNo(12);
 		}
 
 		document.getElementById('back-exam-type-group').onclick = function () {
@@ -451,8 +480,7 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 			document.getElementById('parent-exam-type-section').style.display = "none";
 			document.getElementById('parent-exam-type-form').style.display = "block";
 			$scope.ClearParentExamTypeGroup();
-			$scope.GetExamTypeAutoOrderNo(4);
-
+			$scope.GetAutoOrderNo(14);
 		}
 
 		document.getElementById('back-parent-exam-type').onclick = function () {
@@ -1630,36 +1658,5 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 		});
 	}
 
-	$scope.GetExamTypeAutoOrderNo = function (be) {
-		var para = {
-			For: be
-		};
-		$http({
-			method: 'POST',
-			url: base_url + "Exam/Transaction/GetExamTypeAutoOrderNo",
-			dataType: "json",
-			data: JSON.stringify(para)
-		}).then(function (res) {
-			if (res.data.IsSuccess && res.data.Data) {
-				var vDet = res.data.Data;
-				if (be == 1) {
-					$scope.newExamType.OrderNo = vDet.RId;
-				}
-				if (be == 2) {
-					$scope.newExamTypeGroup.OrderNo = vDet.RId;
-				}
-				if (be == 3) {
-					$scope.newReExamType.OrderNo = vDet.RId;
-				}
-				if (be == 4) {
-					$scope.newParentExamTypeGroup.OrderNo = vDet.RId;
-				}
 
-			} else {
-				Swal.fire(res.data.ResponseMSG);
-			}
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
-	}
 });

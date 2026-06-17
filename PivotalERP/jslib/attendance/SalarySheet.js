@@ -546,7 +546,7 @@ app.controller('SalarySheetController', function ($scope, $http, $timeout, $filt
 		val = isEmptyAmt(val);
 		return ($filter('number')(val, $scope.noofdec)).parseDBL();
 	}
-
+	 
 	$scope.ChangeTotalAttendance = function (curAT) {
 		$scope.EmployeeListForSalarySheet.forEach(function (emp) {
 			emp.AttendanceTypeColl.forEach(function (at) {
@@ -726,9 +726,15 @@ app.controller('SalarySheetController', function ($scope, $http, $timeout, $filt
 
 		var totalTaxableEarning = 0;
 		var totalPTaxableEarning = 0;
+		var pTaxAmt = 0;
 
 		angular.forEach(emp.PayHeadColl, function (ph) {
+
 			ph.Amount = ToRound(ph.Amount);
+
+			if (ph.IsAllow == true && (ph.PayheadType == 4 || ph.PayheadType == 6))
+				pTaxAmt += ph.PAmount;
+
 			if (ph.IsAllow == true && ph.PayheadType != 1) {
 				//ph.Amount = isEmptyAmt(parseFloat(parseFloat(ph.Amount).toFixed(2)));
 
@@ -1073,6 +1079,19 @@ app.controller('SalarySheetController', function ($scope, $http, $timeout, $filt
 
 		});
 
+
+
+		totalEarning = ToRound(totalEarning);
+		totalPEarning = ToRound(totalPEarning);
+		totalDeducation = ToRound(totalDeducation);
+		totalPDeducation = ToRound(totalPDeducation);
+		taxExemptionAmt = ToRound(taxExemptionAmt);
+		taxExeptionAmtMax = ToRound(taxExeptionAmtMax);
+		totalTaxableEarning = ToRound(totalTaxableEarning);
+		totalPTaxableEarning = ToRound(totalPTaxableEarning);
+
+		var taxableEarning = 0;
+
 		emp.Earning = totalEarning;
 		emp.Deducation = totalDeducation;
 
@@ -1144,13 +1163,16 @@ app.controller('SalarySheetController', function ($scope, $http, $timeout, $filt
 				else
 					maxValue = (tr.MaxValue - tr.MinValue) + 1;
 
+				var findTP = mx(emp.PayHeadColl).firstOrDefault(p1 => p1.PayHeadingId == tr.PayHeadingId);
 
 				if (forTaxEaring > 0) {
 					if (maxValue >= forTaxEaring) {
+
 						taxCalRateColl.push({
 							Amount: forTaxEaring,
 							Rate: tr.Rate,
 							PayHeadingId: tr.PayHeadingId,
+							PAmount:findTP ? findTP.PAmount : 0,
 						});
 						forTaxEaring = 0;
 					} else if (maxValue < forTaxEaring) {
@@ -1158,6 +1180,7 @@ app.controller('SalarySheetController', function ($scope, $http, $timeout, $filt
 							Amount: maxValue,
 							Rate: tr.Rate,
 							PayHeadingId: tr.PayHeadingId,
+							PAmount: findTP ? findTP.PAmount : 0,
 						});
 
 						forTaxEaring -= maxValue;
@@ -1167,11 +1190,13 @@ app.controller('SalarySheetController', function ($scope, $http, $timeout, $filt
 		}
 
 		if (forTaxEaring > 0 && taxCalRateColl && taxCalRateColl.length > 0) {
+			var findTP1 = mx(emp.PayHeadColl).firstOrDefault(p1 => p1.PayHeadingId == lastRate.PayHeadingId);
 			var lastRate = taxCalRateColl[taxCalRateColl.length - 1];
 			taxCalRateColl.push({
 				Amount: forTaxEaring,
 				Rate: lastRate.Rate,
 				PayHeadingId: lastRate.PayHeadingId,
+				PAmount: findTP1 ? findTP1.PAmount : 0,
 			});
 			forTaxEaring = 0;
 		}
@@ -1191,7 +1216,10 @@ app.controller('SalarySheetController', function ($scope, $http, $timeout, $filt
 		var taxAmt = 0;
 		angular.forEach(taxCalRateColl, function (cr) {
 			var totalTax = ToRound((cr.Amount * cr.Rate) / 100);
-			var tAmt = ToRound(totalTax / 12);
+			var tAmt = ToRound(totalTax / emp.TotalMonth);
+
+			//var tAmt = ToRound((totalTax-isEmptyAmt(cr.PAmount)) / (emp.PendingMonths+1));
+
 			taxAmt += tAmt;
 			taxPayableAmt += tAmt;
 			$scope.TaxCal.SlabColl.push({

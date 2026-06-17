@@ -118,6 +118,8 @@
 			GenerateQR: false,
 			DepartmentId: 0,
 			DesignationId: 0,
+			IssueDate_TMP: new Date(),
+			ValidUpto_TMP: new Date(),
 			SelectEmployee: $scope.EmployeeSearchOptions[0].value,
 
 		};
@@ -159,6 +161,8 @@
 			RollNoFrom: 0,
 			RollNoTo: 0,
 			OnlyPhotoStudent: false,
+			IssueDate_TMP: new Date(),
+			ValidUpto_TMP: new Date(),
 			SelectStudent: $scope.StudentSearchOptions[0].value
 		};
 
@@ -498,80 +502,21 @@
 
 	};
 	//Ends
-	$scope.validateDatestd = function (changedField) {
-		if (!$scope.newPrintIdCard.IssueDateDet || !$scope.newPrintIdCard.ValidUptoDet ||
-			!$scope.newPrintIdCard.IssueDateDet.dateAD || !$scope.newPrintIdCard.ValidUptoDet.dateAD) {
-			return true;
-		}
-		var IssueDate = $filter('date')(new Date($scope.newPrintIdCard.IssueDateDet.dateAD), 'yyyy-MM-dd')
-		var ValidUpto = $filter('date')(new Date($scope.newPrintIdCard.ValidUptoDet.dateAD), 'yyyy-MM-dd')
-		if (!IssueDate || !ValidUpto) return true;
-		if (IssueDate > ValidUpto) {
-			if (changedField === 'IssueDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Start Date cannot be After Valid UpTo Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newPrintIdCard.IssueDate_TMP = new Date();
-						$scope.newPrintIdCard.IssueDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'ValidUpto') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Valid UpTo Date cannot be Before Start Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newPrintIdCard.ValidUpto_TMP = new Date();
-						$scope.newPrintIdCard.ValidUptoDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
 
-		return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.IssueDate_TMP = new Date();
+				obj.ValidUpto_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
 	};
+	
 
-
-	$scope.validateDateEmp = function (changedField) {
-		if (!$scope.newIdentityCard.IssueDateDet || !$scope.newIdentityCard.ValidUptoDet ||
-			!$scope.newIdentityCard.IssueDateDet.dateAD || !$scope.newIdentityCard.ValidUptoDet.dateAD) {
-			return true;
-		}
-		var IssueDate = $filter('date')(new Date($scope.newIdentityCard.IssueDateDet.dateAD), 'yyyy-MM-dd')
-		var ValidUpto = $filter('date')(new Date($scope.newIdentityCard.ValidUptoDet.dateAD), 'yyyy-MM-dd')
-		if (!IssueDate || !ValidUpto) return true;
-		if (IssueDate > ValidUpto) {
-			if (changedField === 'IssueDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Start Date cannot be After Valid UpTo Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newIdentityCard.IssueDate_TMP = new Date();
-						$scope.newIdentityCard.IssueDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'ValidUpto') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Valid UpTo Date cannot be Before Start Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newIdentityCard.ValidUpto_TMP = new Date();
-						$scope.newIdentityCard.ValidUptoDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
-	};
 });

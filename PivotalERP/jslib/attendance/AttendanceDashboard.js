@@ -40,7 +40,7 @@
             if (res.data.IsSuccess && res.data.Data) {
                 $scope.beData = res.data.Data;
 
-           /*     $timeout(function () {*/
+                $timeout(function () {
                     $scope.TodayStudentAttendance();
                     $scope.TodayEmployeeAttendance();
                     $scope.WeeklyStudentAttendanceOverview();
@@ -55,7 +55,7 @@
                     $scope.AbsenceFineOverview();
                     $scope.StudentAttendanceAlerts();
                     $scope.EmployeeAttendanceAlerts();
-             /*   }, 500);*/
+                }, 500);
 
 
             } else {
@@ -728,8 +728,6 @@
         $scope.EmployeeAlertsList = formatted;
     };
 
-    function init() {
-        $scope.LoadData();
-    }
-    init();
+
+ 
 });

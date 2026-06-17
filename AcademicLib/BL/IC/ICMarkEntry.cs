@@ -28,29 +28,39 @@ namespace AcademicLib.BL.Exam.Transaction
 			return resVal;
 		}
 		
-		public BE.Exam.Transaction.ICStudentsDetailCollections GetIStudentsDetailsSubjectsWise(int EntityId, int? AcademicYearId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, int? CFAssessmentTypeId)
+		public BE.Exam.Transaction.ICStudentsDetailCollections GetIStudentsDetailsSubjectsWise(int EntityId, int? AcademicYearId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, int? CFAssessmentTypeId,DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
-			return db.getIStudentsDetailsSubjectsWise(_UserId, EntityId, AcademicYearId, ClassId, SectionId, FilterSection, SubjectId, LessonId, TopicName, AssessmentTypeId, CFAssessmentTypeId);
+			return db.getIStudentsDetailsSubjectsWise(_UserId, EntityId, AcademicYearId, ClassId, SectionId, FilterSection, SubjectId, LessonId, TopicName, AssessmentTypeId, CFAssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
 		}
-		public BE.Exam.Transaction.TopicForStudentWiseICCollections GetTopicForStudentWiseIC(int EntityId, int? AcademicYearId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, int? CFAssessmentTypeId)
+		public BE.Exam.Transaction.TopicForStudentWiseICCollections GetTopicForStudentWiseIC(int EntityId, int? AcademicYearId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, int? CFAssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
-			return db.getTopicForStudentWiseIC(_UserId, EntityId, AcademicYearId, ClassId, SectionId, FilterSection, SubjectId, LessonId, StudentId, AssessmentTypeId, CFAssessmentTypeId);
-		}
-
-		public BE.Exam.Transaction.ICMArkEntryStatusCCollections GetICMArkSubmitStatus(int ClassId, int? SectionId, int SubjectId, int LessonId, int? AcademicYearId)
-		{
-			return db.getICMarkSubmitStatus(_UserId, ClassId, SectionId, SubjectId, LessonId, AcademicYearId);
+			return db.getTopicForStudentWiseIC(_UserId, EntityId, AcademicYearId, ClassId, SectionId, FilterSection, SubjectId, LessonId, StudentId, AssessmentTypeId, CFAssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
 		}
 
-
-		public ResponeValues DeleteById(int EntityId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int AssessmentTypeId)
+		public BE.Exam.Transaction.ICMArkEntryStatusCCollections GetICMArkSubmitStatus(int ClassId, int? SectionId, int SubjectId, int LessonId, int? AcademicYearId, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
-			return db.DeleteICMarkEntryById(_UserId, EntityId, ClassId, SectionId, FilterSection, SubjectId, LessonId, TopicName, AssessmentTypeId);
+			return db.getICMarkSubmitStatus(_UserId, ClassId, SectionId, SubjectId, LessonId, AcademicYearId, BatchId, SemesterId, ClassYearId);
 		}
 
-		public ResponeValues DeleteByIdStudentWise(int EntityId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int AssessmentTypeId)
+
+		public ResponeValues DeleteById(int EntityId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, string TopicName, int AssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
 		{
-			return db.DeleteICMarkEntryStudentwiseById(_UserId, EntityId, ClassId, SectionId, FilterSection, SubjectId, LessonId, StudentId, AssessmentTypeId);
+			return db.DeleteICMarkEntryById(_UserId, EntityId, ClassId, SectionId, FilterSection, SubjectId, LessonId, TopicName, AssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
+		}
+
+		public ResponeValues DeleteByIdStudentWise(int EntityId, int ClassId, int? SectionId, bool FilterSection, int SubjectId, int LessonId, int StudentId, int AssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
+		{
+			return db.DeleteICMarkEntryStudentwiseById(_UserId, EntityId, ClassId, SectionId, FilterSection, SubjectId, LessonId, StudentId, AssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
+		}
+
+
+		public BE.Exam.Transaction.LOCWiseMarkEntryCollections GetStudentsForLOCMarkEntry(int EntityId, int? AcademicYearId, int ClassId, int? SectionId,int SubjectId, int LessonId, string TopicName, int? AssessmentTypeId, int? CFAssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
+		{
+			return db.GetStudentsForLOCMarkEntry(_UserId, EntityId, AcademicYearId, ClassId, SectionId,  SubjectId, LessonId, TopicName, AssessmentTypeId, CFAssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
+		}
+		public BE.Exam.Transaction.StdWiseLOCMarkEntryCollections GetStdWiseLOCMarkEntry(int EntityId, int? AcademicYearId, int ClassId, int? SectionId,int SubjectId, int LessonId, int StudentId, int? AssessmentTypeId, int? CFAssessmentTypeId, DateTime? AssessmentDate, int? BatchId, int? SemesterId, int? ClassYearId)
+		{
+			return db.GetStdWiseLOCMarkEntry(_UserId, EntityId, AcademicYearId, ClassId, SectionId,  SubjectId, LessonId, StudentId, AssessmentTypeId, CFAssessmentTypeId, AssessmentDate, BatchId, SemesterId, ClassYearId);
 		}
 
 		public ResponeValues IsValidData(ref BE.Exam.Transaction.ICMarkEntry beData, bool IsModify)

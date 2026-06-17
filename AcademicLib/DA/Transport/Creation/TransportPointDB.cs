@@ -453,5 +453,112 @@ namespace AcademicLib.DA.Transport.Creation
             }
             return dataColl;
         }
+
+        public ResponeValues UpdateTransportPoint(int UserId, int AcademicYearId, int PointId, double InRate, double OutRate, double BothRate)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@PointId", PointId);
+            cmd.CommandText = "usp_UpdateTransportPointRow";
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.Parameters.Add("@ErrorNumber", System.Data.SqlDbType.Int);
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@InRate", InRate);
+            cmd.Parameters.AddWithValue("@OutRate", OutRate);
+            cmd.Parameters.AddWithValue("@BothRate", BothRate);
+            try
+            {
+                cmd.ExecuteNonQuery();
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[3].Value);
+
+                if (!(cmd.Parameters[4].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[4].Value);
+
+                if (!(cmd.Parameters[5].Value is DBNull))
+                    resVal.ErrorNumber = Convert.ToInt32(cmd.Parameters[5].Value);
+
+                if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
+                    resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
+
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public ResponeValues CurTransportRate(int UserId, int EntityId, int AcademicYearId)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@EntityId", EntityId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_UpdateCurTransportRate";
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.Parameters.Add("@ErrorNumber", System.Data.SqlDbType.Int);
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+            try
+            {
+                cmd.ExecuteNonQuery();
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[3].Value);
+
+                if (!(cmd.Parameters[4].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[4].Value);
+
+                if (!(cmd.Parameters[5].Value is DBNull))
+                    resVal.ErrorNumber = Convert.ToInt32(cmd.Parameters[5].Value);
+
+                if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
+                    resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
+
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+
     }
 }

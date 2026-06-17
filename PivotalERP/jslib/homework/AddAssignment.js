@@ -123,31 +123,31 @@
 		});
 
 		//student list
-		$scope.ClassListsection = [];
-		glbS.getClassSectionList().then(function (res) {
-			$scope.ClassListsection = res.data.Data;
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
+		//$scope.ClassListsection = [];
+		//glbS.getClassSectionList().then(function (res) {
+		//	$scope.ClassListsection = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
 
-		$scope.SubjectList = [];
-		$http({
-			method: 'POST',
-			url: base_url + "Academic/Creation/GetAllSubjectList",
-			dataType: "json"
-		}).then(function (res) {
-			if (res.data.IsSuccess && res.data.Data) {
-				$scope.SubjectList = res.data.Data;
+		//$scope.SubjectList = [];
+		//$http({
+		//	method: 'POST',
+		//	url: base_url + "Academic/Creation/GetAllSubjectList",
+		//	dataType: "json"
+		//}).then(function (res) {
+		//	if (res.data.IsSuccess && res.data.Data) {
+		//		$scope.SubjectList = res.data.Data;
 
-			} else {
+		//	} else {
 
-				if (res.data.IsSuccess == false)
-					Swal.fire(res.data.ResponseMSG);
-			}
+		//		if (res.data.IsSuccess == false)
+		//			Swal.fire(res.data.ResponseMSG);
+		//	}
 
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
 
 		//class List
 		$scope.ClassList = [];

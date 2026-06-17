@@ -57,8 +57,8 @@
             IsDefault: false,
             Path: '',
             RptType: 2,
-            ForEmail:false,
-            IsActive:true,
+            ForEmail: false,
+            IsActive: true,
             Mode: 'New Report Templates'
         };
 
@@ -116,12 +116,16 @@
     }
 
     $scope.uploadFiles = function (input) {
+
         $scope.files = [];
         if (input.files) {
             $scope.$apply(function () {
                 $scope.files = input.files;
             });
+
+
             $('#uploadRptFiles').modal('show');
+
         }
     };
     $scope.deleteUploadFiles = function (val) {
@@ -143,7 +147,7 @@
             Swal.fire(res.data.ResponseMSG);
         }, function (errormessage) {
             alert('Unable to Delete data. pls try again.' + errormessage.responseText);
-        }); 
+        });
     };
 
     $scope.GetFolderAndFiles = function (path) {
@@ -210,7 +214,7 @@
         }).then(function (res) {
 
             $scope.loadingstatus = "stop";
-            
+
             Swal.fire(res.data.ResponseMSG);
 
             if (res.data.IsSuccess == true) {
@@ -320,6 +324,7 @@
             Path: '',
             RptType: 2,
             ForEmail: false,
+            IsActive: true,
             Mode: 'New Report Templates'
         };
 
@@ -381,7 +386,7 @@
                 $scope.currentPath = 'Report';
                 $('#uploadRptFiles').modal('hide');
 
-            } 
+            }
 
         }, function (reason) {
             Swal.fire('Failed' + reason);
@@ -431,6 +436,6 @@
             $scope.loadingstatus = "stop";
         });
     }
-  
+
 
 });

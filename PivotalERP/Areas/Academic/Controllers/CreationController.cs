@@ -2022,15 +2022,7 @@ namespace PivotalERP.Areas.Academic.Controllers
             }
             
         }
-        //Added by Simran
-        [HttpPost]
-        public JsonNetResult GetClassWiseShift(int? AcademicYearId,int ClassId)
-        {
-            var dataColl = new AcademicLib.BL.Academic.Transaction.ClassShift(User.UserId, User.HostName, User.DBName).GetClassWiseShift(0, AcademicYearId, ClassId);
 
-            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
-        //End
         [HttpPost]
         public JsonNetResult GetClassShiftById(int ClassShiftId)
         {
@@ -2447,9 +2439,9 @@ namespace PivotalERP.Areas.Academic.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult GetLessonPlanByClass(int? ClassId,int? SectionId,int? EmployeeId,int? SubjectId,int ReportType, int? BatchId, int? ClassYearId, int? SemesterId)
+        public JsonNetResult GetLessonPlanByClass(int? ClassId, int? SectionId, int? EmployeeId, int? SubjectId, int ReportType, int? BatchId, int? ClassYearId, int? SemesterId)
         {
-            var dataColl = new AcademicLib.BL.Academic.Transaction.LessonPlan(User.UserId, User.HostName, User.DBName).getLessonPlanByClass(ClassId,SectionId,EmployeeId,SubjectId,ReportType, BatchId, ClassYearId, SemesterId);
+            var dataColl = new AcademicLib.BL.Academic.Transaction.LessonPlan(User.UserId, User.HostName, User.DBName).getLessonPlanByClass(ClassId, SectionId, EmployeeId, SubjectId, ReportType, BatchId, ClassYearId, SemesterId);
 
             return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
@@ -2542,12 +2534,13 @@ namespace PivotalERP.Areas.Academic.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult GetTodayLessonPlan(DateTime? forDate,int? classId,int? sectionId,int? subjectId,int? employeeId,int reportType, int? BatchId, int? SemesterId, int? ClassYearId)
+        public JsonNetResult GetTodayLessonPlan(DateTime? forDate, int? classId, int? sectionId, int? subjectId, int? employeeId, int reportType, int? BatchId=null, int? SemesterId = null, int? ClassYearId = null)
         {
             var dataColl = new AcademicLib.BL.Academic.Transaction.LessonPlan(User.UserId, User.HostName, User.DBName).getTodayLessonPlan(this.AcademicYearId, forDate, classId, sectionId, subjectId, employeeId, reportType, BatchId, SemesterId, ClassYearId);
 
             return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
+
 
         public ActionResult SyllabusStatus()
         {
@@ -2603,7 +2596,7 @@ namespace PivotalERP.Areas.Academic.Controllers
                     //        query = "update top(1) tbl_Student set PhotoPath=@PhotoPath where RollNo=@RollNo and ClassId=@ClassId and SectionId=@SectionId ";
                     //        break;
                     //}
-                    //Commented above switch case and added following
+
                     switch (beData.PhotoUploadedBy)
                     {
                         case 1:
@@ -2635,7 +2628,7 @@ namespace PivotalERP.Areas.Academic.Controllers
                             query = "update top(1) tbl_Student set PhotoPath=@PhotoPath where RollNo=@RollNo and ClassId=@ClassId and SectionId=@SectionId ";
                             break;
                     }
-                    //Ends
+
                     var filesColl = Request.Files;                    
                     int fInd = 0;
                     List<AcademicLib.BE.Academic.Transaction.ImportStudentPhoto> studentColl = new List<AcademicLib.BE.Academic.Transaction.ImportStudentPhoto>();
@@ -2699,7 +2692,6 @@ namespace PivotalERP.Areas.Academic.Controllers
                                 //        break;
                                 //}
 
-                                //Commented above and added following code
                                 switch (beData.PhotoUploadedBy)
                                 {
                                     case 1:
@@ -2939,7 +2931,7 @@ namespace PivotalERP.Areas.Academic.Controllers
         }
 
         [HttpPost]
-        public JsonNetResult GetLessonTopicContent(/*int LessonId,*/int LessonSNo,int TopicSNo, int ClassId, int SubjectId, int? BatchId, int? SemesterId, int? ClassYearId)
+        public JsonNetResult GetLessonTopicContent(/*int LessonId,*/int LessonSNo, int TopicSNo, int ClassId, int SubjectId, int? BatchId, int? SemesterId, int? ClassYearId)
         {
             var dataColl = new AcademicLib.BL.Academic.Transaction.LessonPlan(User.UserId, User.HostName, User.DBName).getLessonTopicContent(/*LessonId, */LessonSNo, TopicSNo, ClassId, SubjectId, BatchId, SemesterId, ClassYearId);
 
@@ -2989,25 +2981,25 @@ namespace PivotalERP.Areas.Academic.Controllers
             ResponeValues resVal = new ResponeValues();
             try
             {
-                
+
                 var beData = DeserializeObject<AcademicLib.BE.Academic.Transaction.LessonTopicQuiz>(Request["jsonData"]);
                 if (beData != null)
                 {
                     if (Request.Files.Count > 0)
                     {
-                        var filesColl = Request.Files;                        
+                        var filesColl = Request.Files;
                         foreach (var que in beData.QuestionColl)
                         {
                             HttpPostedFileBase file = filesColl["file-q" + que.SNo];
                             if (file != null)
                             {
                                 var att = GetAttachmentDocuments(photoLocation, file);
-                                que.ContentPath = att.DocPath;                                
+                                que.ContentPath = att.DocPath;
                             }
 
-                            foreach(var ans in que.AnswerColl)
+                            foreach (var ans in que.AnswerColl)
                             {
-                                HttpPostedFileBase file1 = filesColl["file-q" + que.SNo+"-a"+ans.SNo];
+                                HttpPostedFileBase file1 = filesColl["file-q" + que.SNo + "-a" + ans.SNo];
                                 if (file1 != null)
                                 {
                                     var att = GetAttachmentDocuments(photoLocation, file1);
@@ -3847,7 +3839,7 @@ namespace PivotalERP.Areas.Academic.Controllers
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
 
-        
+
         [HttpPost]
         public JsonNetResult GetLeftTypeById(int LeftTypeId)
         {
@@ -3878,7 +3870,6 @@ namespace PivotalERP.Areas.Academic.Controllers
 
         #endregion
 
-        //For Techer Quota
         [HttpPost]
         public JsonNetResult GetAllTeacherQuota()
         {
@@ -3912,6 +3903,84 @@ namespace PivotalERP.Areas.Academic.Controllers
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
 
+        #region "Manual Biling Class Wise"
+
+        [HttpPost]
+        public JsonNetResult GetAutoNoClassWiseManualBilling(int? CostClassId = null)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new AcademicLib.BL.Fee.Creation.ManualBillingClassWise(User.UserId, User.HostName, User.DBName).getAutoNo(this.AcademicYearId, CostClassId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        [HttpPost]
+        [PermissionsAttribute(Actions.Save, (int)ENTITIES.ManualBillingClassWise, false)]
+        public JsonNetResult SaveClassWiseManualBilling()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+
+                var beData = DeserializeObject<AcademicLib.BE.Fee.Creation.ManualBilling>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+
+                    if (!beData.TranId.HasValue)
+                        beData.TranId = 0;
+
+
+                    bool isModify = false;
+                    if (!beData.TranId.HasValue)
+                        beData.TranId = 0;
+                    else if (beData.TranId > 0)
+                        isModify = true;
+
+                    resVal = new AcademicLib.BL.Fee.Creation.ManualBillingClassWise(User.UserId, User.HostName, User.DBName).SaveClassWiseManualBilling(this.AcademicYearId, beData);
+
+                    if (resVal.IsSuccess)
+                    {
+                        Dynamic.BusinessEntity.Global.AuditLog auditLog = new AuditLog();
+                        auditLog.TranId = (isModify ? beData.TranId.Value : resVal.RId);
+                        auditLog.EntityId = Dynamic.BusinessEntity.Global.FormsEntity.ManualBilling;
+                        auditLog.Action = (isModify ? Actions.Modify : Actions.Save);
+                        auditLog.LogText = (isModify ? "Class Wise Manual Billing Modify" + beData.TotalAmount.ToString("N") : "New Class Wise Manual Billing" + beData.TotalAmount.ToString("N"));
+                        auditLog.AutoManualNo = beData.AutoNumber.ToString();
+                        SaveAuditLog(auditLog);
+                    }
+
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetClassWiseManualBillingDetailsById(int TranId)
+        {
+            var dataColl = new AcademicLib.BL.Fee.Creation.ManualBillingClassWise(User.UserId, User.HostName, User.DBName).getClassWiseManualBillingDetailsById(TranId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        #endregion
 
         [HttpPost]
         public JsonNetResult GetLessonTopicQuizList(/*int LessonId,*/int LessonSNo, int TopicSNo, int ClassId, int SubjectId, int? BatchId, int? SemesterId, int? ClassYearId)
@@ -3936,14 +4005,14 @@ namespace PivotalERP.Areas.Academic.Controllers
 
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
-        
+
         [HttpPost]
         public JsonNetResult GetClassSetupAutoOrderNo(int? For)
         {
             ResponeValues resVal = new ResponeValues();
             try
             {
-                resVal = new AcademicLib.BL.Academic.Creation.Class(User.UserId, User.HostName, User.DBName).GetClassSetupAutoOrderNo(0,For);
+                resVal = new AcademicLib.BL.Academic.Creation.Class(User.UserId, User.HostName, User.DBName).GetClassSetupAutoOrderNo(0, For);
             }
             catch (Exception ee)
             {
@@ -3952,6 +4021,97 @@ namespace PivotalERP.Areas.Academic.Controllers
             }
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
+
+        [HttpPost]
+        public JsonNetResult GetClassWiseShift(int? AcademicYearId, int ClassId)
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.ClassShift(User.UserId, User.HostName, User.DBName).GetClassWiseShift(0, AcademicYearId, ClassId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        #region "Qr Image"
+        [HttpPost]
+        [PermissionsAttribute(Actions.Save, (int)ENTITIES.UploadPhotosSignature, false)]
+        public JsonNetResult SaveQRImage()
+        {
+            string photoLocation = "/Attachments/academic/qr";
+            ResponeValues resVal = new ResponeValues();
+
+            try
+            {
+                string physicalPath = Server.MapPath(photoLocation);
+
+                if (!System.IO.Directory.Exists(physicalPath))
+                {
+                    System.IO.Directory.CreateDirectory(physicalPath);
+                }
+
+                var beData = DeserializeObject<AcademicLib.BE.Academic.Transaction.QRImage>(Request["jsonData"]);
+
+                if (beData != null)
+                {
+                    if (User != null)
+                    {
+                        beData.CUserId = User.UserId;
+                    }
+
+                    if (!beData.QrImageId.HasValue)
+                    {
+                        beData.QrImageId = 0;
+                    }
+
+                    if (Request.Files.Count > 0)
+                    {
+                        var filesColl = Request.Files;
+
+                        var onlineQr = filesColl["onlineQr"];
+                        var playStoreQr = filesColl["playStoreQr"];
+                        var appStoreQr = filesColl["appStoreQr"];
+                        if (onlineQr != null && onlineQr.ContentLength > 0)
+                        {
+                            var doc = GetAttachmentDocuments(photoLocation, onlineQr, true);
+                            beData.OnlineQrPath = doc.DocPath;
+                        }
+
+                        if (playStoreQr != null && playStoreQr.ContentLength > 0)
+                        {
+                            var doc = GetAttachmentDocuments(photoLocation, playStoreQr, true);
+                            beData.PlaystoreQrPath = doc.DocPath;
+                        }
+
+                        if (appStoreQr != null && appStoreQr.ContentLength > 0)
+                        {
+                            var doc = GetAttachmentDocuments(photoLocation, appStoreQr, true);
+                            beData.AppStoreQrPath = doc.DocPath;
+                        }
+                    }
+
+                    resVal = new AcademicLib.BL.Academic.Transaction.QRImage(
+                        User.UserId, User.HostName, User.DBName)
+                        .SaveUpdate(beData);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data can't be Accepted";
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetAllQrImages()
+        {
+            var dataColl = new AcademicLib.BL.Academic.Transaction.QRImage(User.UserId, User.HostName, User.DBName).getAllQrImages(0);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        
+        #endregion
 
     }
 }

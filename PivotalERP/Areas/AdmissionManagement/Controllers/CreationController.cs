@@ -899,6 +899,7 @@ namespace PivotalERP.Areas.AdmissionManagement.Controllers
 
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
+
         #region "EnquiryFormConfig"
         [HttpPost]
         public JsonNetResult SaveEnquiryFormConfig()
@@ -929,12 +930,12 @@ namespace PivotalERP.Areas.AdmissionManagement.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
         [HttpPost]
-        [AllowAnonymous]        
+        [AllowAnonymous]
         public JsonNetResult GetAllEnquiryFormConfig()
         {
             if (User == null)
             {
-                var dataColl = new AcademicLib.BL.Academic.Creation.EnquiryFormConfig(1, hostName, dbName).GetAllEnquiryFormConfig(0);
+                var dataColl = new AcademicLib.BL.Academic.Creation.EnquiryFormConfig(1, hostName,dbName).GetAllEnquiryFormConfig(0);
                 return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
             }
             else
@@ -942,7 +943,10 @@ namespace PivotalERP.Areas.AdmissionManagement.Controllers
                 var dataColl = new AcademicLib.BL.Academic.Creation.EnquiryFormConfig(User.UserId, User.HostName, User.DBName).GetAllEnquiryFormConfig(0);
                 return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
             }
+
+            
         }
+
         #endregion
     }
 }

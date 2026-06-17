@@ -1031,7 +1031,7 @@ namespace PivotalERP.Areas.Academic.Controllers
             AcademicLib.RE.Attendance.PeriodWiseAttendanceCollections dataColl = new AcademicLib.RE.Attendance.PeriodWiseAttendanceCollections();
             try
             {
-                dataColl = new AcademicLib.BL.Attendance.Device(User.UserId, User.HostName, User.DBName).getPeriodWiseAttendance(this.AcademicYearId,StudentId, SubjectId, YearId, MonthId);
+                dataColl = new AcademicLib.BL.Attendance.Device(User.UserId, User.HostName, User.DBName).getPeriodWiseAttendance(this.AcademicYearId, StudentId, SubjectId, YearId, MonthId);
                 return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
             }
             catch (Exception ee)

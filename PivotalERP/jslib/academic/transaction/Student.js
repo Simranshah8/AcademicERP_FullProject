@@ -382,7 +382,7 @@
 			ShowPhoto: false,
 		};
 		//$scope.GetAllHouseNameList();
-	/*	$scope.LoadClassSectionList();*/
+		$scope.LoadClassSectionList();
 		$scope.GetAutoNumber();
 
 		$scope.RoomList = [];
@@ -541,14 +541,14 @@
 
 	};
 
-/*	$scope.LoadClassSectionList = function () {
+	$scope.LoadClassSectionList = function () {
 		$scope.ClassSection = {};
 		GlobalServices.getClassSectionList().then(function (res) {
 			$scope.ClassSection = res.data.Data;
 		}, function (reason) {
 			Swal.fire('Failed' + reason);
 		});
-	}*/
+	}
 
 	$scope.LoadGuradianDet = function () {
 
@@ -2089,6 +2089,12 @@
 		});
 
 	}
+
+	$scope.ValidatePhoto = function (obj, id, modelTmpName, modelDataName, imageId, fieldName, allowedExtensions, maxSizeMB = 1) {
+		GlobalServices.validateImageFile(obj, id, modelTmpName, modelDataName, imageId, fieldName, allowedExtensions, maxSizeMB);
+		$scope.$applyAsync();
+	};
+
 });
 
 
