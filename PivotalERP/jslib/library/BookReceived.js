@@ -444,29 +444,5 @@ app.controller('BookReceivedController', function ($scope, $http, $timeout, $fil
 
 	};
 
-	$scope.validateForDate = function (obj) {
-		if (!obj.ReceivedDateDet || !obj.ReceivedDateDet.dateAD) {
-			return true;
-		}
-
-		var forDate = $filter('date')(obj.ReceivedDateDet.dateAD, 'yyyy-MM-dd');
-		var today = $filter('date')(new Date(), 'yyyy-MM-dd');
-
-		if (!forDate) return true;
-
-		if (forDate > today) {
-			Swal.fire({
-				icon: 'warning',
-				text: 'Date cannot be a future date.',
-				confirmButtonText: 'OK'
-			}).then(function () {
-				$scope.$apply(function () {
-					obj.ReceivedDate_TMP = new Date();
-					obj.ReceivedDateDet = new Date();
-				});
-			});
-			return false;
-		}
-		return true;
-	}
+	
 });

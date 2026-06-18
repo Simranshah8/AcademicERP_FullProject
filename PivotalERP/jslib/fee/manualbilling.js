@@ -1705,41 +1705,18 @@ app.controller('ManualBillingController', function ($scope, $http, $timeout, $fi
 		});
 	};
 
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newBillingRpt.DateFromDet || !$scope.newBillingRpt.DateToDet ||
-			!$scope.newBillingRpt.DateFromDet.dateAD || !$scope.newBillingRpt.DateToDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.DateFrom_TMP = new Date();
+				obj.DateTo_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-		var fromDate = $filter('date')(new Date($scope.newBillingRpt.DateFromDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newBillingRpt.DateToDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be After To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newBillingRpt.DateFrom_TMP = new Date();
-						$scope.newBillingRpt.DateFromDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be Before From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newBillingRpt.DateTo_TMP = new Date();
-						$scope.newBillingRpt.DateToDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
 	};
 });

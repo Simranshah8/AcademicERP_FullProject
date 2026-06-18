@@ -24,6 +24,8 @@
 
 		$scope.newEmployee = {
 			EmployeeId: null,
+			IssueDate_TMP:new Date(),
+			ValidUpto_TMP:new Date(),
 			Mode: 'Save'
 		};
 
@@ -37,6 +39,8 @@
 			ValidTo: null,
 			StudentIdColl: null,
 			TemplatesColl: [],
+			IssueDate_TMP:new Date(),
+			ValidUpto_TMP:new Date(),
 			SelectStudent: $scope.StudentSearchOptions[0].value
 		};
 
@@ -207,45 +211,22 @@
 
 	};
 
-	$scope.validateDates = function (obj,changedField) {
-		if (!obj.IssueDateDet || !obj.ValidUptoDet ||
-			!obj.IssueDateDet.dateAD || !obj.ValidUptoDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.IssueDate_TMP = new Date();
+				obj.ValidUpto_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-
-		var fromDate = $filter('date')(new Date(obj.IssueDateDet.dateAD), 'yyyy-MM-dd');
-		var toDate = $filter('date')(new Date(obj.ValidUptoDet.dateAD), 'yyyy-MM-dd');
-
-		if (!fromDate || !toDate) return true;
-
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Issue Date cannot be After ValidUpto Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						obj.IssueDate_TMP = new Date();
-						obj.IssueDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'ValidUpto Date cannot be Before Issue Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						obj.ValidUpto_TMP = new Date();
-						obj.ValidUptoDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-		return true;
 	};
 
+
+	
 
 });

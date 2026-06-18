@@ -112,7 +112,7 @@ app.controller('CASMarkEntryController', function ($scope, $http, $timeout, $fil
 			SubjectId: null,
 			TeacherId: null,
 			TestName: '',
-			TestDate_TMP: '',
+			TestDate_TMP: new Date(),
 			FulMarks: '',
 			PassMarks: '',
 			Mode: 'Save'
@@ -120,17 +120,22 @@ app.controller('CASMarkEntryController', function ($scope, $http, $timeout, $fil
 		$scope.newClasswiseSummary = {
 			ClasswiseSummaryId: null,
 			ClassSecId: null,
-			DateFrom_TMP: '',
-			DateTo_TMP: '',
+			DateFrom_TMP: new Date(),
+			DateTo_TMP: new Date(),
+			TestTo_TMP: new Date(),
 			Mode: 'Save'
 		};
 		$scope.newMarkLedger = {
 			MarkLedgerId: null,
 			ClassSecId: null,
 			SubjectId: null,
-			DateFrom_TMP: '',
-			DateTo_TMP: '',
+			DateFrom_TMP: new Date(),
+			DateTo_TMP: new Date(),
 			Mode: 'Save'
+		};
+		$scope.newCTypewiseSummary = {
+			DateFrom_TMP: new Date(),
+			TestTo_TMP: new Date(),
 		};
 
 		$scope.newClassWise = {
@@ -210,8 +215,9 @@ app.controller('CASMarkEntryController', function ($scope, $http, $timeout, $fil
 	$scope.ClearClasswiseSummary = function () {
 		$scope.newClasswiseSummary = {
 			ClassSecId: null,
-			DateFrom_TMP: '',
-			DateTo_TMP: '',
+			DateFrom_TMP: new Date(),
+			DateTo_TMP: new Date(),
+			TestTo_TMP: new Date(),
 			Mode: 'Save'
 		};
 	}
@@ -220,8 +226,8 @@ app.controller('CASMarkEntryController', function ($scope, $http, $timeout, $fil
 		$scope.newMarkLedger = {
 			ClassSecId: null,
 			SubjectId: null,
-			DateFrom_TMP: '',
-			DateTo_TMP: '',
+			DateFrom_TMP: new Date(),
+			DateTo_TMP: new Date(),
 			Mode: 'Save'
 		};
 	}
@@ -486,20 +492,7 @@ app.controller('CASMarkEntryController', function ($scope, $http, $timeout, $fil
 	}
 
 	$scope.GetAllClasswiseSummaryList = function () {
-		if ($scope.newClasswiseSummary.DateFromDet &&
-			$scope.newClasswiseSummary.DateToDet &&
-			$scope.newClasswiseSummary.DateToDet.dateAD < $scope.newClasswiseSummary.DateFromDet.dateAD) {
-
-			$scope.newClasswiseSummary.TestTo_TMP = null;
-			$scope.newClasswiseSummary.DateToDet = null;
-
-			Swal.fire(
-				'Invalid Date',
-				'To Date must be greater than or equal to From Date',
-				'warning'
-			);
-			return;
-		}
+		
 		$scope.ClasswiseSummaryList = [];
 
 		if ($scope.newClasswiseSummary.SelectedClass && $scope.newClasswiseSummary.DateFromDet && $scope.newClasswiseSummary.DateToDet) {
@@ -649,20 +642,7 @@ app.controller('CASMarkEntryController', function ($scope, $http, $timeout, $fil
 
 
 	$scope.GetMarkLedger = function () {
-		if ($scope.newMarkLedger.DateFromDet &&
-			$scope.newMarkLedger.DateToDet &&
-			$scope.newMarkLedger.DateToDet.dateAD < $scope.newMarkLedger.DateFromDet.dateAD) {
-
-			$scope.newMarkLedger.DateTo_TMP = null;
-			$scope.newMarkLedger.DateToDet = null;
-
-			Swal.fire(
-				'Invalid Date',
-				'To Date must be greater than or equal to From Date',
-				'warning'
-			);
-			return;
-		}
+		
 		$scope.MarkLedgerCASTypeColl = [];
 		$scope.MarkLedgerColl = [];
 		if ($scope.newMarkLedger.SelectedClass && $scope.newMarkLedger.DateFromDet && $scope.newMarkLedger.DateToDet && $scope.newMarkLedger.SubjectId > 0) {
@@ -832,20 +812,20 @@ app.controller('CASMarkEntryController', function ($scope, $http, $timeout, $fil
 	};
 
 	$scope.GetAllCASTypewiseSummaryList = function () {
-		if ($scope.newCTypewiseSummary.DateFromDet &&
-			$scope.newCTypewiseSummary.DateToDet &&
-			$scope.newCTypewiseSummary.DateToDet.dateAD < $scope.newCTypewiseSummary.DateFromDet.dateAD) {
+		//if ($scope.newCTypewiseSummary.DateFromDet &&
+		//	$scope.newCTypewiseSummary.DateToDet &&
+		//	$scope.newCTypewiseSummary.DateToDet.dateAD < $scope.newCTypewiseSummary.DateFromDet.dateAD) {
 
-			$scope.newCTypewiseSummary.TestTo_TMP = null;
-			$scope.newCTypewiseSummary.DateToDet = null;
+		//	$scope.newCTypewiseSummary.TestTo_TMP = null;
+		//	$scope.newCTypewiseSummary.DateToDet = null;
 
-			Swal.fire(
-				'Invalid Date',
-				'To Date must be greater than or equal to From Date',
-				'warning'
-			);
-			return;
-		}
+		//	Swal.fire(
+		//		'Invalid Date',
+		//		'To Date must be greater than or equal to From Date',
+		//		'warning'
+		//	);
+		//	return;
+		//}
 		$scope.CASTypewiseList = [];
 
 		if ($scope.newCTypewiseSummary.SelectedClass && $scope.newCTypewiseSummary.DateFromDet && $scope.newCTypewiseSummary.DateToDet) {
@@ -935,43 +915,22 @@ app.controller('CASMarkEntryController', function ($scope, $http, $timeout, $fil
 	};
 
 
-	$scope.validateDates = function (changedField, obj) {
-		if (!obj.FromDateDet || !obj.ToDateDet ||
-			!obj.FromDateDet.dateAD || !obj.ToDateDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				obj.DateFrom_TMP = new Date();
+				obj.DateTo_TMP = new Date();
+				obj.TestTo_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-
-		var fromDate = $filter('date')(new Date(obj.FromDateDet.dateAD), 'yyyy-MM-dd');
-		var toDate = $filter('date')(new Date(obj.ToDateDet.dateAD), 'yyyy-MM-dd');
-
-		if (!fromDate || !toDate) return true;
-
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be After To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						obj.FromDate_TMP = new Date();
-						obj.FromDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be Before From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						obj.ToDate_TMP = new Date();
-						obj.ToDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-		return true;
 	};
+
 });

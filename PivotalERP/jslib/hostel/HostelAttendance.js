@@ -629,30 +629,20 @@
 		return true;
 	};
 
-	$scope.validateForDate = function (obj) {
-		if (!obj.ForDateDet || !obj.ForDateDet.dateAD) {
-			return true;
-		}
-
-		var forDate = $filter('date')(obj.ForDateDet.dateAD, 'yyyy-MM-dd');
-		var today = $filter('date')(new Date(), 'yyyy-MM-dd');
-
-		if (!forDate) return true;
-
-		if (forDate > today) {
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
 			Swal.fire({
 				icon: 'warning',
-				text: 'Date cannot be a future date.',
+				text: res.Message,
 				confirmButtonText: 'OK'
 			}).then(function () {
-				$scope.$apply(function () {
-					obj.ForDate_TMP = new Date();
-					obj.ForDateDet = new Date();
-				});
+				obj.DateFrom_TMP = new Date();
+				obj.DateTo_TMP = new Date();
+				$scope.$applyAsync();
 			});
-			return false;
 		}
-		return true;
-	}
+	};
+
 
 });

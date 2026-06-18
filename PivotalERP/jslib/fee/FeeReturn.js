@@ -1394,20 +1394,20 @@ app.controller('FeeReturnController', function ($scope, $http, $timeout, $filter
 
 	}
 	$scope.GetAllFeeReceiptCollectionList = function () {
-		if ($scope.newFeeReceiptCollection.DateFromDet &&
-			$scope.newFeeReceiptCollection.DateToDet &&
-			$scope.newFeeReceiptCollection.DateToDet.dateAD < $scope.newFeeReceiptCollection.DateFromDet.dateAD) {
+		//if ($scope.newFeeReceiptCollection.DateFromDet &&
+		//	$scope.newFeeReceiptCollection.DateToDet &&
+		//	$scope.newFeeReceiptCollection.DateToDet.dateAD < $scope.newFeeReceiptCollection.DateFromDet.dateAD) {
 
-			$scope.newFeeReceiptCollection.DateTo_TMP = new Date();
-			$scope.newFeeReceiptCollection.DateToDet = new Date();
+		//	$scope.newFeeReceiptCollection.DateTo_TMP = new Date();
+		//	$scope.newFeeReceiptCollection.DateToDet = new Date();
 
-			Swal.fire(
-				'Invalid Date',
-				'To Date must be greater than or equal to From Date',
-				'warning'
-			);
-			return;
-		}
+		//	Swal.fire(
+		//		'Invalid Date',
+		//		'To Date must be greater than or equal to From Date',
+		//		'warning'
+		//	);
+		//	return;
+		//}
 
 		$scope.OpeningAmt = 0;
 		$scope.OpeningDisAmt = 0;
@@ -1570,5 +1570,20 @@ app.controller('FeeReturnController', function ($scope, $http, $timeout, $filter
 		}
 
 		$scope.CalculationOnTotal(4);
+	};
+
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
 	};
 });

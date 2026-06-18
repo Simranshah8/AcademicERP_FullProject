@@ -36,18 +36,18 @@
 			EngineNo: '',
 			ChasisNo: '',
 			FuelEngineTypeId: null,
-			NaamsariMiti_TMP: null,
-			RenewalMiti_TMP: null,
+			NaamsariMiti_TMP: new Date(),
+			RenewalMiti_TMP: new Date(),
 			ManufacturingYearId: null,
 			Photo: null,
 			PhotoPath: null,
 			JachpassNo: '',
-			ValidFrom_TMP: null,
-			ValidTo_TMP: null,
+			ValidFrom_TMP: new Date(),
+			ValidTo_TMP: new Date(),
 			JachpassRemarks: '',
 			InsuranceNo: '',
-			InsuranceValidFrom_TMP: null,
-			InsuranceValidTo_TMP: null,
+			InsuranceValidFrom_TMP: new Date(),
+			InsuranceValidTo_TMP: new Date(),
 			InsuranceRemarks: '',
 			InchargeId: null,
 			DriverId: null,
@@ -218,18 +218,18 @@
 			EngineNo: '',
 			ChasisNo: '',
 			FuelEngineTypeId: null,
-			NaamsariMiti_TMP: null,
-			RenewalMiti_TMP: null,
+			NaamsariMiti_TMP: new Date(),
+			RenewalMiti_TMP: new Date(),
 			ManufacturingYearId: null,
 			Photo: null,
 			PhotoPath: null,
 			JachpassNo: '',
-			ValidFrom_TMP: null,
-			ValidTo_TMP: null,
+			ValidFrom_TMP: new Date(),
+			ValidTo_TMP: new Date(),
 			JachpassRemarks: '',
 			InsuranceNo: '',
-			InsuranceValidFrom_TMP: null,
-			InsuranceValidTo_TMP: null,
+			InsuranceValidFrom_TMP: new Date(),
+			InsuranceValidTo_TMP: new Date(),
 			InsuranceRemarks: '',
 			InchargeId: null,
 			DriverId: null,
@@ -1296,34 +1296,22 @@
 	};
 
 	//*********************From and To Date Validation*************************
-	$scope.validateDateRange = function (changedField, obj, fromDetKey, toDetKey, fromTmpKey, toTmpKey, fromLabel, toLabel) {
-		var fromDate = $filter('date')(obj[fromDetKey] && obj[fromDetKey].dateAD, 'yyyy-MM-dd');
-		var toDate = $filter('date')(obj[toDetKey] && obj[toDetKey].dateAD, 'yyyy-MM-dd');
-
-		if (!fromDate || !toDate) return true;
-		if (fromDate <= toDate) return true;
-
-		var isFrom = changedField === fromTmpKey;
-		var msg = isFrom
-			? (fromLabel || 'From Date') + ' cannot be greater than ' + (toLabel || 'To Date') + '.'
-			: (toLabel || 'To Date') + ' cannot be less than ' + (fromLabel || 'From Date') + '.';
-
-		Swal.fire({
-			icon: 'warning',
-			text: msg,
-			confirmButtonText: 'OK'
-		}).then(function () {
-			$scope.$apply(function () {
-				if (isFrom) {
-					obj[fromTmpKey] = new Date();
-					obj[fromDetKey] = new Date();
-				} else {
-					obj[toTmpKey] = new Date();
-					obj[toDetKey] = new Date();
-				}
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.NaamsariMiti_TMP = new Date();
+				obj.RenewalMiti_TMP = new Date();
+				obj.ValidFrom_TMP= new Date(),
+				obj.ValidTo_TMP= new Date(),
+				obj.InsuranceValidFrom_TMP= new Date(),
+				obj.InsuranceValidTo_TMP= new Date(),
+				$scope.$applyAsync();
 			});
-		});
-
-		return false;
+		}
 	};
 });

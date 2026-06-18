@@ -374,7 +374,8 @@ app.controller('ExamScheduleController', function ($scope, $http, $timeout, $fil
 		$scope.newExamSchedule = {
 			ExamScheduleId: null,
 			ExamScheduleDetailsColl: [],
-
+			StartDate_TMP:new Date(),
+			EndDate_TMP:new Date(),
 			Mode: 'Save'
 		};
 
@@ -612,6 +613,8 @@ app.controller('ExamScheduleController', function ($scope, $http, $timeout, $fil
 		$scope.newExamSchedule = {
 			ExamScheduleId: null,
 			ExamScheduleDetailsColl: [],
+			StartDate_TMP: new Date(),
+			EndDate_TMP: new Date(),
 			Mode: 'Save'
 		};
 	}
@@ -1903,41 +1906,19 @@ app.controller('ExamScheduleController', function ($scope, $http, $timeout, $fil
 	};
 
 
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newExamSchedule.StartDateDet || !$scope.newExamSchedule.EndDateDet ||
-			!$scope.newExamSchedule.StartDateDet.dateAD || !$scope.newExamSchedule.EndDateDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.StartDate_TMP = new Date();
+				obj.EndDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-		var StartDate = $filter('date')(new Date($scope.newExamSchedule.StartDateDet.dateAD), 'yyyy-MM-dd')
-		var EndDate = $filter('date')(new Date($scope.newExamSchedule.EndDateDet.dateAD), 'yyyy-MM-dd')
-		if (!StartDate || !EndDate) return true;
-		if (StartDate > EndDate) {
-			if (changedField === 'StartDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Start Date cannot be After End Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newExamSchedule.StartDate_TMP = new Date();
-						$scope.newExamSchedule.StartDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'EndDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'End Date cannot be Before Start Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newExamSchedule.EndDate_TMP = new Date();
-						$scope.newExamSchedule.EndDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
 	};
+
 });

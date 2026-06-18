@@ -1354,79 +1354,21 @@ app.controller('AdditionalController', function ($scope, $http, $timeout, $filte
 		});
 	}
 
-	$scope.validateDates1 = function (changedField) {
-		if (!$scope.newManualBill.DateFromDet || !$scope.newManualBill.DateToDet ||
-			!$scope.newManualBill.DateFromDet.dateAD || !$scope.newManualBill.DateToDet.dateAD) {
-			return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				obj.DateFrom_TMP = new Date();
+				obj.DateTo_TMP = new Date();
+				$scope.$applyAsync();
+			});
 		}
-		var fromDate = $filter('date')(new Date($scope.newManualBill.DateFromDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newManualBill.DateToDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be After To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newManualBill.DateFrom_TMP = new Date();
-						$scope.newManualBill.DateFromDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be Before From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newManualBill.DateTo_TMP = new Date();
-						$scope.newManualBill.DateToDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
 	};
 
-	$scope.validateDates2 = function (changedField) {
-		if (!$scope.filter.FromDateDet || !$scope.filter.ToDateDet ||
-			!$scope.filter.FromDateDet.dateAD || !$scope.filter.ToDateDet.dateAD) {
-			return true;
-		}
-		var fromDate = $filter('date')(new Date($scope.filter.FromDateDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.filter.ToDateDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be After To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.filter.FromDate_TMP = new Date();
-						$scope.filter.FromDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be Before From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.filter.ToDate_TMP = new Date();
-						$scope.filter.ToDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
-	};
 });

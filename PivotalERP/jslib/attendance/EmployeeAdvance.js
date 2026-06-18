@@ -51,6 +51,8 @@
 			Installment: '',
 			DeductionAmount: 0,
 			EffDate: new Date(),
+			AdvanceDate_TMP: new Date(),
+			EffDate_TMP: new Date(),
 			Remarks: '',
 			Mode: 'Save'
 		};
@@ -79,6 +81,8 @@
 			DeductionAmount: '',
 			EffDate_TMP: '',
 			Remarks: '',
+			AdvanceDate_TMP: new Date(),
+			EffDate_TMP: new Date(),
 			SelectEmployee: $scope.EmployeeSearchOptions[0].value,
 			Mode: 'Save'
 		};

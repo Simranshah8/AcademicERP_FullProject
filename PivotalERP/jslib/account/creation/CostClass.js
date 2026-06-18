@@ -188,50 +188,25 @@
                     }
                 }, function (reason) {
                     Swal.fire('Failed' + reason);
+
                 });
             }
 
         });
     }
 
-    $scope.validateDates = function (changedField, obj) {
-        if (!obj.StartDateDet || !obj.EndDateDet ||
-            !obj.StartDateDet.dateAD || !obj.EndDateDet.dateAD) {
-            return true;
+    $scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+        var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+        if (res.IsSuccess == false) {
+            Swal.fire({
+                icon: 'warning',
+                text: res.Message,
+                confirmButtonText: 'OK'
+            }).then(function () {
+                obj.StartDate_TMP = new Date();
+                obj.EndDate_TMP = new Date();
+                $scope.$applyAsync();
+            });
         }
-
-        var fromDate = $filter('date')(new Date(obj.StartDateDet.dateAD), 'yyyy-MM-dd');
-        var toDate = $filter('date')(new Date(obj.EndDateDet.dateAD), 'yyyy-MM-dd');
-
-        if (!fromDate || !toDate) return true;
-
-        if (fromDate > toDate) {
-            if (changedField === 'fromDate') {
-                Swal.fire({
-                    icon: 'warning',
-                    text: 'Start Date cannot be After End Date.',
-                    confirmButtonText: 'OK'
-                }).then(function () {
-                    $scope.$apply(function () {
-                        obj.StartDate_TMP = new Date();
-                        obj.StartDateDet = new Date();
-                    });
-                });
-            } else if (changedField === 'toDate') {
-                Swal.fire({
-                    icon: 'warning',
-                    text: 'End Date cannot be Before Start Date.',
-                    confirmButtonText: 'OK'
-                }).then(function () {
-                    $scope.$apply(function () {
-                        obj.EndDate_TMP = new Date();
-                        obj.EndDateDet = new Date();
-                    });
-                });
-            }
-            return false;
-        }
-        return true;
     };
-     
 });

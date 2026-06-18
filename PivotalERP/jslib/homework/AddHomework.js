@@ -504,11 +504,11 @@
 			HomeworkFile: '',
 			SubmissionsRequired: false,
 			IsAllowLateSibmission: false,
+			DeadlineDate_TMP: new Date(),
+			DeadlineforRedo_TMP: new Date(),
 			AttachmentColl: [],
 			SectionListName: '',
 			SubjectName: '',
-			DeadlineDate_TMP: new Date(),
-			DeadlineforRedo_TMP: new Date(),
 			Mode: 'Save'
 		};
 

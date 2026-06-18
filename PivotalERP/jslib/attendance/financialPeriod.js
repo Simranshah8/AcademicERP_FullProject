@@ -31,6 +31,8 @@
 			EndDate_TMP: '',
 			OrderNo: 0,
 			IsDefault: false,
+			StartDate_TMP: new Date(),
+			EndDate_TMP: new Date(),
 			Mode: 'Save'
 		};
 
@@ -90,6 +92,8 @@
 				EndDate_TMP: '',
 				OrderNo: 0,
 				IsDefault: false,
+				StartDate_TMP: new Date(),
+				EndDate_TMP: new Date(),
 				Mode: 'Save'
 			};
 		});
@@ -289,42 +293,19 @@
 		console.log('page changed to ' + num);
 	};
 
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newFinancialPeriod.StartDateDet || !$scope.newFinancialPeriod.EndDateDet ||
-			!$scope.newFinancialPeriod.StartDateDet.dateAD || !$scope.newFinancialPeriod.EndDateDet.dateAD) {
-			return true;
-		}
-		var fromDate = $filter('date')(new Date($scope.newFinancialPeriod.StartDateDet.dateAD), 'yyyy-MM-dd')
-		var toDate = $filter('date')(new Date($scope.newFinancialPeriod.EndDateDet.dateAD), 'yyyy-MM-dd')
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'StartDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'Start Date cannot be After End Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newFinancialPeriod.StartDate_TMP = new Date();
-						$scope.newFinancialPeriod.StartDateDet = new Date();
-					});
-				});
-			} else if (changedField === 'EndDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'End Date cannot be Before Start Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newFinancialPeriod.EndDate_TMP = new Date();
-						$scope.newFinancialPeriod.EndDateDet = new Date();
-					});
-				});
-			}
-			return false;
-		}
 
-		return true;
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.StartDate_TMP = new Date();
+				obj.EndDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
 	};
-
 });

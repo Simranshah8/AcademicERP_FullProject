@@ -544,69 +544,19 @@
 		console.log('page changed to ' + num);
 	};
 
-	$scope.validateDates = function (changedField) {
-		if (!$scope.newFilter.FromDateDet || !$scope.newFilter.ToDateDet ||
-			!$scope.newFilter.FromDateDet.dateAD || !$scope.newFilter.ToDateDet.dateAD) {
-			return true;
-		}
-		var fromDate = $filter('date')($scope.newFilter.FromDateDet.dateAD, 'yyyy-MM-dd');
-		var toDate = $filter('date')($scope.newFilter.ToDateDet.dateAD, 'yyyy-MM-dd');
-
-		if (!fromDate || !toDate) return true;
-		if (fromDate > toDate) {
-			if (changedField === 'fromDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'From Date cannot be greater than To Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newFilter.FromDate_TMP = new Date();
-						$scope.newFilter.ToDate_TMP = new Date();
-					});
-				});
-			} else if (changedField === 'toDate') {
-				Swal.fire({
-					icon: 'warning',
-					text: 'To Date cannot be less than From Date.',
-					confirmButtonText: 'OK'
-				}).then(function () {
-					$scope.$apply(function () {
-						$scope.newFilter.FromDate_TMP = new Date();
-						$scope.newFilter.ToDate_TMP = new Date();
-					});
-				});
-			}
-			return false;
-		}
-
-		return true;
-	};
-
-	$scope.validateForDate = function () {
-		if (!$scope.newTransportAttendance.ForDateDet ||
-			!$scope.newTransportAttendance.ForDateDet.dateAD) {
-			return true;
-		}
-
-		var forDate = $filter('date')($scope.newTransportAttendance.ForDateDet.dateAD, 'yyyy-MM-dd');
-		var today = $filter('date')(new Date(), 'yyyy-MM-dd');
-
-		if (!forDate) return true;
-
-		if (forDate > today) {
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
 			Swal.fire({
 				icon: 'warning',
-				text: 'Date cannot be a future date.',
+				text: res.Message,
 				confirmButtonText: 'OK'
 			}).then(function () {
-				$scope.$apply(function () {
-					$scope.newTransportAttendance.ForDate_TMP = new Date();
-					$scope.newTransportAttendance.ForDateDet = new Date();
-				});
+				obj.FromDate_TMP = new Date();
+				obj.ToDate_TMP = new Date();
+				$scope.$applyAsync();
 			});
-			return false;
 		}
-		return true;
-	}
+	};
+
 });

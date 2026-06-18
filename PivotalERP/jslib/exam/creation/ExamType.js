@@ -299,6 +299,9 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 			SectionWiseExam: false,
 			MarkSubmitDeadline_Teacher: null,
 			MarkSubmitDeadline_Admin: null,
+			MarkSubmitDeadline_Teacher_TMP: new Date(),
+			MarkSubmitDeadline_Admin_TMP: new Date(),
+			ResultDate_TMP: new Date(),
 			ForClassWiseResultPublished: false,
 			ClassWiseColl_TMP: [],
 			ForPreStudent: false,
@@ -325,6 +328,9 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 			SectionWiseExam: false,
 			MarkSubmitDeadline_Teacher: null,
 			MarkSubmitDeadline_Admin: null,
+			MarkSubmitDeadline_Teacher_TMP: new Date(),
+			MarkSubmitDeadline_Admin_TMP: new Date(),
+			ResultDate_TMP: new Date(),
 			ForClassWiseResultPublished: false,
 			ClassWiseColl_TMP: [],
 			DisplayYearAD: '',
@@ -346,6 +352,7 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 			IsActive: true,
 			DisplayYearAD: '',
 			DisplayYearBS: '',
+			ResultDate_TMP:new Date(),
 			Mode: 'Save'
 		};
 		$scope.newExamTypeGroup.ExamTypeGroupDetailsColl.push({});
@@ -372,6 +379,7 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 			ParentExamTypeGroupDetailsColl: [],
 			DisplayYearAD: '',
 			DisplayYearBS: '',
+			ResultDate_TMP: new Date(),
 			Mode: 'Save'
 		};
 		$scope.newParentExamTypeGroup.ParentExamTypeGroupDetailsColl.push({});
@@ -508,6 +516,9 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 				SectionWiseExam: false,
 				MarkSubmitDeadline_Teacher: null,
 				MarkSubmitDeadline_Admin: null,
+				MarkSubmitDeadline_Teacher_TMP: new Date(),
+				MarkSubmitDeadline_Admin_TMP: new Date(),
+				ResultDate_TMP: new Date(),
 				ForClassWiseResultPublished: false,
 				ClassWiseColl_TMP: [],
 				ForPreStudent: false,
@@ -537,6 +548,9 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 				SectionWiseExam: false,
 				MarkSubmitDeadline_Teacher: null,
 				MarkSubmitDeadline_Admin: null,
+				MarkSubmitDeadline_Teacher_TMP: new Date(),
+				MarkSubmitDeadline_Admin_TMP: new Date(),
+				ResultDate_TMP: new Date(),
 				ForClassWiseResultPublished: false,
 				ClassWiseColl_TMP: [],
 				DisplayYearAD: '',
@@ -562,6 +576,7 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 				IsActive: true,
 				DisplayYearAD: '',
 				DisplayYearBS: '',
+				ResultDate_TMP: new Date(),
 				Mode: 'Save'
 			};
 			$scope.newExamTypeGroup.ExamTypeGroupDetailsColl.push({});
@@ -597,6 +612,7 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 				ParentExamTypeGroupDetailsColl: [],
 				DisplayYearAD: '',
 				DisplayYearBS: '',
+				ResultDate_TMP:new Date(),
 				Mode: 'Save'
 			};
 			$scope.newParentExamTypeGroup.ParentExamTypeGroupDetailsColl.push({});
@@ -1658,5 +1674,63 @@ app.controller('ExamTypeController', function ($scope, $http, $timeout, $filter,
 		});
 	}
 
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.ResultDate_TMP = new Date();
+				obj.MarkSubmitDeadline_Teacher_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
+	};
 
+
+	//$scope.validateDate = function (obj, startField, endFields, startLabel, endLabels) {
+
+	//	if (!Array.isArray(endFields)) {
+	//		endFields = [endFields];
+	//	}
+
+	//	if (!Array.isArray(endLabels)) {
+	//		endLabels = [endLabels];
+	//	}
+
+	//	for (var i = 0; i < endFields.length; i++) {
+
+	//		var res = GlobalServices.validateDate(
+	//			obj,
+	//			startField,
+	//			endFields[i],
+	//			startLabel,
+	//			endLabels[i] || endLabels[0]
+	//		);
+
+	//		if (!res.IsSuccess) {
+
+	//			Swal.fire({
+	//				icon: 'warning',
+	//				text: res.Message,
+	//				confirmButtonText: 'OK'
+	//			}).then(function () {
+
+	//				obj.ResultDate_TMP = new Date();
+
+	//				//// Reset only the invalid fields if desired
+	//				//obj.MarkSubmitDeadline_Teacher_TMP = new Date();
+	//				//obj.MarkSubmitDeadline_Admin_TMP = new Date();
+
+	//				$scope.$applyAsync();
+	//			});
+
+	//			return false;
+	//		}
+	//	}
+
+	//	return true;
+	//};
 });

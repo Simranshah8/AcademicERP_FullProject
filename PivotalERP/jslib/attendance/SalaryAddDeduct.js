@@ -335,29 +335,4 @@
 		console.log('page changed to ' + num);
 	};
 
-	$scope.validateForDate = function (obj) {
-		if (!obj.ForDateDet || !obj.ForDateDet.dateAD) {
-			return true;
-		}
-
-		var forDate = $filter('date')(obj.ForDateDet.dateAD, 'yyyy-MM-dd');
-		var today = $filter('date')(new Date(), 'yyyy-MM-dd');
-
-		if (!forDate) return true;
-
-		if (forDate > today) {
-			Swal.fire({
-				icon: 'warning',
-				text: 'Date cannot be a future date.',
-				confirmButtonText: 'OK'
-			}).then(function () {
-				$scope.$apply(function () {
-					obj.ForDate_TMP = new Date();
-					obj.ForDateDet = new Date();
-				});
-			});
-			return false;
-		}
-		return true;
-	}
 });

@@ -636,29 +636,5 @@
 		console.log('page changed to ' + num);
 	};
 
-	$scope.validateForDate = function (obj) {
-		if (!obj.IncDateDet || !obj.IncDateDet.dateAD) {
-			return true;
-		}
-
-		var forDate = $filter('date')(obj.IncDateDet.dateAD, 'yyyy-MM-dd');
-		var today = $filter('date')(new Date(), 'yyyy-MM-dd');
-
-		if (!forDate) return true;
-
-		if (forDate > today) {
-			Swal.fire({
-				icon: 'warning',
-				text: 'Date cannot be a future date.',
-				confirmButtonText: 'OK'
-			}).then(function () {
-				$scope.$apply(function () {
-					obj.IncDate = new Date();
-					obj.IncDateDet = new Date();
-				});
-			});
-			return false;
-		}
-		return true;
-	}
+	
 });
