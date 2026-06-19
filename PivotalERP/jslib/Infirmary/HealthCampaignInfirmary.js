@@ -73,6 +73,7 @@ app.controller('HCInfirmaryController', function ($scope, $http, $timeout, $filt
             Remarks: '',
             TestNameId: null,
             StudentId: null,
+            CampaignDate_TMP:new Date(),
             Mode: 'Save'
         };
         $scope.GetAllHCInfirmaryList();
@@ -92,6 +93,7 @@ app.controller('HCInfirmaryController', function ($scope, $http, $timeout, $filt
             Remarks: '',
             TestNameId: null,
             StudentId: null,
+            CampaignDate_TMP: new Date(),
             Mode: 'Save'
         };
 
@@ -469,31 +471,6 @@ app.controller('HCInfirmaryController', function ($scope, $http, $timeout, $filt
             Swal.fire('Failed' + reason);
         });
     };
-    $scope.validateForDate = function (obj, key, keyTMP) {
-        if (!obj[key] || !obj[key].dateAD) {
-            return true;
-        }
-
-        var forDate = $filter('date')(obj[key].dateAD, 'yyyy-MM-dd');
-        var today = $filter('date')(new Date(), 'yyyy-MM-dd');
-
-        if (!forDate) return true;
-
-        if (forDate > today) {
-            Swal.fire({
-                icon: 'warning',
-                text: 'Date cannot be a future date.',
-                confirmButtonText: 'OK'
-            }).then(function () {
-                $scope.$apply(function () {
-                    obj[keyTMP] = new Date();
-                    obj[key] = new Date();
-                });
-            });
-            return false;
-        }
-        $scope.getVoucherNoOnly();
-        return true;
-    }
+   
 });
 

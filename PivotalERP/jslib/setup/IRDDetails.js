@@ -207,4 +207,19 @@ app.controller('IRDDetails', function ($scope, $http, $timeout, $filter, GlobalS
 
 	}
 
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.StartDate_TMP = new Date();
+				obj.EndDate_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
+	};
+
 });

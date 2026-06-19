@@ -394,4 +394,19 @@
 		});
 	}
 
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.PublishedOn_TMP = new Date();
+				obj.ValidUpto_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
+	};
+	
 });

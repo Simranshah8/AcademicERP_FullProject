@@ -130,7 +130,6 @@ namespace AcademicLib.DA.AppCMS.Creation
         public AcademicLib.BE.AppCMS.Creation.NoticeCollections getAllNotice(int UserId, int EntityId, string BranchCode, ref int TotalRows, int PageNumber = 1, int RowsOfPage = 100,string NoticeFor="")
         {
             AcademicLib.BE.AppCMS.Creation.NoticeCollections dataColl = new AcademicLib.BE.AppCMS.Creation.NoticeCollections();
-
             dal.OpenConnection(true);
             System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
             cmd.CommandType = System.Data.CommandType.StoredProcedure;

@@ -2,49 +2,8 @@
 
 agGrid.initialiseAgGridWithAngular1(angular);
 
-app.run(function ($rootScope, $filter) {
-    $rootScope.validateDates = function (changedField, obj) {
-        var targetObj = obj || this;
-        if (!targetObj || !targetObj.DateFromDet || !targetObj.DateToDet ||
-            !targetObj.DateFromDet.dateAD || !targetObj.DateToDet.dateAD) {
-            return true;
-        }
-        var fromDate = $filter('date')(new Date(targetObj.DateFromDet.dateAD), 'yyyy-MM-dd');
-        var toDate = $filter('date')(new Date(targetObj.DateToDet.dateAD), 'yyyy-MM-dd');
-        if (!fromDate || !toDate) return true;
-        if (fromDate > toDate) {
-            if (changedField === 'fromDate') {
-                Swal.fire({
-                    icon: 'warning',
-                    text: 'From Date cannot be After To Date.',
-                    confirmButtonText: 'OK'
-                }).then(function () {
-                    var scope = (typeof targetObj.$apply === 'function') ? targetObj : this;
-                    scope.$apply(function () {
-                        targetObj.DateFrom_TMP = new Date();
-                        targetObj.DateFromDet = new Date();
-                    });
-                });
-            } else if (changedField === 'toDate') {
-                Swal.fire({
-                    icon: 'warning',
-                    text: 'To Date cannot be Before From Date.',
-                    confirmButtonText: 'OK'
-                }).then(function () {
-                    var scope = (typeof targetObj.$apply === 'function') ? targetObj : this;
-                    scope.$apply(function () {
-                        targetObj.DateTo_TMP = new Date();
-                        targetObj.DateToDet = new Date();
-                    });
-                });
-            }
-            return false;
-        }
-        return true;
-    };
-});
 
-app.controller('webapiLogCtrl', function ($scope, $http, $filter, companyDet) {
+app.controller('webapiLogCtrl', function ($scope, $http, $filter, companyDet, GlobalServices) {
     LoadData();
 
 
@@ -166,9 +125,23 @@ app.controller('webapiLogCtrl', function ($scope, $http, $filter, companyDet) {
 
         $scope.gridOptions.api.exportDataAsCsv(params);
     }
+    $scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+        var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+        if (res.IsSuccess == false) {
+            Swal.fire({
+                icon: 'warning',
+                text: res.Message,
+                confirmButtonText: 'OK'
+            }).then(function () {
+                obj.DateFrom_TMP = new Date();
+                obj.DateTo_TMP = new Date();
+                $scope.$applyAsync();
+            });
+        }
+    };
 });
 
-app.controller('smsapiLogCtrl', function ($scope, $http, $filter, companyDet) {
+app.controller('smsapiLogCtrl', function ($scope, $http, $filter, companyDet, GlobalServices) {
     LoadData();
 
 
@@ -259,7 +232,20 @@ app.controller('smsapiLogCtrl', function ($scope, $http, $filter, companyDet) {
             alert('Failed' + reason);
         });
 
-
+        $scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+            var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+            if (res.IsSuccess == false) {
+                Swal.fire({
+                    icon: 'warning',
+                    text: res.Message,
+                    confirmButtonText: 'OK'
+                }).then(function () {
+                    obj.DateFrom_TMP = new Date();
+                    obj.DateTo_TMP = new Date();
+                    $scope.$applyAsync();
+                });
+            }
+        };
 
     }
 
@@ -275,9 +261,24 @@ app.controller('smsapiLogCtrl', function ($scope, $http, $filter, companyDet) {
 
         $scope.gridOptions.api.exportDataAsCsv(params);
     }
+
+    $scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+        var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+        if (res.IsSuccess == false) {
+            Swal.fire({
+                icon: 'warning',
+                text: res.Message,
+                confirmButtonText: 'OK'
+            }).then(function () {
+                obj.DateFrom_TMP = new Date();
+                obj.DateTo_TMP = new Date();
+                $scope.$applyAsync();
+            });
+        }
+    };
 });
 
-app.controller('smsSendLogCtrl', function ($scope, $http, $filter, companyDet) {
+app.controller('smsSendLogCtrl', function ($scope, $http, $filter, companyDet, GlobalServices) {
     LoadData();
 
 
@@ -380,9 +381,24 @@ app.controller('smsSendLogCtrl', function ($scope, $http, $filter, companyDet) {
 
         $scope.gridOptions.api.exportDataAsCsv(params);
     }
+
+    $scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+        var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+        if (res.IsSuccess == false) {
+            Swal.fire({
+                icon: 'warning',
+                text: res.Message,
+                confirmButtonText: 'OK'
+            }).then(function () {
+                obj.DateFrom_TMP = new Date();
+                obj.DateTo_TMP = new Date();
+                $scope.$applyAsync();
+            });
+        }
+    };
 });
 
-app.controller('notificationLogCtrl', function ($scope, $http, $filter, companyDet) {
+app.controller('notificationLogCtrl', function ($scope, $http, $filter, companyDet, GlobalServices) {
     LoadData();
 
 
@@ -491,9 +507,23 @@ app.controller('notificationLogCtrl', function ($scope, $http, $filter, companyD
 
         $scope.gridOptions.api.exportDataAsCsv(params);
     }
+    $scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+        var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+        if (res.IsSuccess == false) {
+            Swal.fire({
+                icon: 'warning',
+                text: res.Message,
+                confirmButtonText: 'OK'
+            }).then(function () {
+                obj.DateFrom_TMP = new Date();
+                obj.DateTo_TMP = new Date();
+                $scope.$applyAsync();
+            });
+        }
+    };
 });
 
-app.controller('emailLogCtrl', function ($scope, $http, $filter, companyDet) {
+app.controller('emailLogCtrl', function ($scope, $http, $filter, companyDet, GlobalServices) {
     LoadData();
 
 
@@ -602,6 +632,23 @@ app.controller('emailLogCtrl', function ($scope, $http, $filter, companyDet) {
 
         $scope.gridOptions.api.exportDataAsCsv(params);
     }
+
+
+    $scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+        var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+        if (res.IsSuccess == false) {
+            Swal.fire({
+                icon: 'warning',
+                text: res.Message,
+                confirmButtonText: 'OK'
+            }).then(function () {
+                obj.DateFrom_TMP = new Date();
+                obj.DateTo_TMP = new Date();
+                $scope.$applyAsync();
+            });
+        }
+    };
+
 });
 
 app.controller('emailSetupCtrl', function ($scope, $http, $filter) {
@@ -958,7 +1005,7 @@ app.controller("sentCntrl", function ($scope, $http, $filter, $timeout) {
 
 
 
-app.controller('sqlErrorLogCtrl', function ($scope, $http, $filter, companyDet) {
+app.controller('sqlErrorLogCtrl', function ($scope, $http, $filter, companyDet, GlobalServices) {
     LoadData();
 
 
@@ -1062,12 +1109,26 @@ app.controller('sqlErrorLogCtrl', function ($scope, $http, $filter, companyDet) 
 
         $scope.gridOptions.api.exportDataAsCsv(params);
     }
+
+    $scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+        var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+        if (res.IsSuccess == false) {
+            Swal.fire({
+                icon: 'warning',
+                text: res.Message,
+                confirmButtonText: 'OK'
+            }).then(function () {
+                obj.DateFrom_TMP = new Date();
+                obj.DateTo_TMP = new Date();
+                $scope.$applyAsync();
+            });
+        }
+    };
 });
 
 
-app.controller('irdapiLogCtrl', function ($scope, $http, $filter, companyDet) {
+app.controller('irdapiLogCtrl', function ($scope, $http, $filter, companyDet, GlobalServices) {
     LoadData();
-
 
     $scope.DataColl = [];
     $scope.DateFrom_TMP = new Date();
@@ -1144,7 +1205,6 @@ app.controller('irdapiLogCtrl', function ($scope, $http, $filter, companyDet) {
 
 
     }
-
 
     $scope.GetData = function () {
 
@@ -1294,8 +1354,21 @@ app.controller('irdapiLogCtrl', function ($scope, $http, $filter, companyDet) {
         }, function (reason) {
             alert('Failed' + reason);
         });
-
-
-
     }
+
+    $scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+        var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+        if (res.IsSuccess == false) {
+            Swal.fire({
+                icon: 'warning',
+                text: res.Message,
+                confirmButtonText: 'OK'
+            }).then(function () {
+                obj.DateFrom_TMP = new Date();
+                obj.DateTo_TMP = new Date();
+                $scope.$applyAsync();
+            });
+        }
+    };
+
 });

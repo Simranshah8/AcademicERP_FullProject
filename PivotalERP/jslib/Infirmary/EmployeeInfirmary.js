@@ -1567,31 +1567,6 @@ app.controller('EmployeeInfirmaryController', function ($scope, $http, $timeout,
         console.log('page changed to ' + num);
     };
 
-    $scope.validateForDate = function (obj) {
-        if (!obj.ObservedDateDet || !obj.ObservedDateDet.dateAD) {
-            return true;
-        }
-
-        var forDate = $filter('date')(obj.ObservedDateDet.dateAD, 'yyyy-MM-dd');
-        var today = $filter('date')(new Date(), 'yyyy-MM-dd');
-
-        if (!forDate) return true;
-
-        if (forDate > today) {
-            Swal.fire({
-                icon: 'warning',
-                text: 'Date cannot be a future date.',
-                confirmButtonText: 'OK'
-            }).then(function () {
-                $scope.$apply(function () {
-                    obj.ObservedDate_TMP = new Date();
-                    obj.ObservedDateDet = new Date();
-                });
-            });
-            return false;
-        }
-        return true;
-    }
-
+    
 });
 

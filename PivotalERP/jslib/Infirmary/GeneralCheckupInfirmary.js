@@ -66,6 +66,7 @@
             OrderNo: '',
             Description: '',
             HealthCampaignIsColl: [],
+            CheckupDate_TMP:new Date(),
             Mode: 'Save'
         };
         $scope.GetAllGeneralChkupInfirmaryList();
@@ -80,6 +81,7 @@
             OrderNo: '',
             Description: '',
             HealthCampaignIsColl: [],
+            CheckupDate_TMP: new Date(),
             Mode: 'Save'
         };
     };

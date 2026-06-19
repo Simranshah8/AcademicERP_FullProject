@@ -33,6 +33,7 @@
 			ForOnlineRegistration: false,
 			IsActive: false,
 			ValidUpTo_TMP:new Date(),
+			PublishOn_TMP:new Date(),
 			Mode: 'Save'
 		};
 
@@ -103,6 +104,7 @@
 			OrderNo: 0,
 			Weblink: '',
 			ValidUpTo_TMP: new Date(),
+			PublishOn_TMP: new Date(),
 			Mode: 'Save'
 		};
 
@@ -339,6 +341,20 @@
 
 	};
 
+	$scope.validateDate = function (obj, startField, endField, startLabel, endLabel) {
+		var res = GlobalServices.validateDate(obj, startField, endField, startLabel, endLabel);
+		if (res.IsSuccess == false) {
+			Swal.fire({
+				icon: 'warning',
+				text: res.Message,
+				confirmButtonText: 'OK'
+			}).then(function () {
+				obj.PublishOn_TMP = new Date();
+				obj.ValidUpTo_TMP = new Date();
+				$scope.$applyAsync();
+			});
+		}
+	};
 
 
 });

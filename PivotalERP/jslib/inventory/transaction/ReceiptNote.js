@@ -4590,30 +4590,5 @@ app.controller('ReceiptNoteController', function ($scope, $http, $timeout, $filt
         }
     }
 
-    $scope.validateForDate = function (obj) {
-        if (!obj.VoucherDateDet || !obj.VoucherDateDet.dateAD) {
-            return true;
-        }
-
-        var forDate = $filter('date')(obj.VoucherDateDet.dateAD, 'yyyy-MM-dd');
-        var today = $filter('date')(new Date(), 'yyyy-MM-dd');
-
-        if (!forDate) return true;
-
-        if (forDate > today) {
-            Swal.fire({
-                icon: 'warning',
-                text: 'Date cannot be a future date.',
-                confirmButtonText: 'OK'
-            }).then(function () {
-                $scope.$apply(function () {
-                    obj.VoucherDate_TMP = new Date();
-                    obj.VoucherDateDet = new Date();
-                });
-            });
-            return false;
-        }
-        $scope.getVoucherNoOnly();
-        return true;
-    }
+    
 });
