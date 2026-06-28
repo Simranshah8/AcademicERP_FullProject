@@ -96,6 +96,7 @@ namespace AcademicLib.DA.Exam.Transaction
 			{
 				System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
 				cmd.Parameters.AddWithValue("@ObjectiveId", ObjectiveId);
+				cmd.Parameters.AddWithValue("@SNo", beData.SNo);
 				cmd.Parameters.AddWithValue("@Name", beData.Name);
 				cmd.Parameters.AddWithValue("@Description", beData.Description);
 				cmd.Parameters.AddWithValue("@IsActive", beData.IsActive);
@@ -354,7 +355,61 @@ namespace AcademicLib.DA.Exam.Transaction
 
 			return dataColl;
 		}
-	
+
+		public BE.Exam.Transaction.Objective GetObjectiveById(int UserId, int EntityId, int ObjectiveId)
+		{
+			BE.Exam.Transaction.Objective beData = new BE.Exam.Transaction.Objective();
+
+			dal.OpenConnection();
+			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+			cmd.CommandType = System.Data.CommandType.StoredProcedure;
+			cmd.Parameters.AddWithValue("@ObjectiveId", ObjectiveId);
+			cmd.Parameters.AddWithValue("@UserId", UserId);
+			cmd.Parameters.AddWithValue("@EntityId", EntityId);
+			cmd.CommandText = "usp_GetObjectiveForEdit";
+			try
+			{
+				System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+				if (reader.Read())
+				{
+					beData = new BE.Exam.Transaction.Objective();
+					beData.ObjectiveId = reader.GetInt32(0);
+					if (!(reader[1] is DBNull)) beData.ClassId = reader.GetInt32(1);
+					if (!(reader[2] is DBNull)) beData.ExamTypeId = reader.GetInt32(2);
+					if (!(reader[3] is DBNull)) beData.SubjectId = reader.GetInt32(3);
+					if (!(reader[4] is DBNull)) beData.FullMark = Convert.ToDouble(reader[4]);
+					if (!(reader[5] is DBNull)) beData.SectionId = reader.GetInt32(5);
+				}
+				reader.NextResult();
+				beData.ObjectiveDetailsColl = new AcademicLib.BE.Exam.Transaction.ObjectiveDetailsCollections();
+				while (reader.Read())
+				{
+					AcademicLib.BE.Exam.Transaction.ObjectiveDetails det2 = new AcademicLib.BE.Exam.Transaction.ObjectiveDetails();
+					if (!(reader[0] is DBNull)) det2.ObjectiveId = reader.GetInt32(0);
+					if (!(reader[1] is DBNull)) det2.Name = reader.GetString(1);
+					if (!(reader[2] is DBNull)) det2.Description = reader.GetString(2);
+					if (!(reader[3] is DBNull)) det2.IsActive = Convert.ToBoolean(reader[3]);
+					if (!(reader[4] is DBNull)) det2.Marks = Convert.ToDouble(reader[4]);
+					if (!(reader[5] is DBNull)) det2.SNo = reader.GetInt32(5);
+					beData.ObjectiveDetailsColl.Add(det2);
+				}
+				reader.Close();
+				beData.IsSuccess = true;
+				beData.ResponseMSG = GLOBALMSG.SUCCESS;
+
+			}
+			catch (Exception ee)
+			{
+				beData.IsSuccess = false;
+				beData.ResponseMSG = ee.Message;
+			}
+			finally
+			{
+				dal.CloseConnection();
+			}
+			return beData;
+		}
+
 	}
 
 }

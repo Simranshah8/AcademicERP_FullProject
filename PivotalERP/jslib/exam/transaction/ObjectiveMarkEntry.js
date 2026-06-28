@@ -86,7 +86,8 @@ app.controller('ExamTypeMarkEntryController', function ($scope, $http, $timeout,
 		$scope.newFilter = {
 			ClassId: null,
 			SubjectId: null,
-			ExamTypeId: null
+			ExamTypeId: null,
+			ColumnWiseFocus: false,
         }
 
 		$scope.ClassList = [];
@@ -253,6 +254,53 @@ app.controller('ExamTypeMarkEntryController', function ($scope, $http, $timeout,
 		});
 	}
 
+	$scope.SaveUpdateMarksEntry = function () {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		var dtColl = [];
+		angular.forEach($scope.StudentList, function (st, index) {
+			angular.forEach(st.Marks, function (mk) {
+				dtColl.push({
+					StudentId: st.StudentId,
+					SNo: mk.SNo,
+					Mark: mk.Mark == null || mk.Mark === "" ? 0 : mk.Mark,
+					TotObjMark: st.TotObjMark,
+					Remarks: st.Remarks,
+					ClassId: $scope.newFilter.SelectedClass.ClassId,
+					//SectionId: $scope.newFilter.SelectedClass.SectionId,
+					SectionId:($scope.newFilter.SelectedClass.SectionId > 0)? $scope.newFilter.SelectedClass.SectionId: null,
+					SubjectId: $scope.newFilter.SubjectId,
+					ExamTypeId: $scope.newFilter.ExamTypeId,
+					BatchId: st.BatchId,
+					SemesterId: st.SemesterId,
+					ClassYearId: st.ClassYearId,
+					ColumnWiseFocus: $scope.newFilter.ColumnWiseFocus
+				});
+
+			});
+
+		});
+		$http({
+			method: 'POST',
+			url: base_url + "Exam/Transaction/SaveObjectiveMarksEntry",
+			headers: { 'Content-Type': undefined },
+			transformRequest: function (data) {
+				var formData = new FormData();
+				formData.append("dtColl", angular.toJson(data.dtColl));
+
+				return formData;
+			},
+			data: { dtColl: dtColl }
+		}).then(function (res) {
+			$scope.loadingstatus = "stop";
+			hidePleaseWait();
+			Swal.fire(res.data.ResponseMSG);
+			
+		}, function (errormessage) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+		});
+	}
 
 	//$scope.SaveUpdateMarksEntry = function () {
 	//	var dataColl = [];

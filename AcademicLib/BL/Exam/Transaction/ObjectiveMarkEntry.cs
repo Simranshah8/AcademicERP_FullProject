@@ -25,5 +25,13 @@ namespace AcademicLib.BL.Exam.Transaction
 		{
 			return db.GetObjectiveList(EntityId, _UserId, ClassId, SectionId, SubjectId, ExamTypeId);
 		}
-	}
+        public ResponeValues SaveObjectiveMarksEntry(AcademicLib.BE.Exam.Transaction.StudentCollection dataColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            resVal = db.SaveObjectiveMarksEntry(_UserId, dataColl);
+
+            return resVal;
+        }
+    }
 }

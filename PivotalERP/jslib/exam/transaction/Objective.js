@@ -55,19 +55,21 @@
             ToSectionId: null,
             IsClassWise: false
         };
+        $scope.SetSNO();
     };
 
 
     $scope.ClearDetails = function () {
-         $scope.newDet = {
-                ClassId: null,
-                ExamTypeId: null,
-                SubjectId: null,
-                FullMark: '',
-                ObjectiveDetailsColl: [],
-                Mode: 'save'
-         };
-         $scope.newDet.ObjectiveDetailsColl.push({});
+        $scope.newDet = {
+            ClassId: null,
+            ExamTypeId: null,
+            SubjectId: null,
+            FullMark: '',
+            ObjectiveDetailsColl: [],
+            Mode: 'save'
+        };
+        $scope.newDet.ObjectiveDetailsColl.push({});
+        $scope.SetSNO();
     };
 
     $scope.ClearTransfer = function () {
@@ -107,6 +109,7 @@
                     ClassName: ''
                 })
             }
+            $scope.SetSNO();
         }
     };
 
@@ -114,10 +117,16 @@
         if ($scope.newDet.ObjectiveDetailsColl) {
             if ($scope.newDet.ObjectiveDetailsColl.length > 1) {
                 $scope.newDet.ObjectiveDetailsColl.splice(ind, 1);
+                $scope.SetSNO();
             }
         }
     };
 
+    $scope.SetSNO = function () {
+        angular.forEach($scope.newDet.ObjectiveDetailsColl, function (item, index) {
+            item.SNo = index + 1;
+        });
+    };
 
     $scope.IsValidObjective = function () {
         return true;
@@ -152,7 +161,7 @@
         $scope.loadingstatus = "running";
         showPleaseWait();
         $scope.newDet.ClassId = $scope.newDet.SelectedClass.ClassId;
-        $scope.newDet.SectionId = $scope.newDet.SelectedClass.SectionId;
+        /*  $scope.newDet.SectionId = $scope.newDet.SelectedClass.SectionId;*/
         $http({
             method: 'POST',
             url: base_url + "Exam/Transaction/SaveObjective",
@@ -186,56 +195,57 @@
             SubjectId: $scope.newDet.SubjectId
         };
         $http({
-           method: 'POST',
-           url: base_url + "Exam/Transaction/GetObjective",
-           dataType: "json",
-           data: JSON.stringify(para)
+            method: 'POST',
+            url: base_url + "Exam/Transaction/GetObjective",
+            dataType: "json",
+            data: JSON.stringify(para)
         }).then(function (res) {
-           hidePleaseWait();
-           $scope.loadingstatus = "stop";
-           if (res.data.IsSuccess && res.data.Data) {
-               $scope.newDet.Mode = 'Modify';
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.newDet.Mode = 'Modify';
 
-               $scope.newDet.ObjectiveDetailsColl = res.data.Data.ObjectiveDetailsColl;
-               if (!$scope.newDet.ObjectiveDetailsColl || $scope.newDet.ObjectiveDetailsColl.length == 0) {
-                   $scope.newDet.ObjectiveDetailsColl = [];
-                   $scope.newDet.ObjectiveDetailsColl.push({});
-               }
-                 
-               if ($scope.newDet.ObjectiveDetailsColl.length > 0) {
-                   $scope.newDet.FullMark =  $scope.newDet.ObjectiveDetailsColl[0].FullMark;
-               }
-           } else {
-                    Swal.fire(res.data.ResponseMSG);
-           }
+                $scope.newDet.ObjectiveDetailsColl = res.data.Data.ObjectiveDetailsColl;
+                if (!$scope.newDet.ObjectiveDetailsColl || $scope.newDet.ObjectiveDetailsColl.length == 0) {
+                    $scope.newDet.ObjectiveDetailsColl = [];
+                    $scope.newDet.ObjectiveDetailsColl.push({});
+                }
+
+                if ($scope.newDet.ObjectiveDetailsColl.length > 0) {
+                    $scope.newDet.FullMark = $scope.newDet.ObjectiveDetailsColl[0].FullMark;
+                }
+                $scope.SetSNO();
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
 
         }, function (reason) {
-                Swal.fire('Failed' + reason);
+            Swal.fire('Failed' + reason);
         });
 
     }
 
     $scope.GetAllObjectiveList = function () {
-		$scope.loadingstatus = "running";
-		showPleaseWait();
+        $scope.loadingstatus = "running";
+        showPleaseWait();
         $scope.ObjectiveList = [];
-		$http({
-			method: 'POST',
+        $http({
+            method: 'POST',
             url: base_url + "Exam/Transaction/GetAllObjective",
-			dataType: "json"
-		}).then(function (res) {
-			hidePleaseWait();
-			$scope.loadingstatus = "stop";
-			if (res.data.IsSuccess && res.data.Data) {
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
                 $scope.ObjectiveList = res.data.Data;
 
-			} else {
-				Swal.fire(res.data.ResponseMSG);
-			}
-		}, function (reason) {
-			Swal.fire('Failed' + reason);
-		});
-	}
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+    }
 
     $scope.DelObjectiveById = function (refData, ind) {
         Swal.fire({
@@ -272,6 +282,7 @@
     $scope.GetClassSummaryClassWiseSubject = function () {
         $scope.loadingstatus = "running";
         showPleaseWait();
+
         var para = {
             ClassId: $scope.newDet.SelectedClass.ClassId
         };
@@ -309,41 +320,43 @@
     };
 
     $scope.TransferObjective = function (refData) {
-            Swal.fire({
-                title: 'Do you want to Transfer Objective',
-                showCancelButton: true,
-                confirmButtonText: 'Transfer',
-            }).then((result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) {
-                    $scope.loadingstatus = "running";
-                    showPleaseWait();
-                    var para = {
-                        FromExamTypeId: $scope.newTransfer.FromExamTypeId,
-                        ToExamTypeId: $scope.newTransfer.ToExamTypeId,
-                        FromClassId: $scope.newTransfer.SelectedClass.ClassId,
-                        ToClassId: $scope.newTransfer.SelectedClass2.ClassId,
-                        FromSectionId: $scope.newTransfer.SelectedClass.SectionId,
-                        ToSectionId: $scope.newTransfer.SelectedClass2.SectionId,
-                    };
-                    $http({
-                        method: 'POST',
-                        url: base_url + "Exam/Transaction/TransferObjective",
-                        dataType: "json",
-                        data: JSON.stringify(para)
-                    }).then(function (res) {
-                        hidePleaseWait();
-                        $scope.loadingstatus = "stop";
-                        Swal.fire(res.data.ResponseMSG);
-                        $scope.ClearTransfer();
-                        $scope.GetAllObjectiveList();
-                        $scope.GetObjectiveTransferDetails();
+        Swal.fire({
+            title: 'Do you want to Transfer Objective',
+            showCancelButton: true,
+            confirmButtonText: 'Transfer',
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                $scope.loadingstatus = "running";
+                showPleaseWait();
+                var para = {
+                    FromExamTypeId: $scope.newTransfer.FromExamTypeId,
+                    ToExamTypeId: $scope.newTransfer.ToExamTypeId,
 
-                    }, function (reason) {
-                        Swal.fire('Failed' + reason);
-                    });
-                }
-            });
+                    FromClassId: $scope.newTransfer.SelectedClass?.ClassId ?? null,
+                    ToClassId: $scope.newTransfer.SelectedClass2?.ClassId ?? null,
+
+                    FromSectionId: $scope.newTransfer.SelectedClass?.SectionId ?? null,
+                    ToSectionId: $scope.newTransfer.SelectedClass2?.SectionId ?? null
+                };
+                $http({
+                    method: 'POST',
+                    url: base_url + "Exam/Transaction/TransferObjective",
+                    dataType: "json",
+                    data: JSON.stringify(para)
+                }).then(function (res) {
+                    hidePleaseWait();
+                    $scope.loadingstatus = "stop";
+                    Swal.fire(res.data.ResponseMSG);
+                    $scope.ClearTransfer();
+                    $scope.GetAllObjectiveList();
+                    $scope.GetObjectiveTransferDetails();
+
+                }, function (reason) {
+                    Swal.fire('Failed' + reason);
+                });
+            }
+        });
     };
 
     $scope.GetObjectiveTransferDetails = function () {
@@ -369,10 +382,72 @@
             } else {
                 Swal.fire(res.data.ResponseMSG);
             }
-                
+
         }, function (reason) {
             Swal.fire('Failed' + reason);
         });
 
     }
+
+    $scope.GetObjectiveById = function (refData) {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        var para = {
+            ObjectiveId: refData.ObjectiveId
+        };
+        $http({
+            method: "POST",
+            url: base_url + "Exam/Transaction/GetObjectiveById",
+            data: para
+        }).then(function (res) {
+
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+
+            if (res.data.IsSuccess && res.data.Data) {
+
+                $scope.newDet = angular.copy(res.data.Data);
+
+                // Select Class
+                if ($scope.ClassSectionList &&
+                    $scope.ClassSectionList.ClassList &&
+                    $scope.ClassSectionList.ClassList.length > 0) {
+
+                    $scope.newDet.SelectedClass = $scope.ClassSectionList.ClassList.find(function (c) {
+                        if (c.value != undefined) {
+                            return Number(c.value) === Number(res.data.Data.ClassId);
+                        }
+                        return Number(c.ClassId) === Number(res.data.Data.ClassId);
+                    });
+                }
+                $scope.GetClassSummaryClassWiseSubject();
+                $timeout(function () {
+                    $scope.newDet.SubjectId = res.data.Data.SubjectId;
+                }, 200);
+
+                if (!$scope.newDet.ObjectiveDetailsColl ||
+                    $scope.newDet.ObjectiveDetailsColl.length === 0) {
+
+                    $scope.newDet.ObjectiveDetailsColl = [{}];
+                }
+
+                $scope.newDet.Mode = "Modify";
+
+                document.getElementById("Objective-section").style.display = "none";
+                document.getElementById("Objective-form").style.display = "block";
+            }
+            else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+
+        }, function (reason) {
+
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            Swal.fire("Failed " + reason);
+
+        });
+
+    };
+
 });

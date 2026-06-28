@@ -276,6 +276,7 @@
 			item.SNo = index + 1;
 		});
 		$scope.newIndicator.LessonSno = $scope.newIndicator.SelectLesson.LessonSno;
+		$scope.newIndicator.ClassId = $scope.newIndicator.SelectedClass.ClassId;
 
 		$scope.loadingstatus = "running";
 		showPleaseWait();

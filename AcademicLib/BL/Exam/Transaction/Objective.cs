@@ -47,6 +47,10 @@ namespace AcademicLib.BL.Exam.Transaction
 		{
 			return db.TransferObjective(_UserId, FromExamTypeId, ToExamTypeId, FromClassId, ToClassId, FromSectionId, ToSectionId);
 		}
+		public BE.Exam.Transaction.Objective GetObjectiveById(int EntityId, int ObjectiveId)
+		{
+			return db.GetObjectiveById(_UserId, EntityId, ObjectiveId);
+		}
 		public ResponeValues IsValidData(ref BE.Exam.Transaction.Objective beData, bool IsModify)
 		{
 			ResponeValues resVal = new ResponeValues();

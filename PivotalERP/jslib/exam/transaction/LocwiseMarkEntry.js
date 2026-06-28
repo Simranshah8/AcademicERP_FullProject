@@ -2,7 +2,11 @@
 	$scope.Title = 'MarkEntry';
 	var gSrv = GlobalServices;
 	$scope.LoadData = function () {
-		$('.select2').select2();
+		$('.select2').select2({
+			allowClear: true,
+			openOnEnter: true,
+			placeholder: 'Select data'
+		});
 		$scope.confirmMSG = GlobalServices.getConfirmMSG();
 		$scope.perPageColl = GlobalServices.getPerPageList();
 

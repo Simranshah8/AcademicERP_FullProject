@@ -2984,6 +2984,13 @@ namespace PivotalERP.Areas.Exam.Controllers
             var dataColl = new AcademicLib.BL.Exam.Transaction.Objective(User.UserId, User.HostName, User.DBName).GetAllObjectiveTansfer(0, FromExamTypeId, ToExamTypeId, FromClassId, ToClassId);
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
+
+        [HttpPost]
+        public JsonNetResult GetObjectiveById(int ObjectiveId)
+        {
+            var dataColl = new AcademicLib.BL.Exam.Transaction.Objective(User.UserId, User.HostName, User.DBName).GetObjectiveById(0, ObjectiveId);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
         #endregion
         //End
 
@@ -3006,7 +3013,33 @@ namespace PivotalERP.Areas.Exam.Controllers
             var dataColl = new AcademicLib.BL.Exam.Transaction.ObjectiveMarkEntry(User.UserId, User.HostName, User.DBName).GetObjectiveList(0, ClassId, SectionId, SubjectId, ExamTypeId);
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
-        #endregion
+        //Added by Simran
+        [HttpPost]
+        public JsonNetResult SaveObjectiveMarksEntry()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var payData = DeserializeObject<AcademicLib.BE.Exam.Transaction.StudentCollection>(Request["dtColl"]);
+                if (payData != null)
+                {
+
+                    resVal = new AcademicLib.BL.Exam.Transaction.ObjectiveMarkEntry(User.UserId, User.HostName, User.DBName).SaveObjectiveMarksEntry(payData);
+                }
+
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+          #endregion
 
         //Added By Suresh on 24 Chaitra
         [HttpPost]

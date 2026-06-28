@@ -1,13 +1,16 @@
 ﻿using Dynamic.DataAccess.Global;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AcademicLib.DA.Exam.Transaction
 {
-    public class ObjectiveMarkEntryDB
-    {
+    public class ObjectiveMarkEntryDB: Dynamic.DataAccess.Common.CommonDB
+	{
         DataAccessLayer1 dal = null;
         public ObjectiveMarkEntryDB(string hostName, string dbName)
         {
@@ -36,6 +39,7 @@ namespace AcademicLib.DA.Exam.Transaction
 					if (!(reader[2] is DBNull)) det1.StudentName = reader.GetString(2);
 					if (!(reader[3] is DBNull)) det1.RollNo = reader.GetInt32(3);
 					if (!(reader[4] is DBNull)) det1.SymbolNo = reader.GetString(4);
+					
 					beDataColl.Add(det1);
 				}
 				reader.Close();
@@ -97,5 +101,89 @@ namespace AcademicLib.DA.Exam.Transaction
 			return beDataColl;
 
 		}
-	}
+
+			public ResponeValues SaveObjectiveMarksEntry(int UserId, List<AcademicLib.BE.Exam.Transaction.Student> DataColl)
+			{
+				ResponeValues resVal = new ResponeValues();
+				dal.OpenConnection();
+				System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+				cmd.CommandType = System.Data.CommandType.StoredProcedure;
+				try
+				{
+					cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+					cmd.Parameters[0].Direction = System.Data.ParameterDirection.Output;
+
+					cmd.Parameters.AddWithValue("@UserId", UserId);
+					System.Data.DataTable tableAllocation = new System.Data.DataTable();
+					tableAllocation.Columns.Add("StudentId", typeof(int));
+					tableAllocation.Columns.Add("Mark", typeof(float));
+					tableAllocation.Columns.Add("TotObjMark", typeof(float));
+					tableAllocation.Columns.Add("Remarks", typeof(string));
+					tableAllocation.Columns.Add("SNo", typeof(int));
+					tableAllocation.Columns.Add("ClassId", typeof(int));
+					tableAllocation.Columns.Add("SectionId", typeof(int));
+					tableAllocation.Columns.Add("SubjectId", typeof(int));
+					tableAllocation.Columns.Add("ExamTypeId", typeof(int));
+                    tableAllocation.Columns.Add("BatchId", typeof(int));
+                    tableAllocation.Columns.Add("SemesterId", typeof(int));
+                    tableAllocation.Columns.Add("ClassYearId", typeof(int));
+                    tableAllocation.Columns.Add("ColumnWiseFocus", typeof(bool));
+					foreach (var v in DataColl)
+					{
+						var row = tableAllocation.NewRow();
+					    row["StudentId"] = IsDBNull(v.StudentId);
+					    row["Mark"] = IsDBNull(v.Mark);
+					    row["TotObjMark"] = IsDBNull(v.TotObjMark);
+					    row["Remarks"] = IsDBNull(v.Remarks);
+					    row["SNo"] = IsDBNull(v.SNo);
+					    row["ClassId"] = IsDBNull(v.ClassId);
+					    row["SectionId"] = IsDBNull(v.SectionId);
+					    row["SubjectId"] = IsDBNull(v.SubjectId);
+				     	row["ExamTypeId"] = IsDBNull(v.ExamTypeId);
+                        row["BatchId"] = IsDBNull(v.BatchId);
+                        row["SemesterId"] = IsDBNull(v.SemesterId);
+                        row["ClassYearId"] = IsDBNull(v.ClassYearId);
+                        row["ColumnWiseFocus"] = IsDBNull(v.ColumnWiseFocus);
+				  //	row["StudentId"] = v.StudentId;
+						//row["Mark"] = v.Mark;
+						//row["TotObjMark"] = v.TotObjMark;
+						//row["Remarks"] = v.Remarks;
+						//row["SNo"] = v.SNo;
+						//row["ClassId"] = v.ClassId;
+						//row["SectionId"] = v.SectionId;
+						//row["SubjectId"] = v.SubjectId;
+						//row["ExamTypeId"] = v.ExamTypeId;
+						////row["BatchId"] = v.BatchId;
+						////row["SemesterId"] = v.SemesterId;
+						////row["ClassYearId"] = v.ClassYearId;
+						//row["ColumnWiseFocus"] = v.ColumnWiseFocus;
+
+						tableAllocation.Rows.Add(row);
+					}
+
+					System.Data.SqlClient.SqlParameter sqlParam = cmd.Parameters.AddWithValue("@ObjectiveMarkColl", tableAllocation);
+					sqlParam.SqlDbType = System.Data.SqlDbType.Structured;
+
+         
+					cmd.CommandText = "usp_SaveObjectiveMarksEntry";
+					cmd.ExecuteNonQuery();
+
+					if (!(cmd.Parameters[0].Value is DBNull)) resVal.ResponseMSG = Convert.ToString(cmd.Parameters[0].Value);
+
+				}
+				catch (Exception ee)
+				{
+					resVal.IsSuccess = false;
+					resVal.ResponseMSG = ee.Message;
+				}
+				finally
+				{
+					dal.CloseConnection();
+				}
+
+				return resVal;
+
+			}
+       
+    }
 }
