@@ -57,12 +57,17 @@ namespace AcademicLib.BE.Exam.Transaction
 	{
 
 		public int? ObjectiveId { get; set; }
+		public int? StudentId { get; set; }
 		public string Name { get; set; } = "";
 		public string Description { get; set; } = "";
 		public bool IsActive { get; set; }
 		public double? Marks { get; set; }
 		public double? FullMark { get; set; }
 		public int? SNo { get; set; }
+		public string Remarks { get; set; } = "";
+		public double? TotObjMark { get; set; }
+		public double? Mark { get; set; }
+		public bool? ColumnWiseFocus { get; set; }
 	}
 
 	public class ObjectiveDetailsCollections : System.Collections.Generic.List<ObjectiveDetails>

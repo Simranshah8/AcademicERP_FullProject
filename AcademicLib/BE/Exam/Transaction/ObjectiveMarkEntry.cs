@@ -10,6 +10,7 @@ namespace AcademicLib.BE.Exam.Transaction
     {
         public int? StudentId { get; set; }
         public int? TranId { get; set; }
+        public int? ObjectiveId { get; set; }
         public int? ClassId { get; set; }
         public int? SectionId { get; set; }
         public int? SubjectId { get; set; }

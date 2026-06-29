@@ -119,8 +119,6 @@ app.controller('ExamTypeMarkEntryController', function ($scope, $http, $timeout,
 	}
 
 
-
-
 	$scope.GetStudentList = function () {
 		$scope.StudentList = [];
 		if (!$scope.newFilter.SelectedClass) {
@@ -152,18 +150,85 @@ app.controller('ExamTypeMarkEntryController', function ($scope, $http, $timeout,
 			});
 		}
 	};
+
+	//$scope.GetObjectiveList = function () {
+	//	$scope.ObjectiveList = [];
+	//	if (!$scope.newFilter.SelectedClass) {
+	//		Swal.fire("Please ! Select Class");
+	//		return;
+	//	}
+	//	if (!$scope.newFilter.SubjectId) {
+	//		Swal.fire("Please ! Select Subject");
+	//		return;
+	//	}
+	//	if (!$scope.newFilter.ExamTypeId) {
+	//		Swal.fire("Please ! Select ExamType");
+	//		return;
+	//	}
+	//	else {
+	//		var para = {
+	//			ClassId: $scope.newFilter.SelectedClass.ClassId,
+	//			SectionIdColl: ($scope.newFilter.SelectedClass.SectionId ? $scope.newFilter.SelectedClass.SectionId : 0),
+	//			SubjectId: $scope.newFilter.SubjectId,
+	//			ExamTypeId: $scope.newFilter.ExamTypeId
+	//		};
+	//		$scope.loadingstatus = "running";
+	//		showPleaseWait();
+	//		$http({
+	//			method: 'POST',
+	//			url: base_url + "Exam/Transaction/GetObjectiveList",
+	//			dataSchedule: "json",
+	//			data: JSON.stringify(para)
+	//		}).then(function (res) {
+	//			hidePleaseWait();
+	//			$scope.loadingstatus = "stop";
+	//			if (res.data.IsSuccess && res.data.Data) {
+	//				var total = 0;
+	//				angular.forEach(res.data.Data, function (objective) {
+	//					total = total + objective.Marks;
+	//				});
+	//				res.data.Data.TotObjMark = total;
+	//				$scope.ObjectiveList = res.data.Data;
+	//				angular.forEach($scope.StudentList, function (st) {
+	//					st.Marks = [];
+	//					st.TotObjMark = 0;
+	//					angular.forEach($scope.ObjectiveList, function (ct) {
+	//						st.Marks.push({
+	//							ObjectiveId: ct.ObjectiveId,
+	//							SNo: ct.SNo,
+	//							Mark: ct.Mark,
+	//						});
+	//					});
+	//				});
+	//			} else {
+	//				Swal.fire(res.data.ResponseMSG);
+	//			}
+	//		}, function (reason) {
+	//			Swal.fire('Failed' + reason);
+	//		});
+	//	}
+	//};
+
 	$scope.GetObjectiveList = function () {
 		$scope.ObjectiveList = [];
 		if (!$scope.newFilter.SelectedClass) {
 			Swal.fire("Please ! Select Class");
 			return;
-		} if (!$scope.newFilter.SubjectId) {
+		}
+		if (!$scope.newFilter.SubjectId) {
 			Swal.fire("Please ! Select Subject");
 			return;
-		} if (!$scope.newFilter.ExamTypeId) {
+		}
+		if (!$scope.newFilter.ExamTypeId) {
 			Swal.fire("Please ! Select ExamType");
 			return;
-		} else {
+		}
+		else {
+			angular.forEach($scope.StudentList, function (st) {
+				st.Marks = [];
+				st.TotObjMark = 0;
+				st.Remarks = null;
+			});
 			var para = {
 				ClassId: $scope.newFilter.SelectedClass.ClassId,
 				SectionIdColl: ($scope.newFilter.SelectedClass.SectionId ? $scope.newFilter.SelectedClass.SectionId : 0),
@@ -181,23 +246,66 @@ app.controller('ExamTypeMarkEntryController', function ($scope, $http, $timeout,
 				hidePleaseWait();
 				$scope.loadingstatus = "stop";
 				if (res.data.IsSuccess && res.data.Data) {
-					var total = 0;
-					angular.forEach(res.data.Data, function (objective) {
-						total = total + objective.Marks;
-					});
-					res.data.Data.TotObjMark = total;
-					$scope.ObjectiveList = res.data.Data;
-					angular.forEach($scope.StudentList, function (st) {
-						st.Marks = [];
-						st.TotObjMark = 0;
-						angular.forEach($scope.ObjectiveList, function (ct) {
-							st.Marks.push({
-								ObjectiveId: ct.ObjectiveId,
-								SNo: ct.SNo,
-								Mark: null,
-							});
+
+					if (res.data.IsSuccess && res.data.Data) {
+
+						$scope.newFilter.ColumnWiseFocus = res.data.Data[0].ColumnWiseFocus;
+
+						// Unique ObjectiveList — Remove duplicate data from SNo
+						var uniqueMap = {};
+						angular.forEach(res.data.Data, function (obj) {
+							if (!uniqueMap[parseInt(obj.SNo)]) {
+								uniqueMap[parseInt(obj.SNo)] = obj;
+							}
 						});
-					});
+						var uniqueList = [];
+						angular.forEach(uniqueMap, function (obj) {
+							uniqueList.push(obj);
+						});
+
+						var total = 0;
+						angular.forEach(uniqueList, function (objective) {
+							total = total + objective.Marks;
+						});
+						uniqueList.TotObjMark = total;
+						$scope.ObjectiveList = uniqueList;  // ← Only unique data
+
+						angular.forEach($scope.StudentList, function (st) {
+							st.Marks = [];
+							st.TotObjMark = 0;
+							st.Remarks = null;
+
+							angular.forEach($scope.ObjectiveList, function (ct) {
+								// res.data.Data (full) Match data from form res data
+								var matched = null;
+								angular.forEach(res.data.Data, function (row) {
+									if (parseInt(row.StudentId) === parseInt(st.StudentId)
+										&& parseInt(row.SNo) === parseInt(ct.SNo)) {
+										matched = row;
+									}
+								});
+
+								st.Marks.push({
+									ObjectiveId: ct.ObjectiveId,
+									SNo: ct.SNo,
+									Mark: matched ? matched.Mark : null,
+								});
+							});
+
+							// Remarks and TotObjMark
+							var anyRow = null;
+							angular.forEach(res.data.Data, function (row) {
+								if (parseInt(row.StudentId) === parseInt(st.StudentId)) {
+									anyRow = row;
+								}
+							});
+							if (anyRow) {
+								st.Remarks = anyRow.Remarks;
+								st.TotObjMark = anyRow.TotObjMark;
+							}
+						});
+					}
+
 				} else {
 					Swal.fire(res.data.ResponseMSG);
 				}
@@ -206,6 +314,7 @@ app.controller('ExamTypeMarkEntryController', function ($scope, $http, $timeout,
 			});
 		}
 	};
+	
 
 	$scope.ChangeMarkEntry = function (st, ct, idx) {
 		var markObj = st.Marks[idx];
@@ -260,14 +369,15 @@ app.controller('ExamTypeMarkEntryController', function ($scope, $http, $timeout,
 		var dtColl = [];
 		angular.forEach($scope.StudentList, function (st, index) {
 			angular.forEach(st.Marks, function (mk) {
+			 //if (mk.Mark !== null && mk.Mark !== "") {
 				dtColl.push({
 					StudentId: st.StudentId,
 					SNo: mk.SNo,
 					Mark: mk.Mark == null || mk.Mark === "" ? 0 : mk.Mark,
 					TotObjMark: st.TotObjMark,
+					ObjectiveId: mk.ObjectiveId,
 					Remarks: st.Remarks,
 					ClassId: $scope.newFilter.SelectedClass.ClassId,
-					//SectionId: $scope.newFilter.SelectedClass.SectionId,
 					SectionId:($scope.newFilter.SelectedClass.SectionId > 0)? $scope.newFilter.SelectedClass.SectionId: null,
 					SubjectId: $scope.newFilter.SubjectId,
 					ExamTypeId: $scope.newFilter.ExamTypeId,
@@ -276,9 +386,8 @@ app.controller('ExamTypeMarkEntryController', function ($scope, $http, $timeout,
 					ClassYearId: st.ClassYearId,
 					ColumnWiseFocus: $scope.newFilter.ColumnWiseFocus
 				});
-
+			 //}
 			});
-
 		});
 		$http({
 			method: 'POST',

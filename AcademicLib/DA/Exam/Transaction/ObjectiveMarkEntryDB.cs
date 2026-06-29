@@ -39,8 +39,8 @@ namespace AcademicLib.DA.Exam.Transaction
 					if (!(reader[2] is DBNull)) det1.StudentName = reader.GetString(2);
 					if (!(reader[3] is DBNull)) det1.RollNo = reader.GetInt32(3);
 					if (!(reader[4] is DBNull)) det1.SymbolNo = reader.GetString(4);
-					
-					beDataColl.Add(det1);
+                    
+                    beDataColl.Add(det1);
 				}
 				reader.Close();
 				beDataColl.IsSuccess = true;
@@ -82,6 +82,11 @@ namespace AcademicLib.DA.Exam.Transaction
 					if (!(reader[1] is DBNull)) det1.Name = reader.GetString(1);
 					if (!(reader[2] is DBNull)) det1.Marks = reader.GetDouble(2);
 					if (!(reader[3] is DBNull)) det1.SNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) det1.Mark = Convert.ToDouble(reader[4]);
+                    if (!(reader[5] is DBNull)) det1.Remarks = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) det1.ColumnWiseFocus = Convert.ToBoolean(reader[6]);
+                    if (!(reader[7] is DBNull)) det1.TotObjMark = Convert.ToDouble(reader[7]);
+                    if (!(reader[8] is DBNull)) det1.StudentId = reader.GetInt32(8);
 					beDataColl.Add(det1);
 				}
 				reader.Close();
@@ -128,6 +133,7 @@ namespace AcademicLib.DA.Exam.Transaction
                     tableAllocation.Columns.Add("SemesterId", typeof(int));
                     tableAllocation.Columns.Add("ClassYearId", typeof(int));
                     tableAllocation.Columns.Add("ColumnWiseFocus", typeof(bool));
+                    tableAllocation.Columns.Add("ObjectiveId", typeof(int));
 					foreach (var v in DataColl)
 					{
 						var row = tableAllocation.NewRow();
@@ -144,7 +150,8 @@ namespace AcademicLib.DA.Exam.Transaction
                         row["SemesterId"] = IsDBNull(v.SemesterId);
                         row["ClassYearId"] = IsDBNull(v.ClassYearId);
                         row["ColumnWiseFocus"] = IsDBNull(v.ColumnWiseFocus);
-				  //	row["StudentId"] = v.StudentId;
+                        row["ObjectiveId"] = IsDBNull(v.ObjectiveId);
+				        //row["StudentId"] = v.StudentId;
 						//row["Mark"] = v.Mark;
 						//row["TotObjMark"] = v.TotObjMark;
 						//row["Remarks"] = v.Remarks;
@@ -163,7 +170,6 @@ namespace AcademicLib.DA.Exam.Transaction
 
 					System.Data.SqlClient.SqlParameter sqlParam = cmd.Parameters.AddWithValue("@ObjectiveMarkColl", tableAllocation);
 					sqlParam.SqlDbType = System.Data.SqlDbType.Structured;
-
          
 					cmd.CommandText = "usp_SaveObjectiveMarksEntry";
 					cmd.ExecuteNonQuery();
